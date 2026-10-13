@@ -19,9 +19,13 @@
       @let view = state.data;
       @let post = view.post;
 
-      <p class="fleet-news__back">
-        <a [routerLink]="newsLinkOf(scope)">Back to the news</a>
-      </p>
+      <div class="buttons-row fleet-news__back">
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="newsLinkOf(scope)"
+          >Back to the news</a
+        >
+      </div>
 
       <article
         class="fleet-news__post"
@@ -85,7 +89,7 @@
           aria-label="What you can do with this post">
           @if (view.isOpen) {
             <a
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="editLinkOf(scope, post)"
               >Edit</a
             >
@@ -100,7 +104,7 @@
             } @else {
               <button
                 type="button"
-                class="lcars-btn lcars-btn-auto bluey"
+                class="lcars-btn lcars-btn-auto"
                 [disabled]="busy()"
                 (click)="onUnpublish(scope, post)">
                 Unpublish
@@ -134,7 +138,7 @@
           <!-- A site administrator is only ever shown a published post. -->
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             [disabled]="busy()"
             (click)="onTakeDown(post)">
             Unpublish as site administrator

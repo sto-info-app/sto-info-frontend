@@ -95,6 +95,18 @@ describe('FleetScopeViewComponent', () => {
   const find = (selector: string): HTMLElement | null =>
     fixture.nativeElement.querySelector(selector) as HTMLElement | null;
 
+  /**
+   * Reads the headings of the page's sections.
+   *
+   * @returns Each section's heading, in order.
+   */
+  const sectionHeadings = (): string[] =>
+    Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'app-collapsible-section h2',
+      ),
+    ).map(heading => heading.textContent?.trim() ?? '');
+
   it('says it is loading before the server has answered', () => {
     render({ kind: 'LOADING' });
 
@@ -189,7 +201,7 @@ describe('FleetScopeViewComponent', () => {
       },
     });
 
-    expect(find('#fleet-scope-activity-heading')?.textContent).toBe('Activity');
+    expect(sectionHeadings()).toContain('Activity');
     expect(activity.scopeFeed).toHaveBeenCalledWith(
       { communityId: 'community-1', fleetId: null, armadaId: null },
       null,
@@ -214,7 +226,7 @@ describe('FleetScopeViewComponent', () => {
       },
     });
 
-    expect(find('#fleet-scope-events-heading')?.textContent).toBe('Events');
+    expect(sectionHeadings()).toContain('Events');
     expect(events.calendar).toHaveBeenCalledWith(
       { communityId: 'community-1', fleetId: null, armadaId: null },
       expect.any(String),
@@ -234,8 +246,8 @@ describe('FleetScopeViewComponent', () => {
       description: null,
     });
 
-    expect(find('#fleet-scope-activity-heading')).toBeNull();
-    expect(find('#fleet-scope-events-heading')).toBeNull();
+    expect(sectionHeadings()).not.toContain('Activity');
+    expect(sectionHeadings()).not.toContain('Events');
   });
 
   // Above the record rather than among its facts: it explains what kind of
@@ -263,7 +275,23 @@ describe('FleetScopeViewComponent', () => {
     );
   });
 
-  it('draws no notice where there is nothing to say', () => {
+  // A row of controls nobody can press tells a reader about a permission
+  // they do not have and did not ask about.
+  it.each([
+    [
+      'no notice where there is nothing to say',
+      'app-lcars-information-message',
+    ],
+    ['no About section where nothing was written', 'app-collapsible-section'],
+    [
+      'no row of controls when there is nothing to offer',
+      '.fleet-scope-view__actions',
+    ],
+    [
+      'no follow control where the page has nothing to follow',
+      'app-fleet-follow',
+    ],
+  ])('draws %s', (_absence, selector) => {
     render({
       kind: 'READY',
       following: null,
@@ -274,10 +302,10 @@ describe('FleetScopeViewComponent', () => {
       description: null,
     });
 
-    expect(find('app-lcars-information-message')).toBeNull();
+    expect(find(selector)).toBeNull();
   });
 
-  it('shows a description beneath its own bar', () => {
+  it('shows a description in its own section', () => {
     render({
       kind: 'READY',
       following: null,
@@ -288,24 +316,10 @@ describe('FleetScopeViewComponent', () => {
       description: 'A home for casual PvE fleets.',
     });
 
-    expect(find('.lcars-text-bar')?.textContent).toContain('About');
+    expect(sectionHeadings()).toEqual(['About']);
     expect(find('.fleet-scope-view__description')?.textContent).toContain(
       'A home for casual PvE fleets.',
     );
-  });
-
-  it('draws no About bar where nothing was written', () => {
-    render({
-      kind: 'READY',
-      following: null,
-      artwork: null,
-      actions: [],
-      header: HEADER,
-      notice: null,
-      description: null,
-    });
-
-    expect(find('.lcars-text-bar')).toBeNull();
   });
 
   // A description is somebody's writing, and nothing here may reach a
@@ -355,22 +369,6 @@ describe('FleetScopeViewComponent', () => {
     );
   });
 
-  // A row of controls nobody can press tells a reader about a permission
-  // they do not have and did not ask about.
-  it('draws no row of controls when there is nothing to offer', () => {
-    render({
-      kind: 'READY',
-      following: null,
-      artwork: null,
-      actions: [],
-      header: HEADER,
-      notice: null,
-      description: null,
-    });
-
-    expect(find('.fleet-scope-view__actions')).toBeNull();
-  });
-
   it('draws the follow control when the page has one', () => {
     render({
       kind: 'READY',
@@ -390,20 +388,6 @@ describe('FleetScopeViewComponent', () => {
 
     expect(find('app-fleet-follow')).not.toBeNull();
     expect(fixture.nativeElement.textContent).toContain('3 followers');
-  });
-
-  it('draws none where the page has nothing to follow', () => {
-    render({
-      kind: 'READY',
-      actions: [],
-      header: HEADER,
-      notice: null,
-      description: null,
-      artwork: null,
-      following: null,
-    });
-
-    expect(find('app-fleet-follow')).toBeNull();
   });
 
   describe('the recruitment panel', () => {

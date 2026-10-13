@@ -54,7 +54,7 @@
             <div class="character-fleet__actions">
               <button
                 type="button"
-                class="lcars-btn gold"
+                class="lcars-btn green"
                 [disabled]="busy()"
                 (click)="accept(proposal)">
                 {{
@@ -65,7 +65,7 @@
               </button>
               <button
                 type="button"
-                class="lcars-btn bluey"
+                class="lcars-btn red"
                 [disabled]="busy()"
                 (click)="decline(proposal)">
                 No
@@ -117,14 +117,14 @@
         <div class="character-fleet__actions">
           <button
             type="button"
-            class="lcars-btn peach"
+            class="lcars-btn red"
             [disabled]="busy()"
             (click)="leave()">
             I have left this Fleet
           </button>
           <button
             type="button"
-            class="lcars-btn bluey"
+            class="lcars-btn red"
             [disabled]="busy()"
             (click)="withdraw(entry)">
             Remove — this was never right
@@ -141,7 +141,7 @@
     <div class="character-fleet__actions">
       <button
         type="button"
-        class="lcars-btn gold"
+        class="lcars-btn"
         [disabled]="busy()"
         (click)="toggleRecording()">
         {{ recording() ? 'Cancel' : 'Record a Fleet' }}
@@ -165,7 +165,7 @@
           </div>
           <button
             type="button"
-            class="lcars-btn bluey"
+            class="lcars-btn"
             [disabled]="busy()"
             (click)="search()">
             Search
@@ -239,7 +239,7 @@
           <div class="character-fleet__actions">
             <button
               type="submit"
-              class="lcars-btn gold"
+              class="lcars-btn green"
               [disabled]="busy()">
               Record it
             </button>
@@ -266,7 +266,7 @@
           <div class="character-fleet__actions">
             <button
               type="button"
-              class="lcars-btn bluey"
+              class="lcars-btn red"
               [disabled]="busy()"
               (click)="withdraw(entry)">
               Remove — this was never right

@@ -55,7 +55,7 @@ export class FleetHoldingsService {
     return this._http.get<FleetHoldingHistoryPage>(
       `${this.holdingsUrl(communityId, fleetId)}/history`,
       {
-        ...(this._authService.getHttpOptionsWithAccessToken() ?? {}),
+        ...this._authService.getHttpOptionsWithAccessToken(),
         params: new HttpParams().set('page', page),
       },
     );

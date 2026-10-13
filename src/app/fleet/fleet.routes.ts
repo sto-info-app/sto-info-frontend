@@ -1,9 +1,186 @@
-import { Routes } from '@angular/router';
+import { Data, Routes } from '@angular/router';
 
 import { AuthGuard } from 'src/app/core/auth/auth.guard';
 import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
 
 import { FleetHomeComponent } from './fleet-home/fleet-home.component';
+
+/** A Community's own address, which every page of its own sits below. */
+const COMMUNITY_SCOPE = 'communities/:communitySlug';
+
+/** A Fleet's own address, which every page of its own sits below. */
+const FLEET_SCOPE = 'communities/:communitySlug/fleets/:platformSegment/:slug';
+
+/** An Armada's own address, which every page of its own sits below. */
+const ARMADA_SCOPE =
+  'communities/:communitySlug/armadas/:platformSegment/:slug';
+
+/**
+ * What an Armada's shared pages are told by their route: the same pages
+ * answer for a Community or a Fleet, and only the route says the scope is an
+ * Armada.
+ */
+const ARMADA_ROUTE_DATA: Data = { governs: 'ARMADA' };
+
+/**
+ * A scope's calendar (FC-030): the calendar, each event and each occurrence
+ * for whoever it is shown to, signed in or not; the editor for its event
+ * managers. `new` is a literal no event's ID can be, and comes before the
+ * event it would otherwise be read as.
+ *
+ * @param scope The scope's own address.
+ * @param scopeData What each page is told about the scope, besides its title.
+ * @returns The routes, in the order they are matched.
+ */
+function scopeEventRoutes(scope: string, scopeData: Data = {}): Routes {
+  return [
+    {
+      path: `${scope}/events`,
+      loadComponent: () =>
+        import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
+          m => m.FleetEventCalendarComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_EVENTS, ...scopeData },
+    },
+    {
+      path: `${scope}/events/new`,
+      loadComponent: () =>
+        import('./events/fleet-event-editor/fleet-event-editor.component').then(
+          m => m.FleetEventEditorComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+    {
+      path: `${scope}/events/:eventId`,
+      loadComponent: () =>
+        import('./events/fleet-event-detail/fleet-event-detail.component').then(
+          m => m.FleetEventDetailComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_EVENT, ...scopeData },
+    },
+    {
+      path: `${scope}/events/:eventId/edit`,
+      loadComponent: () =>
+        import('./events/fleet-event-editor/fleet-event-editor.component').then(
+          m => m.FleetEventEditorComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+    {
+      path: `${scope}/events/:eventId/occurrences/:occurrenceId`,
+      loadComponent: () =>
+        import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
+          m => m.FleetEventOccurrenceComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE, ...scopeData },
+    },
+  ];
+}
+
+/**
+ * A scope's news (FC-027). Reading is for whoever each post is published to,
+ * signed in or not, which is the server's answer; writing is for its news
+ * writers. `write` is a literal no post's address can be, and comes before
+ * the post it would otherwise be read as.
+ *
+ * @param scope The scope's own address.
+ * @param scopeData What each page is told about the scope, besides its title.
+ * @returns The routes, in the order they are matched.
+ */
+function scopeNewsRoutes(scope: string, scopeData: Data = {}): Routes {
+  return [
+    {
+      path: `${scope}/news`,
+      loadComponent: () =>
+        import('./news/fleet-news-list/fleet-news-list.component').then(
+          m => m.FleetNewsListComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_NEWS, ...scopeData },
+    },
+    {
+      path: `${scope}/news/write`,
+      loadComponent: () =>
+        import('./news/fleet-news-editor/fleet-news-editor.component').then(
+          m => m.FleetNewsEditorComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+    {
+      path: `${scope}/news/:postSlug`,
+      loadComponent: () =>
+        import('./news/fleet-news-post/fleet-news-post.component').then(
+          m => m.FleetNewsPostComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST, ...scopeData },
+    },
+    {
+      path: `${scope}/news/:postSlug/edit`,
+      loadComponent: () =>
+        import('./news/fleet-news-editor/fleet-news-editor.component').then(
+          m => m.FleetNewsEditorComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+  ];
+}
+
+/**
+ * The Manage pages every scope has (FC-022): the hub, its roles, what is
+ * delegated, and the history of both. The same pages answer at each level,
+ * and the address says which. Whether the reader governs the scope is the
+ * server's answer, so the guard here is only the sign-in one.
+ *
+ * @param scope The scope's own address.
+ * @param scopeData What each page is told about the scope, besides its title.
+ * @returns The routes, in the order they are matched.
+ */
+function scopeManageRoutes(scope: string, scopeData: Data = {}): Routes {
+  return [
+    {
+      path: `${scope}/manage`,
+      loadComponent: () =>
+        import('./governance/governance-hub/governance-hub.component').then(
+          m => m.GovernanceHubComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_MANAGE, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+    {
+      path: `${scope}/manage/roles`,
+      loadComponent: () =>
+        import('./governance/governance-roles/governance-roles.component').then(
+          m => m.GovernanceRolesComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+    {
+      path: `${scope}/manage/delegation`,
+      loadComponent: () =>
+        import('./governance/governance-delegation/governance-delegation.component').then(
+          m => m.GovernanceDelegationComponent,
+        ),
+      data: {
+        title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+        ...scopeData,
+      },
+      canActivate: [AuthGuard],
+    },
+    {
+      path: `${scope}/manage/history`,
+      loadComponent: () =>
+        import('./governance/governance-history/governance-history.component').then(
+          m => m.GovernanceHistoryComponent,
+        ),
+      data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY, ...scopeData },
+      canActivate: [AuthGuard],
+    },
+  ];
+}
 
 /**
  * The Fleet directory's routes, loaded on demand.
@@ -193,91 +370,9 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_ACTIVITY },
       },
-      // A Fleet’s events (FC-030): the calendar, each event and each occurrence
-      // for whoever it is shown to, signed in or not; the editor for its
-      // event managers. `new` is a literal no event's ID can be, and comes
-      // before the event it would otherwise be read as.
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events',
-        loadComponent: () =>
-          import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
-            m => m.FleetEventCalendarComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENTS },
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/new',
-        loadComponent: () =>
-          import('./events/fleet-event-editor/fleet-event-editor.component').then(
-            m => m.FleetEventEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId',
-        loadComponent: () =>
-          import('./events/fleet-event-detail/fleet-event-detail.component').then(
-            m => m.FleetEventDetailComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT },
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/edit',
-        loadComponent: () =>
-          import('./events/fleet-event-editor/fleet-event-editor.component').then(
-            m => m.FleetEventEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
-        loadComponent: () =>
-          import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
-            m => m.FleetEventOccurrenceComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE },
-      },
-      // A Fleet's news (FC-027). Reading is for whoever each post is
-      // published to, signed in or not, which is the server's answer;
-      // writing is for its news writers. `write` is a literal no post's
-      // address can be, and comes before the post it would otherwise be read
-      // as.
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news',
-        loadComponent: () =>
-          import('./news/fleet-news-list/fleet-news-list.component').then(
-            m => m.FleetNewsListComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS },
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news/write',
-        loadComponent: () =>
-          import('./news/fleet-news-editor/fleet-news-editor.component').then(
-            m => m.FleetNewsEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug',
-        loadComponent: () =>
-          import('./news/fleet-news-post/fleet-news-post.component').then(
-            m => m.FleetNewsPostComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST },
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug/edit',
-        loadComponent: () =>
-          import('./news/fleet-news-editor/fleet-news-editor.component').then(
-            m => m.FleetNewsEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT },
-        canActivate: [AuthGuard],
-      },
+      // A Fleet's events and news.
+      ...scopeEventRoutes(FLEET_SCOPE),
+      ...scopeNewsRoutes(FLEET_SCOPE),
       // Where a Fleet's roster is looked into (FC-020). The pages below it
       // sit under its address so its tab stays lit while a reader works
       // through them.
@@ -417,42 +512,7 @@ export const FLEET_ROUTES: Routes = [
       // Who governs a Community or Fleet (FC-022). The same pages answer at
       // both levels; the address says which. Ownership and its disputes are
       // the Community's alone.
-      {
-        path: 'communities/:communitySlug/manage',
-        loadComponent: () =>
-          import('./governance/governance-hub/governance-hub.component').then(
-            m => m.GovernanceHubComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_MANAGE },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/manage/roles',
-        loadComponent: () =>
-          import('./governance/governance-roles/governance-roles.component').then(
-            m => m.GovernanceRolesComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/manage/delegation',
-        loadComponent: () =>
-          import('./governance/governance-delegation/governance-delegation.component').then(
-            m => m.GovernanceDelegationComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/manage/history',
-        loadComponent: () =>
-          import('./governance/governance-history/governance-history.component').then(
-            m => m.GovernanceHistoryComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY },
-        canActivate: [AuthGuard],
-      },
+      ...scopeManageRoutes(COMMUNITY_SCOPE),
       {
         path: 'communities/:communitySlug/manage/ownership',
         loadComponent: () =>
@@ -492,42 +552,7 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_SETTINGS },
         canActivate: [AuthGuard],
       },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage',
-        loadComponent: () =>
-          import('./governance/governance-hub/governance-hub.component').then(
-            m => m.GovernanceHubComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_MANAGE },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/roles',
-        loadComponent: () =>
-          import('./governance/governance-roles/governance-roles.component').then(
-            m => m.GovernanceRolesComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/delegation',
-        loadComponent: () =>
-          import('./governance/governance-delegation/governance-delegation.component').then(
-            m => m.GovernanceDelegationComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/fleets/:platformSegment/:slug/manage/history',
-        loadComponent: () =>
-          import('./governance/governance-history/governance-history.component').then(
-            m => m.GovernanceHistoryComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY },
-        canActivate: [AuthGuard],
-      },
+      ...scopeManageRoutes(FLEET_SCOPE),
 
       // An Armada's sections (FC-026). Its history is for whoever may see it;
       // its requests are its managers', which the server decides. Its Manage
@@ -550,51 +575,7 @@ export const FLEET_ROUTES: Routes = [
         data: { title: APP_ROUTE_TITLES.FLEET_ARMADA_REQUESTS },
         canActivate: [AuthGuard],
       },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
-        loadComponent: () =>
-          import('./governance/governance-hub/governance-hub.component').then(
-            m => m.GovernanceHubComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_MANAGE, governs: 'ARMADA' },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
-        loadComponent: () =>
-          import('./governance/governance-roles/governance-roles.component').then(
-            m => m.GovernanceRolesComponent,
-          ),
-        data: {
-          title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
-          governs: 'ARMADA',
-        },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
-        loadComponent: () =>
-          import('./governance/governance-delegation/governance-delegation.component').then(
-            m => m.GovernanceDelegationComponent,
-          ),
-        data: {
-          title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
-          governs: 'ARMADA',
-        },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
-        loadComponent: () =>
-          import('./governance/governance-history/governance-history.component').then(
-            m => m.GovernanceHistoryComponent,
-          ),
-        data: {
-          title: APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
-          governs: 'ARMADA',
-        },
-        canActivate: [AuthGuard],
-      },
+      ...scopeManageRoutes(ARMADA_SCOPE, ARMADA_ROUTE_DATA),
 
       // An Armada's activity (FC-029), told by the route it is an Armada's.
       {
@@ -605,91 +586,10 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_ACTIVITY, governs: 'ARMADA' },
       },
-      // An Armada’s events (FC-030): the calendar, each event and each occurrence
-      // for whoever it is shown to, signed in or not; the editor for its
-      // event managers. `new` is a literal no event's ID can be, and comes
-      // before the event it would otherwise be read as.
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events',
-        loadComponent: () =>
-          import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
-            m => m.FleetEventCalendarComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENTS, governs: 'ARMADA' },
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/new',
-        loadComponent: () =>
-          import('./events/fleet-event-editor/fleet-event-editor.component').then(
-            m => m.FleetEventEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW, governs: 'ARMADA' },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId',
-        loadComponent: () =>
-          import('./events/fleet-event-detail/fleet-event-detail.component').then(
-            m => m.FleetEventDetailComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT, governs: 'ARMADA' },
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/edit',
-        loadComponent: () =>
-          import('./events/fleet-event-editor/fleet-event-editor.component').then(
-            m => m.FleetEventEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT, governs: 'ARMADA' },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
-        loadComponent: () =>
-          import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
-            m => m.FleetEventOccurrenceComponent,
-          ),
-        data: {
-          title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE,
-          governs: 'ARMADA',
-        },
-      },
-      // An Armada's news (FC-027), as a Fleet's. Resolved as the Armada's
-      // Manage pages are, told so by the route.
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news',
-        loadComponent: () =>
-          import('./news/fleet-news-list/fleet-news-list.component').then(
-            m => m.FleetNewsListComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS, governs: 'ARMADA' },
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news/write',
-        loadComponent: () =>
-          import('./news/fleet-news-editor/fleet-news-editor.component').then(
-            m => m.FleetNewsEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE, governs: 'ARMADA' },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug',
-        loadComponent: () =>
-          import('./news/fleet-news-post/fleet-news-post.component').then(
-            m => m.FleetNewsPostComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST, governs: 'ARMADA' },
-      },
-      {
-        path: 'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug/edit',
-        loadComponent: () =>
-          import('./news/fleet-news-editor/fleet-news-editor.component').then(
-            m => m.FleetNewsEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT, governs: 'ARMADA' },
-        canActivate: [AuthGuard],
-      },
+      // An Armada's events and news, resolved as its Manage pages are, told
+      // so by the route.
+      ...scopeEventRoutes(ARMADA_SCOPE, ARMADA_ROUTE_DATA),
+      ...scopeNewsRoutes(ARMADA_SCOPE, ARMADA_ROUTE_DATA),
       // A Community's own activity (FC-029).
       {
         path: 'communities/:communitySlug/activity',
@@ -699,88 +599,10 @@ export const FLEET_ROUTES: Routes = [
           ),
         data: { title: APP_ROUTE_TITLES.FLEET_ACTIVITY },
       },
-      // A Community’s own events (FC-030): the calendar, each event and each occurrence
-      // for whoever it is shown to, signed in or not; the editor for its
-      // event managers. `new` is a literal no event's ID can be, and comes
-      // before the event it would otherwise be read as.
-      {
-        path: 'communities/:communitySlug/events',
-        loadComponent: () =>
-          import('./events/fleet-event-calendar/fleet-event-calendar.component').then(
-            m => m.FleetEventCalendarComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENTS },
-      },
-      {
-        path: 'communities/:communitySlug/events/new',
-        loadComponent: () =>
-          import('./events/fleet-event-editor/fleet-event-editor.component').then(
-            m => m.FleetEventEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_NEW },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/events/:eventId',
-        loadComponent: () =>
-          import('./events/fleet-event-detail/fleet-event-detail.component').then(
-            m => m.FleetEventDetailComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT },
-      },
-      {
-        path: 'communities/:communitySlug/events/:eventId/edit',
-        loadComponent: () =>
-          import('./events/fleet-event-editor/fleet-event-editor.component').then(
-            m => m.FleetEventEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_EDIT },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/events/:eventId/occurrences/:occurrenceId',
-        loadComponent: () =>
-          import('./events/fleet-event-occurrence/fleet-event-occurrence.component').then(
-            m => m.FleetEventOccurrenceComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE },
-      },
-      // A Community's own news (FC-027), as a Fleet's. Its address has no
-      // platform, which is how the pages know it is the Community's.
-      {
-        path: 'communities/:communitySlug/news',
-        loadComponent: () =>
-          import('./news/fleet-news-list/fleet-news-list.component').then(
-            m => m.FleetNewsListComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS },
-      },
-      {
-        path: 'communities/:communitySlug/news/write',
-        loadComponent: () =>
-          import('./news/fleet-news-editor/fleet-news-editor.component').then(
-            m => m.FleetNewsEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE },
-        canActivate: [AuthGuard],
-      },
-      {
-        path: 'communities/:communitySlug/news/:postSlug',
-        loadComponent: () =>
-          import('./news/fleet-news-post/fleet-news-post.component').then(
-            m => m.FleetNewsPostComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_POST },
-      },
-      {
-        path: 'communities/:communitySlug/news/:postSlug/edit',
-        loadComponent: () =>
-          import('./news/fleet-news-editor/fleet-news-editor.component').then(
-            m => m.FleetNewsEditorComponent,
-          ),
-        data: { title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT },
-        canActivate: [AuthGuard],
-      },
+      // A Community's own events and news. Their addresses have no
+      // platform, which is how the pages know they are the Community's.
+      ...scopeEventRoutes(COMMUNITY_SCOPE),
+      ...scopeNewsRoutes(COMMUNITY_SCOPE),
 
       // Where those pages lived before they moved under Investigate, kept so
       // a link to one still arrives.

@@ -13,6 +13,7 @@ import { CommunitySubscriptionService } from 'src/app/fleet/community-subscripti
 import { FLEET_RELATIONSHIP_NOTES } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetFollowVm } from 'src/app/fleet/scope/fleet-scope-page.models';
 import { CommunityFollowState } from 'src/app/models/fleet.models';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /**
  * Whether the reader follows the Community a page belongs to, and the
@@ -40,7 +41,7 @@ import { CommunityFollowState } from 'src/app/models/fleet.models';
   styleUrls: ['./fleet-follow.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [],
+  imports: [LcarsPanelComponent],
 })
 export class FleetFollowComponent {
   private readonly _subscriptions = inject(CommunitySubscriptionService);

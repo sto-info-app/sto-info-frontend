@@ -8,6 +8,7 @@ import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   COMMUNITY_AUDIENCE_LABELS,
   FLEET_SCOPE_COMMUNITY,
+  FLEET_SCOPE_LABELS,
   SCOPE_CHILDREN_REGISTER_CAPABILITY,
 } from 'src/app/fleet/constants/fleet-scope.constants';
 import {
@@ -21,7 +22,6 @@ import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
 import { GOVERNANCE_READER_ROLES } from 'src/app/fleet/governance/governance.constants';
 import { OwnershipOfferPanelVm } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
 import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
-import { FLEET_SCOPE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
 import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
 import {
   FleetScopeAction,

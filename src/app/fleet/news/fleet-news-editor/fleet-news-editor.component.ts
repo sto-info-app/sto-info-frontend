@@ -39,6 +39,7 @@ import {
   FleetNewsPost,
 } from 'src/app/models/fleet-news.models';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { MarkdownPipe } from 'src/app/shared/pipes/markdown.pipe';
 
@@ -79,6 +80,7 @@ export const FLEET_NEWS_COVER_REMOVE_FAILED =
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class FleetNewsEditorComponent extends FleetNewsPageDirective<FleetNewsPost | null> {

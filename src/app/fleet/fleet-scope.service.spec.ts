@@ -67,11 +67,13 @@ describe('FleetScopeService', () => {
       .resolveArmada('united-federation-alliance', 'xbox', 'ninth-fleet-armada')
       .subscribe();
 
-    httpMock
-      .expectOne(
-        `${bySlug}/united-federation-alliance/armadas/xbox/ninth-fleet-armada`,
-      )
-      .flush({});
+    const request = httpMock.expectOne(
+      `${bySlug}/united-federation-alliance/armadas/xbox/ninth-fleet-armada`,
+    );
+
+    expect(request.request.method).toBe('GET');
+
+    request.flush({});
   });
 
   // A slug comes out of a URL somebody may have typed, and the segments are
@@ -79,7 +81,11 @@ describe('FleetScopeService', () => {
   it('encodes every segment it is given', () => {
     service.resolveFleet('a b', 'p/c', 'x?y').subscribe();
 
-    httpMock.expectOne(`${bySlug}/a%20b/fleets/p%2Fc/x%3Fy`).flush({});
+    const request = httpMock.expectOne(`${bySlug}/a%20b/fleets/p%2Fc/x%3Fy`);
+
+    expect(request.request.method).toBe('GET');
+
+    request.flush({});
   });
 
   // Unlike the directory listings, a single scope does depend on who is

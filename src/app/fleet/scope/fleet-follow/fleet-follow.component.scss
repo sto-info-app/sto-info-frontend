@@ -1,12 +1,7 @@
 @use 'lcars-variables' as vars;
 
+// The panel card draws the box; these are the lines inside it.
 .fleet-follow {
-  padding: 0.75rem;
-  margin-top: 1rem;
-  border-left: 4px solid vars.$lcars-sky;
-  border-radius: 0 0.4rem 0.4rem 0;
-  background: vars.$lcars-grey-bg;
-
   &__standing {
     margin: 0 0 0.35rem;
     font-weight: 600;

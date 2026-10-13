@@ -22,33 +22,26 @@
       </p>
 
       @if (notice(); as saved) {
-        <p
-          class="fleet-holdings__notice"
-          role="status">
-          {{ saved }}
+        <p class="fleet-holdings__notice">
+          <output>{{ saved }}</output>
         </p>
       }
 
-      <div class="fleet-holdings__list">
+      <div class="fleet-holdings__list lcars-rotate">
         @for (holding of data.holdings.holdings; track holding.code) {
-          <section
-            class="fleet-holding"
-            [attr.aria-labelledby]="'holding-' + holding.code">
-            <div class="lcars-text-bar">
-              <h2>
-                <span [id]="'holding-' + holding.code">{{ holding.name }}</span>
-              </h2>
-            </div>
+          <app-lcars-panel
+            [heading]="holding.name"
+            [level]="2">
 
             @if (editing() === holding.code) {
               <form
-                class="fleet-holding__form"
+                class="fleet-holding__form lcars-rotate"
                 [attr.aria-label]="'Record the ' + holding.name"
                 (submit)="
                   $event.preventDefault(); onSave(data.section, holding)
                 ">
                 @for (track of holding.tracks; track track.code) {
-                  <div class="lcars-input-container tangerine">
+                  <div class="lcars-input-container">
                     <label [for]="'tier-' + track.code">{{ track.name }}</label>
                     <select
                       [id]="'tier-' + track.code"
@@ -64,7 +57,7 @@
                     </select>
                   </div>
                 }
-                <div class="lcars-input-container tangerine">
+                <div class="lcars-input-container">
                   <label [for]="'reason-' + holding.code">Why (optional)</label>
                   <textarea
                     [id]="'reason-' + holding.code"
@@ -86,7 +79,7 @@
                 <div class="fleet-community-form-actions">
                   <button
                     type="button"
-                    class="lcars-btn lcars-btn-auto bluey"
+                    class="lcars-btn lcars-btn-auto"
                     [disabled]="busy()"
                     (click)="onCancel()">
                     Cancel
@@ -134,7 +127,7 @@
               @if (data.holdings.mayRecord && editing() === null) {
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto tangerine"
+                  class="lcars-btn lcars-btn-auto"
                   (click)="onRecord(holding)">
                   Record…
                 </button>
@@ -150,16 +143,13 @@
                 >STO Wiki</a
               >, as of {{ holding.sourceEditedOn | date: 'd MMMM y' }}.
             </p>
-          </section>
+          </app-lcars-panel>
         }
       </div>
 
-      <section
+      <app-collapsible-section
         class="fleet-holdings__history"
-        aria-labelledby="holdings-history-heading">
-        <div class="lcars-text-bar">
-          <h2><span id="holdings-history-heading">History</span></h2>
-        </div>
+        heading="History">
 
         @let page = data.history;
 
@@ -206,7 +196,7 @@
             </div>
           }
         }
-      </section>
+      </app-collapsible-section>
     }
   </app-fleet-page-shell>
 }

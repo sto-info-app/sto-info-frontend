@@ -13,6 +13,7 @@ import {
   FleetDirectorySort,
   FleetDirectoryStatusFilter,
 } from 'src/app/models/fleet.models';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** One choice in the lifecycle control, and what it is called. */
 export interface FleetStatusOption {
@@ -57,7 +58,7 @@ export const FLEET_STATUS_OPTIONS: readonly FleetStatusOption[] = [
   styleUrls: ['./fleet-directory-filters.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [FormsModule],
+  imports: [FormsModule, LcarsPanelComponent],
 })
 export class FleetDirectoryFiltersComponent {
   /** The lifecycle choices, in the order they are offered. */

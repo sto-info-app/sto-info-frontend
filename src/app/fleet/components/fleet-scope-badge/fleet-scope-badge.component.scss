@@ -5,8 +5,10 @@
   display: inline-flex;
 }
 
-// Sky is the Fleet system's colour throughout, so the badge says which feature
-// this is; the label and icon inside say which level of it.
+// One colour wherever a Community, Fleet or Armada is named, whatever colour
+// the block around it takes, so the badge is a mark that is recognised rather
+// than read, as a platform's is; the label and icon inside say which level it
+// is.
 // ---
 // No right-hand padding, because the platform half runs to the badge's own
 // edge. `overflow: hidden` is what lets a square-ended half sit inside a fully

@@ -18,6 +18,7 @@ import {
   FleetScopeArtworkSlotVm,
   FleetScopeArtworkVm,
 } from 'src/app/fleet/scope/fleet-scope-page.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
@@ -49,7 +50,7 @@ export const ARTWORK_REMOVE_FAILED =
   styleUrls: ['./fleet-scope-artwork.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LcarsErrorMessageComponent],
+  imports: [CollapsibleSectionComponent, LcarsErrorMessageComponent],
 })
 export class FleetScopeArtworkComponent {
   /** The record's artwork, and what may be done to it. */

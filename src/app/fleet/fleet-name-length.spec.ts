@@ -11,7 +11,7 @@ import {
 describe('fleet name length', () => {
   describe('countCodepoints', () => {
     it('counts an astral character once rather than twice', () => {
-      expect('𝕬'.length).toBe(2);
+      expect('𝕬').toHaveLength(2);
       expect(countCodepoints('𝕬')).toBe(1);
     });
   });

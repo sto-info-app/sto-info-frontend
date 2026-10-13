@@ -16,11 +16,13 @@
     [errorMessage]="messageOf(state)">
     @if (state.kind === 'READY') {
       @if (state.scope.isCommunity) {
-        <p class="fleet-community-field-hint">
-          <a [routerLink]="state.scope.scopeLink"
+        <div class="buttons-row">
+          <a
+            class="lcars-btn lcars-btn-auto"
+            [routerLink]="state.scope.scopeLink"
             >Back to {{ state.scope.name }}</a
           >
-        </p>
+        </div>
       }
       <p class="fleet-community-field-hint">
         What has happened here in the last twelve months that you may see.

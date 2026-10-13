@@ -26,8 +26,10 @@ import {
   FleetHoldings,
   FleetHoldingTrack,
 } from 'src/app/models/fleet-holdings.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** The longest reason the server keeps. */
 export const HOLDING_REASON_LIMIT = 500;
@@ -66,12 +68,14 @@ export interface FleetHoldingsData {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     AppDatePipe,
+    AsyncPipe,
+    CollapsibleSectionComponent,
     DatePipe,
     FleetPageShellComponent,
     FleetTabsComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
   ],
 })
 export class FleetHoldingsComponent extends FleetSectionPageDirective<FleetHoldingsData> {

@@ -21,10 +21,11 @@
     }
   }
 
+  // In the section's own colour, so the slot names belong to its bar.
   &__label {
     flex: 0 0 6rem;
     font-weight: 700;
-    color: vars.$lcars-sunflower;
+    color: var(--lcars-accent, #{vars.$lcars-sunflower});
   }
 
   // What is in the slot: its description where it has one, which is the only

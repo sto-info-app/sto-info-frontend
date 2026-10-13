@@ -31,9 +31,10 @@ export interface FleetNewsLatestVm {
  * The latest few posts of a Community's own news, on its page (FC-027).
  *
  * A Community page has no tab strip, so this is how a reader finds its
- * News page. The section is always there, even with nothing published, so
- * the way to the news is always the same; its writers are offered a new
- * post from it while the Community is open.
+ * News page. The way to the news is always there, even with nothing
+ * published, so it is always the same; its writers are offered a new post
+ * from it while the Community is open. The page draws the News section this
+ * sits in, so it rotates with the page's other sections.
  */
 @Component({
   selector: 'app-fleet-news-latest',

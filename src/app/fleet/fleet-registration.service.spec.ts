@@ -128,9 +128,12 @@ describe('FleetRegistrationService', () => {
         })
         .subscribe();
 
-      httpMock
-        .expectOne(`${API_URLS.FLEET_COMMUNITIES}/a%2Fb/fleets`)
-        .flush({});
+      const request = httpMock.expectOne(
+        `${API_URLS.FLEET_COMMUNITIES}/a%2Fb/fleets`,
+      );
+
+      expect(request.request.method).toBe('POST');
+      request.flush({});
     });
   });
 

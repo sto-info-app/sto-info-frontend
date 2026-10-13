@@ -8,6 +8,7 @@ import {
 
 import { FleetScopeCardComponent } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.component';
 import { FleetDirectoryState } from 'src/app/fleet/directory/fleet-directory-page.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 
@@ -31,6 +32,7 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     FleetScopeCardComponent,
     LcarsErrorMessageComponent,
     LoadingBarComponent,

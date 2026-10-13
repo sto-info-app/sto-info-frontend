@@ -42,7 +42,7 @@
         aria-label="What you can do here">
         @for (action of state.actions; track action.link) {
           <a
-            class="lcars-btn lcars-btn-auto gold"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="action.link"
             [attr.aria-label]="action.description"
             >{{ action.label }}</a
@@ -51,75 +51,75 @@
       </nav>
     }
 
-    @if (state.ownershipOffer) {
-      <app-ownership-offer-panel [vm]="state.ownershipOffer" />
-    }
+    <!--
+      The blocks of the record, each in the next colour of the rotation
+      whichever component draws it.
+    -->
+    <div class="lcars-rotate">
+      @if (state.ownershipOffer) {
+        <app-ownership-offer-panel [vm]="state.ownershipOffer" />
+      }
 
-    @if (state.following) {
-      <app-fleet-follow [vm]="state.following" />
-    }
+      @if (state.following) {
+        <app-fleet-follow [vm]="state.following" />
+      }
 
-    @if (state.armada) {
-      <app-armada-panel [vm]="state.armada" />
-    }
+      @if (state.armada) {
+        <app-armada-panel [vm]="state.armada" />
+      }
 
-    @if (state.fleetArmada) {
-      <app-fleet-armada-panel [vm]="state.fleetArmada" />
-    }
+      @if (state.fleetArmada) {
+        <app-fleet-armada-panel [vm]="state.fleetArmada" />
+      }
 
-    @if (state.communityNews) {
-      <app-fleet-news-latest [vm]="state.communityNews" />
-    }
+      @if (state.communityNews) {
+        <app-collapsible-section
+          heading="News">
+          <app-fleet-news-latest [vm]="state.communityNews" />
+        </app-collapsible-section>
+      }
 
-    @if (state.communityEvents; as events) {
-      <section
-        class="fleet-scope-view__events"
-        aria-labelledby="fleet-scope-events-heading">
-        <div class="lcars-text-bar">
-          <h2><span id="fleet-scope-events-heading">Events</span></h2>
-        </div>
-        <app-fleet-events-upcoming
-          [source]="events"
-          [latest]="5" />
-      </section>
-    }
+      @if (state.communityEvents; as events) {
+        <app-collapsible-section
+          heading="Events">
+          <app-fleet-events-upcoming
+            [source]="events"
+            [latest]="5" />
+        </app-collapsible-section>
+      }
 
-    @if (state.communityActivity; as activity) {
-      <section
-        class="fleet-scope-view__activity"
-        aria-labelledby="fleet-scope-activity-heading">
-        <div class="lcars-text-bar">
-          <h2><span id="fleet-scope-activity-heading">Activity</span></h2>
-        </div>
-        <app-fleet-activity-feed
-          [source]="activity.source"
-          [latest]="5"
-          [allLink]="activity.allLink" />
-      </section>
-    }
+      @if (state.communityActivity; as activity) {
+        <app-collapsible-section
+          heading="Activity">
+          <app-fleet-activity-feed
+            [source]="activity.source"
+            [latest]="5"
+            [allLink]="activity.allLink" />
+        </app-collapsible-section>
+      }
 
-    @if (state.communityStructure) {
-      <app-community-structure-panel [vm]="state.communityStructure" />
-    }
+      @if (state.communityStructure) {
+        <app-community-structure-panel [vm]="state.communityStructure" />
+      }
 
-    @if (state.recruitment) {
-      <app-fleet-recruitment-panel
-        [vm]="state.recruitment"
-        (changed)="changed.emit()" />
-    }
+      @if (state.recruitment) {
+        <app-fleet-recruitment-panel
+          [vm]="state.recruitment"
+          (changed)="changed.emit()" />
+      }
 
-    @if (state.artwork) {
-      <app-fleet-scope-artwork
-        [vm]="state.artwork"
-        (changed)="changed.emit()" />
-    }
+      @if (state.artwork) {
+        <app-fleet-scope-artwork
+          [vm]="state.artwork"
+          (changed)="changed.emit()" />
+      }
 
-    @if (state.description) {
-      <div class="lcars-text-bar">
-        <span>About</span>
-      </div>
-
-      <p class="fleet-scope-view__description">{{ state.description }}</p>
-    }
+      @if (state.description) {
+        <app-collapsible-section
+          heading="About">
+          <p class="fleet-scope-view__description">{{ state.description }}</p>
+        </app-collapsible-section>
+      }
+    </div>
   }
 }

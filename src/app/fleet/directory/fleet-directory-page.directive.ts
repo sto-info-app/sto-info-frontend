@@ -19,11 +19,11 @@ import {
 export const FLEET_DIRECTORY_PAGE_SIZE = 12;
 
 /** Every lifecycle filter the server accepts. */
-const STATUSES: readonly FleetDirectoryStatusFilter[] = [
+const STATUSES: ReadonlySet<string> = new Set<FleetDirectoryStatusFilter>([
   FleetDirectoryStatusFilter.ACTIVE,
   FleetDirectoryStatusFilter.CLOSED,
   FleetDirectoryStatusFilter.ANY,
-];
+]);
 
 /** Shown when a listing could not be read at all. */
 export const FLEET_DIRECTORY_ERROR =
@@ -167,7 +167,7 @@ export abstract class FleetDirectoryPageDirective {
   protected statusOf(params: ParamMap): FleetDirectoryStatusFilter {
     const value = params.get('status');
 
-    return STATUSES.includes(value as FleetDirectoryStatusFilter)
+    return value !== null && STATUSES.has(value)
       ? (value as FleetDirectoryStatusFilter)
       : FleetDirectoryStatusFilter.ACTIVE;
   }

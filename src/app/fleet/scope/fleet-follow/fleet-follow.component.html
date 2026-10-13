@@ -1,4 +1,6 @@
-<section class="fleet-follow">
+<app-lcars-panel
+  heading="Following"
+  [level]="2">
   @if (vm.communityId === null) {
     <!--
       Nothing to follow. A Fleet nobody has registered belongs to no
@@ -20,8 +22,8 @@
       <button
         type="button"
         class="lcars-btn lcars-btn-auto"
-        [class.sky]="!following()"
-        [class.gold]="following()"
+        [class.green]="!following()"
+        [class.red]="following()"
         [disabled]="busy()"
         (click)="toggle()">
         @if (following()) {
@@ -52,4 +54,4 @@
       </p>
     }
   }
-</section>
+</app-lcars-panel>

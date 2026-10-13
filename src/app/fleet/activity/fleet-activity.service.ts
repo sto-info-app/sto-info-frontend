@@ -34,16 +34,8 @@ export class FleetActivityService {
     target: GovernanceTarget,
     before: string | null = null,
   ): Observable<FleetActivityPage> {
-    const community = `${API_URLS.FLEET_COMMUNITIES}/${target.communityId}`;
-    const url =
-      target.fleetId !== null
-        ? `${community}/fleets/${target.fleetId}/activity`
-        : target.armadaId
-          ? `${community}/armadas/${target.armadaId}/activity`
-          : `${community}/activity`;
-
-    return this._http.get<FleetActivityPage>(url, {
-      ...(this._authService.getHttpOptionsWithAccessToken() ?? {}),
+    return this._http.get<FleetActivityPage>(this.scopeFeedUrl(target), {
+      ...this._authService.getHttpOptionsWithAccessToken(),
       params: this.paramsOf(before),
     });
   }
@@ -65,6 +57,25 @@ export class FleetActivityService {
       `${API_URLS.FLEET_ACTIVITY}/mine`,
       { ...options, params: this.paramsOf(before) },
     );
+  }
+
+  /**
+   * Where a scope's feed is read from: a Fleet's, an Armada's, or the
+   * Community's own.
+   *
+   * @param target - The scope.
+   * @returns The address.
+   */
+  private scopeFeedUrl(target: GovernanceTarget): string {
+    const community = `${API_URLS.FLEET_COMMUNITIES}/${target.communityId}`;
+
+    if (target.fleetId !== null) {
+      return `${community}/fleets/${target.fleetId}/activity`;
+    }
+
+    return target.armadaId
+      ? `${community}/armadas/${target.armadaId}/activity`
+      : `${community}/activity`;
   }
 
   /**

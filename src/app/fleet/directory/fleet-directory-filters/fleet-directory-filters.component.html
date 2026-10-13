@@ -1,65 +1,69 @@
-<form
-  class="fleet-directory-filters"
-  (ngSubmit)="onSubmit()">
-  <div class="form-row">
-    <div class="lcars-input-container sky">
-      <label for="fleet-directory-search">{{ searchLabel }}</label>
-      <input
-        id="fleet-directory-search"
-        type="search"
-        name="search"
-        autocomplete="off"
-        [maxlength]="searchMaxLength"
-        [placeholder]="searchPlaceholder"
-        [(ngModel)]="searchTerm" />
+<app-lcars-panel
+  heading="Search"
+  [level]="2">
+  <form
+    class="fleet-directory-filters"
+    (ngSubmit)="onSubmit()">
+    <div class="form-row lcars-rotate">
+      <div class="lcars-input-container">
+        <label for="fleet-directory-search">{{ searchLabel }}</label>
+        <input
+          id="fleet-directory-search"
+          type="search"
+          name="search"
+          autocomplete="off"
+          [maxlength]="searchMaxLength"
+          [placeholder]="searchPlaceholder"
+          [(ngModel)]="searchTerm" />
+      </div>
+
+      <div class="lcars-input-container">
+        <label for="fleet-directory-status">Showing</label>
+        <select
+          id="fleet-directory-status"
+          name="status"
+          [ngModel]="status"
+          (change)="onStatusPicked($any($event.target).value)">
+          @for (option of statusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="lcars-input-container">
+        <label for="fleet-directory-sort">Ordered by</label>
+        <select
+          id="fleet-directory-sort"
+          name="sort"
+          [ngModel]="sort"
+          (change)="onSortPicked($any($event.target).value)">
+          @for (option of sortOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
     </div>
 
-    <div class="lcars-input-container sky">
-      <label for="fleet-directory-status">Showing</label>
-      <select
-        id="fleet-directory-status"
-        name="status"
-        [ngModel]="status"
-        (change)="onStatusPicked($any($event.target).value)">
-        @for (option of statusOptions; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
-    </div>
+    <!--
+      Whatever this particular listing asks that the other two do not: a
+      platform, a recruitment posture, an allegiance.
+    -->
+    <ng-content />
 
-    <div class="lcars-input-container sky">
-      <label for="fleet-directory-sort">Ordered by</label>
-      <select
-        id="fleet-directory-sort"
-        name="sort"
-        [ngModel]="sort"
-        (change)="onSortPicked($any($event.target).value)">
-        @for (option of sortOptions; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
-    </div>
-  </div>
-
-  <!--
-    Whatever this particular listing asks that the other two do not: a
-    platform, a recruitment posture, an allegiance.
-  -->
-  <ng-content />
-
-  <div class="form-actions">
-    @if (searchTerm || filtersApplied) {
+    <div class="form-actions lcars-rotate">
+      @if (searchTerm || filtersApplied) {
+        <button
+          type="button"
+          class="lcars-btn fleet-directory-filters__clear"
+          (click)="onClear()">
+          Clear all
+        </button>
+      }
       <button
-        type="button"
-        class="lcars-btn red"
-        (click)="onClear()">
-        Clear all
+        type="submit"
+        class="lcars-btn">
+        Search
       </button>
-    }
-    <button
-      type="submit"
-      class="lcars-btn green">
-      Search
-    </button>
-  </div>
-</form>
+    </div>
+  </form>
+</app-lcars-panel>

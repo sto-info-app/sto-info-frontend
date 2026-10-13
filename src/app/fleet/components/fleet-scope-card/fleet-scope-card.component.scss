@@ -29,12 +29,13 @@
 }
 
 // Square, because an emblem is a badge rather than a portrait: the circular
-// crop the profile avatar uses would take the corners off one.
+// crop the profile avatar uses would take the corners off one. Framed in the
+// card's colour of the listing's rotation.
 .fleet-scope-card__emblem {
   display: block;
   width: 48px;
   height: 48px;
-  border: 2px solid vars.$lcars-sky;
+  border: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
   border-radius: 6px;
   object-fit: cover;
   background: vars.$lcars-black;
@@ -53,7 +54,7 @@
 
 a.fleet-scope-card__identity:hover .fleet-scope-card__name,
 a.fleet-scope-card__identity:focus-visible .fleet-scope-card__name {
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   text-decoration: underline;
 }
 
@@ -62,8 +63,9 @@ a.fleet-scope-card__identity:focus-visible .fleet-scope-card__name {
   color: vars.$lcars-grey-light;
 }
 
-// The state pill. Its colours carry meaning, which is why the card itself does
-// not: sky is the feature, and these say what is happening inside it.
+// The state pill. Its colours carry meaning, which is why the card's own colour
+// does not: that is only its place in the listing's rotation, and these say
+// what is happening inside the record.
 .fleet-scope-card__status {
   @include mixins.lcars-badge;
 

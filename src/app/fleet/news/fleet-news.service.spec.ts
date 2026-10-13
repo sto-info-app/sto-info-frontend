@@ -90,7 +90,10 @@ describe('FleetNewsService', () => {
     it('reads an Armada’s news', () => {
       service.list(ARMADA, {}).subscribe();
 
-      httpMock.expectOne(req => req.url === ARMADA_URL).flush({ items: [] });
+      const request = httpMock.expectOne(req => req.url === ARMADA_URL);
+
+      expect(request.request.method).toBe('GET');
+      request.flush({ items: [] });
     });
   });
 

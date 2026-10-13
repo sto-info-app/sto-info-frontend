@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, NgZone } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -6,14 +6,12 @@ import {
   MatDialogRef,
 } from '@angular/material/dialog';
 
-import { ImageCropperComponent } from 'ngx-image-cropper';
-
-import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
+import { DescribedImageCropperBaseComponent } from 'src/app/shared/base/described-image-cropper-base.component';
+import { ImageCropPickerComponent } from 'src/app/shared/components/image-crop-picker/image-crop-picker.component';
 import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 import {
   describeFleetImageRequirement,
@@ -63,7 +61,7 @@ export interface FleetImageCropData {
   standalone: true,
   imports: [
     FormsModule,
-    ImageCropperComponent,
+    ImageCropPickerComponent,
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
@@ -71,7 +69,7 @@ export interface FleetImageCropData {
     LcarsWarningMessageComponent,
   ],
 })
-export class FleetImageCropDialogComponent extends ImageCropperBaseComponent {
+export class FleetImageCropDialogComponent extends DescribedImageCropperBaseComponent {
   protected override readonly _dialogRef = inject(
     MatDialogRef<FleetImageCropDialogComponent>,
   );
@@ -88,12 +86,7 @@ export class FleetImageCropDialogComponent extends ImageCropperBaseComponent {
   /** The longest description the server accepts. */
   readonly altMaxLength = FLEET_IMAGE_ALT_MAX_LENGTH;
 
-  /** What the picture shows, which travels with the upload. */
-  altText = this.data.currentAlt ?? '';
-
   private readonly _imageService = inject(FleetImageService);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Creates the dialogue, taking its crop rules from the slot being filled.
@@ -101,72 +94,23 @@ export class FleetImageCropDialogComponent extends ImageCropperBaseComponent {
   constructor() {
     super();
 
-    this.outputFormat = this.spec.outputFormat;
-    this.minimumCroppedWidth = this.spec.minimumWidth;
-    this.minimumCroppedHeight = this.spec.minimumHeight;
-    this.recommendedCroppedWidth = this.spec.recommendedWidth;
-    this.recommendedCroppedHeight = this.spec.recommendedHeight;
-  }
-
-  /**
-   * Whether the upload button should do anything yet.
-   *
-   * @returns True when there is a crop and a description to send with it.
-   */
-  get canUpload(): boolean {
-    return (
-      this.croppedImage !== '' &&
-      this.altText.trim().length > 0 &&
-      !this.isSubmitting
-    );
+    this.altText = this.data.currentAlt ?? '';
+    this.holdCropTo(this.spec);
   }
 
   /**
    * Sends the crop and its description to be scanned.
    */
   onUploadImageClick(): void {
-    if (!this.validateCroppedImage()) {
-      return;
-    }
-
-    const description = this.altText.trim();
-
-    if (!description) {
-      this.displayErrorMessage('Please describe what the picture shows.');
-
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    this._imageService
-      .upload(
-        this.data.target,
-        this.data.slot,
-        this.croppedImageBlob as Blob,
-        description,
-      )
-      .pipe(observeInZone(this._ngZone, this._cdr))
-      .subscribe({
-        // Nothing has changed yet. The picture is held privately and
-        // scanned first, and this dialogue reports where it has got to
-        // until it is in use or was refused — FC-012.
-        next: accepted => this.watchUpload(accepted),
-        error: (error: { status: number; error?: { message?: string } }) => {
-          this.isSubmitting = false;
-          // The server names the specific problem — a crop below the size
-          // the slot needs, a picture over the limit, somebody else's work
-          // in the slot — which is more use than a generic failure.
-          const message = error.error?.message;
-
-          if (message) {
-            this.displayErrorMessage(message);
-
-            return;
-          }
-
-          this.handleHttpError(error);
-        },
-      });
+    this.uploadDescribed(
+      'Please describe what the picture shows.',
+      (image, description) =>
+        this._imageService.upload(
+          this.data.target,
+          this.data.slot,
+          image,
+          description,
+        ),
+    );
   }
 }

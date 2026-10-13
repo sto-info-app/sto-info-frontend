@@ -21,10 +21,10 @@
       @let post = state.data;
 
       <form
-        class="fleet-news__form"
+        class="fleet-news__form lcars-rotate"
         [attr.aria-label]="post ? 'Edit ' + post.title : 'Write a post'"
         (submit)="$event.preventDefault(); onSave(scope, post, false)">
-        <div class="lcars-input-container tangerine">
+        <div class="lcars-input-container">
           <label for="fleet-news-title">Title</label>
           <input
             id="fleet-news-title"
@@ -36,7 +36,7 @@
             (input)="title.set($any($event.target).value)" />
         </div>
 
-        <div class="lcars-input-container tangerine">
+        <div class="lcars-input-container">
           <label for="fleet-news-summary">Summary (optional)</label>
           <textarea
             id="fleet-news-summary"
@@ -76,7 +76,7 @@
           <label for="fleet-news-body">Post (Markdown)</label>
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto sky"
+            class="lcars-btn lcars-btn-auto"
             [attr.aria-pressed]="previewing()"
             (click)="previewing.set(!previewing())">
             {{ previewing() ? 'Write' : 'Preview' }}
@@ -88,7 +88,7 @@
             aria-live="polite"
             [innerHTML]="body() | markdown"></div>
         } @else {
-          <div class="lcars-input-container tangerine">
+          <div class="lcars-input-container">
             <textarea
               id="fleet-news-body"
               rows="14"
@@ -106,16 +106,16 @@
             [message]="refusal" />
         }
 
-        <div class="fleet-community-form-actions">
+        <div class="fleet-community-form-actions lcars-rotate">
           <a
-            class="lcars-btn lcars-btn-auto bluey"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="cancelLinkOf(scope, post)"
             >Cancel</a
           >
           @if (post === null || post.status === 'DRAFT') {
             <button
               type="submit"
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto green"
               [disabled]="!canSave()">
               Save draft
             </button>
@@ -137,12 +137,9 @@
         </div>
       </form>
 
-      <section
+      <app-collapsible-section
         class="fleet-news__cover-section"
-        aria-labelledby="fleet-news-cover-heading">
-        <div class="lcars-text-bar">
-          <h2><span id="fleet-news-cover-heading">Cover</span></h2>
-        </div>
+        heading="Cover">
         @if (post === null) {
           <p class="fleet-community-field-hint">
             Save the post as a draft first; its cover can be added then.
@@ -159,7 +156,7 @@
           <div class="buttons-row">
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto"
               (click)="onSetCover(scope, post)">
               {{ post.coverImageId ? 'Replace the cover' : 'Set the cover' }}
             </button>
@@ -178,7 +175,7 @@
             the page stops working at the end of the next day (UTC).
           </p>
         }
-      </section>
+      </app-collapsible-section>
     }
   </app-fleet-page-shell>
 }

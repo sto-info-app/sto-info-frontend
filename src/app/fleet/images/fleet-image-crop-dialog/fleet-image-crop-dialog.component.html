@@ -26,25 +26,15 @@
       class="fleet-community-image-crop__layout"
       [class.has-image]="imageChangedEvent">
       <div class="fleet-community-image-crop__main">
-        <input
-          type="file"
-          [title]="'Choose a picture for the ' + spec.label"
-          [attr.aria-label]="'Choose a picture for the ' + spec.label"
-          (change)="onFileChangeEvent($event)"
-          accept="image/jpg, image/jpeg, image/png"
+        <app-image-crop-picker
+          [label]="spec.label"
+          [imageChangedEvent]="imageChangedEvent"
+          [aspectRatio]="spec.aspectRatio"
+          [format]="spec.outputFormat"
           [disabled]="isSubmitting"
-          class="file-input" />
-
-        @if (imageChangedEvent) {
-          <image-cropper
-            [imageChangedEvent]="imageChangedEvent"
-            [maintainAspectRatio]="true"
-            [aspectRatio]="spec.aspectRatio"
-            [output]="'blob'"
-            [format]="spec.outputFormat"
-            (imageCropped)="onImageCropped($event)"
-            (loadImageFailed)="loadImageFailed()"></image-cropper>
-        }
+          (fileChange)="onFileChangeEvent($event)"
+          (imageCropped)="onImageCropped($event)"
+          (loadImageFailed)="loadImageFailed()" />
       </div>
 
       @if (imageChangedEvent) {
@@ -113,7 +103,7 @@
     class="fleet-community-image-crop__actions">
     <button
       type="button"
-      class="lcars-btn sunflower"
+      class="lcars-btn green"
       mat-button
       [disabled]="!canUpload"
       (click)="onUploadImageClick()">
@@ -121,7 +111,7 @@
     </button>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       mat-button
       mat-dialog-close
       [disabled]="isSubmitting"

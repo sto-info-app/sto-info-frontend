@@ -41,7 +41,7 @@
   }
 
   &__when {
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 
   &__reason {
@@ -50,12 +50,9 @@
   }
 }
 
+// Each holding is a panel of its own in the grid, in the next colour of the
+// rotation; what follows is what sits inside one.
 .fleet-holding {
-  h2 {
-    margin: 0;
-    font-size: inherit;
-  }
-
   &__form {
     display: flex;
     flex-direction: column;
@@ -71,7 +68,7 @@
 
   &__source {
     margin: 0.75rem 0 0;
-    color: vars.$lcars-sky;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
     font-size: 0.85rem;
   }
 }

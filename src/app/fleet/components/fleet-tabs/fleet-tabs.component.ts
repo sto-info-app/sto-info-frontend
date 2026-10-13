@@ -145,55 +145,58 @@ export class FleetTabsComponent {
         // Every other tab's address starts with this one.
         exact: true,
       },
+      // Its news (FC-027): on every registered Fleet, for whoever each post
+      // is published to. Lit on a post, the editor and the drafts too.
+      {
+        link: FLEET_LINKS.fleetNews(communitySlug, platformSegment, fleetSlug),
+        label: 'News',
+        exact: false,
+      },
+      // Its activity (FC-029): for whoever may see each item.
+      {
+        link: FLEET_LINKS.fleetActivity(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'Activity',
+        exact: false,
+      },
+      // Its events (FC-030): for whoever each is shown to.
+      {
+        link: FLEET_LINKS.fleetEvents(
+          communitySlug,
+          platformSegment,
+          fleetSlug,
+        ),
+        label: 'Events',
+        exact: false,
+      },
     ];
-
-    // Its news (FC-027): on every registered Fleet, for whoever each post is
-    // published to. Lit on a post, the editor and the drafts too.
-    tabs.push({
-      link: FLEET_LINKS.fleetNews(communitySlug, platformSegment, fleetSlug),
-      label: 'News',
-      exact: false,
-    });
-
-    // Its activity (FC-029): for whoever may see each item.
-    tabs.push({
-      link: FLEET_LINKS.fleetActivity(
-        communitySlug,
-        platformSegment,
-        fleetSlug,
-      ),
-      label: 'Activity',
-      exact: false,
-    });
-
-    // Its events (FC-030): for whoever each is shown to.
-    tabs.push({
-      link: FLEET_LINKS.fleetEvents(communitySlug, platformSegment, fleetSlug),
-      label: 'Events',
-      exact: false,
-    });
 
     // The private roster: the Fleet's members and up.
     if (providesRoster && capabilities.includes(ROSTER_VIEW_CAPABILITY)) {
-      tabs.push({
-        link: FLEET_LINKS.fleetRoster(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        label: 'Roster',
-        exact: false,
-      });
-      tabs.push({
-        link: FLEET_LINKS.fleetHistory(
-          communitySlug,
-          platformSegment,
-          fleetSlug,
-        ),
-        label: 'History',
-        // Lit on a member's timeline beneath it too.
-        exact: false,
-      });
+      tabs.push(
+        {
+          link: FLEET_LINKS.fleetRoster(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          label: 'Roster',
+          exact: false,
+        },
+        {
+          link: FLEET_LINKS.fleetHistory(
+            communitySlug,
+            platformSegment,
+            fleetSlug,
+          ),
+          label: 'History',
+          // Lit on a member's timeline beneath it too.
+          exact: false,
+        },
+      );
     }
 
     if (this._hasReports()) {

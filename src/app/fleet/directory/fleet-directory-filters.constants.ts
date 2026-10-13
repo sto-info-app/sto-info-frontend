@@ -136,10 +136,9 @@ const ROSTER_QUERIES: Readonly<Record<FleetRosterFilter, FleetRosterQuery>> = {
  * @returns The choice the control should show.
  */
 export function rosterFilterOf(value: string | null): FleetRosterFilter {
-  const asked = value ?? '';
-
-  return Object.hasOwn(ROSTER_QUERIES, asked)
-    ? (asked as FleetRosterFilter)
+  // No value at all is "Any" too, which is the fallback either way.
+  return value !== null && Object.hasOwn(ROSTER_QUERIES, value)
+    ? (value as FleetRosterFilter)
     : FleetRosterFilter.ANY;
 }
 

@@ -10,7 +10,11 @@ export interface FleetScopeCardAction {
   /** Button label. */
   label: string;
 
-  /** LCARS colour class applied alongside `lcars-btn`, e.g. `sky`. */
+  /**
+   * LCARS colour class applied alongside `lcars-btn`: `green` for an action
+   * that joins or applies, `red` for one that leaves or removes, and empty to
+   * take the card's own colour.
+   */
   colourClass: string;
 
   /**

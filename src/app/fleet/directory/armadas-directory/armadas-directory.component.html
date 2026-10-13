@@ -1,41 +1,47 @@
-<app-help-link
-  slug="finding-a-fleet"
-  label="Help with finding a Fleet" />
+<!--
+  The listing's blocks - its action, its search and its results - each in the
+  next colour of the rotation.
+-->
+<div class="lcars-rotate">
+  <app-help-link
+    slug="finding-a-fleet"
+    label="Help with finding a Fleet" />
 
-<app-fleet-directory-filters
-  searchLabel="Armada name"
-  searchPlaceholder="e.g. Ninth Fleet Armada"
-  [search]="search"
-  [status]="status"
-  [sort]="sort"
-  [sortOptions]="sortOptions"
-  [filtersApplied]="anyFilterApplied"
-  (searchChange)="onSearch($event)"
-  (statusChange)="onStatus($event)"
-  (sortChange)="onSort($event)"
-  (cleared)="onClearAll()">
-  <div class="fleet-community-filter-row">
-    <div class="lcars-input-container sky">
-      <label for="armadas-directory-platform">Platform</label>
-      <select
-        id="armadas-directory-platform"
-        name="platformId"
-        [ngModel]="filterValue('platformId')"
-        (change)="onFilter('platformId', $any($event.target).value)">
-        <option value="">Any platform</option>
-        @for (platform of platforms$ | async; track platform.id) {
-          <option [value]="platform.id">{{ platform.name }}</option>
-        }
-      </select>
+  <app-fleet-directory-filters
+    searchLabel="Armada name"
+    searchPlaceholder="e.g. Ninth Fleet Armada"
+    [search]="search"
+    [status]="status"
+    [sort]="sort"
+    [sortOptions]="sortOptions"
+    [filtersApplied]="anyFilterApplied"
+    (searchChange)="onSearch($event)"
+    (statusChange)="onStatus($event)"
+    (sortChange)="onSort($event)"
+    (cleared)="onClearAll()">
+    <div class="fleet-community-filter-row lcars-rotate">
+      <div class="lcars-input-container">
+        <label for="armadas-directory-platform">Platform</label>
+        <select
+          id="armadas-directory-platform"
+          name="platformId"
+          [ngModel]="filterValue('platformId')"
+          (change)="onFilter('platformId', $any($event.target).value)">
+          <option value="">Any platform</option>
+          @for (platform of platforms$ | async; track platform.id) {
+            <option [value]="platform.id">{{ platform.name }}</option>
+          }
+        </select>
+      </div>
     </div>
-  </div>
-</app-fleet-directory-filters>
+  </app-fleet-directory-filters>
 
-@if (state$ | async; as state) {
-  <app-fleet-directory-results
-    heading="Armadas"
-    loadingText="Scanning Armada records"
-    [state]="state"
-    [emptyMessage]="emptyMessage"
-    (pageChange)="onPage($event)" />
-}
+  @if (state$ | async; as state) {
+    <app-fleet-directory-results
+      heading="Armadas"
+      loadingText="Scanning Armada records"
+      [state]="state"
+      [emptyMessage]="emptyMessage"
+      (pageChange)="onPage($event)" />
+  }
+</div>

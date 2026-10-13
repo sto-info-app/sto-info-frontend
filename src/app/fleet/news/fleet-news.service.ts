@@ -49,7 +49,7 @@ export class FleetNewsService {
     }
 
     return this._http.get<FleetNewsPage>(this.newsUrl(target), {
-      ...(this._authService.getHttpOptionsWithAccessToken() ?? {}),
+      ...this._authService.getHttpOptionsWithAccessToken(),
       params,
     });
   }

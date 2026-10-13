@@ -88,16 +88,17 @@ describe('FleetPageShellComponent', () => {
     expect(link?.textContent?.trim()).toBe('Help with importing');
   });
 
-  it('shows no Help link for a page without a guide', () => {
+  it.each([
+    ['shows no Help link for a page without a guide', 'app-help-link'],
+    [
+      'leaves out the subject line when the page is not about one thing',
+      '.page-subject-row',
+    ],
+    ['draws no strip at all for a page with no sections', 'nav.lcars-tabs'],
+  ])('%s', (_behaviour, selector) => {
     fixture.detectChanges();
 
-    expect(find('app-help-link')).toBeNull();
-  });
-
-  it('leaves out the subject line when the page is not about one thing', () => {
-    fixture.detectChanges();
-
-    expect(find('.page-subject-row')).toBeNull();
+    expect(find(selector)).toBeNull();
   });
 
   describe('while loading', () => {
@@ -189,12 +190,6 @@ describe('FleetPageShellComponent', () => {
     it('closes the strip with its filler', () => {
       expect(find('.lcars-tabs-filler')).not.toBeNull();
     });
-  });
-
-  it('draws no strip at all for a page with no sections', () => {
-    fixture.detectChanges();
-
-    expect(find('nav.lcars-tabs')).toBeNull();
   });
 
   // FC-044: a tab with a path pattern lights by the page shown, whatever its

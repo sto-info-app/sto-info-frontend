@@ -140,12 +140,13 @@ export class FleetImageService {
       case 'ARMADA':
         return `${communities}/${target.communityId}/armadas/${target.armadaId}`;
       case 'NEWS_POST': {
-        const scope =
-          target.fleetId !== null
-            ? `/fleets/${target.fleetId}`
-            : target.armadaId !== null
-              ? `/armadas/${target.armadaId}`
-              : '';
+        let scope = '';
+
+        if (target.fleetId !== null) {
+          scope = `/fleets/${target.fleetId}`;
+        } else if (target.armadaId !== null) {
+          scope = `/armadas/${target.armadaId}`;
+        }
 
         return `${communities}/${target.communityId}${scope}/news/${target.postId}`;
       }

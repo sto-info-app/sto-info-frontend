@@ -19,9 +19,13 @@
       @let data = state.data;
 
       @if (scope.isCommunity) {
-        <p class="fleet-news__back">
-          <a [routerLink]="scope.scopeLink">Back to {{ scope.name }}</a>
-        </p>
+        <div class="buttons-row fleet-news__back">
+          <a
+            class="lcars-btn lcars-btn-auto"
+            [routerLink]="scope.scopeLink"
+            >Back to {{ scope.name }}</a
+          >
+        </div>
       }
 
       @if (data.page.mayWrite) {
@@ -30,7 +34,7 @@
             class="buttons-row fleet-news__actions"
             aria-label="Writing news">
             <a
-              class="lcars-btn lcars-btn-auto gold"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="writeLinkOf(scope)"
               >Write a post</a
             >
@@ -72,11 +76,11 @@
       }
 
       <form
-        class="fleet-news__search"
+        class="fleet-news__search lcars-rotate"
         role="search"
         aria-label="Search the news"
         (submit)="$event.preventDefault(); onSearch()">
-        <div class="lcars-input-container tangerine">
+        <div class="lcars-input-container">
           <label for="fleet-news-search">Search titles and summaries</label>
           <input
             id="fleet-news-search"
@@ -85,16 +89,16 @@
             [value]="search()"
             (input)="search.set($any($event.target).value)" />
         </div>
-        <div class="fleet-community-form-actions">
+        <div class="fleet-community-form-actions lcars-rotate">
           <button
             type="submit"
-            class="lcars-btn lcars-btn-auto green">
+            class="lcars-btn lcars-btn-auto">
             Search
           </button>
           @if (data.search) {
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               (click)="onClearSearch()">
               Clear
             </button>

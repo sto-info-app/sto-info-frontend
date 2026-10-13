@@ -1,51 +1,57 @@
-<app-help-link
-  slug="finding-a-fleet"
-  label="Help with finding a Fleet" />
+<!--
+  The listing's blocks - its action, its search and its results - each in the
+  next colour of the rotation.
+-->
+<div class="lcars-rotate">
+  <app-help-link
+    slug="finding-a-fleet"
+    label="Help with finding a Fleet" />
 
-@if (canRegister) {
-  <p class="communities-directory__register">
-    <a
-      class="lcars-btn lcars-btn-auto sky"
-      [routerLink]="registerLink">
-      Register a Community
-    </a>
-  </p>
-}
+  @if (canRegister) {
+    <p class="communities-directory__register">
+      <a
+        class="lcars-btn lcars-btn-auto"
+        [routerLink]="registerLink">
+        Register a Community
+      </a>
+    </p>
+  }
 
-<app-fleet-directory-filters
-  searchLabel="Community name"
-  searchPlaceholder="e.g. United Federation Alliance"
-  [search]="search"
-  [status]="status"
-  [sort]="sort"
-  [sortOptions]="sortOptions"
-  [filtersApplied]="anyFilterApplied"
-  (searchChange)="onSearch($event)"
-  (statusChange)="onStatus($event)"
-  (sortChange)="onSort($event)"
-  (cleared)="onClearAll()">
-  <div class="fleet-community-filter-row">
-    <div class="lcars-input-container sky">
-      <label for="communities-directory-recruitment">Recruiting</label>
-      <select
-        id="communities-directory-recruitment"
-        name="recruitmentState"
-        [ngModel]="filterValue('recruitmentState')"
-        (change)="onFilter('recruitmentState', $any($event.target).value)">
-        <option value="">Any posture</option>
-        @for (option of recruitmentOptions; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
+  <app-fleet-directory-filters
+    searchLabel="Community name"
+    searchPlaceholder="e.g. United Federation Alliance"
+    [search]="search"
+    [status]="status"
+    [sort]="sort"
+    [sortOptions]="sortOptions"
+    [filtersApplied]="anyFilterApplied"
+    (searchChange)="onSearch($event)"
+    (statusChange)="onStatus($event)"
+    (sortChange)="onSort($event)"
+    (cleared)="onClearAll()">
+    <div class="fleet-community-filter-row lcars-rotate">
+      <div class="lcars-input-container">
+        <label for="communities-directory-recruitment">Recruiting</label>
+        <select
+          id="communities-directory-recruitment"
+          name="recruitmentState"
+          [ngModel]="filterValue('recruitmentState')"
+          (change)="onFilter('recruitmentState', $any($event.target).value)">
+          <option value="">Any posture</option>
+          @for (option of recruitmentOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
     </div>
-  </div>
-</app-fleet-directory-filters>
+  </app-fleet-directory-filters>
 
-@if (state$ | async; as state) {
-  <app-fleet-directory-results
-    heading="Fleet Communities"
-    loadingText="Scanning Community records"
-    [state]="state"
-    [emptyMessage]="emptyMessage"
-    (pageChange)="onPage($event)" />
-}
+  @if (state$ | async; as state) {
+    <app-fleet-directory-results
+      heading="Fleet Communities"
+      loadingText="Scanning Community records"
+      [state]="state"
+      [emptyMessage]="emptyMessage"
+      (pageChange)="onPage($event)" />
+  }
+</div>

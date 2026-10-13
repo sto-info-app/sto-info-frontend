@@ -160,7 +160,7 @@ describe('FleetDirectoryFiltersComponent', () => {
   it('offers no Clear button until there is something to clear', fakeAsync(() => {
     render();
 
-    expect(find('.lcars-btn.red')).toBeNull();
+    expect(find('.fleet-directory-filters__clear')).toBeNull();
   }));
 
   /*
@@ -171,7 +171,7 @@ describe('FleetDirectoryFiltersComponent', () => {
   it('offers to clear when a filter is in force and the box is empty', fakeAsync(() => {
     render('', FLEET_SORTS_WITHOUT_FRESHNESS, true);
 
-    expect(find('.lcars-btn.red')).not.toBeNull();
+    expect(find('.fleet-directory-filters__clear')).not.toBeNull();
   }));
 
   it('empties the box and asks for the listing back when Clear is pressed', fakeAsync(() => {
@@ -180,7 +180,7 @@ describe('FleetDirectoryFiltersComponent', () => {
     let cleared = 0;
     fixture.componentInstance.cleared.subscribe(() => (cleared += 1));
 
-    find<HTMLButtonElement>('.lcars-btn.red').click();
+    find<HTMLButtonElement>('.fleet-directory-filters__clear').click();
     fixture.detectChanges();
     tick();
 

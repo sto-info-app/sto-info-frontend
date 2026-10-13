@@ -166,26 +166,16 @@
     border-radius: 0.75rem;
   }
 
+  // A section the reader can fold away, laid out as a block so its margin
+  // tells.
   &__cover-section {
+    display: block;
     max-width: 60rem;
     margin-top: 2rem;
-
-    h2 {
-      margin: 0;
-      font-size: inherit;
-    }
   }
 
-  &__latest {
-    margin: 1.5rem 0;
-
-    h2 {
-      margin: 0;
-      font-size: inherit;
-    }
-
-    li {
-      padding: 0.5rem 0;
-    }
+  // The Community page's latest posts, in the News section the page draws.
+  &__latest-list li {
+    padding: 0.5rem 0;
   }
 }
