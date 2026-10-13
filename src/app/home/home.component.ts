@@ -13,6 +13,7 @@ import { environment } from 'src/environments/environment';
 import { AuthService } from '../core/auth/auth.service';
 import { NewsPost } from '../models/news.models';
 import { NewsService } from '../news/news.service';
+import { CollapsibleSectionComponent } from '../shared/components/collapsible-section/collapsible-section.component';
 import { NewsCardComponent } from '../shared/components/news-card/news-card.component';
 import {
   APP_ROUTES,
@@ -32,6 +33,7 @@ import { RoutingService } from '../shared/services/routing.service';
     RouterModule,
     LcarsInformationMessageComponent,
     NewsCardComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class HomeComponent implements OnDestroy {

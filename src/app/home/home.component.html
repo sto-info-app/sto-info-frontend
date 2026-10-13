@@ -10,17 +10,17 @@
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.LOGIN)"
-        class="sunflower"
+        class="lcars-btn lcars-btn-auto"
         >Login</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.REGISTER)"
-        class="almond"
+        class="lcars-btn lcars-btn-auto"
         >Register</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="perano"
+        class="lcars-btn lcars-btn-auto"
         >{{ appRouteTitles.COMMUNITY }}</a
       >
     </div>
@@ -30,10 +30,10 @@
       [message]="'The Star Trek Online Info portal is a fan-made project and is not affiliated with or endorsed by Cryptic Studios or Paramount. There is no connection of data between this site and the official Star Trek Online game servers. All data is provided by yourself and is for informational purposes only.'"></app-lcars-information-message>
   } @else {
     <p>Welcome back, Captain.</p>
-    <div class="home-dashboard-tiles">
+    <div class="home-dashboard-tiles lcars-rotate">
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_ACCOUNTS)"
-        class="dashboard-tile sunflower">
+        class="dashboard-tile">
         <div class="tile-icon">
           <i class="fas fa-users"></i>
         </div>
@@ -43,7 +43,7 @@
       </a>
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_PROFILE)"
-        class="dashboard-tile perano">
+        class="dashboard-tile">
         <div class="tile-icon">
           <i class="fas fa-id-card"></i>
         </div>
@@ -53,7 +53,7 @@
       </a>
       <a
         [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
-        class="dashboard-tile atomic">
+        class="dashboard-tile">
         <div class="tile-icon">
           <i class="fa-solid fa-chart-bar"></i>
         </div>
@@ -63,7 +63,7 @@
       </a>
       <a
         [routerLink]="getRouteLink(appRoutes.COMMUNITY)"
-        class="dashboard-tile perano">
+        class="dashboard-tile">
         <div class="tile-icon">
           <i class="fas fa-users-viewfinder"></i>
         </div>
@@ -74,7 +74,7 @@
       @if (isFleetOffered$ | async) {
         <a
           [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_FLEETS)"
-          class="dashboard-tile sky">
+          class="dashboard-tile">
           <div class="tile-icon">
             <i class="fa-solid fa-people-group"></i>
           </div>
@@ -86,9 +86,9 @@
     </div>
   }
 
-  <section class="news-section">
-    <h2>Recent News</h2>
-
+  <app-collapsible-section
+    class="news-section"
+    heading="Recent News">
     @if (newsLoading) {
       <p class="news-loading">Loading news&hellip;</p>
     } @else if (newsError) {
@@ -102,5 +102,5 @@
         }
       </div>
     }
-  </section>
+  </app-collapsible-section>
 </div>

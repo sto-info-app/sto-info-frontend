@@ -25,7 +25,7 @@
       @if (unreadCount > 0) {
         <button
           type="button"
-          class="notifications-markall"
+          class="lcars-btn lcars-btn-auto notifications-markall"
           (click)="markAllRead()">
           Mark all read
         </button>
@@ -129,21 +129,10 @@
     </ul>
 
     @if (totalPages > 1) {
-      <div class="notifications-pagination">
-        <button
-          type="button"
-          [disabled]="page <= 1"
-          (click)="loadPage(page - 1)">
-          Previous
-        </button>
-        <span>Page {{ page }} of {{ totalPages }}</span>
-        <button
-          type="button"
-          [disabled]="page >= totalPages"
-          (click)="loadPage(page + 1)">
-          Next
-        </button>
-      </div>
+      <app-lcars-pagination
+        [page]="page"
+        [pageCount]="totalPages"
+        (turn)="loadPage(page + $event)" />
     }
   }
 </div>

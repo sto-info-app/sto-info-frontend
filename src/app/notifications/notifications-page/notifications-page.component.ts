@@ -14,6 +14,7 @@ import {
   NotificationSeverity,
 } from 'src/app/models/notification.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { NotificationService } from '../notification.service';
@@ -42,6 +43,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsPaginationComponent,
   ],
 })
 export class NotificationsPageComponent implements OnInit {

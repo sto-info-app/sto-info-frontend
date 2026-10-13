@@ -1,4 +1,5 @@
 @use 'notification-card';
+@use 'lcars-variables' as vars;
 
 #notifications-page {
   max-width: 68rem;
@@ -27,26 +28,10 @@
   opacity: 0.8;
 }
 
+// The pill itself is the shared `.lcars-btn`; the toolbar only takes its
+// outer margin away.
 .notifications-markall {
-  width: auto;
-  height: auto;
-  min-height: 42px;
   margin: 0;
-  padding: 0.55rem 1.1rem 0.4rem;
-  border: none;
-  border-radius: 999px;
-  background: #8ff;
-  color: #0d0d0d;
-  cursor: pointer;
-  font: inherit;
-  font-weight: 700;
-  text-align: center;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-
-  &:hover {
-    filter: brightness(1.08);
-  }
 }
 
 .notifications-items {
@@ -64,41 +49,5 @@
   // Dim read cards slightly so unread ones stand out.
   &:not(.unread) {
     opacity: 0.82;
-  }
-}
-
-.notifications-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-
-  button {
-    width: auto;
-    height: auto;
-    min-height: 46px;
-    margin: 0;
-    padding: 0.6rem 1.15rem 0.45rem;
-    border: none;
-    border-radius: 999px;
-    background: #58e;
-    color: #0d0d0d;
-    cursor: pointer;
-    text-align: center;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    font-weight: 700;
-    font-size: inherit;
-    font-family: inherit;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    &:hover:not(:disabled) {
-      filter: brightness(1.08);
-    }
   }
 }

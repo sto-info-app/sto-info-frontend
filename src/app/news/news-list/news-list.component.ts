@@ -10,7 +10,9 @@ import {
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Subscription, finalize, take } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { NewsCardComponent } from 'src/app/shared/components/news-card/news-card.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
@@ -39,6 +41,8 @@ const LOAD_TIMEOUT_MS = 12000;
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     NewsCardComponent,
+    CollapsibleSectionComponent,
+    LcarsPaginationComponent,
   ],
 })
 export class NewsListComponent implements OnInit, OnDestroy {

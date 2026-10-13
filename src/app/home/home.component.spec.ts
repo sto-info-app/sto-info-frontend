@@ -79,7 +79,9 @@ describe('HomeComponent', () => {
 
     expect(cards).toHaveLength(5);
     expect(cards[0].textContent).toContain('Accounts');
-    expect(cards[0].classList.contains('sunflower')).toBe(true);
+    // The grid rotates the palette, so no tile names a colour of its own.
+    expect(cards[0].classList.contains('sunflower')).toBe(false);
+    expect(cards[0].parentElement.classList).toContain('lcars-rotate');
   });
 
   it('should offer the Fleet section last when it is offered', () => {
@@ -87,7 +89,6 @@ describe('HomeComponent', () => {
     const cards = fixture.nativeElement.querySelectorAll('a.dashboard-tile');
 
     expect(cards[4].textContent).toContain('Fleets');
-    expect(cards[4].classList.contains('sky')).toBe(true);
   });
 
   it('should drop the Fleet tile when the section is not offered', () => {
