@@ -425,6 +425,10 @@ test.describe.serial('Chat, as its people use it', () => {
 
     const composer = owner.getByLabel('Message # General');
 
+    // Into the composer as a person would, which brings it on screen: the
+    // list of people opens in an overlay beside it, and fill() alone would
+    // type into a composer still below the fold.
+    await composer.click();
     await composer.fill(`${note} @${people.applicant.username}`);
     await owner
       .getByRole('listbox', { name: 'People to mention' })

@@ -680,7 +680,10 @@ test.describe
 
     await owner.goto(importPath);
 
-    const corrections = owner.getByRole('region', { name: 'Corrections' });
+    const corrections = owner.getByRole('region', {
+      name: 'Corrections',
+      exact: true,
+    });
 
     await corrections
       .getByLabel('Why', { exact: true })
