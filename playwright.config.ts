@@ -1,6 +1,20 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { loadEnvFile } from 'node:process';
+
 import { defineConfig, devices } from '@playwright/test';
 
 import { MEMBER_STORAGE_STATE } from './e2e/support/actors';
+
+/*
+ * The run's E2E_* variables may be kept in e2e/.env.local, which git ignores,
+ * rather than typed on every command (13 October 2026). A variable already in
+ * the environment wins over the file, so one run can still override it.
+ */
+const ENV_FILE = resolve(__dirname, 'e2e', '.env.local');
+if (existsSync(ENV_FILE)) {
+  loadEnvFile(ENV_FILE);
+}
 
 /**
  * The end-to-end journeys drive a real browser against a real backend and a
@@ -231,6 +245,30 @@ export default defineConfig({
       dependencies: ['fleet-desktop'],
       retries: 1,
       use: { ...devices['Pixel 7'], trace: FLEET_TRACE },
+    },
+
+    // The help videos (13 October 2026): one clip per guide, recorded at
+    // 1920 by 1080 for YouTube by e2e/video, with the people fleet-setup
+    // makes. Not a test of anything, so never part of `npm run e2e`: it is
+    // run by name, and it has no retries, no trace and a long clock, since a
+    // clip is paced for a viewer rather than a runner. Motion is left on,
+    // unlike the journeys, because the folds and transitions are what a
+    // viewer sees. Each clip opens its own context, which is where the
+    // recording is switched on; see e2e/video/support/clip.ts.
+    {
+      name: 'video',
+      testMatch: /video[\\/].*\.e2e\.ts/,
+      dependencies: ['fleet-setup'],
+      retries: 0,
+      timeout: 900_000,
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
+        deviceScaleFactor: 1,
+        reducedMotion: 'no-preference',
+        trace: 'off',
+        launchOptions: { slowMo: 150 },
+      },
     },
   ],
 

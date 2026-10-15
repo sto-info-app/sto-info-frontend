@@ -22,5 +22,6 @@ teardown('remove the run’s people and everything they made', () => {
     people: 0,
     communities: 0,
     profiles: 0,
+    standaloneFleets: 0,
   });
 });

@@ -41,6 +41,11 @@ and `E2E_REDIS_DB` have to name the database and Redis logical database the
 backend is actually using. The harness refuses a different database, a
 database that is not on this machine, and any site that is not on localhost.
 
+Rather than typing them on every command, the variables can be kept in
+`e2e/.env.local`, one `NAME=value` a line, which git ignores and the config
+loads before anything reads them. A variable set in the shell still wins over
+the file. Copy `e2e/.env.local.example` to start.
+
 | Variable              | Default                     | What it is                                      |
 | --------------------- | --------------------------- | ----------------------------------------------- |
 | `E2E_PASSWORD`        | _required_                  | The seed password.                              |
@@ -55,6 +60,21 @@ database that is not on this machine, and any site that is not on localhost.
 | `E2E_REDIS_DB`        | _required_                  | The Redis logical database.                     |
 | `E2E_IMAGES`          | unset                       | `on` to include the external picture cases.     |
 | `E2E_OMIT`            | unset                       | Comma-separated ids for a labelled partial run. |
+
+### Recording the help videos
+
+`npx playwright test --project=video` records the help guides as 1920 by
+1080 WebM clips under `reports/recordings/`, one a guide, from `e2e/video/`. It is
+not part of `npm run e2e`. It needs what the Fleet journeys need: the local
+backend, `E2E_BACKEND_DIR`, and no password, since `fleet-setup` makes and
+signs in the people it records as; the clips that upload a picture or an
+export also need the local scan worker running, or they wait at Scanning.
+Each spec is one guide and runs on its own, so one clip is retaken with
+`npx playwright test --project=video e2e/video/<spec>`. The clips are silent,
+captioned, and paced for a viewer; `e2e/video/support/clip.ts` has the
+cursor, the caption bar and the slowed actions they share, and
+`e2e/video/support/prepare.ts` registers off camera what a clip needs in
+place first.
 
 `npm run e2e:ui` opens Playwright's interactive runner; `npm run e2e:report`
 opens the last report. The HTML report is written to
@@ -165,7 +185,7 @@ The journeys:
 | `04-owed-events` | FC-028 and FC-030's: weekly and monthly events and their previews, audiences, places and the waiting line, each reminder, a moved and a cancelled occurrence, attendance once one is under way, the change log, the dashboard, and the attendance and recruitment reports with who sees each; answers by keyboard, and axe on the event, an occurrence with its sheet, and the report |
 | `04-owed-chat` | FC-031 to FC-035's: channels added, renamed, archived and refused, mentions and replies and their notices, direct messages and the one notice somebody away is sent until they read them, presence, typing, a block, toasts, and a report's evidence and removal |
 | `04-owed-admin` | FC-036, FC-037, FC-039 and FC-041's: suspensions, disputes and duplicate names, investigations, holds and their review, an expired held export, roles and overrides, disabled accounts, chat and member report decisions, Storytime Moderation, the Security Log and its pages, Scan Diagnostics and rescan campaigns |
-| `05-screenshots` | Representative pages at each size, written to `docs/screenshots/fc-044/` |
+| `05-screenshots` | Representative pages at each size, written to `reports/screenshots/fc-044/` |
 | `06-feature-switches` | FC-045's release smoke test: the Admin page's Features panel and what the environment allows; Fleet Community switched off with a reason, gone for everybody and its Contact topic withdrawn, then on again and back; Storytime switched and put back; a switch thrown elsewhere first; each change in the Security Log; axe on the Admin page |
 
 ## Picture cases are opt-in
