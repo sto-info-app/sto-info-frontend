@@ -12,13 +12,13 @@ import {
 /**
  * Representative screenshots for FC-044's evidence, at 1280px on the desktop
  * project and 375px-wide on the phone project, written to
- * `docs/screenshots/fc-044/`.
+ * `reports/screenshots/fc-044/`, which git ignores.
  *
  * Everything on them was made for the run by people made for the run, so they
  * show no real member, roster, handle or chat. Each run overwrites the last.
  */
 
-const FOLDER = 'docs/screenshots/fc-044';
+const FOLDER = 'reports/screenshots/fc-044';
 
 /** The basic roster fixture's rows, with the run's own names. */
 const rosterRows = (): string[] => [
