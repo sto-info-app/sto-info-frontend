@@ -1,0 +1,62 @@
+# Render Blueprint for the STO Info Staging project, "tribble": the Fleet
+# Community branch deployed whole. A Blueprint instance reads this file from
+# the sr/sc-1036-fleet-community branch, with its path given in the
+# dashboard's Blueprint Path field; render/development.yaml and
+# render/production.yaml describe the other projects. The API and the worker
+# have blueprints of their own in their repositories.
+#
+# `build:render` fetches the published posts from API_URL while it builds the
+# sitemap and feeds, so the API is deployed first.
+
+services:
+  - type: web
+    runtime: static
+    name: sto-info-frontend-tribble
+    repo: https://github.com/sto-info-app/sto-info-frontend
+    branch: sr/sc-1036-fleet-community
+    buildCommand: npm install; npm run build:render
+    staticPublishPath: dist/sto-info-frontend/browser
+    autoDeployTrigger: commit
+    domains:
+      - tribble.startrekonline.info
+    # Every address is the application's: the router draws the page.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      # A production bundle, labelled Staging.
+      - key: PRODUCTION
+        value: 'false'
+      - key: ENV_NAME
+        value: staging
+      - key: ENV_LABEL
+        value: Staging
+      - key: API_URL
+        value: https://tribble-api.startrekonline.info
+      # The sitemap's and feeds' own address.
+      - key: SITE_URL
+        value: https://tribble.startrekonline.info
+      - key: APP_TITLE
+        value: Star Trek Online Info Portal
+      - key: APP_LOGGED_IN_HOME
+        value: /dashboard
+      - key: ALLOW_DEBUGGING
+        value: 'false'
+      - key: MINS_BEFORE_LOGOUT_EXPIRY_TO_SHOW_WARNING
+        value: '5'
+      - key: MINS_BEFORE_LOGOUT_EXPIRY_TO_REFRESH_TOKEN
+        value: '15'
+
+      # Account identifiers, set in the dashboard. Without the kit, icon-only
+      # controls have no box.
+      - key: FONT_AWESOME_KIT_ID
+        sync: false
+      - key: COOKIE_YES_URL
+        sync: false
+      - key: GA_MEASUREMENT_ID
+        sync: false
+      - key: LOG_ROCKET_APP_ID
+        sync: false
+      - key: SENTRY_DSN
+        sync: false

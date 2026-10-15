@@ -1,0 +1,54 @@
+# Render Blueprint for the STO Info Production project, recording the services
+# as they run today, which were made by hand in the dashboard. A Blueprint
+# instance reads this file from the production branch, with its path given in
+# the dashboard's Blueprint Path field. Values a blueprint cannot hold, or
+# that the dashboard already holds and this file does not assert, are `sync:
+# false`: a sync leaves them as they are. See docs/infrastructure.md.
+
+services:
+  - type: web
+    runtime: static
+    name: sto-info-frontend
+    repo: https://github.com/sto-info-app/sto-info-frontend
+    branch: production
+    buildCommand: npm install; node src/environments/inject-env-vars.js; npm run build:prod
+    staticPublishPath: dist/sto-info-frontend/browser
+    autoDeployTrigger: commit
+    domains:
+      - startrekonline.info
+    # Every address is the application's: the router draws the page. The
+    # dashboard holds the same rule.
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: PRODUCTION
+        value: 'true'
+      - key: ENV_NAME
+        value: prod
+      - key: ENV_LABEL
+        value: Production
+      - key: API_URL
+        value: https://api.startrekonline.info
+      - key: APP_TITLE
+        sync: false
+      - key: APP_LOGGED_IN_HOME
+        sync: false
+      - key: ALLOW_DEBUGGING
+        sync: false
+      - key: MINS_BEFORE_LOGOUT_EXPIRY_TO_SHOW_WARNING
+        sync: false
+      - key: MINS_BEFORE_LOGOUT_EXPIRY_TO_REFRESH_TOKEN
+        sync: false
+      # Account identifiers. Without the kit, icon-only controls have no box.
+      - key: FONT_AWESOME_KIT_ID
+        sync: false
+      - key: COOKIE_YES_URL
+        sync: false
+      - key: GA_MEASUREMENT_ID
+        sync: false
+      - key: LOG_ROCKET_APP_ID
+        sync: false
+      - key: SENTRY_DSN
+        sync: false
