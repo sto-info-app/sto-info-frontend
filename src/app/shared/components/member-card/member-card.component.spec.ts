@@ -78,12 +78,27 @@ describe('MemberCardComponent', () => {
       render(buildVm());
 
       const link = fixture.nativeElement.querySelector(
-        'a.member-card__identity',
+        'a.member-card__heading',
       );
       expect(link).toBeTruthy();
       expect(link.getAttribute('href')).toBe(
         '/community/registry/profiles/captain.picard',
       );
+    });
+
+    it('should carry the username alone on the heading block', () => {
+      render(buildVm());
+
+      const heading = fixture.nativeElement.querySelector(
+        '.member-card__heading',
+      );
+      expect(heading.textContent.trim()).toBe('captain.picard');
+      expect(heading.querySelector('app-entity-avatar')).toBeNull();
+      expect(
+        fixture.nativeElement.querySelector(
+          '.member-card__body app-entity-avatar',
+        ),
+      ).toBeTruthy();
     });
 
     it('should not link a member whose record has gone private', () => {
@@ -98,7 +113,7 @@ describe('MemberCardComponent', () => {
 
       expect(
         fixture.nativeElement
-          .querySelector('.member-card__identity')
+          .querySelector('.member-card__heading')
           .getAttribute('title'),
       ).toBe('This officer has made their record private.');
     });

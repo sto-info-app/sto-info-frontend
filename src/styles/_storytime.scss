@@ -191,14 +191,9 @@ nav[class^='storytime-'] :where(a, [aria-current='page']) {
   margin-bottom: 1rem;
 }
 
-// An intro runs the full width of the page. It sits directly under a
-// full-width heading and above full-width content, and a measure-capped line
-// between the two reads as a column that has lost its other half. The summaries
-// keep a measure, because they are read as a list of short lines rather than as
-// prose and are already held by whatever panel or row they sit in.
-.storytime-landing__summary {
-  max-width: 60ch;
-}
+// Text runs the full width of what holds it (13 October 2026): a
+// measure-capped line under a full-width heading reads as a column that has
+// lost its other half.
 
 // Every "there is nothing here" line in the feature. One rule, because an
 // empty Story list and an empty reading list should not look like different
@@ -956,7 +951,6 @@ p.storytime-fan-notice,
     margin: 0;
     color: vars.$lcars-white;
     font-size: 0.95rem;
-    max-width: 80ch;
   }
 
   // The facts wrap rather than holding a fixed two columns: they are short and
@@ -1208,13 +1202,12 @@ p.storytime-fan-notice,
     margin-bottom: 1rem;
   }
 
-  // The Chapter itself. Wider line height and a capped measure, because this
-  // is the one part of Storytime somebody reads for half an hour at a time.
+  // The Chapter itself. A wider line height, because this is the one part of
+  // Storytime somebody reads for half an hour at a time.
   &__body {
     color: vars.$lcars-white;
     font-size: 1.05rem;
     line-height: 1.7;
-    max-width: 70ch;
 
     p {
       margin-bottom: 1rem;
@@ -1457,7 +1450,6 @@ p.storytime-fan-notice,
   &__summary,
   &__biography {
     color: vars.$lcars-white;
-    max-width: 70ch;
   }
 
   &__summary {
@@ -2203,7 +2195,6 @@ app-storytime-tag-row {
 .storytime-removed {
   &__summary {
     color: vars.$lcars-grey-light;
-    max-width: 60ch;
   }
 }
 
@@ -2586,7 +2577,6 @@ app-storytime-tag-row {
 .storytime-reading-list {
   &__description {
     color: vars.$lcars-white;
-    max-width: 70ch;
   }
 
   &__visibility,
@@ -2675,10 +2665,6 @@ app-storytime-tag-row {
     @include storytime-meta;
   }
 
-  &__empty {
-    max-width: 30ch;
-  }
-
   &__status {
     @include storytime-message(vars.$lcars-green);
   }
@@ -2738,7 +2724,6 @@ app-storytime-tag-row {
     color: vars.$lcars-grey-light;
     font-size: 0.85rem;
     margin: 0 0 0.75rem;
-    max-width: 70ch;
   }
 
   &__body {
@@ -2801,7 +2786,6 @@ app-storytime-tag-row {
 .storytime-image-crop {
   &__guidance {
     margin: 0 0 0.35rem;
-    max-width: 70ch;
   }
 
   &__layout {

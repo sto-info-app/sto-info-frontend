@@ -1,7 +1,7 @@
 @use 'sass:color';
-@use 'sass:list';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
+@use 'lcars-rotation' as rotation;
 @use 'lcars-tabs' as tabs;
 
 // Custom Tracking.
@@ -39,7 +39,6 @@
   }
 
   p {
-    max-width: 70ch;
     margin-bottom: 0.75rem;
   }
 }
@@ -234,7 +233,6 @@
 
 .custom-tracking-builder {
   .field-hint {
-    max-width: 70ch;
     margin: 0 0 0.75rem;
     color: vars.$lcars-grey-light;
     font-size: 0.8rem;
@@ -250,7 +248,6 @@
 }
 
 .custom-tracking-empty {
-  max-width: 70ch;
   padding: 0.75rem 0;
   color: vars.$lcars-grey-light;
 }
@@ -259,7 +256,6 @@
 // reached, a public setting with no effect yet, a feature switched off.
 .custom-tracking-notice {
   display: block;
-  max-width: 70ch;
   padding: 0.75rem 1rem;
   border-left: 4px solid vars.$lcars-sunflower;
   margin: 0.75rem 0;
@@ -294,7 +290,6 @@
 }
 
 .custom-tracking-panel-description {
-  max-width: 70ch;
   margin: 0 0 0.75rem;
   color: vars.$lcars-grey-light;
 }
@@ -383,41 +378,19 @@
 // Each field takes the next colour of the list's rotation, so neighbours
 // differ the way the dashboard's tiles do; tangerine, the colour the feature
 // was once drawn in throughout, is only for a field nothing around it colours.
-// The spine and the wash are mixed from the accent at runtime, because the
-// accent is a custom property rather than a colour known when this is built.
+// Drawn with the shared accent panel card, the same one a Fleet in a directory
+// is drawn with, so the spine, the block and the wash are mixed from the
+// rotation's accent at runtime. It does
+// not lift under the pointer: every one of these opens its editor from a
+// button rather than from the panel.
 .custom-tracking-field-panel {
-  @include mixins.lcars-panel-card(vars.$lcars-tangerine);
+  @include mixins.lcars-accent-panel-card(vars.$lcars-tangerine);
 
-  --custom-tracking-field-accent: var(--lcars-accent, #{vars.$lcars-tangerine});
-
-  border-left-color: color-mix(
-    in srgb,
-    var(--custom-tracking-field-accent) 80%,
-    #{vars.$lcars-black}
-  );
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--custom-tracking-field-accent) 14%, transparent) 0%,
-    #{vars.$lcars-grey-bg} 100%
-  );
-}
-
-// A panel of a list holds still under the pointer. The lift belongs to a card
-// that opens something, and every one of these opens its editor from a button
-// rather than from the panel.
-.custom-tracking-field-panel:hover {
-  transform: none;
+  margin-bottom: 0.75rem;
 }
 
 .custom-tracking-field-panel__heading {
-  @include mixins.lcars-panel-card-heading(vars.$lcars-tangerine);
-
-  background: var(--custom-tracking-field-accent);
-  border-bottom-color: color-mix(
-    in srgb,
-    var(--custom-tracking-field-accent) 80%,
-    #{vars.$lcars-black}
-  );
+  @include mixins.lcars-accent-panel-card-heading;
 }
 
 .custom-tracking-field-panel__name {
@@ -478,7 +451,6 @@
 }
 
 .custom-tracking-field-description {
-  max-width: 70ch;
   margin: 0 0 0.6rem;
   color: vars.$lcars-grey-light;
   font-size: 0.85rem;
@@ -549,7 +521,6 @@
   margin: 0.5rem 0 1rem;
 
   .field-hint {
-    max-width: 70ch;
     margin: -0.4rem 0 0.75rem;
     color: vars.$lcars-grey-light;
     font-size: 0.8rem;
@@ -605,7 +576,6 @@
   flex-wrap: wrap;
   align-items: baseline;
   gap: 0.5rem;
-  max-width: 70ch;
   margin-bottom: 0.75rem;
   color: vars.$lcars-grey-light;
   font-size: 0.85rem;
@@ -629,7 +599,6 @@
   }
 
   .field-hint {
-    max-width: 70ch;
     margin: 0 0 0.75rem;
     color: vars.$lcars-grey-light;
     font-size: 0.8rem;
@@ -694,8 +663,6 @@
 // ─── The content agreement ───────────────────────────────────────────────────
 
 .custom-tracking-agreement {
-  max-width: 70ch;
-
   h2 {
     margin-bottom: 8px;
   }
@@ -789,7 +756,6 @@
   }
 
   .field-hint {
-    max-width: 70ch;
     margin: 0.25rem 0 0;
     color: vars.$lcars-grey-light;
     font-size: 0.8rem;
@@ -977,10 +943,9 @@
 // is the thing, and without it the captions and answers float loose on the
 // page background with nothing marking where one section ends.
 // ---
-// In the colour of the section's own bar, which the rotation of sections on
-// the page decides, so the spine carries on from the bar above it; blue where
-// nothing rotates. The fields inside take turns through warm colours of their
-// own, so a field still reads as a thing inside the section.
+// In the colour the rotation of sections on the page gives it; blue where
+// nothing rotates. The fields inside rotate among themselves, so a field still
+// reads as a thing inside the section.
 .custom-tracking-display-panel {
   --custom-tracking-section-accent: var(--lcars-accent, #{vars.$lcars-bluey});
 
@@ -1001,68 +966,19 @@
   );
 }
 
-// The colours a field's panel is drawn in, taken in turn: a section is one
-// kind of thing all the way down, so a colour cannot say what a field is the
-// way it says what a Storytime panel is. It marks where one field ends and the
-// next begins instead, the way a run of comments does over there.
-// ---
-// Nothing blue, which is where the section's own colour falls when nothing
-// rotates, and would read as another statement about the section rather than
-// as a thing inside it. Nothing red,
-// which the site keeps for refusing and for what has gone wrong, and nothing
-// green, which it keeps for accepting — a field reporting an answer is neither.
-// ---
-// Every one of them carries black at 4.5:1 or better, which is what lets the
-// name sit on the block. Violet will not at this size, so it is taken a shade
-// lighter here, exactly as a Storytime Arc takes it.
-$custom-tracking-field-colours: (
-  vars.$lcars-tangerine,
-  vars.$lcars-sunflower,
-  color.adjust(vars.$lcars-violet, $lightness: 10%),
-  vars.$lcars-orange,
-  vars.$lcars-gold
-);
-
-// Each field is a panel in its own right, so what separates two of them is air
-// rather than a rule drawn between them.
-// ---
-// The first colour is set here rather than on the field, so that the position
-// in the list below — which is set on the element between the two — is what
-// decides. A field reaching a page some other way than from this list still
-// has a colour to draw itself in.
+// Each field takes the next colour of the site's palette rotation, as every
+// other run of panels does, rather than
+// turns through warm colours of its own: a section is one kind of thing all
+// the way down, so the colour marks where one field ends and the next begins.
+// Green and red are not in the rotation, so a field reporting an answer never
+// reads as accepting or refusing. Each field is a panel in its own right, so
+// what separates two of them is air rather than a rule drawn between them.
 .custom-tracking-display-fields {
-  --custom-tracking-field-surface: #{list.nth(
-      $custom-tracking-field-colours,
-      1
-    )};
-  --custom-tracking-field-edge: #{color.adjust(
-      list.nth($custom-tracking-field-colours, 1),
-      $lightness: -20%
-    )};
-  --custom-tracking-field-wash: #{color.change(
-      list.nth($custom-tracking-field-colours, 1),
-      $alpha: 0.14
-    )};
+  @include rotation.rotate-accent;
 
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
-}
-
-// Which colour each field takes, by where it sits among its neighbours. Asked
-// of the position rather than of a class on the element, because the colour
-// says nothing about the field itself: two fields side by side have to differ,
-// and the same field on another page has no reason to look the same.
-@each $colour in $custom-tracking-field-colours {
-  $index: list.index($custom-tracking-field-colours, $colour);
-  $count: list.length($custom-tracking-field-colours);
-
-  .custom-tracking-display-fields
-    > app-custom-tracking-display-field:nth-child(#{$count}n + #{$index}) {
-    --custom-tracking-field-surface: #{$colour};
-    --custom-tracking-field-edge: #{color.adjust($colour, $lightness: -20%)};
-    --custom-tracking-field-wash: #{color.change($colour, $alpha: 0.14)};
-  }
 }
 
 // One field, in the shape a captain card, a Storytime chapter and the
@@ -1075,6 +991,23 @@ $custom-tracking-field-colours: (
 // paragraph of Markdown, a picture or a video, none of which leaves room for a
 // column of names beside it.
 .custom-tracking-display-field {
+  // Drawn from the accent the rotation gives the field, or tangerine where
+  // the field reaches a page outside a list and nothing rotates.
+  --custom-tracking-field-surface: var(
+    --lcars-accent,
+    #{vars.$lcars-tangerine}
+  );
+  --custom-tracking-field-edge: color-mix(
+    in srgb,
+    var(--custom-tracking-field-surface) 80%,
+    #{vars.$lcars-black}
+  );
+  --custom-tracking-field-wash: color-mix(
+    in srgb,
+    var(--custom-tracking-field-surface) 14%,
+    transparent
+  );
+
   overflow: hidden;
   border-left: 6px solid var(--custom-tracking-field-edge);
   border-radius: 4px;
@@ -1111,7 +1044,6 @@ $custom-tracking-field-colours: (
 // everything else on the block, at the weight of an aside rather than of the
 // name above it.
 .custom-tracking-display-field .custom-tracking-display-hint {
-  max-width: 60ch;
   color: vars.$black-a72;
   font-size: 0.75rem;
   font-weight: 400;
@@ -1132,8 +1064,6 @@ $custom-tracking-field-colours: (
 }
 
 .custom-tracking-display-markdown {
-  max-width: 75ch;
-
   :first-child {
     margin-top: 0;
   }

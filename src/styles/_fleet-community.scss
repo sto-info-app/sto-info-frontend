@@ -71,7 +71,6 @@
 // `.lcars-empty-state`, with room for the sentence that says what to do next —
 // an empty directory is a normal state here, not a fault.
 .fleet-community-empty {
-  max-width: 70ch;
   padding: 1rem 0;
   margin: 1rem 0;
   font-style: italic;
@@ -210,7 +209,6 @@
 
 // A sentence about the report as a whole: what it covers, what it hides.
 .fleet-report-notice {
-  max-width: 70ch;
   margin: 0.5rem 0;
   font-style: italic;
   color: vars.$lcars-grey-light;
@@ -259,7 +257,6 @@
 // The sentence under a field saying what it means. Not an error: errors are
 // `.field-error`, which the input container already styles.
 .fleet-community-field-hint {
-  max-width: 60ch;
   margin: 0.35rem 0 0;
   font-size: 0.85rem;
   color: vars.$lcars-grey-light;
@@ -290,7 +287,6 @@
   }
 
   .field-hint {
-    max-width: 70ch;
     margin: 0.35rem 0 0;
     font-size: 0.8rem;
     line-height: 1.4;
@@ -300,7 +296,6 @@
 
 .fleet-community-image-crop {
   &__guidance {
-    max-width: 70ch;
     margin: 0 0 0.35rem;
   }
 

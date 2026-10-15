@@ -83,11 +83,10 @@
     }
   }
 
-  // One measure for every explanatory line on the page, so the note under the
-  // timeout chooser and the note under Custom Tracking wrap alike instead of
-  // one being squeezed to the width of the control above it.
+  // Every explanatory line on the page alike, running the width of its panel,
+  // so the note under the timeout chooser is not squeezed to the width of the
+  // control above it.
   .settings-description {
-    max-width: 70ch;
     margin: 0;
     color: vars.$lcars-help-note;
     font-size: 0.9rem;

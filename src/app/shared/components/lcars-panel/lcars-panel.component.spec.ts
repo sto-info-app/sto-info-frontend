@@ -33,6 +33,21 @@ class HostComponent {
 })
 class PlainHostComponent {}
 
+/** Hosts a search panel the reader may fold away. */
+@Component({
+  standalone: true,
+  imports: [LcarsPanelComponent],
+  template: `<app-lcars-panel
+    heading="Search"
+    [collapsible]="true"
+    [panelKey]="panelKey()"
+    ><input aria-label="Name"
+  /></app-lcars-panel>`,
+})
+class CollapsibleHostComponent {
+  readonly panelKey = signal('');
+}
+
 describe('LcarsPanelComponent', () => {
   let fixture: ComponentFixture<HostComponent>;
 
@@ -104,5 +119,82 @@ describe('LcarsPanelComponent', () => {
     )?.id;
 
     expect(plainId).not.toBe(find('.lcars-panel__name')?.id);
+  });
+
+  // A search or a set of filters folds away, remembered for the page as a section's fold is.
+  describe('when collapsible', () => {
+    let host: ComponentFixture<CollapsibleHostComponent>;
+
+    const toggle = (): HTMLButtonElement =>
+      (host.nativeElement as HTMLElement).querySelector(
+        '.lcars-panel__toggle',
+      ) as HTMLButtonElement;
+    const body = (): HTMLElement =>
+      (host.nativeElement as HTMLElement).querySelector(
+        '.lcars-panel__body',
+      ) as HTMLElement;
+
+    const show = (panelKey = ''): void => {
+      host = TestBed.createComponent(CollapsibleHostComponent);
+      host.componentInstance.panelKey.set(panelKey);
+      host.detectChanges();
+    };
+
+    it('opens with a caret that says what it does and what it controls', () => {
+      show();
+
+      expect(toggle().getAttribute('aria-expanded')).toBe('true');
+      expect(toggle().getAttribute('aria-controls')).toBe(body().id);
+      expect(toggle().title).toBe('Collapse');
+      expect(body().hidden).toBe(false);
+    });
+
+    it('hides its body rather than removing it, and opens it again', () => {
+      show();
+      const input = body().querySelector('input') as HTMLInputElement;
+      input.value = 'Starfleet';
+
+      toggle().click();
+      host.detectChanges();
+
+      expect(body().hidden).toBe(true);
+      expect(toggle().getAttribute('aria-expanded')).toBe('false');
+      expect(toggle().title).toBe('Expand');
+      expect((body().querySelector('input') as HTMLInputElement).value).toBe(
+        'Starfleet',
+      );
+
+      toggle().click();
+      host.detectChanges();
+
+      expect(body().hidden).toBe(false);
+    });
+
+    it('stays folded on the next visit to the page', () => {
+      show();
+      toggle().click();
+      host.detectChanges();
+
+      show();
+
+      expect(body().hidden).toBe(true);
+    });
+
+    it('remembers a fold by its key where one is given', () => {
+      show('directory-search');
+      toggle().click();
+      host.detectChanges();
+
+      show();
+      expect(body().hidden).toBe(false);
+
+      show('directory-search');
+      expect(body().hidden).toBe(true);
+    });
+  });
+
+  it('draws no caret and never folds unless asked', () => {
+    expect(find('.lcars-panel__toggle')).toBeNull();
+    expect(find('.lcars-panel__body')?.hidden).toBe(false);
   });
 });

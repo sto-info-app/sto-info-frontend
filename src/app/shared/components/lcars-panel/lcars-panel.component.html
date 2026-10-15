@@ -28,8 +28,30 @@
     <div class="lcars-panel__marks">
       <ng-content select="[panelMarks]" />
     </div>
+    @if (collapsible()) {
+      <button
+        type="button"
+        class="lcars-panel__toggle"
+        [attr.aria-expanded]="isExpanded()"
+        [attr.aria-controls]="bodyId"
+        [title]="isExpanded() ? 'Collapse' : 'Expand'"
+        (click)="toggle()">
+        <i
+          class="fas"
+          [class.fa-caret-up]="isExpanded()"
+          [class.fa-caret-down]="!isExpanded()"
+          aria-hidden="true"></i>
+      </button>
+    }
   </div>
-  <div class="lcars-panel__body">
+  <!--
+    Hidden rather than removed, so a search part way through keeps what was
+    typed into it while its panel is folded away.
+  -->
+  <div
+    class="lcars-panel__body"
+    [id]="bodyId"
+    [hidden]="!isExpanded()">
     <ng-content />
   </div>
 </section>

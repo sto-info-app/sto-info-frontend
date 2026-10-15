@@ -205,3 +205,44 @@
   border-radius: 6px;
   background: vars.$lcars-grey-bg;
 }
+
+// ---
+// The panel-card shape drawn from the page's accent at runtime, for a card
+// whose colour comes from the rotation (`--lcars-accent`) rather than from a
+// colour fixed when the stylesheet is built. `<app-lcars-panel>` draws itself with these, and so does any card
+// whose markup is its own: a Fleet in a directory, a member, a Custom Tracking
+// field. `$fallback` is the colour where nothing around it rotates.
+// ---
+
+// The card: the spine a shade darker than the accent, the body washed with it
+// and fading to the page.
+@mixin lcars-accent-panel-card($fallback: vars.$lcars-perano) {
+  --lcars-panel-accent: var(--lcars-accent, #{$fallback});
+
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid vars.$lcars-grey-border;
+  border-left: 10px solid
+    color-mix(in srgb, var(--lcars-panel-accent) 80%, #{vars.$lcars-black});
+  border-radius: 10px;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--lcars-panel-accent) 14%, transparent) 0%,
+    #{vars.$lcars-grey-bg} 100%
+  );
+}
+
+// The block across the top in the accent, carrying the name in black.
+@mixin lcars-accent-panel-card-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  background: var(--lcars-panel-accent);
+  border-bottom: 2px solid
+    color-mix(in srgb, var(--lcars-panel-accent) 80%, #{vars.$lcars-black});
+  color: vars.$lcars-black;
+  text-decoration: none;
+}
