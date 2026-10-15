@@ -30,7 +30,16 @@ describe('HelpLinkComponent (FC-049)', () => {
     ) as HTMLAnchorElement;
 
     expect(link.getAttribute('href')).toBe('/help/privacy-mode');
-    expect(link.textContent?.trim()).toBe('Help with Privacy Mode');
-    expect(link.querySelector('i')?.getAttribute('aria-hidden')).toBe('true');
+    expect(link.querySelector('.help-link__label')?.textContent).toBe(
+      'Help with Privacy Mode',
+    );
+    // The cap and the question mark are drawing, so the link is named by its
+    // words alone.
+    expect(
+      Array.from(
+        link.querySelectorAll('.help-link__cap, .help-link__mark'),
+        part => part.getAttribute('aria-hidden'),
+      ),
+    ).toEqual(['true', 'true']);
   });
 });

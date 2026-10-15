@@ -85,7 +85,9 @@ describe('FleetPageShellComponent', () => {
     const link = find('app-help-link a');
 
     expect(link?.getAttribute('href')).toBe('/help/importing-a-roster');
-    expect(link?.textContent?.trim()).toBe('Help with importing');
+    expect(link?.querySelector('.help-link__label')?.textContent).toBe(
+      'Help with importing',
+    );
   });
 
   it.each([

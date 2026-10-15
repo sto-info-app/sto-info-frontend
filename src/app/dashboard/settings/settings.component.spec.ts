@@ -441,7 +441,10 @@ describe('SettingsComponent', () => {
     const helpLinks = (): [string | null, string][] =>
       Array.from(
         (fixture.nativeElement as HTMLElement).querySelectorAll('a.help-link'),
-      ).map(link => [link.getAttribute('href'), link.textContent!.trim()]);
+      ).map(link => [
+        link.getAttribute('href'),
+        link.querySelector('.help-link__label')!.textContent,
+      ]);
 
     // Steve's decision: a link under each heading, to that panel's guide.
     it('links the page and each of its panels to its own guide', () => {

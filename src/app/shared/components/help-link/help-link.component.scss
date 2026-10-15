@@ -7,25 +7,20 @@
   margin-bottom: 0.75rem;
 }
 
-// A small LCARS pill (Steve's decision of 12 October 2026): the shape every
-// other link to somewhere is drawn in, at half the height, and always the same
-// blue, which is not in the page's rotation, so a reader learns it as "help"
-// wherever it appears.
+// An LCARS numbered panel button: a
+// rounded cap, a large question mark standing where the panel's number would,
+// and the words on a pill rounded at its far end. Always the same blue, which
+// is not in the page's rotation, so a reader learns it as "help" wherever it
+// appears.
 .help-link {
+  --help-link-colour: #{vars.$lcars-c48};
+
   display: inline-flex;
-  gap: 0.4rem;
-  align-items: flex-end;
-  justify-content: flex-end;
-  min-height: 30px;
-  padding: 0 14px 4px 24px;
-  border-radius: 15px;
-  background-color: vars.$lcars-c48;
+  align-items: center;
+  gap: 0.3rem;
+  height: 44px;
   color: vars.$a11y-black;
   font-family: vars.$font-antonio;
-  font-size: 0.85rem;
-  font-weight: 700;
-  letter-spacing: normal;
-  text-transform: uppercase;
   text-decoration: none;
   transition: filter 0.2s ease;
 
@@ -37,4 +32,38 @@
     outline: 2px solid vars.$lcars-sunflower;
     outline-offset: 2px;
   }
+}
+
+.help-link__cap {
+  width: 35px;
+  height: 100%;
+  border-radius: 22px 0 0 22px;
+  background: var(--help-link-colour);
+}
+
+// Tall and narrow in Antonio, as the panel's numbers are, and in the button's
+// colour on the page rather than on a block. The mark stands exactly as tall
+// as the bar: Antonio's question mark is 0.87 of its size, so 50.6px draws it
+// 44px high, and a line height of 0.73 puts its top on the bar's top and its
+// foot on the bar's foot.
+.help-link__mark {
+  display: block;
+  height: 100%;
+  font-size: 50.6px;
+  font-weight: 700;
+  line-height: 0.73;
+  color: var(--help-link-colour);
+}
+
+.help-link__label {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  padding: 0 18px 0 10px;
+  border-radius: 0 22px 22px 0;
+  background: var(--help-link-colour);
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: normal;
+  text-transform: uppercase;
 }

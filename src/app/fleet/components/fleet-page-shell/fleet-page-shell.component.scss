@@ -13,6 +13,13 @@
 .fleet-page-shell {
   padding: 1rem;
 
+  // The shell's padding already parts the heading from the tab strip; the
+  // heading's own top margin on top of it left Fleet pages 30px lower than
+  // the Community pages under the same strip.
+  > h1 {
+    margin-top: 0;
+  }
+
   // A section's page sits inside the directory's shell, and two insets moved
   // every section's content in further than the Overview's (FC-044).
   .fleet-page-shell {
