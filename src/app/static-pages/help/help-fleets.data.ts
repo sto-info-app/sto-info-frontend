@@ -159,8 +159,8 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
       ],
       'How to read a card': {
         paragraphs: [
-          'A card starts with what the record is, Community, Fleet or Armada, and the platform it is on. Then comes its name exactly as recorded and the Community holding it. A Community card shows its description, and a Fleet card says when its roster was last imported.',
-          'The coloured label says how a record stands:',
+          'Each tab lists one kind of record, so a card does not say which it is. It starts with the name exactly as recorded, then the record’s emblem, or the “picture unavailable” mark where it has none, and then what tells two records of one name apart, each labelled: Platform, Status, Roster and Community. A Community card has no Platform or Community line, and shows its description beneath instead; an Armada card adds what it is known as. The eye at the card’s right opens the record.',
+          'Roster says “Never imported”, or “Imported” and the date of the latest export; on a console it says that the game provides no roster export there. Status says how a record stands:',
         ],
         points: [
           'Recruiting — anyone eligible may join.',
@@ -169,6 +169,7 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
           'Not recruiting — nobody can ask to join, though a Fleet can still invite somebody.',
           'Suspended — a site administrator has paused the record. It can be read, but nothing new is accepted.',
           'Closed — the record has closed. Its history can still be read.',
+          'An Armada recruits nobody, so its card shows a Status only when it is suspended or closed.',
         ],
       },
       'How to follow a Community': [
@@ -266,7 +267,7 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
     whenSomethingGoesWrong: [
       'If the web address you typed was taken a moment before you registered, the page says so. Change it, or leave it blank.',
       '“You do not have permission to register anything into this Community.” means you do not hold “Register Fleets and Armadas” there. Ask its Owner.',
-      'If you already own ten Communities, the page says so. Closing one does not free a place, so use Contact us if you need more.',
+      '“You may own at most 10 Fleet Communities, closed ones included. If you need more, use Contact us.” means what it says: closing one does not free a place.',
       'A Fleet or Armada name can be up to 64 characters, counting any spaces at either end. A picture marked Rejected has not been kept, and nothing already there has changed.',
     ],
     relatedLinks: [
@@ -310,11 +311,20 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
         'Only members can be appointed: a Fleet’s members at a Fleet, members of any of its Fleets at a Community, and members of the Fleets placed in an Armada at that Armada. A person holds one role per record; to change it, withdraw it first.',
         'To withdraw one, choose Withdraw… and give a Reason. A role also ends by itself when its holder leaves the Fleet, when their Fleet leaves an Armada, or when the record closes.',
       ],
-      'How to delegate to Officers and particular people': [
-        'On Delegation, “What every Officer holds” is a list of capabilities to tick. Save applies them to every Officer at that record, and taking one away asks why.',
-        'Under “Particular people”, choose a Person, a Capability and whether to grant or deny it. A denial beats any role they hold, and needs a reason. Clear… takes a grant or denial away again.',
-        'Managing roles, handing over ownership, changing settings and closing are never handed on.',
-      ],
+      'How to delegate to Officers and particular people': {
+        paragraphs: [
+          'On Delegation, “What every Officer holds” is a list of capabilities to tick. Save applies them to every Officer at that record, and taking one away asks why.',
+          'Under “Particular people”, choose a Person, a Capability and whether to grant or deny it. A denial beats any role they hold, and needs a reason. Clear… takes a grant or denial away again.',
+          'Managing roles, handing over ownership, changing settings and closing are never handed on. Everything else can be, and each is named for what it allows:',
+        ],
+        points: [
+          'What a member already holds — View members, View the roster, Respond to events, Post in chat and Report content. Granting one to somebody outside the membership, or denying one to a member, is what these are for.',
+          'Running the record — Register Fleets and Armadas, Manage artwork, Write news, Manage events, Record holdings, Request an Armada and Manage the Armada.',
+          'Recruitment — View applications, Decide applications, Manage members and Manage recruitment.',
+          'The roster — Import rosters, Investigate imports and View reports.',
+          'Chat — Moderate chat and Export transcripts.',
+        ],
+      },
       'How to hand a Community to somebody else': [
         'On Ownership, pick one of the Community’s Admins, then choose Offer ownership… to offer it. It moves only if they accept within seven days, and you then stay on as an Admin. Until they answer, Take the offer back… cancels it.',
         'The Admin is told by a notification and sees “Ownership offered to you” on the Community’s page, with Accept… and Decline. On acceptance they own the Community and all it holds, and any role, grant or denial they held in it ends.',
@@ -430,7 +440,7 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
       points: [
         'No question arrived — a roster question is asked only when the Fleet’s latest export lists your Character’s exact name and handle, you can see the Fleet, and you have not recorded that Fleet or said No to it before. Where the game writes no roster export, none is asked. You can always record the Fleet yourself.',
         'The Fleet cannot be found — it needs a record on STO Info that you can see. The Fleet pages are where a record is made.',
-        'Recording is refused — a Character is in one Fleet at a time, so an entry that would overlap one already recorded is refused. Remove whichever entry is wrong, and try again.',
+        '“This Character is already recorded as being in a Fleet from that date or later. Record when they left it first.” — a Character is in one Fleet at a time, so an entry that would overlap one already recorded is refused. End or remove whichever entry is wrong, and try again.',
         'A question has disappeared — one from a Fleet you can no longer see is hidden until you can see it again, and its deadline keeps running. One raised by joining or being accepted is withdrawn if your membership ends first. You can still record the Fleet yourself.',
       ],
     },
@@ -566,7 +576,7 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
       'Answering requests, moving Fleets and taking them out belong to the Armada’s managers: the Community’s Owner and Admins, the Armada’s own Admins, and any Officer given “Manage the Armada”. Closing an Armada is for the Community’s Owner.',
     ],
     whereToFindIt: [
-      'The Armadas tab of the Fleet directory lists them. An Armada’s page shows “Fleets in this Armada”, with tabs for its News, Activity, Events and History, Requests for its managers, and Manage for its Owner and Admins.',
+      'The Armadas tab of the Fleet directory lists them. An Armada’s page opens on Overview, which shows “Fleets in this Armada”, and has tabs for its News, Activity, Events and History, Requests for its managers, and Manage for its Owner and Admins.',
       'A Fleet’s page has an Armada section saying which Armada it is in and where. A Community’s page lists its “Armadas and Fleets”, ending with “Fleets not in an Armada”.',
     ],
     how: {
@@ -606,7 +616,7 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
       ],
       'How Armada chat works': {
         paragraphs: [
-          'Members of a Fleet in an Armada take part in the Armada’s chat channels as well as their Fleet’s and their Community’s. When the Fleet leaves the Armada, those channels close to its members at once.',
+          'Members of a Fleet in an Armada take part in the Armada’s chat channels as well as their Fleet’s and their Community’s; the Chat tab on the Armada’s page opens them. When the Fleet leaves the Armada, those channels close to its members at once.',
         ],
         requiresFeature: 'CHAT',
       },
@@ -620,7 +630,7 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
       paragraphs: ['The page usually says what is in the way:'],
       points: [
         '“No open Armada in this Community takes Fleets on this platform with this allegiance.” — there is nothing the Fleet could join yet.',
-        '“An Armada is Federation or Klingon, and this Fleet’s allegiance is not set to either.” — the Community’s Owner sets it on the Fleet’s Settings page.',
+        '“An Armada is Federation or Klingon, and this Fleet’s allegiance is not set to either. Set it in the Fleet’s settings first.” — the Community’s Owner sets it on the Fleet’s Settings page.',
         'A change is refused — it would leave the Armada out of shape, such as a Gamma under nothing or a Beta with a fourth Gamma. The refusal names what does not fit.',
         'An allegiance will not change — an Armada’s cannot while a Fleet is placed in it, and a placed Fleet’s cannot change at all.',
         'The Armada in game has changed but not here — nothing is read from the game. Ask the Armada’s managers to record the change.',
@@ -733,7 +743,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       ],
       'How activity differs from a notification': [
         'Activity is something you look at; nothing on a feed is sent to you. A notification, under Notifications, is sent to you alone because it needs you, such as a reminder of an event you asked about, or your Fleet membership being suspended.',
-        'The What you are notified about guide, in the STO Info settings section of Help, lists the notices and the switch that stops each.',
+        'The What you are notified about guide, in the STO Info settings section of Help, lists the notices: the five kinds a switch stops, and those no switch does, such as your membership being suspended.',
       ],
       'How chat’s notices fit in': {
         paragraphs: [
@@ -864,7 +874,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       ],
       'How to send, reply and mention': [
         'Enter sends and Shift+Enter starts a new line. A message can be up to 2,000 characters, and a count appears as you near the end. You can send ten messages in any ten seconds.',
-        'Reply, beside a message, shows who wrote it and its first 80 characters above yours; Escape stops replying. Once that message is deleted or older than four hours, the reply shows “Earlier message” instead.',
+        'Reply, beside a message, shows “Replying to” and who wrote it above what you type; Escape stops replying. Your reply, once sent, carries their name and the first 80 characters of their message. Once that message is deleted or older than four hours, the reply shows “Earlier message” instead.',
         'In a channel, type @ and the start of a name, then pick somebody who can read it from the list. Only people picked from the list are mentioned and told; there is no way to mention everybody.',
         'Delete, beside your own message, leaves “Message deleted” in its place for everybody. Messages cannot be edited.',
       ],
@@ -885,11 +895,18 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
         'Chat can be open in five tabs or devices at once. Open another and the oldest gives way, saying “Chat is open elsewhere”; Use chat here takes it back.',
         'Elsewhere on the site, a new direct message or a mention of you pops up as a small notice, unless you have that chat open. It says who and where, never what.',
       ],
+      'How to export a transcript': {
+        paragraphs: [
+          'Whoever holds Export transcripts at a Community, Fleet or Armada — its Admins and Owner, and anybody the Owner gives it under Delegation — finds an export button beside each of its channels in the list down the side. Nobody can export a conversation between friends.',
+          'Export transcript asks for the span, From and To, from any time in the last seven days, in your device’s time, and a “Purpose (10 to 500 characters)”. Choose Export, and the transcript is written in the background, in plain text and in UTC.',
+          'Under Your transcripts, at the foot of the list, each one you asked for in the last day shows its channel, its span and how it stands: Being written, Ready, Not written or Expired. You are sent the notice “Transcript ready”, and Download, beside it, is yours alone for 24 hours. The request, its purpose and each download are logged, and the purpose is printed at the head of the file.',
+        ],
+      },
     },
     whoCanSeeIt: [
       'A channel is read by the people its reading role admits, and a conversation by the two of you alone, never further back than four hours.',
       'A channel’s chat moderators can remove anybody’s message there, and a site administrator can remove one that was reported. It then shows as “Message removed by a moderator” for everybody, and the reason given is not shown to its author.',
-      'A channel’s Admins and Owner can export a transcript of it; nobody can export a conversation between friends. Site administrators read chat only through reports and the holds they place. The How long things are kept guide gives the times.',
+      'Whoever holds Export transcripts can export a transcript of a channel; nobody can export a conversation between friends. Site administrators read chat only through reports and the holds they place. The How long things are kept guide gives the times.',
     ],
     whenSomethingGoesWrong: [
       'A message marked Not sent can be sent again with Try again, or dropped with Discard. Sending too many too quickly is the usual reason.',
@@ -922,7 +939,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
         paragraphs: [
           'Members can read back four hours in any channel or conversation, and nothing older; the start of a chat says “You can read back the last four hours here.” Messages are kept longer than that, as below.',
           'Every message is deleted 45 days after it was sent. Deleting your own message takes its words off everybody’s screen at once; the message itself goes with the rest at 45 days.',
-          'A channel’s Admins and Owner can export a transcript of it from any time in the last seven days, giving a purpose that is logged and printed at its head. Only the person who asked can download it, for 24 hours, and each download is logged. Then the file is deleted.',
+          'Whoever holds Export transcripts at a Community, Fleet or Armada — its Admins and Owner, and anybody the Owner gives it under Delegation — can export a transcript of a channel from any time in the last seven days, giving a purpose that is logged and printed at its head. Only the person who asked can download it, for 24 hours, and each download is logged. Then the file is deleted.',
         ],
         requiresFeature: 'CHAT',
       },
@@ -995,14 +1012,14 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     how: {
       'How a suspension works': [
         'A site administrator can suspend a Community, a Fleet or an Armada. Its page, and its card in the directory, then say Suspended. Suspending a Community holds its Fleets and Armadas too.',
-        'Everything in it stays readable, and nothing can be written, scheduled, answered or changed there. Nothing ends, either: roles, memberships and events stand, and come back into force when it is reinstated. Nobody is sent a notice about it.',
+        'Everything in it stays readable, and nothing can be written, scheduled, answered or changed there. Nothing ends, either: roles, memberships and events stand, and come back into force when it is reinstated. Its Owner and Admins are sent a notice, without the reason; its members are not.',
       ],
       'How a closure works': [
         'A site administrator can close a Community, Fleet or Armada, as its Owner can. Closing is not deleting: its page, address and history stay, marked Closed, and its members see that it was closed in its Activity.',
         'Roles held there end, and events still to come are cancelled. Unlike a suspension, a closure cannot be reinstated.',
       ],
       'How a membership is suspended': [
-        'A Fleet’s Owner and Admins, or anybody holding Manage members there, can suspend a member. You are told under Notifications, “Fleet membership suspended”, but never why, and the Fleet’s page says “Your membership of this Fleet is suspended.”',
+        'A Fleet’s Owner and Admins, or anybody holding Manage members there, can suspend a member. You are told under Notifications, “Fleet membership suspended”, but never why. The Fleet’s page offers you nothing under Recruitment, neither a member’s things nor a way to apply, and the Apply page says “Your membership of this Fleet is suspended.”',
         'Until it is lifted you have no access to the Fleet, as though you were not a member. Your membership and the date you joined are kept, and when you are reinstated everything comes back and you are told again.',
         'A site administrator does not suspend a single member; they can only disable a whole STO Info account.',
       ],
@@ -1082,7 +1099,7 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
         'The file writes every time in the clock of the computer it was exported on, and never says which. The choice starts on the zone picked in Settings under “Read Fleet roster exports as”, or on your device’s zone when that is left on “My device’s zone”. Change it here if this export was taken somewhere else.',
         'A wrong zone does not fail: it quietly moves every date by a few hours. That is why the first rows show each date twice, as the file says it and as it was read, in UTC. Check they agree.',
         'An export taken in the hour the clocks go back names two moments, and you are asked which. A time in the hour they skip going forward is refused, which usually means the zone is wrong.',
-        'If the export’s time, or any date in it, comes out later than now, the check warns you, because that usually means the zone is wrong. Check the zone; if it is right, tick “The timezone is right; import it anyway” to import it.',
+        'If the export’s time, or any date in it, comes out more than ten minutes later than now, the check warns you, because that usually means the zone is wrong. Check the zone; if it is right, tick “The timezone is right; import it anyway” to import it.',
       ],
       'How to import it': {
         paragraphs: [

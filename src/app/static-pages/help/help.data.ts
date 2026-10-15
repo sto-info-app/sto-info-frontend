@@ -1273,12 +1273,13 @@ const SETTINGS_TOPIC: HelpTopic = {
     {
       slug: 'what-you-are-notified-about',
       title: 'What you are notified about',
-      summary: 'The notices STO Info sends you, and switching each one off.',
+      summary:
+        'The notices STO Info sends you, switching each kind off, and the ones no switch stops.',
       requiresFeature: 'FLEET',
       sections: [
         guideSection('Where notices arrive', [
           'Notices arrive in STO Info only, under Notifications, never by email. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
-          'Each switch under Notifications stops that kind of notice once you save. A notice already sent stays where it is.',
+          'Each switch under Notifications stops that kind of notice once you save. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
         ]),
         {
           heading: 'Mentions, replies and direct messages',
@@ -1294,8 +1295,23 @@ const SETTINGS_TOPIC: HelpTopic = {
           'Somebody proposes that a character on an imported roster is yours. You always decide. Switching this off stops the notices, not the proposals, and a proposal left unanswered expires after 90 days.',
         ]),
         guideSection('Event reminders', [
-          'Only for events you have asked to be reminded about, at the time you chose. Asking for a reminder is done on the event itself; this switch stops them all.',
+          'Only for events you have asked to be reminded about, at the time you chose. Asking for a reminder is done on the event itself; this switch stops them all, and with them the notices that an occurrence you are reminded of has moved or is cancelled, and that a place at it has come free for you.',
         ]),
+        {
+          heading: 'Notices no switch stops',
+          paragraphs: [
+            'These are sent because somebody decided something about you or what you run, so they cannot be switched off:',
+          ],
+          points: [
+            'Your Fleet membership being suspended or reinstated.',
+            'A Community, Fleet or Armada you run being suspended or reinstated by a site administrator.',
+            'Ownership of a Community being offered to you, and a Community becoming yours.',
+            'An Armada taking, turning down or letting lapse a request from a Fleet you run, or taking that Fleet out.',
+            'A picture of yours being removed.',
+            'A transcript you asked for being ready.',
+            'Anything the site’s administrators send to everybody, or to you alone.',
+          ],
+        },
       ],
       relatedLinks: [
         SETTINGS_LINK,
