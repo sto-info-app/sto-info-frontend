@@ -70,17 +70,26 @@ describe('FleetScopeHeaderComponent', () => {
     ).toHaveLength(2);
   });
 
-  it('says what kind of record it is, and on which platform', () => {
+  // The head of the page is the directory's card (13 October 2026), with the
+  // name as the page's heading and the kind of record on its block.
+  it('heads the page with the name, and says what kind of record it is', () => {
     render(header());
 
-    expect(find('app-fleet-scope-badge')?.textContent).toContain('Fleet');
-    expect(find('app-fleet-scope-badge')?.textContent).toContain('PC');
+    expect(find('h2 .fleet-exact-name__core')?.textContent).toBe(
+      'Starfleet Command',
+    );
+    expect(
+      find('.fleet-scope-card__heading app-fleet-scope-badge'),
+    ).not.toBeNull();
+    expect(
+      find('.fleet-scope-card__heading app-fleet-scope-badge')?.textContent,
+    ).toContain('Fleet');
   });
 
   it('links to the Community holding the record', () => {
     render(header());
 
-    const link = find('.fleet-scope-header__community a') as HTMLAnchorElement;
+    const link = find('.fleet-scope-card__community a') as HTMLAnchorElement;
 
     expect(link.textContent?.trim()).toBe('United Federation Alliance');
     expect(link.getAttribute('href')).toBe(
@@ -91,8 +100,8 @@ describe('FleetScopeHeaderComponent', () => {
   it('names an unopenable Community without linking to it', () => {
     render(header({ communityLink: null }));
 
-    expect(find('.fleet-scope-header__community a')).toBeNull();
-    expect(find('.fleet-scope-header__community')?.textContent).toContain(
+    expect(find('.fleet-scope-card__community a')).toBeNull();
+    expect(find('.fleet-scope-card__community')?.textContent).toContain(
       'United Federation Alliance',
     );
   });
@@ -100,25 +109,21 @@ describe('FleetScopeHeaderComponent', () => {
   it('names no Community on a Community’s own page', () => {
     render(header({ communityName: null, communityLink: null }));
 
-    expect(find('.fleet-scope-header__community')).toBeNull();
+    expect(find('.fleet-scope-card__community')).toBeNull();
   });
 
-  it('shows the state pill in its own colour', () => {
+  it('shows the state in its own colour', () => {
     render(header());
 
-    const pill = find('.fleet-scope-header__status');
+    const state = find('.fleet-scope-card__status');
 
-    expect(pill?.textContent?.trim()).toBe('Recruiting');
-    expect(pill?.className).toContain('fleet-scope-header__status--recruiting');
+    expect(state?.textContent?.trim()).toBe('Recruiting');
+    expect(state?.className).toContain('fleet-scope-card__status--recruiting');
   });
 
-  it('shows no pill when there is nothing to say about state', () => {
-    render(header({ status: null }));
-
-    expect(find('.fleet-scope-header__status')).toBeNull();
-  });
-
-  it('lists each fact against its label', () => {
+  // The platform is among a Fleet's facts, and the card already sets it out
+  // with its icon, so it is said once.
+  it('lists each fact against its label, the platform once', () => {
     render(
       header({
         facts: [
@@ -128,21 +133,20 @@ describe('FleetScopeHeaderComponent', () => {
       }),
     );
 
-    const labels = Array.from(fixture.nativeElement.querySelectorAll('dt')).map(
-      node => (node as HTMLElement).textContent,
+    const details = Array.from(
+      fixture.nativeElement.querySelectorAll('.fleet-scope-card__detail'),
+      (detail: Element) => [
+        detail.querySelector('dt')?.textContent?.trim(),
+        detail.querySelector('dd')?.textContent?.trim(),
+      ],
     );
-    const values = Array.from(fixture.nativeElement.querySelectorAll('dd')).map(
-      node => (node as HTMLElement).textContent,
-    );
 
-    expect(labels).toEqual(['Roster last imported', 'Platform']);
-    expect(values).toEqual(['4 March 2015', 'PC']);
-  });
-
-  it('draws no fact list when there is nothing to list', () => {
-    render(header({ facts: [] }));
-
-    expect(find('.fleet-scope-header__facts')).toBeNull();
+    expect(details).toEqual([
+      ['Platform', 'PC'],
+      ['Status', 'Recruiting'],
+      ['Community', 'United Federation Alliance'],
+      ['Roster last imported', '4 March 2015'],
+    ]);
   });
 
   describe('the pictures', () => {
@@ -155,28 +159,24 @@ describe('FleetScopeHeaderComponent', () => {
       expect(find('.fleet-scope-header__banner')?.getAttribute('src')).toBe(
         banner.url,
       );
-      expect(find('.fleet-scope-header__emblem')?.getAttribute('alt')).toBe(
+      expect(find('.fleet-scope-card__emblem')?.getAttribute('alt')).toBe(
         emblem.alt,
       );
     });
 
-    it('draws nothing where the scope has no artwork', () => {
+    it('draws no banner where the scope has none', () => {
       render(header());
 
       expect(find('.fleet-scope-header__banner')).toBeNull();
-      expect(find('.fleet-scope-header__emblem')).toBeNull();
     });
 
-    it.each([
-      ['banner', '.fleet-scope-header__banner'],
-      ['emblem', '.fleet-scope-header__emblem'],
-    ])('drops the %s rather than showing a broken image', (_name, selector) => {
-      render(header({ banner, emblem }));
+    it('drops the banner rather than showing a broken image', () => {
+      render(header({ banner }));
 
-      find(selector)?.dispatchEvent(new Event('error'));
+      find('.fleet-scope-header__banner')?.dispatchEvent(new Event('error'));
       fixture.detectChanges();
 
-      expect(find(selector)).toBeNull();
+      expect(find('.fleet-scope-header__banner')).toBeNull();
     });
 
     // A page whose address was replaced resolves a different record into the
@@ -186,14 +186,12 @@ describe('FleetScopeHeaderComponent', () => {
       render(header({ banner, emblem }));
 
       find('.fleet-scope-header__banner')?.dispatchEvent(new Event('error'));
-      find('.fleet-scope-header__emblem')?.dispatchEvent(new Event('error'));
       fixture.detectChanges();
 
       fixture.componentRef.setInput('vm', header({ banner, emblem }));
       fixture.detectChanges();
 
       expect(find('.fleet-scope-header__banner')).not.toBeNull();
-      expect(find('.fleet-scope-header__emblem')).not.toBeNull();
     });
   });
 });

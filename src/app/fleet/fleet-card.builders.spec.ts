@@ -143,7 +143,7 @@ describe('fleet-card.builders', () => {
     it('should never claim a Community was observed', () => {
       const vm = buildCommunityCardVm(communityCard());
 
-      expect(vm.lastObservedLabel).toBeNull();
+      expect(vm.roster).toBeNull();
     });
   });
 
@@ -269,15 +269,13 @@ describe('fleet-card.builders', () => {
         formatInstant,
       );
 
-      expect(vm.lastObservedLabel).toBe(
-        'Roster last imported formatted(2026-03-04T05:06:07.000Z)',
-      );
+      expect(vm.roster).toBe('Imported formatted(2026-03-04T05:06:07.000Z)');
     });
 
     it('should say plainly when no roster has ever been imported', () => {
       const vm = buildFleetCardVm(fleetCard(), formatInstant);
 
-      expect(vm.lastObservedLabel).toBe('No roster has ever been imported');
+      expect(vm.roster).toBe('Never imported');
     });
 
     // The card and the Fleet's own page give the same reason in the same
@@ -291,10 +289,8 @@ describe('fleet-card.builders', () => {
         formatInstant,
       );
 
-      expect(vm.lastObservedLabel).toBe(rosterUnavailableOn('Xbox'));
-      expect(vm.lastObservedLabel).toBe(
-        'The game provides no roster export on Xbox',
-      );
+      expect(vm.roster).toBe(rosterUnavailableOn('Xbox'));
+      expect(vm.roster).toBe('The game provides no roster export on Xbox');
     });
 
     it('should give the platform’s reason even over a date recorded before', () => {
@@ -307,7 +303,7 @@ describe('fleet-card.builders', () => {
         formatInstant,
       );
 
-      expect(vm.lastObservedLabel).toBe(
+      expect(vm.roster).toBe(
         'The game provides no roster export on PlayStation',
       );
     });
@@ -353,7 +349,7 @@ describe('fleet-card.builders', () => {
     });
 
     it('should never claim an Armada was observed', () => {
-      expect(buildArmadaCardVm(armadaCard()).lastObservedLabel).toBeNull();
+      expect(buildArmadaCardVm(armadaCard()).roster).toBeNull();
     });
 
     it('should show a preferred name beneath the one the game holds', () => {

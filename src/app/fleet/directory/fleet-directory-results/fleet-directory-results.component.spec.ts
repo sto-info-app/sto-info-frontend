@@ -27,7 +27,7 @@ function card(id: string): FleetScopeCardVm {
     link: null,
     unlinkedTitle: null,
     status: null,
-    lastObservedLabel: null,
+    roster: null,
     meta: [],
     actions: [],
   };

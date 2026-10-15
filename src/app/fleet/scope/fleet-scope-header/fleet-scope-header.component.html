@@ -6,57 +6,14 @@
     (error)="onBannerError()" />
 }
 
-<div class="fleet-scope-header__identity">
-  @if (vm.emblem && !hasEmblemFailed) {
-    <img
-      class="fleet-scope-header__emblem"
-      width="96"
-      height="96"
-      [src]="vm.emblem.url"
-      [alt]="vm.emblem.alt"
-      (error)="onEmblemError()" />
-  }
-
-  <div class="fleet-scope-header__naming">
-    <app-fleet-scope-badge
-      [scope]="vm.scope"
-      [platform]="vm.platform" />
-
-    <h2 class="fleet-scope-header__name">
-      <app-fleet-exact-name [name]="vm.name" />
-    </h2>
-
-    @if (vm.communityName) {
-      <p class="fleet-scope-header__community">
-        @if (vm.communityLink) {
-          Held by
-          <a [routerLink]="vm.communityLink">{{ vm.communityName }}</a>
-        } @else {
-          Held by {{ vm.communityName }}
-        }
-      </p>
-    }
-
-    @if (vm.status) {
-      <span
-        class="fleet-scope-header__status"
-        [class]="
-          'fleet-scope-header__status fleet-scope-header__status--' +
-          vm.status.modifier
-        ">
-        {{ vm.status.label }}
-      </span>
-    }
-  </div>
-</div>
-
-@if (vm.facts.length > 0) {
-  <dl class="fleet-scope-header__facts">
-    @for (fact of vm.facts; track fact.label) {
-      <div class="fleet-scope-header__fact">
-        <dt>{{ fact.label }}</dt>
-        <dd>{{ fact.value }}</dd>
-      </div>
-    }
-  </dl>
-}
+<!--
+  The record set out as a panel, in the
+  shape the directory draws it: its name, as the page's heading, and its kind
+  on a block of the rotation's colour; the emblem, and its facts label over
+  value, over the account list's art for its platform.
+-->
+<app-fleet-scope-card
+  class="fleet-scope-header__card"
+  [vm]="card"
+  [nameHeading]="true"
+  [showScope]="true" />

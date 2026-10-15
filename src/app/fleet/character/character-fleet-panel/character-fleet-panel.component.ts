@@ -30,7 +30,9 @@ import {
   FLEET_AUDIENCE_LABELS,
 } from '../../constants/fleet-scope.constants';
 import { CharacterFleetService } from '../../character-fleet.service';
-import { FLEET_LINKS } from '../../fleet-links';
+import { FleetScopeCardComponent } from '../../components/fleet-scope-card/fleet-scope-card.component';
+import { FleetScopeCardVm } from '../../components/fleet-scope-card/fleet-scope-card.model';
+import { buildCharacterFleetCardVm } from '../../fleet-card.builders';
 import { RECRUITED_BY_LINES } from '../../recruitment/recruitment.constants';
 import { FleetDirectoryService } from '../../fleet-directory.service';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -102,6 +104,7 @@ export const PROPOSALS_MIXED_NOTE =
     HelpLinkComponent,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    FleetScopeCardComponent,
   ],
   providers: [AppDatePipe],
 })
@@ -162,6 +165,59 @@ export class CharacterFleetPanelComponent implements OnInit {
     this.proposals().filter(
       proposal => proposal.state === CharacterFleetProposalState.PENDING,
     ),
+  );
+
+  /**
+   * Each unanswered proposal with its card (13 October 2026), drawn as the
+   * directory draws a Fleet: when it was seen on the roster as a detail, and
+   * what it asks and by when as the lines beneath.
+   */
+  protected pendingCards = computed(() =>
+    this.pending().map(proposal => ({
+      proposal,
+      card: buildCharacterFleetCardVm(
+        proposal.fleet,
+        proposal.observedAt
+          ? [
+              {
+                label: 'Seen on the roster',
+                value: this.instant(proposal.observedAt),
+              },
+            ]
+          : [],
+        [
+          ...(proposal.recruitedBy
+            ? [
+                `${this.recruitedByLines[proposal.recruitedBy]} Say yes once you have been invited in game.`,
+              ]
+            : []),
+          `${this.deadline(proposal)}.`,
+        ],
+      ),
+    })),
+  );
+
+  /** The current entry with its card, where there is one. */
+  protected currentCard = computed(() => {
+    const entry = this.current();
+
+    return entry === null
+      ? null
+      : {
+          entry,
+          card: buildCharacterFleetCardVm(entry.fleet, [
+            { label: 'Since', value: this.instant(entry.validFrom) },
+            { label: 'Source', value: this.sourceLabel(entry) },
+          ]),
+        };
+  });
+
+  /** Each entry that has ended with its card. */
+  protected pastCards = computed(() =>
+    this.past().map(entry => ({
+      entry,
+      card: this.pastCardOf(entry),
+    })),
   );
 
   /**
@@ -390,6 +446,22 @@ export class CharacterFleetPanelComponent implements OnInit {
   }
 
   /**
+   * The card for an entry that has ended: when it began and ended, where it
+   * came from and who may see it.
+   *
+   * @param entry - The entry.
+   * @returns Its card.
+   */
+  private pastCardOf(entry: CharacterFleetMembership): FleetScopeCardVm {
+    return buildCharacterFleetCardVm(entry.fleet, [
+      { label: 'From', value: this.instant(entry.validFrom) },
+      { label: 'Until', value: this.instant(entry.validTo as string) },
+      { label: 'Source', value: this.sourceLabel(entry) },
+      { label: 'Seen by', value: this.audienceLabel(entry) },
+    ]);
+  }
+
+  /**
    * What an entry says about where it came from.
    *
    * @param membership - The entry.
@@ -407,19 +479,6 @@ export class CharacterFleetPanelComponent implements OnInit {
    */
   protected audienceLabel(membership: CharacterFleetMembership): string {
     return FLEET_AUDIENCE_LABELS[membership.visibility];
-  }
-
-  /**
-   * Links to the Community a proposal's Fleet belongs to.
-   *
-   * A proposal is only raised to somebody who can see the Fleet, and so its
-   * Community, which is what makes naming it here safe.
-   *
-   * @param communitySlug - The Community's URL segment.
-   * @returns The router link.
-   */
-  protected communityLink(communitySlug: string): string[] {
-    return FLEET_LINKS.community(communitySlug);
   }
 
   /**

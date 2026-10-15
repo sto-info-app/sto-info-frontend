@@ -385,7 +385,7 @@ describe('CharacterFleetPanelComponent', () => {
 
       render();
 
-      expect(text()).toContain('Seen on that roster');
+      expect(text()).toContain('Seen on the roster');
     });
 
     it.each([
@@ -472,7 +472,7 @@ describe('CharacterFleetPanelComponent', () => {
 
       const link = (
         fixture.nativeElement as HTMLElement
-      ).querySelector<HTMLAnchorElement>('.character-fleet__proposal-name a');
+      ).querySelector<HTMLAnchorElement>('.fleet-scope-card__community a');
 
       expect(link?.textContent).toBe('United Federation Alliance');
       expect(link?.getAttribute('href')).toBe(
@@ -480,20 +480,31 @@ describe('CharacterFleetPanelComponent', () => {
       );
     });
 
-    // Angular drops white space that stands alone between two elements, so
-    // the space before "in" has to live inside its span.
-    it('keeps a space between the platform and the Community', () => {
+    // Drawn as the directory draws a Fleet (13 October 2026): the name on the
+    // block, and its platform and Community as details beneath.
+    it('sets the Fleet out as the directory does', () => {
       service.proposals.mockReturnValue(of([proposal()]));
 
       render();
 
-      const name = (fixture.nativeElement as HTMLElement).querySelector(
-        '.character-fleet__proposal-name',
+      const card = (fixture.nativeElement as HTMLElement).querySelector(
+        'app-fleet-scope-card',
+      );
+      const details = Array.from(
+        card?.querySelectorAll('.fleet-scope-card__detail') ?? [],
+        detail => [
+          detail.querySelector('dt')?.textContent?.trim(),
+          detail.querySelector('dd')?.textContent?.trim(),
+        ],
       );
 
-      expect(name?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
-        'Sol Defence Force on Windows in United Federation Alliance',
+      expect(card?.querySelector('.fleet-exact-name__core')?.textContent).toBe(
+        'Sol Defence Force',
       );
+      expect(details).toEqual([
+        ['Platform', 'Windows'],
+        ['Community', 'United Federation Alliance'],
+      ]);
     });
 
     it('names no Community where the Fleet has none', () => {
@@ -509,7 +520,7 @@ describe('CharacterFleetPanelComponent', () => {
 
       expect(
         (fixture.nativeElement as HTMLElement).querySelector(
-          '.character-fleet__proposal-name a',
+          '.fleet-scope-card__community',
         ),
       ).toBeNull();
     });

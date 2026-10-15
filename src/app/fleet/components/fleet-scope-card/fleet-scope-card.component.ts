@@ -10,8 +10,32 @@ import { RouterModule } from '@angular/router';
 
 import { FleetExactNameComponent } from 'src/app/fleet/components/fleet-exact-name/fleet-exact-name.component';
 import { FleetScopeBadgeComponent } from 'src/app/fleet/components/fleet-scope-badge/fleet-scope-badge.component';
+import { FLEET_SCOPE_LABELS } from 'src/app/fleet/constants/fleet-scope.constants';
+import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
+import {
+  getAccountBgImagePath,
+  getPlatformClass,
+  getPlatformIconClass,
+} from 'src/app/shared/utils/card-theme.utils';
 
 import { FleetScopeCardVm } from './fleet-scope-card.model';
+
+/** Distinguishes one card's name from another's, for `aria-describedby`. */
+let nextFleetScopeCardId = 0;
+
+/**
+ * The icon beside each state, by the state's modifier. Every one is in the
+ * subsetted Font Awesome kit, checked against the running app (13 October
+ * 2026); a glyph that is not renders as nothing at all, silently.
+ */
+const STATUS_ICONS: Readonly<Record<string, string>> = {
+  recruiting: 'fa-solid fa-user-plus',
+  application: 'fa-solid fa-hourglass-half',
+  invite: 'fa-solid fa-envelope',
+  closed: 'fa-solid fa-circle-xmark',
+  suspended: 'fa-solid fa-ban',
+  disputed: 'fa-solid fa-gavel',
+};
 
 /**
  * A Community, Fleet or Armada as it appears in a listing.
@@ -59,8 +83,58 @@ export class FleetScopeCardComponent {
     return this._vm;
   }
 
+  /** The picture the character listings show when a portrait is missing. */
+  readonly unavailableSrc = SRC_PHOTO_UNAVAILABLE_300PX;
+
+  /** Identifies the card's name, which describes its view control. */
+  readonly nameId = `fleet-scope-card-name-${nextFleetScopeCardId++}`;
+
+  /**
+   * What the view control in the card's right-hand column says: "View Fleet",
+   * as an account card's says "View Account".
+   */
+  get viewLabel(): string {
+    return `View ${FLEET_SCOPE_LABELS[this._vm.scope]}`;
+  }
+
+  /** The platform's icon, or null where it has none or there is no platform. */
+  get platformIcon(): string | null {
+    return getPlatformIconClass(this._vm.platform);
+  }
+
+  /**
+   * A state's icon.
+   *
+   * @param modifier - The state, as its modifier names it.
+   * @returns The icon, or null for a state without one.
+   */
+  statusIconOf(modifier: string): string | null {
+    return STATUS_ICONS[modifier] ?? null;
+  }
+
+  /**
+   * The picture behind the details: the account list's art for the platform,
+   * so a Fleet on Xbox looks like an Xbox account (13 October 2026). A
+   * Community, on no platform, takes the default.
+   */
+  get backgroundPath(): string {
+    return getAccountBgImagePath(getPlatformClass(this._vm.platform));
+  }
+
   /** Set while an action is in flight, so every button on the card disables. */
   @Input() isActing = false;
+
+  /**
+   * Whether the name is the page's heading: on a record's own page, where the
+   * card is the head of the page rather than a row in a listing.
+   */
+  @Input() nameHeading = false;
+
+  /**
+   * Whether the block says which kind of record this is. A listing holds one
+   * kind and does not; a record's own page does.
+   */
+  @Input() showScope = false;
 
   /** Emits the `key` of the action button the viewer activated. */
   @Output() readonly action = new EventEmitter<string>();

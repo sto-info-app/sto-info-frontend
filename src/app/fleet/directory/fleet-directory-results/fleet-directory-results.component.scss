@@ -2,15 +2,12 @@
   display: block;
 }
 
-// Cards rather than rows, and as many per line as will fit. A directory is
-// read by scanning for a name, and a minimum of 18rem is what keeps a long
-// Fleet name on two lines rather than five on a narrow screen.
+// One card to a line, the full width of the results, as the account and
+// captain lists are: the room lets a
+// card set its details out side by side rather than stacking them.
 .fleet-directory-results__grid {
   display: grid;
-
-  // Never wider than the results themselves, which a phone's column is not
-  // (FC-044): at 18rem a card ran 33px off a 412px screen.
-  grid-template-columns: repeat(auto-fill, minmax(min(18rem, 100%), 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   margin-top: 1rem;
 }

@@ -48,6 +48,16 @@ export interface FleetScopeCardStatus {
  * rather than beside it: an emblem whose alternative text came from a second
  * request would render without one for as long as that request took.
  */
+/**
+ * A detail a page adds to a card, set out label over value after the ones
+ * every card carries: when a Captain joined a Fleet, say, on their own page.
+ */
+export interface FleetScopeCardDetail {
+  label: string;
+
+  value: string;
+}
+
 export interface FleetScopeCardEmblem {
   /** Where to fetch the picture from. */
   url: string;
@@ -100,6 +110,12 @@ export interface FleetScopeCardVm {
    */
   communityName: string | null;
 
+  /**
+   * Where the Community opens, where the reader may follow it there; null
+   * shows its name alone.
+   */
+  communityLink?: string[] | null;
+
   /** The platform, or null for a Community, which spans all of them. */
   platform: string | null;
 
@@ -113,15 +129,19 @@ export interface FleetScopeCardVm {
   status: FleetScopeCardStatus | null;
 
   /**
-   * When this record was last observed, already written out.
+   * How fresh a Fleet's roster is, the value under the card's "Roster"
+   * label, already written out; null where a record has no roster.
    *
    * A formatted string rather than a date, because deciding which timezone a
    * moment is written in belongs to the page, which knows whether it holds an
    * instant or a day somebody typed.
    */
-  lastObservedLabel: string | null;
+  roster: string | null;
 
-  /** Secondary lines beneath the name, e.g. member counts. */
+  /** Details of the page's own, after the shared ones; none by default. */
+  details?: readonly FleetScopeCardDetail[];
+
+  /** Lines beneath the details, e.g. a description or a duplicate note. */
   meta: string[];
 
   /** Action buttons; empty for a read-only context such as an anonymous visit. */

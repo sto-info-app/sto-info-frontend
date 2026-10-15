@@ -25,88 +25,67 @@
         <h3 class="character-fleet__heading">Awaiting your answer</h3>
         <p class="character-fleet__note">{{ pendingNote() }}</p>
 
-        @for (proposal of pending(); track proposal.id) {
-          <div class="character-fleet__proposal">
-            <div class="character-fleet__proposal-name">
-              {{ proposal.fleet.exactGameName }}
-              <span class="character-fleet__muted"
-                >on {{ proposal.fleet.platformName }}</span
-              >
-              @if (proposal.fleet.communitySlug; as communitySlug) {
-                <span class="character-fleet__muted">
-                  in
-                  <a [routerLink]="communityLink(communitySlug)">{{
-                    proposal.fleet.communityName
-                  }}</a></span
-                >
-              }
-            </div>
-            <div class="character-fleet__muted">
-              @if (proposal.recruitedBy; as recruitedBy) {
-                {{ recruitedByLines[recruitedBy] }} Say yes once you have been
-                invited in game.
-              }
-              @if (proposal.observedAt) {
-                Seen on that roster {{ instant(proposal.observedAt) }}.
-              }
-              {{ deadline(proposal) }}
-            </div>
-            <div class="character-fleet__actions">
-              <button
-                type="button"
-                class="lcars-btn green"
-                [disabled]="busy()"
-                (click)="accept(proposal)">
-                {{
-                  proposal.recruitedBy
-                    ? 'Yes, I am in this Fleet'
-                    : 'Yes, that is this Captain'
-                }}
-              </button>
-              <button
-                type="button"
-                class="lcars-btn red"
-                [disabled]="busy()"
-                (click)="decline(proposal)">
-                No
-              </button>
-            </div>
-          </div>
-        }
+        <!--
+          Drawn as the directory draws a Fleet (13 October 2026), with the
+          answers beneath the card's details.
+        -->
+        <div class="character-fleet__cards lcars-rotate">
+          @for (item of pendingCards(); track item.proposal.id) {
+            <app-fleet-scope-card
+              class="character-fleet__proposal"
+              [vm]="item.card">
+              <div class="character-fleet__actions lcars-rotate">
+                <button
+                  type="button"
+                  class="lcars-btn green"
+                  [disabled]="busy()"
+                  (click)="accept(item.proposal)">
+                  {{
+                    item.proposal.recruitedBy
+                      ? 'Yes, I am in this Fleet'
+                      : 'Yes, that is this Captain'
+                  }}
+                </button>
+                <button
+                  type="button"
+                  class="lcars-btn red"
+                  [disabled]="busy()"
+                  (click)="decline(item.proposal)">
+                  No
+                </button>
+              </div>
+            </app-fleet-scope-card>
+          }
+        </div>
       </div>
     }
 
     <!-- The current Fleet, or the absence of one. -->
     <h3 class="character-fleet__heading">Currently</h3>
-    @if (current(); as entry) {
-      <div class="character-fleet__entry">
-        <div class="character-fleet__proposal-name">
-          {{ entry.fleet.exactGameName }}
-          <span class="character-fleet__muted"
-            >on {{ entry.fleet.platformName }}</span
-          >
-        </div>
-        <div class="character-fleet__muted">
-          Since {{ instant(entry.validFrom) }}. {{ sourceLabel(entry) }}.
-        </div>
-
+    @if (currentCard(); as item) {
+      <app-fleet-scope-card
+        class="character-fleet__entry"
+        [vm]="item.card">
         <div class="character-fleet__row">
-          <div class="lcars-input-container sky">
-            <label [attr.for]="'visibility-' + entry.id">Who can see this</label>
+          <div class="lcars-input-container lcars-field--short">
+            <label [attr.for]="'visibility-' + item.entry.id"
+              >Who can see this</label
+            >
             <select
-              [id]="'visibility-' + entry.id"
-              [value]="entry.visibility"
+              [id]="'visibility-' + item.entry.id"
+              [value]="item.entry.visibility"
               [disabled]="busy()"
               (change)="
-                changeVisibility(entry, $any($event.target).value)
+                changeVisibility(item.entry, $any($event.target).value)
               ">
               <!-- Each option says whether it is chosen. The select's own
                    value is bound before these exist, so the browser would
-                   show the first, "Anyone", for an entry only its owner sees. -->
+                   show the first, "Anyone", for an entry only its owner
+                   sees. -->
               @for (choice of audienceChoices; track choice[0]) {
                 <option
                   [value]="choice[0]"
-                  [selected]="choice[0] === entry.visibility">
+                  [selected]="choice[0] === item.entry.visibility">
                   {{ choice[1] }}
                 </option>
               }
@@ -114,10 +93,10 @@
           </div>
         </div>
 
-        <div class="character-fleet__actions">
+        <div class="character-fleet__actions lcars-rotate">
           <button
             type="button"
-            class="lcars-btn red"
+            class="lcars-btn"
             [disabled]="busy()"
             (click)="leave()">
             I have left this Fleet
@@ -126,11 +105,11 @@
             type="button"
             class="lcars-btn red"
             [disabled]="busy()"
-            (click)="withdraw(entry)">
+            (click)="withdraw(item.entry)">
             Remove — this was never right
           </button>
         </div>
-      </div>
+      </app-fleet-scope-card>
     } @else {
       <p class="character-fleet__note">
         No Fleet is recorded for this Captain. Nobody sees what you record here
@@ -138,7 +117,7 @@
       </p>
     }
 
-    <div class="character-fleet__actions">
+    <div class="character-fleet__actions lcars-rotate">
       <button
         type="button"
         class="lcars-btn"
@@ -207,7 +186,7 @@
             {{ picked.platformName }}.
           </p>
 
-          <div class="character-fleet__row">
+          <div class="character-fleet__row lcars-field-columns">
             <div class="lcars-input-container sky">
               <label for="character-fleet-from">Joined on</label>
               <input
@@ -236,7 +215,7 @@
             </p>
           }
 
-          <div class="character-fleet__actions">
+          <div class="character-fleet__actions lcars-rotate">
             <button
               type="submit"
               class="lcars-btn green"
@@ -251,29 +230,23 @@
     <!-- What has ended. -->
     @if (past().length > 0) {
       <h3 class="character-fleet__heading">Previously</h3>
-      @for (entry of past(); track entry.id) {
-        <div class="character-fleet__entry">
-          <div class="character-fleet__proposal-name">
-            {{ entry.fleet.exactGameName }}
-            <span class="character-fleet__muted"
-              >on {{ entry.fleet.platformName }}</span
-            >
-          </div>
-          <div class="character-fleet__muted">
-            {{ instant(entry.validFrom) }} to {{ instant(entry.validTo!) }}.
-            {{ sourceLabel(entry) }}. Seen by: {{ audienceLabel(entry) }}.
-          </div>
-          <div class="character-fleet__actions">
-            <button
-              type="button"
-              class="lcars-btn red"
-              [disabled]="busy()"
-              (click)="withdraw(entry)">
-              Remove — this was never right
-            </button>
-          </div>
-        </div>
-      }
+      <div class="character-fleet__cards lcars-rotate">
+        @for (item of pastCards(); track item.entry.id) {
+          <app-fleet-scope-card
+            class="character-fleet__entry"
+            [vm]="item.card">
+            <div class="character-fleet__actions lcars-rotate">
+              <button
+                type="button"
+                class="lcars-btn red"
+                [disabled]="busy()"
+                (click)="withdraw(item.entry)">
+                Remove — this was never right
+              </button>
+            </div>
+          </app-fleet-scope-card>
+        }
+      </div>
     }
 
     <!--

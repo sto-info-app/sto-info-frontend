@@ -325,7 +325,7 @@ describe('FleetsDirectoryComponent', () => {
       render();
 
       expect(fixture.nativeElement.textContent).toContain(
-        'Roster last imported 4 March 2015',
+        'Imported 4 March 2015',
       );
     });
 
@@ -343,7 +343,7 @@ describe('FleetsDirectoryComponent', () => {
       render();
 
       expect(fixture.nativeElement.textContent).toContain(
-        'Roster last imported 2015-03-04T00:00:00Z',
+        'Imported 2015-03-04T00:00:00Z',
       );
     });
 

@@ -6,6 +6,8 @@ import {
   FLEET_SCOPE_FLEET,
 } from 'src/app/fleet/constants/fleet-scope.constants';
 
+import { SRC_PHOTO_UNAVAILABLE_300PX } from 'src/app/shared/constants/app-image-assets.constants';
+
 import { FleetScopeCardComponent } from './fleet-scope-card.component';
 import { FleetScopeCardVm } from './fleet-scope-card.model';
 
@@ -26,7 +28,7 @@ function buildVm(overrides: Partial<FleetScopeCardVm> = {}): FleetScopeCardVm {
     link: ['/fleets', 'united-federation-alliance', 'pc', 'starfleet-command'],
     unlinkedTitle: 'This Fleet is not open to visitors.',
     status: { label: 'Recruiting', modifier: 'recruiting' },
-    lastObservedLabel: 'Roster last seen 4 March 2015',
+    roster: 'Imported 4 March 2015',
     meta: ['128 members'],
     actions: [],
     ...overrides,
@@ -88,13 +90,73 @@ describe('FleetScopeCardComponent', () => {
     expect(text()).toContain('Starfleet Command');
     expect(text()).toContain('United Federation Alliance');
     expect(text()).toContain('PC');
-    expect(text()).toContain('Roster last seen 4 March 2015');
+    expect(text()).toContain('Imported 4 March 2015');
   });
 
-  it('says which level of the hierarchy it is', () => {
+  // Label over value, as the admin member cards set out a member.
+  // The directories list one kind each, so a card does not say which kind it
+  // is (13 October 2026).
+  it('sets each detail out under its label', () => {
     render(buildVm());
 
-    expect(find('app-fleet-scope-badge')?.textContent).toContain('Fleet');
+    const details = Array.from(
+      fixture.nativeElement.querySelectorAll('.fleet-scope-card__detail'),
+      (detail: Element) => [
+        detail.querySelector('dt')?.textContent?.trim(),
+        detail.querySelector('dd')?.textContent?.trim(),
+      ],
+    );
+
+    expect(details).toEqual([
+      ['Platform', 'PC'],
+      ['Status', 'Recruiting'],
+      ['Roster', 'Imported 4 March 2015'],
+      ['Community', 'United Federation Alliance'],
+    ]);
+  });
+
+  // The platform and the state each show an icon, and the card carries the
+  // account list's art for its platform (13 October 2026).
+  it('draws an icon beside the platform and the state', () => {
+    render(buildVm());
+
+    const icons = Array.from(
+      fixture.nativeElement.querySelectorAll('.fleet-scope-card__detail dd i'),
+      (icon: Element) => icon.className,
+    );
+
+    expect(icons).toEqual(['fab fa-windows', 'fa-solid fa-user-plus']);
+    expect(find('.fleet-scope-card__backdrop')?.getAttribute('src')).toBe(
+      '/assets/account-types/account_type_windows_default.jpg',
+    );
+  });
+
+  it('draws no icon for a platform or a state it has none for', () => {
+    render(
+      buildVm({
+        platform: 'Holodeck',
+        status: { label: 'Mothballed', modifier: 'mothballed' },
+      }),
+    );
+
+    expect(
+      fixture.nativeElement.querySelectorAll('.fleet-scope-card__detail dd i'),
+    ).toHaveLength(0);
+    expect(find('.fleet-scope-card__backdrop')?.getAttribute('src')).toBe(
+      '/assets/account-types/account_type_default.jpg',
+    );
+  });
+
+  // The character listings' picture for a missing portrait, as decoration.
+  it('stands the unavailable picture where a missing emblem would be', () => {
+    render(buildVm({ emblem: null, status: null }));
+
+    const stand = find(
+      '.fleet-scope-card__emblem--unavailable',
+    ) as HTMLImageElement | null;
+
+    expect(stand?.getAttribute('src')).toBe(SRC_PHOTO_UNAVAILABLE_300PX);
+    expect(stand?.getAttribute('alt')).toBe('');
   });
 
   // A name is evidence, not a label: two Fleets whose names differ only in
@@ -131,14 +193,38 @@ describe('FleetScopeCardComponent', () => {
   it('links to the record when the viewer may open it', () => {
     render(buildVm());
 
-    expect(find('a.fleet-scope-card__identity')).not.toBeNull();
+    expect(find('a.fleet-scope-card__link')).not.toBeNull();
+  });
+
+  // The narrow column an account card carries down its right, with the one
+  // control that opens the record (13 October 2026).
+  it('opens the record from its right-hand column, named by its kind', () => {
+    render(buildVm());
+
+    const view = find(
+      '.fleet-scope-card__controls a',
+    ) as HTMLAnchorElement | null;
+    const name = find('.fleet-scope-card__name');
+
+    expect(view?.getAttribute('href')).toBe(
+      '/fleets/united-federation-alliance/pc/starfleet-command',
+    );
+    expect(view?.getAttribute('aria-label')).toBe('View Fleet');
+    expect(view?.title).toBe('View Fleet');
+    expect(view?.getAttribute('aria-describedby')).toBe(name?.id);
+  });
+
+  it('has no column to open a record that cannot be opened', () => {
+    render(buildVm({ link: null }));
+
+    expect(find('.fleet-scope-card__controls')).toBeNull();
   });
 
   it('says why an unopenable record cannot be opened', () => {
     render(buildVm({ link: null }));
 
-    expect(find('a.fleet-scope-card__identity')).toBeNull();
-    expect(find('.fleet-scope-card__identity')?.getAttribute('title')).toBe(
+    expect(find('a.fleet-scope-card__link')).toBeNull();
+    expect(find('.fleet-scope-card__link')?.getAttribute('title')).toBe(
       'This Fleet is not open to visitors.',
     );
   });
@@ -161,9 +247,9 @@ describe('FleetScopeCardComponent', () => {
   });
 
   it('leaves the observation line out when nothing has been seen', () => {
-    render(buildVm({ lastObservedLabel: null }));
+    render(buildVm({ roster: null }));
 
-    expect(find('.fleet-scope-card__observed')).toBeNull();
+    expect(find('.fleet-scope-card__roster')).toBeNull();
   });
 
   it('lists the secondary lines', () => {
@@ -234,7 +320,9 @@ describe('FleetScopeCardComponent', () => {
      * @returns The image, or null.
      */
     const emblem = (): HTMLImageElement | null =>
-      find('.fleet-scope-card__emblem') as HTMLImageElement | null;
+      find(
+        '.fleet-scope-card__emblem:not(.fleet-scope-card__emblem--unavailable)',
+      ) as HTMLImageElement | null;
 
     it('draws the emblem it was given, with its description', () => {
       render(
@@ -252,19 +340,20 @@ describe('FleetScopeCardComponent', () => {
       expect(emblem()?.getAttribute('alt')).toBe('A crossed-sabres badge');
     });
 
-    it('draws nothing where a scope has no emblem', () => {
+    it('draws no emblem where a scope has none', () => {
       render(buildVm({ emblem: null }));
 
       expect(emblem()).toBeNull();
     });
 
-    it('drops the emblem rather than showing a broken image', () => {
+    it('shows the unavailable picture rather than a broken image', () => {
       render(buildVm({ emblem: { url: 'https://images.test/gone', alt: '' } }));
 
       emblem()?.dispatchEvent(new Event('error'));
       fixture.detectChanges();
 
       expect(emblem()).toBeNull();
+      expect(find('.fleet-scope-card__emblem--unavailable')).not.toBeNull();
     });
 
     it('tries again when the card is reused for another record', () => {

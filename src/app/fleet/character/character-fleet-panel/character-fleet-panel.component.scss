@@ -21,31 +21,33 @@
     opacity: 0.75;
   }
 
-  &__entry,
-  &__proposal {
-    padding: 0.6rem 0.75rem;
-    margin-bottom: 0.6rem;
-    border-left: 4px solid vars.$lcars-sky;
-    border-radius: 0 0.4rem 0.4rem 0;
-    background: vars.$lcars-grey-bg;
-  }
-
-  // A question somebody else is waiting on reads differently from a record
-  // that is simply there.
-  &__proposal {
-    border-left-color: vars.$lcars-gold;
-  }
-
-  &__proposal-name {
-    font-weight: 600;
-  }
-
-  &__row {
+  // The Fleets, the current one, the past ones and the proposals alike, are
+  // the directory's Fleet card, with
+  // what can be done about each beneath its details. A list of them rotates;
+  // a card alone takes the colour of the section it sits in.
+  &__cards {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    align-items: flex-end;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 0.6rem;
+  }
+
+  &__entry {
+    margin-bottom: 0.6rem;
+  }
+
+  // A row of short fields — the joining date beside who can see it — is laid
+  // out by the shared `.lcars-field-columns` grid instead, two to a row, so
+  // it keeps only the margin here.
+  &__row {
     margin-top: 0.5rem;
+
+    &:not(.lcars-field-columns) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: flex-end;
+    }
   }
 
   &__actions {

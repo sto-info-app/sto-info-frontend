@@ -6,26 +6,179 @@
   height: 100%;
 }
 
-// The base card shape, so a Fleet in a directory is the same surface as an
-// account on the dashboard. Full height, so a row of cards carrying different
-// numbers of lines still reads as one row.
+// An LCARS panel card: the spine and the
+// heading block in the listing's rotation colour, the body washed with it.
+// Full height, so a row of cards carrying different numbers of lines still
+// reads as one row.
 .fleet-scope-card {
-  @include mixins.lcars-card;
+  @include mixins.lcars-accent-panel-card(vars.$lcars-sky);
 
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   height: 100%;
-  padding: 1rem;
 }
 
-.fleet-scope-card__identity {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  align-items: flex-start;
+// The name on the block, and the record's state at its far end, as an admin
+// member card carries "Active" and its light.
+.fleet-scope-card__heading {
+  @include mixins.lcars-accent-panel-card-heading;
+}
+
+// The name as the page's heading: the heading's own margins and lettering
+// give way to the block's, its capitals among them, since a Fleet's name is
+// exact and its case is part of it.
+.fleet-scope-card__title {
+  min-width: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: none;
+  color: inherit;
+}
+
+// What kind of record this is, at the block's far end.
+.fleet-scope-card__scope {
+  flex: 0 0 auto;
+}
+
+.fleet-scope-card__link {
+  min-width: 0;
   color: inherit;
   text-decoration: none;
+}
+
+a.fleet-scope-card__link:hover .fleet-scope-card__name,
+a.fleet-scope-card__link:focus-visible .fleet-scope-card__name {
+  text-decoration: underline;
+}
+
+a.fleet-scope-card__link:focus-visible {
+  outline: 2px solid vars.$a11y-white;
+  outline-offset: 2px;
+}
+
+// The name is the whole point of the card and comes from a CSV, so it is given
+// room to be long: it wraps rather than being clipped, because a Fleet whose
+// name is cut off is a Fleet somebody cannot be sure they have found. Not
+// upper-cased, unlike other panels' names: a Fleet's name is exact, and its
+// case is part of it.
+.fleet-scope-card__name {
+  font-family: vars.$font-antonio;
+  font-size: 1.2rem;
+  line-height: 1.2;
+  color: vars.$lcars-black;
+  overflow-wrap: anywhere;
+}
+
+// The state, its words and icon in the colour that carries its meaning. That
+// is why the card's own colour does not: it is only the card's place in the
+// listing's rotation, and the state says what is happening inside the record.
+.fleet-scope-card__status {
+  --fleet-scope-card-state: #{vars.$lcars-grey-light};
+
+  i {
+    color: var(--fleet-scope-card-state);
+  }
+
+  &--recruiting {
+    --fleet-scope-card-state: #{vars.$lcars-green};
+  }
+
+  // Applications and invitations are both "the door is shut but there is a
+  // way through", so they share a colour and are told apart by their words.
+  &--application,
+  &--invite {
+    --fleet-scope-card-state: #{vars.$lcars-gold};
+  }
+
+  // An administrative hold, which is not the owner's doing and is not the
+  // same as closed — hence its own colour rather than the grey.
+  &--suspended {
+    --fleet-scope-card-state: #{vars.$lcars-red};
+  }
+
+  &--disputed {
+    --fleet-scope-card-state: #{vars.$lcars-tangerine};
+  }
+}
+
+// The emblem beside the details, as an account card's endeavour rank sits
+// beside its own, over the account list's art for the platform, shaded so the
+// words stay readable.
+.fleet-scope-card__body {
+  position: relative;
+  display: flex;
+  flex: 1;
+  gap: 1.25rem;
+  align-items: center;
+  overflow: hidden;
+  padding: 1rem 1.25rem;
+  background: vars.$lcars-black;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: vars.$lcars-banner-shade;
+    pointer-events: none;
+  }
+}
+
+.fleet-scope-card__backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+  user-select: none;
+}
+
+.fleet-scope-card__mark,
+.fleet-scope-card__main,
+.fleet-scope-card__controls {
+  position: relative;
+  z-index: 2;
+}
+
+// The narrow column down the card's right, as an account card's: darkened,
+// apart from the body by a hairline, and running the body's full height.
+.fleet-scope-card__controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: stretch;
+  justify-content: center;
+  gap: 0.5rem;
+  margin: -1rem -1.25rem -1rem 0;
+  padding: 0.6rem 0.8rem;
+  border-left: 1px solid vars.$white-a10;
+  background: vars.$black-a15;
+
+  .cta-icon {
+    @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+
+    font-size: 1.3rem;
+  }
+}
+
+.fleet-scope-card__mark {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+}
+
+.fleet-scope-card__main {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  align-self: stretch;
+  justify-content: center;
+  min-width: 0;
 }
 
 // Square, because an emblem is a badge rather than a portrait: the circular
@@ -33,81 +186,54 @@
 // card's colour of the listing's rotation.
 .fleet-scope-card__emblem {
   display: block;
-  width: 48px;
-  height: 48px;
-  border: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
+  width: 96px;
+  height: 96px;
+  border: 2px solid var(--lcars-panel-accent);
   border-radius: 6px;
   object-fit: cover;
   background: vars.$lcars-black;
 }
 
-// The name is the whole point of the card and comes from a CSV, so it is given
-// room to be long: it wraps rather than being clipped, because a Fleet whose
-// name is cut off is a Fleet somebody cannot be sure they have found.
-.fleet-scope-card__name {
-  font-family: vars.$font-antonio;
-  font-size: 1.25rem;
-  line-height: 1.2;
-  color: vars.$lcars-sunflower;
-  overflow-wrap: anywhere;
+// Label over value, as on the admin member cards: across the card where it is
+// wide, two to a row where it is not.
+.fleet-scope-card__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
+  gap: 0.6rem 1.25rem;
+  margin: 0;
 }
 
-a.fleet-scope-card__identity:hover .fleet-scope-card__name,
-a.fleet-scope-card__identity:focus-visible .fleet-scope-card__name {
-  color: var(--lcars-accent, #{vars.$lcars-sky});
-  text-decoration: underline;
+// A Community's name is somebody's free choice and may be long, so it has the
+// row to itself rather than wrapping in a column of its own.
+.fleet-scope-card__detail--wide {
+  grid-column: 1 / -1;
 }
 
-.fleet-scope-card__community {
-  font-size: 0.85rem;
-  color: vars.$lcars-grey-light;
-}
+.fleet-scope-card__detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
 
-// The state pill. Its colours carry meaning, which is why the card's own colour
-// does not: that is only its place in the listing's rotation, and these say
-// what is happening inside the record.
-.fleet-scope-card__status {
-  @include mixins.lcars-badge;
-
-  align-self: flex-start;
-  color: vars.$lcars-black;
-  background: vars.$lcars-grey-light;
-
-  &--recruiting {
-    background: vars.$lcars-green;
+  dt {
+    @include mixins.lcars-label;
   }
 
-  // Applications and invitations are both "the door is shut but there is a
-  // way through", so they share a colour and are told apart by their words.
-  &--application,
-  &--invite {
-    background: vars.$lcars-gold;
-  }
+  dd {
+    @include mixins.lcars-value;
 
-  &--closed {
-    background: vars.$lcars-grey-light;
-  }
+    margin: 0;
 
-  // An administrative hold, which is not the owner's doing and is not the
-  // same as closed — hence its own colour rather than the grey.
-  &--suspended {
-    background: vars.$lcars-red;
-  }
-
-  &--disputed {
-    background: vars.$lcars-tangerine;
+    i {
+      margin-right: 0.35rem;
+    }
   }
 }
 
-.fleet-scope-card__observed,
 .fleet-scope-card__meta {
   margin: 0;
   font-size: 0.85rem;
   color: vars.$lcars-grey-light;
-}
-
-.fleet-scope-card__observed i {
-  margin-right: 0.35rem;
 }
 
 // Pushed to the bottom, so the buttons line up across a row whatever each card

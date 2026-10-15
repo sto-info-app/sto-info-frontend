@@ -4,6 +4,7 @@ import {
   FLEET_SCOPE_FLEET,
 } from 'src/app/fleet/constants/fleet-scope.constants';
 import {
+  FleetScopeCardDetail,
   FleetScopeCardEmblem,
   FleetScopeCardStatus,
   FleetScopeCardVm,
@@ -15,6 +16,7 @@ import {
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
 import { rosterUnavailableOn } from 'src/app/fleet/imports/roster-import.constants';
 import {
+  CharacterFleetSummary,
   FleetCommunityCard,
   FleetDirectoryCard,
   FleetRecruitmentState,
@@ -138,6 +140,17 @@ function duplicateLine(card: InGameScopeCard): string | null {
 }
 
 /**
+ * Where a record's Community opens, so a card can link its name there.
+ *
+ * @param communitySlug - The Community's URL segment, or null where the record
+ *   belongs to none or it could not be read.
+ * @returns The router link, or null.
+ */
+function communityLinkOf(communitySlug: string | null): string[] | null {
+  return communitySlug === null ? null : FLEET_LINKS.community(communitySlug);
+}
+
+/**
  * Builds the card for a Fleet Community.
  *
  * @param card - The Community as the server sent it.
@@ -158,7 +171,7 @@ export function buildCommunityCardVm(
     link: FLEET_LINKS.community(card.slug),
     unlinkedTitle: null,
     status: scopeStatusPill(card.status, card.recruitmentState),
-    lastObservedLabel: null,
+    roster: null,
     meta: card.description === null ? [] : [card.description],
     actions: [],
   };
@@ -169,6 +182,27 @@ export type FleetFreshnessFacts = Pick<
   StoFleetCard,
   'platformName' | 'platformProvidesRosterExport' | 'lastEffectiveImportAt'
 >;
+
+/** The words a Fleet's freshness is said in: never imported, or when. */
+export interface FleetFreshnessWords {
+  readonly never: string;
+  readonly imported: (when: string) => string;
+}
+
+/** A sentence of its own, as a duplicate warning says it. */
+export const FLEET_FRESHNESS_SENTENCE: FleetFreshnessWords = {
+  never: 'No roster has ever been imported',
+  imported: when => `Roster last imported ${when}`,
+};
+
+/**
+ * A value under a card's "Roster" label (13 October 2026), where the label
+ * already says what it is about.
+ */
+export const FLEET_FRESHNESS_VALUE: FleetFreshnessWords = {
+  never: 'Never imported',
+  imported: when => `Imported ${when}`,
+};
 
 /**
  * Says how fresh a Fleet's record is, on its card or in a duplicate warning.
@@ -181,19 +215,21 @@ export type FleetFreshnessFacts = Pick<
  *
  * @param card - The Fleet as the server sent it.
  * @param formatInstant - Writes a roster import date out for the reader.
- * @returns The line the card draws.
+ * @param words - A sentence of its own, or a value under a label.
+ * @returns What to draw.
  */
 export function fleetFreshnessOf(
   card: FleetFreshnessFacts,
   formatInstant: InstantFormatter,
+  words: FleetFreshnessWords = FLEET_FRESHNESS_SENTENCE,
 ): string {
   if (!card.platformProvidesRosterExport) {
     return rosterUnavailableOn(card.platformName);
   }
 
   return card.lastEffectiveImportAt === null
-    ? 'No roster has ever been imported'
-    : `Roster last imported ${formatInstant(card.lastEffectiveImportAt)}`;
+    ? words.never
+    : words.imported(formatInstant(card.lastEffectiveImportAt));
 }
 
 /**
@@ -217,6 +253,7 @@ export function buildFleetCardVm(
     emblem: emblemOf(card),
     name: card.exactGameName,
     communityName: card.communityName,
+    communityLink: communityLinkOf(communitySlug),
     platform: card.platformName,
     link:
       communitySlug === null
@@ -224,7 +261,7 @@ export function buildFleetCardVm(
         : FLEET_LINKS.fleet(communitySlug, card.platformSegment, card.slug),
     unlinkedTitle: null,
     status: scopeStatusPill(card.status, card.recruitmentState),
-    lastObservedLabel: fleetFreshnessOf(card, formatInstant),
+    roster: fleetFreshnessOf(card, formatInstant, FLEET_FRESHNESS_VALUE),
     meta: [duplicateLine(card)].filter((line): line is string => line !== null),
     actions: [],
   };
@@ -251,6 +288,7 @@ export function buildArmadaCardVm(card: StoArmadaCard): FleetScopeCardVm {
     emblem: emblemOf(card),
     name: card.exactGameName,
     communityName: card.communityName,
+    communityLink: communityLinkOf(card.communitySlug),
     platform: card.platformName,
     // An Armada always has a Community; the shared card type says otherwise
     // only because it is shared with the Fleet card, which does not.
@@ -270,10 +308,51 @@ export function buildArmadaCardVm(card: StoArmadaCard): FleetScopeCardVm {
     // when the record itself has stopped operating.
     status: scopeStatusPill(card.status, null),
     // Nothing imports a roster for an Armada, so there is nothing to be fresh.
-    lastObservedLabel: null,
+    roster: null,
     meta: [alias, duplicateLine(card)].filter(
       (line): line is string => line !== null,
     ),
+    actions: [],
+  };
+}
+
+/**
+ * Builds the card for a Fleet a Captain is, was or may be in, on the
+ * Character's own page (13 October 2026), in the shape the directory draws a
+ * Fleet: what the page knows of the Captain's time in it is set out as details
+ * of its own, and what it asks as lines beneath them.
+ *
+ * @param fleet - The Fleet, as the Character's record names it.
+ * @param details - What the page says of the Captain's time in it.
+ * @param meta - Sentences beneath the details, e.g. what a proposal asks.
+ * @returns What the card component should draw.
+ */
+export function buildCharacterFleetCardVm(
+  fleet: CharacterFleetSummary,
+  details: readonly FleetScopeCardDetail[],
+  meta: string[] = [],
+): FleetScopeCardVm {
+  return {
+    id: fleet.id,
+    scope: FLEET_SCOPE_FLEET,
+    emblem: null,
+    name: fleet.exactGameName,
+    communityName: fleet.communityName,
+    communityLink: communityLinkOf(fleet.communitySlug),
+    platform: fleet.platformName,
+    link:
+      fleet.communitySlug === null
+        ? FLEET_LINKS.standaloneFleet(fleet.platformSegment, fleet.slug)
+        : FLEET_LINKS.fleet(
+            fleet.communitySlug,
+            fleet.platformSegment,
+            fleet.slug,
+          ),
+    unlinkedTitle: null,
+    status: null,
+    roster: null,
+    details,
+    meta,
     actions: [],
   };
 }

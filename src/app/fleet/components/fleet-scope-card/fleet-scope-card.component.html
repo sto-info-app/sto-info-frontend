@@ -1,93 +1,198 @@
+<!--
+  An LCARS panel card (13 October 2026), laid out as an account card is: the
+  name on a block of the listing's rotation colour, then the emblem where an
+  account shows its endeavour rank, and what tells two records of one name
+  apart set out label over value, over the account list's art for the
+  platform.
+-->
 <div class="fleet-scope-card">
-  @if (vm.link) {
-    <a
-      class="fleet-scope-card__identity"
-      [routerLink]="vm.link">
+  <div class="fleet-scope-card__heading">
+    <!--
+      On a record's own page the name is the page's heading, in the outline
+      under its title; in a listing it is a name among names.
+    -->
+    @if (nameHeading) {
+      <h2 class="fleet-scope-card__title">
+        <ng-container [ngTemplateOutlet]="identity"></ng-container>
+      </h2>
+    } @else {
       <ng-container [ngTemplateOutlet]="identity"></ng-container>
-    </a>
-  } @else {
-    <div
-      class="fleet-scope-card__identity"
-      [title]="vm.unlinkedTitle">
-      <ng-container [ngTemplateOutlet]="identity"></ng-container>
-    </div>
-  }
+    }
 
-  @if (vm.status) {
-    <span
-      class="fleet-scope-card__status"
-      [ngClass]="'fleet-scope-card__status--' + vm.status.modifier">
-      {{ vm.status.label }}
-    </span>
-  }
+    @if (showScope) {
+      <app-fleet-scope-badge
+        class="fleet-scope-card__scope"
+        [scope]="vm.scope"
+        [platform]="null" />
+    }
+  </div>
 
-  @if (vm.lastObservedLabel) {
-    <p class="fleet-scope-card__observed">
-      <i
-        class="fa-solid fa-clock"
-        aria-hidden="true"></i>
-      {{ vm.lastObservedLabel }}
-    </p>
-  }
+  <ng-template #identity>
+    @if (vm.link) {
+      <a
+        class="fleet-scope-card__link"
+        [routerLink]="vm.link">
+        <ng-container [ngTemplateOutlet]="name"></ng-container>
+      </a>
+    } @else {
+      <span
+        class="fleet-scope-card__link"
+        [title]="vm.unlinkedTitle">
+        <ng-container [ngTemplateOutlet]="name"></ng-container>
+      </span>
+    }
+  </ng-template>
 
-  @for (line of vm.meta; track $index) {
-    <p class="fleet-scope-card__meta">{{ line }}</p>
-  }
+  <div class="fleet-scope-card__body">
+    <img
+      class="fleet-scope-card__backdrop"
+      alt=""
+      aria-hidden="true"
+      [src]="backgroundPath" />
 
-  @if (vm.actions.length > 0) {
-    <div class="fleet-scope-card__actions">
-      @for (cardAction of vm.actions; track cardAction.key) {
-        <button
-          type="button"
-          class="lcars-btn lcars-btn-auto"
-          [ngClass]="cardAction.colourClass"
-          [disabled]="isActing"
-          [attr.aria-label]="cardAction.ariaLabel"
-          (click)="action.emit(cardAction.key)">
-          {{ cardAction.label }}
-        </button>
+    <!--
+      The emblem, where an account shows its endeavour rank. Without one, or
+      when it cannot be fetched, the picture the character listings show for a
+      missing portrait stands in its place, so every card keeps one shape.
+    -->
+    <div class="fleet-scope-card__mark">
+      @if (vm.emblem && !hasEmblemFailed) {
+        <img
+          class="fleet-scope-card__emblem"
+          loading="lazy"
+          width="96"
+          height="96"
+          [src]="vm.emblem.url"
+          [alt]="vm.emblem.alt"
+          (error)="onEmblemError()" />
+      } @else {
+        <img
+          class="fleet-scope-card__emblem fleet-scope-card__emblem--unavailable"
+          loading="lazy"
+          width="96"
+          height="96"
+          alt=""
+          [src]="unavailableSrc" />
       }
     </div>
-  }
+
+    <div class="fleet-scope-card__main">
+      <dl class="fleet-scope-card__details">
+        @if (vm.platform) {
+          <div class="fleet-scope-card__detail">
+            <dt>Platform</dt>
+            <dd>
+              @if (platformIcon) {
+                <i
+                  [ngClass]="platformIcon"
+                  aria-hidden="true"></i>
+              }
+              {{ vm.platform }}
+            </dd>
+          </div>
+        }
+        @if (vm.status) {
+          <div class="fleet-scope-card__detail">
+            <dt>Status</dt>
+            <dd
+              class="fleet-scope-card__status"
+              [ngClass]="'fleet-scope-card__status--' + vm.status.modifier">
+              @if (statusIconOf(vm.status.modifier); as statusIcon) {
+                <i
+                  [ngClass]="statusIcon"
+                  aria-hidden="true"></i>
+              }
+              {{ vm.status.label }}
+            </dd>
+          </div>
+        }
+        @if (vm.roster) {
+          <div class="fleet-scope-card__detail">
+            <dt>Roster</dt>
+            <dd class="fleet-scope-card__roster">{{ vm.roster }}</dd>
+          </div>
+        }
+        @if (vm.communityName) {
+          <div class="fleet-scope-card__detail fleet-scope-card__detail--wide">
+            <dt>Community</dt>
+            <dd class="fleet-scope-card__community">
+              @if (vm.communityLink) {
+                <a [routerLink]="vm.communityLink">{{ vm.communityName }}</a>
+              } @else {
+                {{ vm.communityName }}
+              }
+            </dd>
+          </div>
+        }
+        @for (detail of vm.details ?? []; track detail.label) {
+          <div class="fleet-scope-card__detail">
+            <dt>{{ detail.label }}</dt>
+            <dd>{{ detail.value }}</dd>
+          </div>
+        }
+      </dl>
+
+      @for (line of vm.meta; track $index) {
+        <p class="fleet-scope-card__meta">{{ line }}</p>
+      }
+
+      @if (vm.actions.length > 0) {
+        <div class="fleet-scope-card__actions">
+          @for (cardAction of vm.actions; track cardAction.key) {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto"
+              [ngClass]="cardAction.colourClass"
+              [disabled]="isActing"
+              [attr.aria-label]="cardAction.ariaLabel"
+              (click)="action.emit(cardAction.key)">
+              {{ cardAction.label }}
+            </button>
+          }
+        </div>
+      }
+
+      <!--
+        Controls of the page's own beneath the details - a chooser, an answer
+        to give - where a card is more than a row in a listing.
+      -->
+      <ng-content />
+    </div>
+
+    <!--
+      The narrow column of controls an account card carries down its right,
+      here with the one that opens the record. Named by its kind and described
+      by the card's name, so it does not repeat the name link above it.
+    -->
+    @if (vm.link) {
+      <div class="fleet-scope-card__controls">
+        <a
+          class="cta-icon"
+          [routerLink]="vm.link"
+          [title]="viewLabel"
+          [attr.aria-label]="viewLabel"
+          [attr.aria-describedby]="nameId"
+          ><i
+            class="fas fa-eye"
+            aria-hidden="true"></i
+        ></a>
+      </div>
+    }
+  </div>
 </div>
 
 <!--
-  The badge, name and parent Community read the same whether or not the record
-  can be opened; only the element wrapping them changes, so they are declared
-  once here rather than repeated in both branches.
+  The name reads the same whether or not the record can be opened; only the
+  element wrapping it changes, so it is declared once here rather than
+  repeated in both branches. Every name goes through the exact-name component,
+  including a Community's, which the server has trimmed and which therefore
+  draws no marks. One path rather than two: the day a name reaches a card from
+  somewhere that did not trim it, it is shown rather than swallowed.
 -->
-<ng-template #identity>
-  <!--
-    Drawn square and dropped entirely when it cannot be fetched. A scope with
-    no emblem gets no placeholder: the badge and the name already say what the
-    row is, and a column of identical grey squares would be furniture.
-  -->
-  @if (vm.emblem && !hasEmblemFailed) {
-    <img
-      class="fleet-scope-card__emblem"
-      loading="lazy"
-      width="48"
-      height="48"
-      [src]="vm.emblem.url"
-      [alt]="vm.emblem.alt"
-      (error)="onEmblemError()" />
-  }
-
-  <app-fleet-scope-badge
-    [scope]="vm.scope"
-    [platform]="vm.platform" />
-
-  <!--
-    Every name goes through the exact-name component, including a Community's,
-    which the server has trimmed and which therefore draws no marks. One path
-    rather than two: the day a name reaches a card from somewhere that did not
-    trim it, it is shown rather than swallowed.
-  -->
-  <span class="fleet-scope-card__name">
+<ng-template #name>
+  <span
+    class="fleet-scope-card__name"
+    [id]="nameId">
     <app-fleet-exact-name [name]="vm.name" />
   </span>
-
-  @if (vm.communityName) {
-    <span class="fleet-scope-card__community">{{ vm.communityName }}</span>
-  }
 </ng-template>
