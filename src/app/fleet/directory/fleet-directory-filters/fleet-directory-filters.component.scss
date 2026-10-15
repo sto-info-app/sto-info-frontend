@@ -6,12 +6,5 @@
   margin-bottom: 1rem;
 }
 
-// Wraps rather than scrolls. On a narrow screen the three controls stack, and
-// a reader who cannot see the ordering control cannot be expected to guess
-// that the list is ordered by name.
-.fleet-directory-filters .form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
-}
+// The name takes the row; what is shown and its order, both a word or two,
+// sit side by side under it (`.lcars-field-columns`), and stack on a phone.

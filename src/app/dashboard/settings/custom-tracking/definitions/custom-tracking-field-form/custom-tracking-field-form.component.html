@@ -11,7 +11,7 @@
     [level]="3">
     <div class="lcars-rotate">
       @if (isNew) {
-        <div class="lcars-select-container">
+        <div class="lcars-select-container lcars-field--short">
           <span class="select-label">What this field asks for</span>
           <select
             formControlName="fieldType"
@@ -130,7 +130,7 @@
                 </div>
               }
               @case (settingKind.CHOICE) {
-                <div class="lcars-select-container">
+                <div class="lcars-select-container lcars-field--short">
                   <span class="select-label">{{ setting.label }}</span>
                   <select
                     [formControlName]="setting.key"
@@ -146,7 +146,7 @@
                 }
               }
               @case (settingKind.TIMEZONE) {
-                <div class="lcars-select-container">
+                <div class="lcars-select-container lcars-field--short">
                   <span class="select-label">{{ setting.label }}</span>
                   <select
                     [formControlName]="setting.key"
@@ -205,34 +205,36 @@
       <fieldset class="custom-tracking-empty-modes lcars-rotate">
         <legend>When this field has no value</legend>
 
-        <div class="lcars-select-container">
-          <label
-            class="select-label"
-            [attr.for]="formId + '-owner-empty'"
-            >You see</label
-          >
-          <select
-            formControlName="ownerEmptyMode"
-            [id]="formId + '-owner-empty'">
-            @for (choice of emptyModeChoices; track choice.value) {
-              <option [value]="choice.value">{{ choice.label }}</option>
-            }
-          </select>
-        </div>
+        <div class="lcars-field-columns lcars-rotate">
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              [attr.for]="formId + '-owner-empty'"
+              >You see</label
+            >
+            <select
+              formControlName="ownerEmptyMode"
+              [id]="formId + '-owner-empty'">
+              @for (choice of emptyModeChoices; track choice.value) {
+                <option [value]="choice.value">{{ choice.label }}</option>
+              }
+            </select>
+          </div>
 
-        <div class="lcars-select-container">
-          <label
-            class="select-label"
-            [attr.for]="formId + '-public-empty'"
-            >The public sees</label
-          >
-          <select
-            formControlName="publicEmptyMode"
-            [id]="formId + '-public-empty'">
-            @for (choice of emptyModeChoices; track choice.value) {
-              <option [value]="choice.value">{{ choice.label }}</option>
-            }
-          </select>
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              [attr.for]="formId + '-public-empty'"
+              >The public sees</label
+            >
+            <select
+              formControlName="publicEmptyMode"
+              [id]="formId + '-public-empty'">
+              @for (choice of emptyModeChoices; track choice.value) {
+                <option [value]="choice.value">{{ choice.label }}</option>
+              }
+            </select>
+          </div>
         </div>
 
         <p class="field-hint">

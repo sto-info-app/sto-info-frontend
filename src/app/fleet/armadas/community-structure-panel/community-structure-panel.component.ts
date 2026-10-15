@@ -22,7 +22,7 @@ import {
   ArmadaRef,
   CommunityStructure,
 } from 'src/app/models/fleet-armada.models';
-import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** The Community the panel is on. */
 export interface CommunityStructurePanelVm {
@@ -47,7 +47,7 @@ export interface CommunityStructurePanelVm {
   styleUrls: ['./community-structure-panel.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ArmadaTreeComponent, CollapsibleSectionComponent, RouterLink],
+  imports: [ArmadaTreeComponent, LcarsPanelComponent, RouterLink],
 })
 export class CommunityStructurePanelComponent {
   private readonly _armadas = inject(FleetArmadaService);

@@ -5,10 +5,6 @@
   display: block;
 }
 
-.roster-conflicts__intro {
-  max-width: 70ch;
-}
-
 // Which conflicts, as a tab strip: each tab takes the next colour of the
 // rotation, and the one shown is filled with its own.
 @include tabs.lcars-tab-strip($min-width: 0);

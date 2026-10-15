@@ -6,17 +6,21 @@
 
 .community-register__intro {
   margin: 1rem 0;
-  max-width: 60ch;
 }
 
-// Wraps rather than scrolls, so the three short controls sit on one line on
-// a wide screen and stack on a narrow one.
+// Wraps rather than scrolls, so a row's controls sit on one line on a wide
+// screen and stack on a narrow one. The three short drop-downs are laid out
+// by the shared `.lcars-field-columns` grid instead, two to a row, so the
+// flex rules leave that row alone.
 .community-register__form .form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
   margin-bottom: 1rem;
+
+  &:not(.lcars-field-columns) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
 }
 
 // Drawn up under the row it explains, as on the Settings page.

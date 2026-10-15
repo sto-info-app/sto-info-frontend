@@ -40,23 +40,27 @@
                 (submit)="
                   $event.preventDefault(); onSave(data.section, holding)
                 ">
-                @for (track of holding.tracks; track track.code) {
-                  <div class="lcars-input-container">
-                    <label [for]="'tier-' + track.code">{{ track.name }}</label>
-                    <select
-                      [id]="'tier-' + track.code"
-                      [disabled]="busy()"
-                      (change)="onTier(track, $any($event.target).value)">
-                      @for (tier of tiersOf(track); track tier) {
-                        <option
-                          [value]="tier"
-                          [selected]="tier === drafted(track)">
-                          Tier {{ tier }}
-                        </option>
-                      }
-                    </select>
-                  </div>
-                }
+                <div class="lcars-field-columns lcars-rotate">
+                  @for (track of holding.tracks; track track.code) {
+                    <div class="lcars-input-container">
+                      <label [for]="'tier-' + track.code">{{
+                        track.name
+                      }}</label>
+                      <select
+                        [id]="'tier-' + track.code"
+                        [disabled]="busy()"
+                        (change)="onTier(track, $any($event.target).value)">
+                        @for (tier of tiersOf(track); track tier) {
+                          <option
+                            [value]="tier"
+                            [selected]="tier === drafted(track)">
+                            Tier {{ tier }}
+                          </option>
+                        }
+                      </select>
+                    </div>
+                  }
+                </div>
                 <div class="lcars-input-container">
                   <label [for]="'reason-' + holding.code">Why (optional)</label>
                   <textarea

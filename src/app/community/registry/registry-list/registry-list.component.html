@@ -83,7 +83,7 @@
             <p class="lcars-empty-state">{{ emptyMessage }}</p>
           }
 
-          <div class="member-card-grid">
+          <div class="member-card-grid lcars-rotate">
             @for (vm of profileVms; track vm.id) {
               <app-member-card
                 [vm]="vm.card"

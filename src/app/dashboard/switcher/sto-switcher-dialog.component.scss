@@ -1,13 +1,13 @@
-@use 'sass:color';
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
 
-// The switcher wears the shapes the dashboard behind it wears. An account is a
-// solid bar with its name in black, the way an account card heads itself; a
-// captain is a panel with a coloured spine, the way a captain card is drawn.
-// Nothing here is a new shape to learn — the list reads as the pages it jumps
-// between, only denser.
-$account-colour: vars.$lcars-sunflower;
-$captain-colour: vars.$lcars-perano;
+// The switcher wears the shapes the dashboard behind it wears. Each account is
+// an LCARS panel card: its name on a
+// block of the list's rotation colour, the way an account card heads itself,
+// with its captains beneath on a spine and a body washed with that colour.
+// Each captain is a row with a spine of its allegiance's colour, the way a
+// captain card is drawn. Nothing here is a new shape to learn — the list
+// reads as the pages it jumps between, only denser.
 
 #sto-switcher-dialog {
   display: flex;
@@ -67,12 +67,17 @@ $captain-colour: vars.$lcars-perano;
   margin: 1rem 0 0;
 }
 
+// One account and its captains. Sunflower where nothing rotates: an account
+// alone in the list takes it, as the account cards' headings do.
+.sto-switcher__account {
+  @include mixins.lcars-accent-panel-card(vars.$lcars-sunflower);
+}
+
 // ── The account bar ──────────────────────────────────────────────────────────
 
 .sto-switcher__account-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
+  @include mixins.lcars-accent-panel-card-heading;
+
   gap: 0.25rem 0.75rem;
 
   // On a narrow screen the platform glyphs, the captain count and the Viewing
@@ -89,16 +94,19 @@ $captain-colour: vars.$lcars-perano;
   height: auto;
   margin: 0;
   padding: 0.4rem 0.9rem;
-  border: none;
-  border-radius: 10px 10px 0 0;
-  background: $account-colour;
-  border-bottom: 2px solid color.adjust($account-colour, $lightness: -20%);
-  color: vars.$lcars-black;
+  border-top: none;
+  border-right: none;
+  border-left: none;
+  border-radius: 0;
   font-family: vars.$font-antonio;
   font-size: 1.05rem;
   letter-spacing: 0.04em;
   text-align: left;
-  text-transform: uppercase;
+
+  // Not upper-cased, unlike other panels' names (and unlike the site's
+  // buttons, which this bar is): an account's handle is exact, and its case is
+  // part of it.
+  text-transform: none;
   cursor: pointer;
   transition: background 0.2s;
 
@@ -108,8 +116,16 @@ $captain-colour: vars.$lcars-perano;
     // this size reads as the bar going out rather than as the pointer being on
     // it.
     filter: none;
-    outline: none;
-    background: color.adjust($account-colour, $lightness: 12%);
+    background: color-mix(
+      in srgb,
+      var(--lcars-panel-accent) 75%,
+      #{vars.$lcars-white}
+    );
+  }
+
+  &:focus-visible:not(:disabled) {
+    outline: 2px solid vars.$a11y-white;
+    outline-offset: -4px;
   }
 }
 
@@ -158,9 +174,10 @@ $captain-colour: vars.$lcars-perano;
   padding: 0.05rem 0.45rem;
   border-radius: 999px;
   background: vars.$lcars-black;
-  color: vars.$lcars-sunflower;
+  color: var(--lcars-panel-accent);
   font-size: 0.7rem;
   letter-spacing: 0.08em;
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
@@ -175,12 +192,15 @@ $captain-colour: vars.$lcars-perano;
 
 // ── Captain rows ─────────────────────────────────────────────────────────────
 
+// The card's body: the rows sit inset on the washed ground rather than
+// running to its edges.
 .sto-switcher__captains {
+  @include mixins.lcars-panel-card-body;
+
   display: flex;
   flex-direction: column;
   gap: 2px;
   list-style: none;
-  padding: 0;
   margin: 0;
 }
 
@@ -197,7 +217,7 @@ $captain-colour: vars.$lcars-perano;
   padding: 0.3rem 0.9rem;
   border: none;
   border-left: 8px solid vars.$lcars-grey-dark;
-  border-radius: 0;
+  border-radius: 0 4px 4px 0;
   background: vars.$lcars-grey-bg;
   color: vars.$lcars-white;
   font: inherit;
@@ -208,12 +228,12 @@ $captain-colour: vars.$lcars-perano;
   &:hover:not(:disabled),
   &:focus-visible:not(:disabled) {
     filter: none;
-    outline: none;
     background: vars.$lcars-card-surface-hover;
   }
 
-  &:last-child {
-    border-radius: 0 0 10px 10px;
+  &:focus-visible:not(:disabled) {
+    outline: 2px solid vars.$a11y-white;
+    outline-offset: -2px;
   }
 
   // Allegiance colours the spine, matching the captain cards these rows stand
@@ -257,7 +277,7 @@ $captain-colour: vars.$lcars-perano;
   font-size: 1rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: $captain-colour;
+  color: var(--lcars-panel-accent);
 }
 
 // The avatar component renders at its natural 100px, which is a portrait

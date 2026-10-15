@@ -7,18 +7,22 @@
 .scope-settings {
   &__intro,
   &__renamed {
-    max-width: 70ch;
     margin: 1rem 0;
   }
 
   // The fields sit side by side where there is room and stack on a phone,
-  // as on registration.
+  // as on registration. The rows of short drop-downs are laid out by the
+  // shared `.lcars-field-columns` grid instead, two to a row, so the flex
+  // rules leave them alone.
   &__form .form-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: flex-end;
     margin-bottom: 1rem;
+
+    &:not(.lcars-field-columns) {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      align-items: flex-end;
+    }
   }
 
   &__hint {

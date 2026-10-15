@@ -6,17 +6,21 @@
 
 .register-page__intro {
   margin: 1rem 0;
-  max-width: 70ch;
 }
 
 // Wraps rather than scrolls, so the controls sit on one line on a wide
-// screen and stack on a narrow one.
+// screen and stack on a narrow one. A row of short fields is laid out by the
+// shared `.lcars-field-columns` grid instead — the platform and allegiance
+// two to a row beneath a full-width name — so the flex rules leave it alone.
 .register-page__form .form-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  align-items: flex-end;
   margin-bottom: 1rem;
+
+  &:not(.lcars-field-columns) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
 }
 
 // Beneath the field it is about: a reader who has to look elsewhere to find

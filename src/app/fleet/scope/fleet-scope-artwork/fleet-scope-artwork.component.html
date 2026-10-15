@@ -1,4 +1,7 @@
-<app-collapsible-section heading="Artwork">
+<app-lcars-panel
+  heading="Artwork"
+  [level]="2"
+  [collapsible]="true">
   @if (errorMessage) {
     <app-lcars-error-message
       title="Transmission Error"
@@ -38,4 +41,4 @@
       </li>
     }
   </ul>
-</app-collapsible-section>
+</app-lcars-panel>

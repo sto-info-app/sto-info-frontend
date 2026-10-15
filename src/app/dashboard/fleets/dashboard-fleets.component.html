@@ -73,7 +73,9 @@
             <app-collapsible-section
               heading="Following"
               [badge]="state.cards.length">
-              <div id="dashboard-fleets-grid">
+              <div
+                id="dashboard-fleets-grid"
+                class="lcars-rotate">
                 @for (card of state.cards; track card.id) {
                   <app-fleet-scope-card [vm]="card" />
                 }

@@ -238,9 +238,9 @@ describe('RosterTimelineComponent', () => {
     );
     render();
 
-    expect(
-      page().querySelector('.roster-timeline__link')?.getAttribute('href'),
-    ).toBe('/community/registry/profiles/kell/fixture003/kell-marr@fixture003');
+    expect(page().querySelector('.buttons-row a')?.getAttribute('href')).toBe(
+      '/community/registry/profiles/kell/fixture003/kell-marr@fixture003',
+    );
   });
 
   it('calls a member none of whose rows the reader may see this member', () => {

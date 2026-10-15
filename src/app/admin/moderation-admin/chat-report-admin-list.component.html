@@ -32,7 +32,9 @@
       heading="Chat Queue"
       barClass="small-lcars-bar-gap"
       [badge]="openCount() > 0 ? openCount() : null">
-      <app-lcars-panel heading="Filters">
+      <app-lcars-panel
+        heading="Filters"
+        [collapsible]="true">
         <div class="admin-fields lcars-rotate">
           <div class="lcars-select-container">
             <label

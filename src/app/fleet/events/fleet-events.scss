@@ -12,16 +12,35 @@
     margin: 0 0 1rem;
   }
 
+  // A row of short drop-downs in the editor is laid out by the shared
+  // `.lcars-field-columns` grid instead, two to a row, so it keeps only the
+  // margin here.
   &__actions,
   &__views,
   &__months,
-  &__answers,
+  &__answers:not(.lcars-field-columns),
   &__reminders {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
     align-items: center;
+  }
+
+  &__actions,
+  &__views,
+  &__months,
+  &__answers,
+  &__reminders {
     margin: 0 0 1rem;
+  }
+
+  // Going is green and Can't go red, as accepting and refusing are everywhere,
+  // so the answer somebody gave is told apart by a ring (and aria-pressed)
+  // rather than by a colour of its own.
+  &__answers .lcars-btn[aria-pressed='true'] {
+    box-shadow:
+      0 0 0 3px vars.$lcars-black,
+      0 0 0 5px vars.$a11y-white;
   }
 
   // The LCARS frame caps every `nav` at the sidebar's 660px and pushes its

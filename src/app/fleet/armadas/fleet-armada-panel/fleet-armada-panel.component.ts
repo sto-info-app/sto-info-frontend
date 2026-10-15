@@ -26,7 +26,7 @@ import {
   ArmadaRef,
   FleetArmadaView,
 } from 'src/app/models/fleet-armada.models';
-import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -61,7 +61,7 @@ export const FLEET_ARMADA_FAILED = 'That did not work. Please try again.';
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AppDatePipe,
-    CollapsibleSectionComponent,
+    LcarsPanelComponent,
     LcarsErrorMessageComponent,
     RouterLink,
   ],

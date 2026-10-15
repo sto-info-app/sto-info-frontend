@@ -20,7 +20,7 @@
           message="Chat is open in five other tabs or devices, so this one gave way."></app-lcars-warning-message>
         <button
           type="button"
-          class="lcars-btn sunflower"
+          class="lcars-btn"
           (click)="reconnect()">
           Use chat here
         </button>
@@ -57,6 +57,10 @@
           </p>
         }
 
+        <!--
+          Each part of the list is an LCARS panel card (13 October 2026): its
+          name on a block of the list's rotation colour, its places beneath.
+        -->
         @for (scope of scopes(); track scope.path) {
           <section class="chat-page__scope">
             <h2 class="chat-page__scope-name">
@@ -65,108 +69,114 @@
               }}</span
               >&ngsp;<a [routerLink]="scope.path">{{ scope.name }}</a>
             </h2>
-            <ul class="chat-page__places">
-              @for (channel of scope.channels; track channel.id) {
-                <li class="chat-page__place">
-                  <a
-                    class="chat-page__place-link"
-                    [routerLink]="['/chat', 'channels', channel.id]"
-                    [attr.aria-current]="isOpenChannel(channel) ? 'page' : null"
-                    [class.chat-page__place-link--open]="
-                      isOpenChannel(channel)
-                    ">
-                    <span># {{ channel.name }}</span>
-                    @if (channel.readRole !== 'MEMBER') {
-                      &ngsp;<span class="chat-page__place-note">{{
-                        roleLabels[channel.readRole]
-                      }}</span>
+            <div class="chat-page__scope-body">
+              <ul class="chat-page__places">
+                @for (channel of scope.channels; track channel.id) {
+                  <li class="chat-page__place">
+                    <a
+                      class="chat-page__place-link"
+                      [routerLink]="['/chat', 'channels', channel.id]"
+                      [attr.aria-current]="
+                        isOpenChannel(channel) ? 'page' : null
+                      "
+                      [class.chat-page__place-link--open]="
+                        isOpenChannel(channel)
+                      ">
+                      <span># {{ channel.name }}</span>
+                      @if (channel.readRole !== 'MEMBER') {
+                        &ngsp;<span class="chat-page__place-note">{{
+                          roleLabels[channel.readRole]
+                        }}</span>
+                      }
+                    </a>
+                    @if (channel.mayManage || scope.mayExport) {
+                      <span class="chat-page__manage">
+                        @if (scope.mayExport) {
+                          <button
+                            type="button"
+                            class="chat-page__manage-button"
+                            [attr.aria-label]="
+                              'Export a transcript of ' + channel.name
+                            "
+                            (click)="exportTranscript(scope, channel)">
+                            <i
+                              class="fas fa-file-lines"
+                              aria-hidden="true"></i>
+                          </button>
+                        }
+                        @if (channel.mayManage) {
+                          <button
+                            type="button"
+                            class="chat-page__manage-button"
+                            [attr.aria-label]="'Change ' + channel.name"
+                            (click)="changeChannel(scope, channel)">
+                            <i
+                              class="fas fa-user-pen"
+                              aria-hidden="true"></i>
+                          </button>
+                          <button
+                            type="button"
+                            class="chat-page__manage-button"
+                            [attr.aria-label]="'Archive ' + channel.name"
+                            (click)="archiveChannel(scope, channel)">
+                            <i
+                              class="fas fa-box-archive"
+                              aria-hidden="true"></i>
+                          </button>
+                        }
+                      </span>
                     }
-                  </a>
-                  @if (channel.mayManage || scope.mayExport) {
-                    <span class="chat-page__manage">
-                      @if (scope.mayExport) {
-                        <button
-                          type="button"
-                          class="chat-page__manage-button"
-                          [attr.aria-label]="
-                            'Export a transcript of ' + channel.name
-                          "
-                          (click)="exportTranscript(scope, channel)">
-                          <i
-                            class="fas fa-file-lines"
-                            aria-hidden="true"></i>
-                        </button>
-                      }
-                      @if (channel.mayManage) {
-                        <button
-                          type="button"
-                          class="chat-page__manage-button"
-                          [attr.aria-label]="'Change ' + channel.name"
-                          (click)="changeChannel(scope, channel)">
-                          <i
-                            class="fas fa-user-pen"
-                            aria-hidden="true"></i>
-                        </button>
-                        <button
-                          type="button"
-                          class="chat-page__manage-button"
-                          [attr.aria-label]="'Archive ' + channel.name"
-                          (click)="archiveChannel(scope, channel)">
-                          <i
-                            class="fas fa-box-archive"
-                            aria-hidden="true"></i>
-                        </button>
-                      }
-                    </span>
-                  }
-                </li>
+                  </li>
+                }
+              </ul>
+              @if (scope.mayCreate) {
+                <button
+                  type="button"
+                  class="lcars-btn chat-page__add"
+                  (click)="addChannel(scope)">
+                  Add channel
+                </button>
               }
-            </ul>
-            @if (scope.mayCreate) {
-              <button
-                type="button"
-                class="lcars-btn chat-page__add"
-                (click)="addChannel(scope)">
-                Add channel
-              </button>
-            }
+            </div>
           </section>
         }
 
         <section class="chat-page__scope">
           <h2 class="chat-page__scope-name">Direct messages</h2>
-          @if (conversations().length === 0) {
-            <p class="chat-page__place-note">
-              Open a conversation from a friend’s profile.
-            </p>
-          } @else {
-            <ul class="chat-page__places">
-              @for (conversation of conversations(); track conversation.id) {
-                <li class="chat-page__place">
-                  <a
-                    class="chat-page__place-link"
-                    [routerLink]="['/chat', 'direct', conversation.id]"
-                    [attr.aria-current]="
-                      isOpenConversation(conversation) ? 'page' : null
-                    "
-                    [class.chat-page__place-link--open]="
-                      isOpenConversation(conversation)
-                    ">
-                    <span class="chat-page__friend">
-                      <span
-                        class="chat-presence"
-                        [class.chat-presence--online]="isOnline(conversation)"
-                        aria-hidden="true"></span>
-                      {{ conversation.other.username ?? 'Somebody' }}
-                      @if (isOnline(conversation)) {
-                        <span class="sr-only">(online)</span>
-                      }
-                    </span>
-                  </a>
-                </li>
-              }
-            </ul>
-          }
+          <div class="chat-page__scope-body">
+            @if (conversations().length === 0) {
+              <p class="chat-page__place-note">
+                Open a conversation from a friend’s profile.
+              </p>
+            } @else {
+              <ul class="chat-page__places">
+                @for (conversation of conversations(); track conversation.id) {
+                  <li class="chat-page__place">
+                    <a
+                      class="chat-page__place-link"
+                      [routerLink]="['/chat', 'direct', conversation.id]"
+                      [attr.aria-current]="
+                        isOpenConversation(conversation) ? 'page' : null
+                      "
+                      [class.chat-page__place-link--open]="
+                        isOpenConversation(conversation)
+                      ">
+                      <span class="chat-page__friend">
+                        <span
+                          class="chat-presence"
+                          [class.chat-presence--online]="isOnline(conversation)"
+                          aria-hidden="true"></span>
+                        {{ conversation.other.username ?? 'Somebody' }}
+                        @if (isOnline(conversation)) {
+                          <span class="sr-only">(online)</span>
+                        }
+                      </span>
+                    </a>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
         </section>
 
         @if (mayExport() || transcripts().length > 0) {
@@ -178,69 +188,74 @@
               class="chat-page__scope-name">
               Your transcripts
             </h2>
-            @if (transcriptError(); as error) {
-              <app-lcars-error-message
-                title="Transcripts"
-                [message]="error"></app-lcars-error-message>
-            }
-            @if (transcripts().length === 0) {
-              <p class="chat-page__place-note">
-                Export a channel’s transcript with the export button beside it.
-                Transcripts you asked for in the last day show here.
-              </p>
-            }
-            @if (hasPending()) {
-              <p class="chat-page__place-note">
-                You’ll get a notice when a transcript is ready. Refresh to see
-                it here.
-              </p>
-            }
-            @if (transcripts().length > 0) {
-              <ul class="chat-page__places">
-                @for (transcript of transcripts(); track transcript.id) {
-                  <li class="chat-page__transcript">
-                    <span class="chat-page__transcript-name">
-                      # {{ transcript.channelName }}
-                      @if (transcript.scopeName; as scopeName) {
-                        &ngsp;<span class="chat-page__place-note">{{
-                          scopeName
-                        }}</span>
+            <div class="chat-page__scope-body">
+              @if (transcriptError(); as error) {
+                <app-lcars-error-message
+                  title="Transcripts"
+                  [message]="error"></app-lcars-error-message>
+              }
+              @if (transcripts().length === 0) {
+                <p class="chat-page__place-note">
+                  Export a channel’s transcript with the export button beside
+                  it. Transcripts you asked for in the last day show here.
+                </p>
+              }
+              @if (hasPending()) {
+                <p class="chat-page__place-note">
+                  You’ll get a notice when a transcript is ready. Refresh to
+                  see it here.
+                </p>
+              }
+              @if (transcripts().length > 0) {
+                <ul class="chat-page__places">
+                  @for (transcript of transcripts(); track transcript.id) {
+                    <li class="chat-page__transcript">
+                      <span class="chat-page__transcript-name">
+                        # {{ transcript.channelName }}
+                        @if (transcript.scopeName; as scopeName) {
+                          &ngsp;<span class="chat-page__place-note">{{
+                            scopeName
+                          }}</span>
+                        }
+                      </span>
+                      <span class="chat-page__place-note">
+                        {{ transcript.fromAt | appDate: 'short' }} to
+                        {{ transcript.toAt | appDate: 'short' }}
+                      </span>
+                      <span class="chat-page__transcript-status">
+                        {{ transcriptStatusLabels[transcript.status] }}
+                        @if (transcript.messageCount !== null) {
+                          · {{ transcript.messageCount }}
+                          {{
+                            transcript.messageCount === 1
+                              ? 'message'
+                              : 'messages'
+                          }}
+                        }
+                      </span>
+                      @if (isDownloadable(transcript)) {
+                        <button
+                          type="button"
+                          class="lcars-btn chat-page__transcript-download"
+                          [attr.aria-label]="
+                            'Download the transcript of ' +
+                            transcript.channelName
+                          "
+                          (click)="download(transcript)">
+                          Download
+                        </button>
                       }
-                    </span>
-                    <span class="chat-page__place-note">
-                      {{ transcript.fromAt | appDate: 'short' }} to
-                      {{ transcript.toAt | appDate: 'short' }}
-                    </span>
-                    <span class="chat-page__transcript-status">
-                      {{ transcriptStatusLabels[transcript.status] }}
-                      @if (transcript.messageCount !== null) {
-                        · {{ transcript.messageCount }}
-                        {{
-                          transcript.messageCount === 1 ? 'message' : 'messages'
-                        }}
-                      }
-                    </span>
-                    @if (isDownloadable(transcript)) {
-                      <button
-                        type="button"
-                        class="lcars-btn chat-page__transcript-download"
-                        [attr.aria-label]="
-                          'Download the transcript of ' + transcript.channelName
-                        "
-                        (click)="download(transcript)">
-                        Download
-                      </button>
-                    }
-                  </li>
-                }
-              </ul>
-            }
-            <button
-              type="button"
-              class="lcars-btn chat-page__add"
-              (click)="refreshTranscripts()">
-              Refresh
-            </button>
+                    </li>
+                  }
+                </ul>
+              }
+              <button
+                type="button"
+                class="lcars-btn chat-page__add"
+                (click)="refreshTranscripts()">
+                Refresh
+              </button>
+            </div>
           </section>
         }
       </nav>

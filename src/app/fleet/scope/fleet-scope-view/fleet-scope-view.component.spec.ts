@@ -103,7 +103,7 @@ describe('FleetScopeViewComponent', () => {
   const sectionHeadings = (): string[] =>
     Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll(
-        'app-collapsible-section h2',
+        'app-lcars-panel h2',
       ),
     ).map(heading => heading.textContent?.trim() ?? '');
 
@@ -171,7 +171,7 @@ describe('FleetScopeViewComponent', () => {
     expect(links[0].getAttribute('href')).toBe(
       '/help/communities-fleets-and-armadas',
     );
-    expect(links[0].textContent.trim()).toBe(
+    expect(links[0].querySelector('.help-link__label').textContent).toBe(
       'Help with Communities, Fleets and Armadas',
     );
   });
@@ -282,7 +282,7 @@ describe('FleetScopeViewComponent', () => {
       'no notice where there is nothing to say',
       'app-lcars-information-message',
     ],
-    ['no About section where nothing was written', 'app-collapsible-section'],
+    ['no About section where nothing was written', 'app-lcars-panel'],
     [
       'no row of controls when there is nothing to offer',
       '.fleet-scope-view__actions',

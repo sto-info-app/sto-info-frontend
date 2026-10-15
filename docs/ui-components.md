@@ -150,6 +150,14 @@ the Cancel opposite or rotating to match. A colour that shows a state — a
 pressed toggle, the selected filter, a thumbs-down given, a Fleet's
 recruiting pill — is not a call to action, and keeps its own meaning.
 
+Where two controls that would both be red share a row, the one that destroys
+nothing rotates (13 October 2026): Storytime moderation's Dismiss beside
+Remove the content, a permission override's Withdraw beside Deny, the
+character panel's "I have left this Fleet" beside "Remove — this was never
+right", and an event's "Take my answer back" beside Can't go. An event's
+answers are Going green, Can't go red and Maybe rotating, so the answer given
+is marked by a ring and `aria-pressed`, as the news chips are.
+
 **Links that stand on their own are pills.** A link that is an action or a
 destination in its own right — "All news", "The full calendar", "Back to the
 Community" — is an `.lcars-btn` pill, in a `.buttons-row` when several sit
@@ -306,6 +314,21 @@ box drawn round it, its `<legend>` uppercase Antonio in perano; both rules
 carry no specificity, so a feature that draws its own group keeps it. The
 plain `input` rule below once drew every checkbox and radio 100% wide.
 
+**Field width** — a field whose values
+are short, such as a drop-down of a word or two, a number or a date, need not
+run the width of the form. `styles.scss` lays them out:
+
+| Class | Where | What it does |
+|---|---|---|
+| `.lcars-field-columns` | A row or wrapper whose direct children are fields | Two columns on a wide screen, one at 768px and below. |
+| `.lcars-field--wide` | A child of `.lcars-field-columns` | Spans both columns: a text search, or a drop-down whose options are sentences. |
+| `.lcars-field--short` | A lone `.lcars-input-container` or `.lcars-select-container` | Half the row, where no short neighbour pairs with it. |
+
+Judge each drop-down by its longest realistic option: about 40 characters fit
+half a page, about 25 half a dialog. When in doubt, leave it full width. The
+Fleet directory's search is the model: the name across the row, then its
+choices two to a row.
+
 **`.field-picker`** — a field whose value is chosen in a dialog rather than
 typed (a recipient, a featured work). It sits inside a `.lcars-input-container`
 where an input would and reads as one. It shows the *name* of the thing chosen;
@@ -361,10 +384,20 @@ and every undo step behind it.
 | `mixins.lcars-panel-card-controls` | Controls in their own darkened strip at the end of the row, so pressing one is never mistaken for opening the thing the panel is about. |
 | `mixins.lcars-panel-card-marks` / `-badge` | What the bar says besides the name, at its right-hand end. |
 | `mixins.lcars-panel-surface` | The surface a block of a feature sits on, beneath its heading bar. |
+| `mixins.lcars-accent-panel-card($fallback)` | The panel card drawn from `--lcars-accent` at runtime, so a list of cards takes the rotation; `$fallback` where nothing rotates. Sets `--lcars-panel-accent` for what is inside. |
+| `mixins.lcars-accent-panel-card-heading` | Its block across the top, in the accent, with black text. |
 
 The panel-card family is shared deliberately: a captain card on the dashboard, a
 panel in Storytime and a field in the Custom Tracking builder are all the same
 shape, learned once.
+
+**No plain cards**. A card that stands
+for one thing — a Fleet in a directory, a member, a Custom Tracking field, a
+switcher entry — is a panel card in the rotation: its name on the heading
+block, a spine, and the rest in the body, in a `lcars-rotate` list. The
+`accent` mixins draw it; `<app-lcars-panel>` and the Fleet scope card are the
+models. A name whose case is part of it, such as a Fleet's, keeps its case
+on the block rather than taking the uppercase of `lcars-panel-card-name`.
 
 `_notification-card.scss` holds the notification anatomy — a severity-tinted
 left edge and a matching header bar — shared by the user inbox, the admin sent
@@ -390,6 +423,10 @@ cover the smaller pieces.
 | `.flexbox` / `.col` / `.col.right` | The vendored theme's simple column layout. |
 | `registry.registry-two-column($container, $main, $side)` | The two-column page shell shared by every registry page, matching the dashboard's account pages. Collapses at 768px. |
 | `registry.registry-detail-grid` | The label/value grid for registry detail panels. One pair per row by design — these panels sit in columns of very different widths. |
+
+Text runs the full width of whatever holds it (13 October 2026): no paragraph,
+hint or intro is capped to a reading measure in `ch`. A line held short under
+a full-width heading reads as a column that has lost its other half.
 
 ### Badges and status
 
@@ -489,6 +526,8 @@ put a block in — a follow box, a filter box, a list of alerts — with it.
 | `heading` | `string` (required) | The name on the heading block, labelling the panel's region. |
 | `level` | `2 \| 3 \| 4` | The heading's level in the page's outline. Default 3. |
 | `accent` | rotation colour \| `null` | A colour of its own; otherwise it takes `--lcars-accent`, so a run of panels in a `lcars-rotate` container varies by itself. |
+| `collapsible` | `boolean` | A caret on the heading block folds the body away, remembered per page as a section's fold is (`panel:` + `panelKey`, or the heading), and hidden rather than removed. Every search and filter panel sets it (13 October 2026). |
+| `panelKey` | `string` | Names the panel for its remembered fold where two on a page share a heading. |
 
 Marks for the heading block — a count, a state — are projected with the
 `panelMarks` attribute. List cards keep the `lcars-panel-card` mixins; the
@@ -565,7 +604,7 @@ place `.lcars-number-highlight` gives up its sunflower.
 | `<app-entity-avatar>` (3) | `src`, `alt` (required), `size` (`100 \| 300`) | Profile picture with a size-matched placeholder fallback. Resets its failure flag when `src` changes. Replaces the open-coded `<img>` plus `(error)` handler pages used to repeat. |
 | `<app-endeavour-rank-badge>` (3) | `totalNodes`, `size` (`'default' \| 'small'`) | Zero-padded four-digit rank readout. `small` rescales through host CSS variables rather than a second stylesheet. |
 | `<app-smart-chart>` (1) | `data: ChartDataItem[]`, `threshold` (5), `mode` (`'pie' \| 'donut' \| 'bar' \| 'auto'`) | Signal inputs. Switches between an SVG pie/donut and a bar chart on the number of data points; every segment path, bar width and colour class is computed once in a `computed`. Falls back to `<app-lcars-information-message>` when there is no data. |
-| `<app-help-link>` | `slug`, `label` (both required) | A small help pill, on its own line, to one Help guide (FC-049, FC-050): half a pill's height and always `$lcars-c48`, which is outside the rotation, so it reads as "help" wherever it appears. Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
+| `<app-help-link>` | `slug`, `label` (both required) | A help button, on its own line, to one Help guide (FC-049, FC-050), drawn as an LCARS numbered panel button (13 October 2026): a 44px bar with a 35px rounded cap, a question mark exactly the bar's height where the panel's number would stand, and the words on a pill. Always `$lcars-c48`, which is outside the rotation, so it reads as "help" wherever it appears. The cap and the mark are `aria-hidden`, so the link is named by its words alone. Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
 
 ### Feature locks
 
@@ -1032,12 +1071,49 @@ Every field of the view model is text the card renders as text. A Fleet name
 comes from a CSV somebody uploaded, so nothing in it may reach a component that
 renders HTML.
 
-`FleetScopeCardStatus` is its own field rather than a colour on the card: the
-card's colour says which feature this is, and the pill says what state the
-Fleet is in (`recruiting` green, `closed` grey, `disputed` tangerine).
+**Its shape** (13 October 2026) is an LCARS panel card laid out as an account
+card is. The name, keeping its case, sits on a heading block in the listing's
+rotation colour. Beneath it lies the account list's art for the platform
+(`getAccountBgImagePath`; a Community takes the default), shaded. On that, the
+emblem stands where an account shows its endeavour rank, or the character
+listings' "photo unavailable" picture when it has none or it cannot be fetched.
+Lists of them run one card to a line, the full width, as the account and
+captain lists do, so the details sit side by side. Beside the emblem, the details run label over value:
+Platform, Status, Roster and Community, the first two with an icon each: the
+platform's (`getPlatformIconClass`) and the state's. A card does not say
+which kind of record it is: each directory lists one kind. Down its right runs
+the narrow, darkened column of controls an account card carries, with an eye
+that opens the record: named "View Fleet" (or Community, or Armada), as an
+account's is "View Account", and described by the card's name. A record that
+cannot be opened has no column. The Community's name links to it where the
+card is given a `communityLink`.
 
-`lastObservedLabel` is a formatted string, not a date. Deciding which timezone
-a moment is written in belongs to the page, which knows whether it holds an
+The card also draws a Captain's Fleets on their Character page
+(`buildCharacterFleetCardVm`): `details` adds the page's own label-over-value
+pairs after the shared ones (Since, Source, Seen on the roster), and the
+answers, the audience chooser and Leave or Remove are projected beneath the
+details as the card's content.
+
+The head of a Community's, Fleet's or Armada's own page (`<app-fleet-scope-header>`)
+is the same card, with `nameHeading` making the name the page's `<h2>` and
+`showScope` putting the kind of record on its block. The page's facts become
+its details, the platform said once, and the banner stays above it.
+
+Beneath it, every block of a record's page is a collapsible `<app-lcars-panel>`
+at level 2, in the page's rotation (13 October 2026): Following, Recruitment,
+News, Events, Activity, About, Artwork, the Armada and Community structure
+blocks and an ownership offer. Their folds are remembered per page. The rest of
+the site keeps its collapsible section bars.
+
+`FleetScopeCardStatus` is its own field rather than a colour on the card: the
+card's colour is only its place in the rotation, and the state's icon and words
+say what state the record is in (`recruiting` green, `application` and
+`invite` gold, `closed` grey, `suspended` red, `disputed` tangerine).
+
+`roster` is a formatted string, not a date: "Never imported", "Imported …", or
+the platform's reason where the game gives no roster export
+(`fleetFreshnessOf(…, FLEET_FRESHNESS_VALUE)`). Deciding which timezone a
+moment is written in belongs to the page, which knows whether it holds an
 instant — rendered through `AppDatePipe` — or a day somebody typed, which is
 never re-zoned at all.
 
@@ -1792,7 +1868,7 @@ exports, an import's corrections and rows — share a shape:
 - **A reason, given once** for whichever change it is, capped at the server's
   500 characters, with the button disabled until it is given.
 - **No confirmation dialog.** Each change can be undone by another and is
-  logged with who made it and why (Steve's decision of 25 September 2026).
+  logged with who made it and why.
   Deleting is different, and still takes `ConfirmDialogComponent`.
 - **The server's own words** for a refusal it understood — a 409, or a 400
   naming what it would not take — through `app-lcars-error-message`, and a

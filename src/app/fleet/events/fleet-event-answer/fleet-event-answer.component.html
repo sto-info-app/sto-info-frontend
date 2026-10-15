@@ -19,7 +19,7 @@
   </p>
 
   @if (characters().length > 0) {
-    <div class="lcars-select-container">
+    <div class="lcars-select-container lcars-field--short">
       <label [attr.for]="'answer-character-' + occurrence().id"
         >As which Character (optional)</label
       >
@@ -50,14 +50,14 @@
   }
 
   <fieldset
-    class="fleet-events__answers"
+    class="fleet-events__answers lcars-rotate"
     [attr.aria-label]="'Answer for ' + occurrence().localStart">
     @for (response of responses; track response) {
       <button
         type="button"
         class="lcars-btn lcars-btn-auto"
-        [class.sunflower]="mine?.response === response"
-        [class.bluey]="mine?.response !== response"
+        [class.green]="response === 'GOING'"
+        [class.red]="response === 'NOT_GOING'"
         [attr.aria-pressed]="mine?.response === response"
         [disabled]="busy()"
         (click)="onAnswer(response)">
@@ -67,7 +67,7 @@
     @if (mine !== null) {
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto red"
+        class="lcars-btn lcars-btn-auto"
         [disabled]="busy()"
         (click)="onWithdraw()">
         Take my answer back

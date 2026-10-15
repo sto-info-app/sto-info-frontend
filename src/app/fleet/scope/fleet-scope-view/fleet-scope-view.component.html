@@ -73,29 +73,35 @@
       }
 
       @if (state.communityNews) {
-        <app-collapsible-section
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
           heading="News">
           <app-fleet-news-latest [vm]="state.communityNews" />
-        </app-collapsible-section>
+        </app-lcars-panel>
       }
 
       @if (state.communityEvents; as events) {
-        <app-collapsible-section
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
           heading="Events">
           <app-fleet-events-upcoming
             [source]="events"
             [latest]="5" />
-        </app-collapsible-section>
+        </app-lcars-panel>
       }
 
       @if (state.communityActivity; as activity) {
-        <app-collapsible-section
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
           heading="Activity">
           <app-fleet-activity-feed
             [source]="activity.source"
             [latest]="5"
             [allLink]="activity.allLink" />
-        </app-collapsible-section>
+        </app-lcars-panel>
       }
 
       @if (state.communityStructure) {
@@ -115,10 +121,12 @@
       }
 
       @if (state.description) {
-        <app-collapsible-section
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
           heading="About">
           <p class="fleet-scope-view__description">{{ state.description }}</p>
-        </app-collapsible-section>
+        </app-lcars-panel>
       }
     </div>
   }

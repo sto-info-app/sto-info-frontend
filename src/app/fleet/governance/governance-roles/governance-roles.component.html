@@ -147,33 +147,35 @@
               class="governance-roles__form lcars-rotate"
               aria-label="Appoint somebody"
               (submit)="$event.preventDefault(); onAppoint(scope)">
-              <div class="lcars-input-container">
-                <label for="role-appointee">Person</label>
-                <select
-                  id="role-appointee"
-                  [value]="appointee()"
-                  [disabled]="busy()"
-                  (change)="appointee.set($any($event.target).value)">
-                  <option value="">Choose somebody</option>
-                  @for (person of people; track person.userId) {
-                    <option [value]="person.userId">
-                      {{ person.username ?? unnamed }}
-                    </option>
-                  }
-                </select>
-              </div>
-              <div class="lcars-input-container">
-                <label for="role-appoint-role">Role</label>
-                <select
-                  id="role-appoint-role"
-                  [value]="appointRole()"
-                  [disabled]="busy()"
-                  (change)="appointRole.set($any($event.target).value)">
-                  <option value="">Choose a role</option>
-                  @for (role of appointableRoles; track role) {
-                    <option [value]="role">{{ roleLabels[role] }}</option>
-                  }
-                </select>
+              <div class="lcars-field-columns lcars-rotate">
+                <div class="lcars-input-container">
+                  <label for="role-appointee">Person</label>
+                  <select
+                    id="role-appointee"
+                    [value]="appointee()"
+                    [disabled]="busy()"
+                    (change)="appointee.set($any($event.target).value)">
+                    <option value="">Choose somebody</option>
+                    @for (person of people; track person.userId) {
+                      <option [value]="person.userId">
+                        {{ person.username ?? unnamed }}
+                      </option>
+                    }
+                  </select>
+                </div>
+                <div class="lcars-input-container">
+                  <label for="role-appoint-role">Role</label>
+                  <select
+                    id="role-appoint-role"
+                    [value]="appointRole()"
+                    [disabled]="busy()"
+                    (change)="appointRole.set($any($event.target).value)">
+                    <option value="">Choose a role</option>
+                    @for (role of appointableRoles; track role) {
+                      <option [value]="role">{{ roleLabels[role] }}</option>
+                    }
+                  </select>
+                </div>
               </div>
               <div class="lcars-input-container">
                 <label for="role-appoint-reason">Why (optional)</label>

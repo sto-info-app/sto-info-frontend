@@ -112,7 +112,7 @@
           </fieldset>
         }
 
-        <div class="lcars-select-container">
+        <div class="lcars-select-container lcars-field--short">
           <label for="event-timezone">On the clock of</label>
           <select
             id="event-timezone"
@@ -235,7 +235,7 @@
           }
 
           @if (recurrence() === 'MONTHLY_WEEKDAY') {
-            <div class="fleet-events__answers lcars-rotate">
+            <div class="fleet-events__answers lcars-field-columns lcars-rotate">
               <div class="lcars-select-container">
                 <label for="event-month-week">On the</label>
                 <select

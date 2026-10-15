@@ -40,7 +40,7 @@ describe('FleetFollowComponent', () => {
 
   /** The follow control, or null when there is none. */
   const button = (): HTMLButtonElement | null =>
-    fixture.nativeElement.querySelector('button');
+    fixture.nativeElement.querySelector('button:not(.lcars-panel__toggle)');
 
   /**
    * Renders the control with whatever the mocks are set to.

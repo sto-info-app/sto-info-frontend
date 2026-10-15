@@ -46,7 +46,7 @@
           (submit)="$event.preventDefault(); onSubmit(data)">
           @if (answer.mode === 'APPROVE') {
             <p class="armada-requests__asking">Where does {{ name }} go?</p>
-            <div class="lcars-input-container">
+            <div class="lcars-input-container lcars-field--short">
               <label for="armada-approve-position">Position</label>
               <select
                 id="armada-approve-position"

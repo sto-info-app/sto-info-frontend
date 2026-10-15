@@ -1,8 +1,10 @@
 @if (community(); as community) {
   @if (outcome() === 'ACCEPTED') {
-    <app-collapsible-section
+    <app-lcars-panel
+      [level]="2"
+      [collapsible]="true"
       heading="Ownership"
-      sectionKey="ownership-offer">
+      panelKey="ownership-offer">
       <p class="ownership-offer__done">
         <output>
           You are now the Owner of {{ community.communityName }}.
@@ -15,22 +17,26 @@
           >Manage it</a
         >
       </div>
-    </app-collapsible-section>
+    </app-lcars-panel>
   } @else if (outcome() === 'DECLINED') {
-    <app-collapsible-section
+    <app-lcars-panel
+      [level]="2"
+      [collapsible]="true"
       heading="Ownership"
-      sectionKey="ownership-offer">
+      panelKey="ownership-offer">
       <p>
         <output>
           Declined. It is recorded in the Community’s history, where the Owner
           can see it.
         </output>
       </p>
-    </app-collapsible-section>
+    </app-lcars-panel>
   } @else if (offer(); as offer) {
-    <app-collapsible-section
+    <app-lcars-panel
+      [level]="2"
+      [collapsible]="true"
       heading="Ownership offered to you"
-      sectionKey="ownership-offer">
+      panelKey="ownership-offer">
       <p>
         {{ offer.from.username ?? unnamed }} has offered you ownership of
         {{ community.communityName }}. The offer lapses on
@@ -62,6 +68,6 @@
           Accept…
         </button>
       </div>
-    </app-collapsible-section>
+    </app-lcars-panel>
   }
 }

@@ -1,4 +1,7 @@
-<app-collapsible-section heading="Recruitment">
+<app-lcars-panel
+  heading="Recruitment"
+  [level]="2"
+  [collapsible]="true">
 
   @if (loadFailed()) {
     <p
@@ -171,4 +174,4 @@
       </p>
     }
   }
-</app-collapsible-section>
+</app-lcars-panel>

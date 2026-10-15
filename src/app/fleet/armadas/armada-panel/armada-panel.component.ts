@@ -27,7 +27,7 @@ import {
   GammaOutcome,
   GammaResolution,
 } from 'src/app/models/fleet-armada.models';
-import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 
@@ -79,7 +79,7 @@ export const ARMADA_VIEW_FAILED =
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     ArmadaTreeComponent,
-    CollapsibleSectionComponent,
+    LcarsPanelComponent,
     LcarsErrorMessageComponent,
     RouterLink,
   ],

@@ -39,14 +39,8 @@
     color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 
-  // The measure is the words', not the section's: capped, the section drew
-  // its heading bar half as wide as every other bar on the page (FC-044).
   &__close {
     display: block;
     margin-top: 2.5rem;
-
-    p {
-      max-width: 70ch;
-    }
   }
 }

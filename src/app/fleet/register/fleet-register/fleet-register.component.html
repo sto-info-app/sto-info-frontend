@@ -42,8 +42,8 @@
         class="register-page__form"
         [formGroup]="form"
         (ngSubmit)="onSubmit(state.context)">
-        <div class="form-row">
-          <div class="lcars-input-container sky">
+        <div class="form-row lcars-field-columns">
+          <div class="lcars-input-container sky lcars-field--wide">
             <label for="fleet-name">Name, exactly as in game</label>
             <input
               id="fleet-name"
@@ -99,7 +99,7 @@
           scopeLabel="Fleet"
           [duplicates]="duplicates" />
 
-        <div class="form-row">
+        <div class="form-row lcars-field-columns">
           <div class="lcars-input-container sky">
             <label for="fleet-allegiance">Allegiance</label>
             <select

@@ -9,7 +9,7 @@
 
 .chat-channel-dialog__scope {
   display: block;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-size: 0.8em;
 }
 

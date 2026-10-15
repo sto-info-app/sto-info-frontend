@@ -171,6 +171,28 @@ describe('FleetEventAnswerComponent', () => {
     expect(pageText(fixture)).not.toContain('Every place is taken');
   });
 
+  // Going accepts and Can't go refuses, so they are green and red; Maybe and
+  // taking the answer back take the row's rotation, never a second red.
+  it('colours Going green and Can’t go red, and nothing else', () => {
+    render({
+      mine: { response: 'MAYBE', characterId: null, waitlistPosition: null },
+    });
+
+    const colourOf = (label: string): string[] => {
+      const classes = findButton(fixture, label)?.classList;
+
+      return ['green', 'red'].filter(colour => classes?.contains(colour));
+    };
+
+    expect(colourOf('Going')).toEqual(['green']);
+    expect(colourOf('Maybe')).toEqual([]);
+    expect(colourOf('Can’t go')).toEqual(['red']);
+    expect(colourOf('Take my answer back')).toEqual([]);
+    expect(findButton(fixture, 'Maybe')?.getAttribute('aria-pressed')).toBe(
+      'true',
+    );
+  });
+
   it('holds every button while a change is being made', () => {
     render({}, { busy: true });
 

@@ -3,7 +3,9 @@
     @if (
       structure.armadas.length > 0 || structure.standaloneFleets.length > 0
     ) {
-      <app-collapsible-section
+      <app-lcars-panel
+        [level]="2"
+        [collapsible]="true"
         class="community-structure"
         heading="Armadas and Fleets">
 
@@ -42,7 +44,7 @@
             }
           </ul>
         }
-      </app-collapsible-section>
+      </app-lcars-panel>
     }
   }
 }

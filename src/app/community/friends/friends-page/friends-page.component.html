@@ -77,7 +77,7 @@
 
           <!-- Friends -->
           @if (tab === 'friends') {
-            <div class="member-card-grid">
+            <div class="member-card-grid lcars-rotate">
               @for (vm of friendVms; track vm.id) {
                 <app-member-card
                   [vm]="vm.card"

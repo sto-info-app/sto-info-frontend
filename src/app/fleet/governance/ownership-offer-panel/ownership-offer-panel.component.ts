@@ -20,7 +20,7 @@ import {
   ConfirmPrompt,
   escapeHtml,
 } from 'src/app/shared/actions/confirm-prompt';
-import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -61,7 +61,7 @@ export const OFFER_ANSWER_FAILED = 'That did not work. Please try again.';
   imports: [
     AppDatePipe,
     RouterLink,
-    CollapsibleSectionComponent,
+    LcarsPanelComponent,
     LcarsErrorMessageComponent,
   ],
 })

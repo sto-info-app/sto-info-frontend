@@ -18,9 +18,10 @@
 // member followed is drawn here exactly as it was where they found it, and a
 // second set of proportions for the same card would be the only thing telling
 // them otherwise.
+// One card to a line, as the directories and the account list are.
 #dashboard-fleets-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 1rem;
   margin-top: 1rem;
 }

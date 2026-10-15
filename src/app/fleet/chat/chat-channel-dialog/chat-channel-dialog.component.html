@@ -23,34 +23,36 @@
         (input)="setName($any($event.target).value)" />
     </div>
 
-    <div class="lcars-select-container">
-      <label for="chat-channel-read">Who reads it</label>
-      <select
-        id="chat-channel-read"
-        (change)="chooseReadRole($any($event.target).value)">
-        @for (role of roles; track role) {
-          <option
-            [value]="role"
-            [selected]="readRole() === role">
-            {{ roleLabels[role] }}
-          </option>
-        }
-      </select>
-    </div>
+    <div class="lcars-field-columns lcars-rotate">
+      <div class="lcars-select-container">
+        <label for="chat-channel-read">Who reads it</label>
+        <select
+          id="chat-channel-read"
+          (change)="chooseReadRole($any($event.target).value)">
+          @for (role of roles; track role) {
+            <option
+              [value]="role"
+              [selected]="readRole() === role">
+              {{ roleLabels[role] }}
+            </option>
+          }
+        </select>
+      </div>
 
-    <div class="lcars-select-container">
-      <label for="chat-channel-post">Who posts in it</label>
-      <select
-        id="chat-channel-post"
-        (change)="choosePostRole($any($event.target).value)">
-        @for (role of postRoles(); track role) {
-          <option
-            [value]="role"
-            [selected]="postRole() === role">
-            {{ roleLabels[role] }}
-          </option>
-        }
-      </select>
+      <div class="lcars-select-container">
+        <label for="chat-channel-post">Who posts in it</label>
+        <select
+          id="chat-channel-post"
+          (change)="choosePostRole($any($event.target).value)">
+          @for (role of postRoles(); track role) {
+            <option
+              [value]="role"
+              [selected]="postRole() === role">
+              {{ roleLabels[role] }}
+            </option>
+          }
+        </select>
+      </div>
     </div>
     <p class="chat-channel-dialog__hint">
       Posting is never open to more people than reading.

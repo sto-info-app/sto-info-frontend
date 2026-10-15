@@ -6,7 +6,6 @@
 
 .community-ownership {
   &__intro {
-    max-width: 70ch;
     margin: 0 0 1rem;
   }
 
@@ -16,7 +15,7 @@
   }
 
   // The offer's section runs the width of the page, as every section bar
-  // does; only the form's measure is capped.
+  // does; only the form is held narrower.
   &__offer {
     display: block;
     margin-bottom: 1.5rem;

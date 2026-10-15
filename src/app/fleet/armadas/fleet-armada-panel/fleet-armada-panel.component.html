@@ -1,6 +1,9 @@
 @if (view(); as view) {
   @if (view.placement !== null || view.mayRequest) {
-    <app-collapsible-section heading="Armada">
+    <app-lcars-panel
+  heading="Armada"
+  [level]="2"
+  [collapsible]="true">
 
       @if (notice(); as done) {
         <p class="fleet-armada__notice">
@@ -160,6 +163,6 @@
           <p class="fleet-armada__last">Reason: {{ why }}</p>
         }
       }
-    </app-collapsible-section>
+    </app-lcars-panel>
   }
 }

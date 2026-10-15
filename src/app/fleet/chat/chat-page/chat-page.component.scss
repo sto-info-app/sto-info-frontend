@@ -1,4 +1,5 @@
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
 
 .chat-page {
   display: flex;
@@ -60,12 +61,26 @@
 // Each part of the list takes the next colour of the page's rotation (the
 // list carries `lcars-rotate`): its name, its open place and its controls,
 // so a Community and its Fleets read as neighbours rather than one block of
-// sky (Steve's decision of 12 October 2026).
+// sky. Each is an LCARS panel card
+// : the spine and the name's block in
+// that colour, the places beneath on a body washed with it.
+.chat-page__scope {
+  @include mixins.lcars-accent-panel-card(vars.$lcars-sky);
+}
+
+// The name on the block, with what kind of place it is above it. Black on the
+// colour, and not upper-cased: a Fleet's name is exact, and its case is part
+// of it.
 .chat-page__scope-name {
-  margin: 0 0 0.35rem;
+  @include mixins.lcars-accent-panel-card-heading;
+
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0;
+  margin: 0;
   font-size: 1rem;
-  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-family: vars.$font-antonio;
+  line-height: 1.2;
   overflow-wrap: anywhere;
 
   a {
@@ -75,14 +90,31 @@
     padding: 0;
     border-radius: 0;
     color: inherit;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid vars.$a11y-white;
+      outline-offset: 2px;
+    }
   }
 }
 
 .chat-page__scope-kind {
   display: block;
   font-size: 0.75rem;
-  color: vars.$lcars-grey-light;
   text-transform: uppercase;
+}
+
+.chat-page__scope-body {
+  @include mixins.lcars-panel-card-body;
+
+  // The places run nearer the card's edges than a panel's prose would, so a
+  // channel's name keeps what room the column has.
+  padding-inline: 0.4rem;
 }
 
 .chat-page__places {

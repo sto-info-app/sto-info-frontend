@@ -138,7 +138,7 @@ describe('PublicationPauseComponent (FC-042)', () => {
     expect(
       element()
         .querySelector('.publication-pause')
-        ?.classList.contains('publication-pause--paused'),
+        ?.classList.contains('accent-red'),
     ).toBe(false);
   });
 
@@ -166,7 +166,7 @@ describe('PublicationPauseComponent (FC-042)', () => {
     expect(
       element()
         .querySelector('.publication-pause')
-        ?.classList.contains('publication-pause--paused'),
+        ?.classList.contains('accent-red'),
     ).toBe(true);
   });
 

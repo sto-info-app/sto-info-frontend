@@ -1,5 +1,8 @@
 @if (armada(); as armada) {
-  <app-collapsible-section heading="Fleets in this Armada">
+  <app-lcars-panel
+  heading="Fleets in this Armada"
+  [level]="2"
+  [collapsible]="true">
 
     @if (failed()) {
       <app-lcars-error-message
@@ -37,7 +40,7 @@
           </p>
 
           @if (edit.mode === 'MOVE') {
-            <div class="lcars-input-container">
+            <div class="lcars-input-container lcars-field--short">
               <label for="armada-move-position">To</label>
               <select
                 id="armada-move-position"
@@ -184,5 +187,5 @@
     } @else {
       <p class="armada-panel__loading">Reading the Fleets…</p>
     }
-  </app-collapsible-section>
+  </app-lcars-panel>
 }
