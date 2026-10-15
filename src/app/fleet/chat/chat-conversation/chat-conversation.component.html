@@ -49,12 +49,18 @@
     </div>
   }
 
+  <!--
+    Focusable so a keyboard can scroll the log: Safari does not focus a
+    scrolling area by itself (WCAG 2.1.1). SonarQube's rule against a focusable
+    non-interactive element is accepted for this one element.
+  -->
   <div
     #log
     class="chat-conversation__log"
     role="log"
     aria-live="polite"
     aria-relevant="additions"
+    tabindex="0"
     [attr.aria-label]="'Messages in ' + title()"
     (scroll)="onScroll()">
     @if (!isLoading() && errorMessage() === null) {
@@ -243,7 +249,7 @@
   @if (unseen() > 0) {
     <button
       type="button"
-      class="lcars-btn sunflower chat-conversation__unseen"
+      class="lcars-btn chat-conversation__unseen"
       (click)="toLatest()">
       {{ unseen() }} new {{ unseen() === 1 ? 'message' : 'messages' }}
       <i

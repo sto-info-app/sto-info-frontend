@@ -345,6 +345,8 @@ export class CommunityDisputeComponent extends GovernancePageDirective<Community
         'You can read its imports, rows, conflicts, identity decisions and rank order for 24 hours, and change nothing. Your purpose is logged with your look.',
       label: 'Purpose',
       confirmText: 'Look in',
+      // Agreeing to look: the dialogue's yes, so green, and Cancel its no.
+      confirmTone: 'accept',
       ...PURPOSE,
     })
       .pipe(

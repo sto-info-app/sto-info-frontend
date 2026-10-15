@@ -35,7 +35,7 @@
 
 .chat-conversation__title {
   margin: 0;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-family: vars.$font-antonio;
   overflow-wrap: anywhere;
 }
@@ -57,7 +57,7 @@
   background: vars.$lcars-grey-bg;
 
   &:focus-visible {
-    outline: 2px solid vars.$lcars-sky;
+    outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
   }
 }
 
@@ -81,7 +81,7 @@
 
 .chat-conversation__day {
   margin: 0.75rem 0 0.25rem;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-family: vars.$font-antonio;
   text-transform: uppercase;
   font-size: 0.85rem;
@@ -113,12 +113,12 @@
   }
 
   &:focus-visible {
-    outline: 2px solid vars.$lcars-sky;
+    outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
   }
 }
 
 .chat-message--mine {
-  border-left-color: vars.$lcars-sky;
+  border-left-color: var(--lcars-accent, #{vars.$lcars-sky});
 }
 
 .chat-message--pending {
@@ -145,7 +145,7 @@
 }
 
 .chat-message__author {
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-weight: bold;
 }
 
@@ -186,7 +186,7 @@
 }
 
 .chat-message__reply-author {
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
 }
 
 .chat-message__reply-excerpt {
@@ -239,13 +239,13 @@
   border: 1px solid vars.$lcars-grey-border;
   border-radius: 0.75rem;
   background: none;
-  color: vars.$lcars-sky;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
   font-size: 0.8rem;
   cursor: pointer;
 
   &:hover,
   &:focus-visible {
-    border-color: vars.$lcars-sky;
+    border-color: var(--lcars-accent, #{vars.$lcars-sky});
   }
 }
 
@@ -301,14 +301,14 @@
   min-height: 3rem;
   resize: vertical;
   padding: 0.5rem;
-  border: 1px solid vars.$lcars-sky;
+  border: 1px solid var(--lcars-accent, #{vars.$lcars-sky});
   border-radius: 0.5rem;
   background: vars.$lcars-black;
   color: vars.$lcars-white;
   font: inherit;
 
   &:focus-visible {
-    outline: 2px solid vars.$lcars-sky;
+    outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
   }
 }
 

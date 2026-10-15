@@ -470,6 +470,16 @@ describe('ChatConversationComponent', () => {
       expect(document.activeElement?.id).toBe('chat-message-a');
     });
 
+    // Safari does not focus a scrolling area by itself, so the log is in the
+    // tab order for a keyboard to scroll it.
+    it('lets a keyboard reach the log to scroll it', async () => {
+      await show();
+
+      expect(
+        element.querySelector('[role="log"]')?.getAttribute('tabindex'),
+      ).toBe('0');
+    });
+
     it('keeps to the bottom, and counts what arrives while the reader is reading back', async () => {
       await show();
 

@@ -6,7 +6,6 @@
 
 .community-dispute {
   &__intro {
-    max-width: 70ch;
     margin: 0 0 1rem;
   }
 
@@ -36,16 +35,10 @@
     margin-bottom: 1.5rem;
   }
 
-  // The measure is the words', not the section's: capped, the section drew
-  // its heading bar half as wide as every other bar on the page (FC-044).
   &__close,
   &__suspend {
     display: block;
     margin-top: 2.5rem;
-
-    p {
-      max-width: 70ch;
-    }
   }
 
   &__scope {

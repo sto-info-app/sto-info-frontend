@@ -433,7 +433,7 @@ describe('CommunityDisputeComponent', () => {
       pressButton(fixture, 'Look into its imports…');
 
       expect(confirm.dialog.open.mock.lastCall?.[1]).toMatchObject({
-        data: { label: 'Purpose', min: 10, max: 500 },
+        data: { label: 'Purpose', confirmTone: 'accept', min: 10, max: 500 },
       });
       expect(governance.investigate).toHaveBeenCalledWith(
         'community-1',
