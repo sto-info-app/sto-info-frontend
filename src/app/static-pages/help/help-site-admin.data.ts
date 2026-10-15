@@ -15,9 +15,9 @@ const SECURITY_LOG_LINK: HelpGuideLink = {
 
 /**
  * The guides to running the site, for its administrators (FC-050): reports and
- * holds, disputes, roster erasure, the Security Log, picture scanning and,
- * from FC-045, the feature switches. Each follows the same six parts as the
- * Fleet guides.
+ * holds, members and permissions, disputes, roster erasure, the Security Log,
+ * picture scanning, the feature switches (FC-045) and the site's own content
+ * (13 October 2026). Each follows the same six parts as the Fleet guides.
  */
 const SITE_ADMIN_GUIDES: HelpGuide[] = [
   sixPartGuide({
@@ -38,7 +38,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     how: {
       'How to work Reported Officers': {
         paragraphs: [
-          'It opens on Open reports, longest-waiting first, and shows the first twenty that match. Search by username matches the reporter or the reported member; press Apply.',
+          'It opens with Status on Open, longest-waiting first, and shows the first twenty that match. Search by username matches the reporter or the reported member; press Apply.',
           'Each report shows who was reported and why, and who raised it and when. Its buttons:',
         ],
         points: [
@@ -52,8 +52,8 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       },
       'How to work Chat Reports': {
         paragraphs: [
-          'It opens on Open reports, longest-waiting first, twenty to a page. Status also offers Actioned, Dismissed and All reports. There is nothing to claim.',
-          'Each report says Where the message was — a channel in a Community, Fleet or Armada, or a direct message — who reported it, and why. Show evidence opens a copy of the reported message and the twenty before it, taken when the report was made. Once the report is closed, it also shows who closed it and why. Its buttons:',
+          'It opens with Status on Open, longest-waiting first, twenty to a page. Status also offers Actioned, Dismissed and All reports. There is nothing to claim.',
+          'Each report says Where the message was — a channel in a Community, Fleet or Armada, or a direct message — under Where, and who reported it, and why. Show evidence opens a copy of the reported message and the twenty before it, taken when the report was made. Once the report is closed, it also shows who closed it and why. Its buttons:',
         ],
         points: [
           'Resolve or Dismiss — closes it, as actioned or with no action, asking “What was found or done, and why”, up to 1,000 characters.',
@@ -94,6 +94,62 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       { label: 'Reported Officers', route: APP_ROUTES.ADMIN_REPORTS },
       { label: 'Chat Reports', route: APP_ROUTES.ADMIN_CHAT_REPORTS },
       { label: 'Moderation Holds', route: APP_ROUTES.ADMIN_HOLDS },
+      SECURITY_LOG_LINK,
+    ],
+  }),
+  sixPartGuide({
+    slug: 'site-admin-members-and-permissions',
+    title: 'Members and permissions',
+    summary:
+      'Finding an account, disabling or restoring it, making somebody a Storytime Curator, and granting or denying one permission at a time.',
+    whatItIsFor: [
+      'Manage Members is the site’s own directory of accounts: find one, see whether it is active or disabled and how many open reports name it, and disable or restore it. It reaches accounts nobody has reported, which the report queues do not.',
+      'Manage Permissions gives one member a job without giving them the whole site: the Storytime Curator role, and single permissions granted or denied on top of whatever their role confers. The roles a Fleet Community hands out are a different thing, kept at the Community itself.',
+    ],
+    whoCanUseIt: [
+      'Site administrators only. The administrator role itself is set outside STO Info: an administrator’s account cannot be disabled, restored or given another role here, your own included.',
+    ],
+    whereToFindIt: [
+      'Choose Admin in the side bar. Manage Members and Manage Permissions are under Community, and each links to the other from its side column.',
+    ],
+    how: {
+      'How to find an account': [
+        'On Manage Members, Filters offers Account state — All members, Active only or Disabled only — and “Search by email or username”; press Apply. The first twenty matches are shown, so narrow the search if the one you want is not among them.',
+        'Each card shows the name, Active or Disabled, any open reports, their Role, Email, when they Registered and when they Last signed in, and, once disabled, when and the Reason recorded.',
+        'Manage Permissions searches the same way under Find A Member, five to a page, and the pen on a card opens that member.',
+      ],
+      'How to disable and restore an account': [
+        'Disable this account asks for a Reason, up to 500 characters. They are signed out immediately and cannot sign in again, their record leaves the registry, and every open report about them, member and chat alike, is closed as actioned. They are not told why.',
+        'Restore this account asks for a Reason too. They can sign in again and their record returns to the registry; reports already closed against them stay closed.',
+        'Both do the same as the buttons on Reported Officers, and both appear in the Security Log with your reason.',
+      ],
+      'How to change a member’s role': [
+        'Under Account Role, choose Member or Storytime Curator; the words beneath say what each allows. A Storytime Curator runs Storytime — the moderation queue, the Spotlight and the tag vocabulary — while Storytime’s settings stay with administrators. “This is the role they already hold.” means nothing would change.',
+        'Change role asks for a Reason. Overrides already applied to them stay in force, and still beat whatever the new role confers.',
+      ],
+      'How overrides work': {
+        paragraphs: [
+          'Effective Permissions lists every permission the site defines, with where the member stands on each: Held via role, Granted by override, Denied by override or Not held. At present every permission is Storytime’s, from viewing it to configuring it.',
+        ],
+        points: [
+          'Grant or Deny, beside a permission, fills in Apply An Override below with that Permission and Effect, or choose them there yourself. Write a Reason, up to 500 characters, set “Expires At (optional)” or leave it empty for an override that never lapses, and press Apply override.',
+          'A denial beats the role: a Storytime Curator denied Moderate Storytime cannot moderate. A grant adds what the role lacks.',
+          'An override shows its Reason, when it was Applied and when it Expires, or Never. Withdraw takes it away again, with a reason, and the role decides once more.',
+        ],
+      },
+    },
+    whoCanSeeIt: [
+      'Only site administrators see these pages or any override. A member sees only what they can and cannot do.',
+      'Every role change, override and withdrawal, and every account disabled or restored, appears in the Security Log under Site admin actions with your reason.',
+    ],
+    whenSomethingGoesWrong: [
+      '“Administrator accounts, including your own, cannot be moderated.” means you tried to disable or restore an administrator.',
+      '“The API refused that role change. Administrator roles are set outside STO Info.” means the account is an administrator’s, which the page also says under Account Role.',
+      '“A reason is required, so the decision stays reviewable.” and “The expiry must be a date and time in the future.” say what to put right. “The API rejected that override. Check the reason and the expiry.” means the server refused it for one of those.',
+    ],
+    relatedLinks: [
+      { label: 'Manage Members', route: APP_ROUTES.ADMIN_USERS },
+      { label: 'Manage Permissions', route: APP_ROUTES.ADMIN_PERMISSIONS },
       SECURITY_LOG_LINK,
     ],
   }),
@@ -262,7 +318,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     ],
     whenSomethingGoesWrong: [
       'An entry you expected is missing? Check Show is on Everything. A change that failed was never logged, because an entry is only written with the change it records.',
-      'An entry cannot be edited or deleted, here or anywhere else: the site admin log is write-once.',
+      'No administrator can edit or delete an entry, here or anywhere else: the site admin log takes no changes. Only the audit policy ends an entry, by age.',
       '“The log could not be read.” means the feed did not load. Open the page again to retry.',
     ],
     relatedLinks: [SECURITY_LOG_LINK, ADMIN_LINK],
@@ -284,14 +340,15 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     ],
     how: {
       'How to read the scanner’s health': [
-        'The top of the page is totals only, and never names a file, an uploader or a signature. Usage counts scans, outcomes and latency over the last 24 hours, 7 days and 30 days; Engine shows the scanner and how old its signatures are; Backlog shows what is waiting to be scanned.',
+        'The page runs Alerts, Worker, Publication, Usage, Engine and Backlog, then the lists. All of it is totals, and never names a file, an uploader or a signature. Usage counts scans, outcomes and latency over the last 24 hours, 7 days and 30 days; Engine shows the scanner and how old its signatures are; Backlog shows what is waiting to be scanned.',
       ],
       'How to read the alerts': {
         paragraphs: [
-          'Alerts lists each problem open now, oldest first, with when it opened and when it was last seen. Every site administrator was told of it once, in the site, when it opened, and is told again when it clears. There is nothing to close: an alert clears by itself once its problem goes, checked every minute. The problems are:',
+          'Alerts, at the top, lists each problem open now, oldest first, with when it opened and when it was last seen. Every site administrator was told of it once, in the site, when it opened, and is told again when it clears. There is nothing to close: an alert clears by itself once its problem goes, checked every minute. The problems are:',
         ],
         points: [
-          'Uploads are waiting to be scanned, or to be published — one has waited more than 15 minutes.',
+          'Uploads are waiting to be scanned — one has waited more than 15 minutes.',
+          'Uploads are waiting to be published — one the scanner cleared has waited more than 15 minutes.',
           'The scan worker is silent — no worker has checked in for two minutes.',
           'The scan worker is paused — every worker has been paused for more than 10 minutes.',
           'Virus signatures are out of date — the newest are more than 36 hours old. The worker stops scanning at 48.',
@@ -390,7 +447,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
         'Every server applies the change within ten seconds. Pages already open in a browser, your own included, show it once they are reloaded.',
       ],
       'How to read what the environment sets': [
-        'Under Set by the environment, each feature lists its parts and whether the server’s settings allow them — for Fleet Communities, registering, roster imports and chat. These are fixed where the site is deployed and cannot be changed here.',
+        'Under Set by the environment, each feature lists its parts and whether the server’s settings allow them — for Fleet Communities, “Registering Communities, Fleets and Armadas”, “Roster imports” and “Chat and direct messages”. These are fixed where the site is deployed and cannot be changed here.',
         'A part that is not allowed stays off even while its feature is on. While a feature is off, every part of it is off whatever this list says.',
       ],
     },
@@ -405,6 +462,55 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     ],
     relatedLinks: [ADMIN_LINK, SECURITY_LOG_LINK],
   }),
+  sixPartGuide({
+    slug: 'site-admin-site-content',
+    title: 'News, banners and notifications',
+    summary:
+      'Writing the site’s own news, scheduling a banner across every page, and sending a notice to everybody or to one member.',
+    whatItIsFor: [
+      'Three ways to speak to the site’s members as the site. News is the public feed under News, for release notes and announcements. A banner is a line across the top of every page, for the time you choose. A notification goes into the inbox under Notifications, for everybody at once or for one member.',
+      'None of these is a Fleet’s: a Community, Fleet or Armada writes its own news, and nothing it does reaches these pages.',
+    ],
+    whoCanUseIt: ['Site administrators only.'],
+    whereToFindIt: [
+      'Choose Admin in the side bar. Manage News, Manage Banners and Send Notification are under Site Content.',
+    ],
+    how: {
+      'How to write and publish news': [
+        'Manage News lists every post, drafts first and then the published newest first, with its category, date, status, title and summary. New post asks for a Title, a Slug, which is made from the title when left empty, a Summary for the list, a Category — Release notes, Announcement or General — and a Status, Draft or Published. The post itself goes under “Markdown Content”, and Show preview renders it as readers will see it.',
+        'A post saved as Published is dated from that moment, and so is a draft published later, by Publish post in the list or by changing its Status. Editing a published post keeps its date. Taking a post back to Draft removes it from News, and publishing it again dates it afresh.',
+        'Edit post opens the form again, and Delete post asks you to confirm. A deleted post cannot be put back.',
+      ],
+      'How banners work': [
+        'Manage Banners lists each banner with its Severity, title, message, Status, whether it is Dismissible, its window and its link. New banner asks for a Severity — Info, Success, Warning or Critical, which sets its colour and icon — a Title, a Message of up to 2,000 characters, an optional Link URL and Link Label, Starts At and Ends At, and the Active and Dismissible switches.',
+        'A banner shows at the top of every page to everybody, signed in or not, while it is Active and inside its window; with no Starts At or Ends At it is Always Active. A Dismissible banner can be closed by each reader, and stays closed in that browser.',
+        'Edit banner changes a banner that is already showing, and Delete banner takes it down for good.',
+      ],
+      'How to send a notification': [
+        'Send Notification asks for an Audience — Everyone or Single user — a Severity, a Title of up to 160 characters, a Body of up to 2,000 and an optional Link URL. For a single member, Search and select finds them by email or username.',
+        'Send delivers it at once to the inbox of everybody, or of that one member. Nothing in Settings switches these off: the five switches there stop only the notices a Fleet or chat sends.',
+        'Sent Notifications lists what has been sent, with Everyone or Single user beside each. Delete notification takes one out of every inbox it reached.',
+      ],
+    },
+    whoCanSeeIt: [
+      'News and banners are public. A notification is seen by its audience alone; Sent Notifications says Everyone or Single user beside each, never who.',
+      'None of this is recorded in the Security Log.',
+    ],
+    whenSomethingGoesWrong: [
+      '“A title is required.”, “A body is required.” and “A message is required.” mark the field left empty. “Choose who this notification goes to.” means a single-member notice has no recipient yet.',
+      '“Failed to publish the post.”, “Failed to send the notification.” or a Save failed notice means nothing changed. Try again.',
+      'A banner that does not show is Inactive, outside its window, or already dismissed in that browser.',
+    ],
+    relatedLinks: [
+      { label: 'Manage News', route: APP_ROUTES.ADMIN_NEWS },
+      { label: 'Manage Banners', route: APP_ROUTES.ADMIN_BANNERS },
+      {
+        label: 'Sent Notifications',
+        route: APP_ROUTES.ADMIN_NOTIFICATIONS,
+      },
+      { label: 'News', route: APP_ROUTES.NEWS },
+    ],
+  }),
 ];
 
 /**
@@ -416,7 +522,7 @@ export const SITE_ADMIN_TOPIC: HelpTopic = {
   id: 'site-admin',
   title: 'Running the site',
   intro:
-    'For site administrators: deciding reports, keeping evidence, settling disputes over who runs a Community, erasing somebody from rosters, reading the Security Log, checking pictures and switching features on and off.',
+    'For site administrators: deciding reports, keeping evidence, looking after accounts and permissions, settling disputes over who runs a Community, erasing somebody from rosters, reading the Security Log, checking pictures, switching features on and off, and speaking to members as the site.',
   requiresAdmin: true,
   guides: SITE_ADMIN_GUIDES,
 };

@@ -7,6 +7,9 @@
   class="admin-layout">
   <div class="admin-content admin-main-column">
     <h1>Manage Permissions</h1>
+    <app-help-link
+      slug="site-admin-members-and-permissions"
+      label="Help with permissions" />
     <p class="admin-page-intro">
       Give one member a job without giving them the whole site. Find an account,
       make them a curator or return them to an ordinary member, and grant or
@@ -31,7 +34,9 @@
         heading="Find A Member"
         barClass="small-lcars-bar-gap"
         [badge]="memberTotal > 0 ? memberTotal : null">
-        <app-lcars-panel heading="Search">
+        <app-lcars-panel
+          heading="Search"
+          [collapsible]="true">
           <div class="admin-fields lcars-rotate">
             <div class="lcars-input-container admin-field-full">
               <label for="permission-search-input"
@@ -295,7 +300,7 @@
                   }
                 </div>
 
-                <div class="permission-row-actions">
+                <div class="permission-row-actions lcars-rotate">
                   <button
                     type="button"
                     class="lcars-btn green"
@@ -313,7 +318,7 @@
                   @if (row.override) {
                     <button
                       type="button"
-                      class="lcars-btn red"
+                      class="lcars-btn"
                       [disabled]="isBusy"
                       (click)="withdrawOverride(row)">
                       Withdraw
@@ -334,7 +339,7 @@
             class="admin-form">
             <div class="admin-section-body">
               <div class="admin-fields lcars-rotate">
-                <div class="lcars-select-container">
+                <div class="lcars-select-container admin-field-full">
                   <label
                     class="select-label"
                     for="override-permission-select"

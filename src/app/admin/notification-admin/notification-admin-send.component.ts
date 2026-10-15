@@ -14,6 +14,7 @@ import { Router, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import {
   LcarsSearchDialogComponent,
@@ -52,6 +53,7 @@ import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsib
     ReactiveFormsModule,
     RouterModule,
     MatDialogModule,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     CollapsibleSectionComponent,

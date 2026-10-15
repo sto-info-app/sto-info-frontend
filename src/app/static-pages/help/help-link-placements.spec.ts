@@ -328,6 +328,47 @@ const PLACEMENTS: readonly [string, string, string][] = [
     'site-admin-scanning',
     'Help with pausing publication',
   ],
+  // Accounts and permissions, and the site's own content (13 October 2026).
+  [
+    'admin/moderation-admin/user-admin-list.component.html',
+    'site-admin-members-and-permissions',
+    'Help with members',
+  ],
+  [
+    'admin/access-control-admin/permission-admin.component.html',
+    'site-admin-members-and-permissions',
+    'Help with permissions',
+  ],
+  [
+    'admin/news-admin/news-admin-list.component.html',
+    'site-admin-site-content',
+    'Help with news',
+  ],
+  [
+    'admin/news-admin/news-admin-form.component.html',
+    'site-admin-site-content',
+    'Help with news',
+  ],
+  [
+    'admin/banner-admin/banner-admin-list.component.html',
+    'site-admin-site-content',
+    'Help with banners',
+  ],
+  [
+    'admin/banner-admin/banner-admin-form.component.html',
+    'site-admin-site-content',
+    'Help with banners',
+  ],
+  [
+    'admin/notification-admin/notification-admin-list.component.html',
+    'site-admin-site-content',
+    'Help with notifications',
+  ],
+  [
+    'admin/notification-admin/notification-admin-send.component.html',
+    'site-admin-site-content',
+    'Help with sending a notification',
+  ],
 ];
 
 /** Pages only site admins reach, and so the only ones to link an admin guide. */

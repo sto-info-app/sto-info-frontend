@@ -17,6 +17,7 @@ import {
 import { Observable, finalize, take } from 'rxjs';
 import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { ModeratedUser } from 'src/app/models/moderation.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -70,6 +71,7 @@ const DISABLED_FILTER_LABELS: Record<DisabledFilter, string> = {
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     CollapsibleSectionComponent,

@@ -34,6 +34,7 @@ import {
   GovernanceReasonDialogComponent,
   GovernanceReasonDialogData,
 } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -127,6 +128,7 @@ const STATUS_PILL_CLASSES: Record<PermissionStatus, string> = {
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     CollapsibleSectionComponent,

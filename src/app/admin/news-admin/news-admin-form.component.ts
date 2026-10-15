@@ -9,6 +9,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -36,6 +37,7 @@ import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsib
     ReactiveFormsModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     MarkdownPipe,
     CollapsibleSectionComponent,
