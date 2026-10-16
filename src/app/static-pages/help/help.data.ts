@@ -1138,8 +1138,8 @@ const SETTINGS_TOPIC: HelpTopic = {
           'Each panel has a help link under its heading, leading to the guide for that panel.',
         ]),
         guideSection('Saving', [
-          'Change what you like, then press Save at the foot of the form. Save stays greyed out until something has changed, and nothing takes effect until it is saved.',
-          'If saving fails, the page says “Unable to save settings.” and your changes stay in the form, so you can try again.',
+          'There is nothing to press. Each setting is saved the moment you change it, and a brief Saved note appears beside it. Change one at a time or several in a row; each is saved in turn.',
+          'If one cannot be saved, it is put back to what it was, and the page says so at its foot, naming the setting: “Unable to save Privacy Mode. It has been put back.” Change it again to retry.',
         ]),
         guideSection('Settings are not your STO accounts', [
           'Your STO accounts are the Star Trek Online accounts you record on STO Info, each @handle with its captains, under Manage STO Accounts on your Dashboard. They describe you in the game.',
@@ -1180,7 +1180,7 @@ const SETTINGS_TOPIC: HelpTopic = {
           'It is a blur, not a removal. The details are still on the page, so anybody who copies the text, or uses a screen reader, still gets them.',
         ]),
         guideSection('Turning it on', [
-          'It is off until you turn it on. Switch on Privacy Mode under Privacy in Settings, and press Save.',
+          'It is off until you turn it on. Switch on Privacy Mode under Privacy in Settings; it is saved as soon as you do.',
           'While your settings are still loading, private details start out blurred, so they never flash up before the setting is known.',
         ]),
       ],
@@ -1203,7 +1203,7 @@ const SETTINGS_TOPIC: HelpTopic = {
           'Anything you do on the site keeps your session going, so the countdown only runs while you are idle. You are warned shortly before it runs out.',
         ]),
         guideSection('When a change applies', [
-          'A new timeout applies as soon as you save it, to the session you are in, rather than from your next sign-in.',
+          'A new timeout applies as soon as you choose it, to the session you are in, rather than from your next sign-in.',
         ]),
         guideSection('On a shared computer', [
           'Choose the shortest, and sign out when you finish. The timeout is a safety net, not a replacement for signing out.',
@@ -1279,7 +1279,7 @@ const SETTINGS_TOPIC: HelpTopic = {
       sections: [
         guideSection('Where notices arrive', [
           'Notices arrive in STO Info only, under Notifications, never by email. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
-          'Each switch under Notifications stops that kind of notice once you save. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
+          'Each switch under Notifications stops that kind of notice as soon as it is switched off. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
         ]),
         {
           heading: 'Mentions, replies and direct messages',

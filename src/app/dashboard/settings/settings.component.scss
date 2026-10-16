@@ -64,6 +64,35 @@
     gap: 8px;
   }
 
+  // A chooser and the note that it saved, side by side while there is room
+  // and one above the other on a phone.
+  .settings-chooser {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    .lcars-input-container {
+      flex: 1 1 240px;
+    }
+  }
+
+  // The word beside a control once its change has been kept: the success
+  // green the site's success messages use, and gone again after a moment.
+  // It fades in for those who have not asked for less motion.
+  .settings-saved {
+    align-self: center;
+    color: vars.$lcars-c60;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: settings-saved-in 200ms ease-out;
+    }
+  }
+
   .settings-field {
     display: flex;
     flex-direction: column;
@@ -164,5 +193,15 @@
       font-weight: 700;
       text-transform: uppercase;
     }
+  }
+}
+
+@keyframes settings-saved-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }

@@ -1,4 +1,4 @@
-import { expect, Locator, test } from '@playwright/test';
+import { expect, Locator, Page, test } from '@playwright/test';
 
 import { login, seedPassword } from '../external/account';
 import { backend } from '../support/backend';
@@ -18,6 +18,31 @@ import { member } from '../support/member';
  */
 
 test.use({ storageState: { cookies: [], origins: [] } });
+
+/**
+ * Changes a setting and waits for the server to keep it.
+ *
+ * Settings save themselves as they change; the note beside the control says
+ * when the server has answered, and reloading before then would lose the
+ * change.
+ *
+ * @param page - The page, on Settings.
+ * @param change - What to change.
+ */
+async function changeSetting(
+  page: Page,
+  change: () => Promise<void>,
+): Promise<void> {
+  const kept = page.waitForResponse(
+    response =>
+      response.url().includes('/user/settings') &&
+      response.request().method() === 'PUT',
+  );
+
+  await change();
+  expect((await kept).ok()).toBe(true);
+  await expect(page.getByText('Saved', { exact: true })).toBeVisible();
+}
 
 /**
  * Writes a text field the way Angular's form hears it.
@@ -55,10 +80,11 @@ test(
 
     try {
       if (!privacyBefore) {
-        await privacy.click();
+        await changeSetting(page, () => privacy.click());
       }
-      await timeout.selectOption({ label: '1 hour' });
-      await page.getByRole('button', { name: 'Save', exact: true }).click();
+      await changeSetting(page, () =>
+        timeout.selectOption({ label: '1 hour' }),
+      );
       await page.reload();
       await expect(privacy).toBeChecked();
       await expect(timeout.locator('option:checked')).toHaveText('1 hour');
@@ -78,15 +104,13 @@ test(
       await page.goto('/dashboard/settings');
       const privacyNow = await privacy.isChecked();
       if (privacyNow !== privacyBefore) {
-        await privacy.click();
+        await changeSetting(page, () => privacy.click());
       }
-      await timeout.selectOption({ label: timeoutBefore });
-      if (
-        await page
-          .getByRole('button', { name: 'Save', exact: true })
-          .isEnabled()
-      ) {
-        await page.getByRole('button', { name: 'Save', exact: true }).click();
+      const timeoutNow = await timeout.locator('option:checked').innerText();
+      if (timeoutNow !== timeoutBefore) {
+        await changeSetting(page, () =>
+          timeout.selectOption({ label: timeoutBefore }),
+        );
       }
     }
   },

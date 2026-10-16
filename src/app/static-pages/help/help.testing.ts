@@ -38,6 +38,6 @@ export const SETTINGS_FORM_LABELS: readonly string[] = [
   'Direct messages',
   'Roster association proposals',
   'Event reminders',
-  'Save',
+  'Saved',
   'Configure Custom Tracking',
 ];

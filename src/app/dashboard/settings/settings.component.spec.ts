@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { FLEET_FEATURES_DISABLED } from 'src/app/models/fleet.models';
@@ -10,7 +10,10 @@ import { PrivacyModeService } from '../services/privacy-mode.service';
 import { DEFAULT_USER_SETTINGS } from '../services/user-settings.service';
 import { findHelpGuide } from 'src/app/static-pages/help/help.data';
 import { SETTINGS_FORM_LABELS } from 'src/app/static-pages/help/help.testing';
-import { SettingsComponent } from './settings.component';
+import {
+  SAVED_NOTE_DURATION_MS,
+  SettingsComponent,
+} from './settings.component';
 
 describe('SettingsComponent', () => {
   let fixture: ComponentFixture<SettingsComponent>;
@@ -100,55 +103,168 @@ describe('SettingsComponent', () => {
     );
   });
 
-  it('saves the settings and marks the form pristine', () => {
+  /**
+   * The word beside a control once it has saved.
+   *
+   * @param key - The control's form name, or a chooser's id.
+   * @returns The note's text, or null while there is none.
+   */
+  const savedNoteBeside = (key: string): string | null => {
+    const control = fixture.nativeElement.querySelector(
+      `[formcontrolname="${key}"], #${key}`,
+    ) as HTMLElement | null;
+    const row = control?.closest('.settings-row, .settings-chooser');
+
+    return row?.querySelector('.settings-saved')?.textContent?.trim() ?? null;
+  };
+
+  it('fills the form in without saving it', () => {
+    privacyModeService.load.mockReturnValue(
+      of(settings({ privacyMode: true, sessionTimeoutMinutes: 60 })),
+    );
+
     createComponent();
-    component.settingsForm.controls.privacyMode.setValue(true);
-    component.settingsForm.markAsDirty();
 
-    component.save();
-
-    expect(privacyModeService.update).toHaveBeenCalledWith(
-      settings({ privacyMode: true }),
-    );
-    expect(component.isSaving).toBe(false);
     expect(component.settingsForm.getRawValue()).toEqual(
-      settings({ privacyMode: true }),
+      settings({ privacyMode: true, sessionTimeoutMinutes: 60 }),
     );
-    expect(component.settingsForm.pristine).toBe(true);
+    expect(privacyModeService.update).not.toHaveBeenCalled();
   });
 
-  it('shows an error when saving fails', () => {
+  it('has no Save button', () => {
+    createComponent();
+
+    expect(
+      fixture.nativeElement.querySelector('button[type="submit"]'),
+    ).toBeNull();
+    expect(fixture.nativeElement.textContent).not.toMatch(/\bSave\b/);
+  });
+
+  /**
+   * The server insists on the privacy mode with every change, so it travels
+   * alongside the one field that changed and nothing else.
+   */
+  it('saves a changed setting on its own, with the stored privacy mode', () => {
+    privacyModeService.update.mockReturnValue(
+      of(settings({ sessionTimeoutMinutes: 480 })),
+    );
+    createComponent();
+
+    component.settingsForm.controls.sessionTimeoutMinutes.setValue(480);
+
+    expect(privacyModeService.update).toHaveBeenCalledTimes(1);
+    expect(privacyModeService.update).toHaveBeenCalledWith({
+      privacyMode: false,
+      sessionTimeoutMinutes: 480,
+    });
+    expect(component.errorMessage).toBe('');
+  });
+
+  it('shows Saved beside the control that saved, then takes it away', () => {
+    jest.useFakeTimers();
+    try {
+      createComponent();
+
+      component.settingsForm.controls.privacyMode.setValue(true);
+      fixture.detectChanges();
+
+      expect(savedNoteBeside('privacyMode')).toBe('Saved');
+      expect(savedNoteBeside('session-timeout')).toBeNull();
+      expect(component.announcement).toBe('Privacy Mode saved.');
+
+      jest.advanceTimersByTime(SAVED_NOTE_DURATION_MS);
+      fixture.detectChanges();
+
+      expect(savedNoteBeside('privacyMode')).toBeNull();
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  /**
+   * A value the server sent back is written into the form silently; were it
+   * heard as a change, every save would beget another.
+   */
+  it('does not save again what the server sent back', () => {
+    privacyModeService.update.mockReturnValue(
+      of(settings({ privacyMode: true, sessionTimeoutMinutes: 60 })),
+    );
+    createComponent();
+
+    component.settingsForm.controls.privacyMode.setValue(true);
+
+    expect(privacyModeService.update).toHaveBeenCalledTimes(1);
+    expect(component.settingsForm.controls.privacyMode.value).toBe(true);
+    // Only the field that was saved is taken from the answer.
+    expect(component.settingsForm.controls.sessionTimeoutMinutes.value).toBe(
+      240,
+    );
+  });
+
+  it('puts a failed change back and names the setting', () => {
     privacyModeService.update.mockReturnValue(
       throwError(() => new Error('nope')),
     );
     createComponent();
 
-    component.save();
-
-    expect(component.isSaving).toBe(false);
-    expect(component.errorMessage).toBe('Unable to save settings.');
-  });
-
-  it('ignores a save while another save is in flight', () => {
-    createComponent();
-    component.isSaving = true;
-
-    component.save();
-
-    expect(privacyModeService.update).not.toHaveBeenCalled();
-  });
-
-  it('submits the form when the save button is clicked', () => {
-    createComponent();
-    component.settingsForm.markAsDirty();
+    component.settingsForm.controls.privacyMode.setValue(true);
     fixture.detectChanges();
 
-    const button = fixture.nativeElement.querySelector(
-      'button[type="submit"]',
-    ) as HTMLButtonElement;
-    button.click();
+    expect(component.settingsForm.controls.privacyMode.value).toBe(false);
+    expect(component.errorMessage).toBe(
+      'Unable to save Privacy Mode. It has been put back.',
+    );
+    expect(component.announcement).toBe(component.errorMessage);
+    expect(fixture.nativeElement.textContent).toContain(
+      'Unable to save Privacy Mode. It has been put back.',
+    );
+    expect(savedNoteBeside('privacyMode')).toBeNull();
+    // Putting it back is not a change to be saved.
+    expect(privacyModeService.update).toHaveBeenCalledTimes(1);
+  });
 
-    expect(privacyModeService.update).toHaveBeenCalledWith(settings());
+  it('clears the error once a later change saves', () => {
+    privacyModeService.update
+      .mockReturnValueOnce(throwError(() => new Error('nope')))
+      .mockReturnValueOnce(of(settings({ sessionTimeoutMinutes: 60 })));
+    createComponent();
+
+    component.settingsForm.controls.privacyMode.setValue(true);
+    component.settingsForm.controls.sessionTimeoutMinutes.setValue(60);
+
+    expect(component.errorMessage).toBe('');
+    expect(component.settingsForm.controls.sessionTimeoutMinutes.value).toBe(
+      60,
+    );
+  });
+
+  /**
+   * Two changes in quick succession reach the server in the order they were
+   * made, the second waiting for the first's answer, so neither can overtake
+   * the other and leave the stored settings as nobody chose them.
+   */
+  it('saves changes one at a time, in order', () => {
+    const first = new Subject<UserSettings>();
+    privacyModeService.update
+      .mockReturnValueOnce(first.asObservable())
+      .mockReturnValueOnce(
+        of(settings({ privacyMode: true, sessionTimeoutMinutes: 60 })),
+      );
+    createComponent();
+
+    component.settingsForm.controls.privacyMode.setValue(true);
+    component.settingsForm.controls.sessionTimeoutMinutes.setValue(60);
+
+    expect(privacyModeService.update).toHaveBeenCalledTimes(1);
+
+    first.next(settings({ privacyMode: true }));
+    first.complete();
+
+    expect(privacyModeService.update).toHaveBeenCalledTimes(2);
+    expect(privacyModeService.update).toHaveBeenLastCalledWith({
+      privacyMode: true,
+      sessionTimeoutMinutes: 60,
+    });
   });
 
   it('offers every inactivity window, and describes what it does', () => {
@@ -173,23 +289,20 @@ describe('SettingsComponent', () => {
       of(settings({ sessionTimeoutMinutes: 480 })),
     );
     createComponent();
+
     component.settingsForm.controls.sessionTimeoutMinutes.setValue(480);
-    component.settingsForm.markAsDirty();
 
-    component.save();
-
-    expect(privacyModeService.update).toHaveBeenCalledWith(
-      settings({ sessionTimeoutMinutes: 480 }),
-    );
+    expect(privacyModeService.update).toHaveBeenCalledWith({
+      privacyMode: false,
+      sessionTimeoutMinutes: 480,
+    });
     expect(authService.refreshToken).toHaveBeenCalled();
   });
 
-  it('leaves the session alone when the timeout is unchanged', () => {
+  it('leaves the session alone when something other than the timeout changes', () => {
     createComponent();
-    component.settingsForm.controls.privacyMode.setValue(true);
-    component.settingsForm.markAsDirty();
 
-    component.save();
+    component.settingsForm.controls.privacyMode.setValue(true);
 
     expect(authService.refreshToken).not.toHaveBeenCalled();
   });
@@ -202,13 +315,14 @@ describe('SettingsComponent', () => {
       of(settings({ sessionTimeoutMinutes: 60 })),
     );
     createComponent();
-    component.settingsForm.controls.sessionTimeoutMinutes.setValue(60);
-    component.settingsForm.markAsDirty();
 
-    component.save();
+    component.settingsForm.controls.sessionTimeoutMinutes.setValue(60);
 
     expect(component.errorMessage).toBe('');
-    expect(component.settingsForm.pristine).toBe(true);
+    expect(component.settingsForm.controls.sessionTimeoutMinutes.value).toBe(
+      60,
+    );
+    expect(component.savedKey).toBe('sessionTimeoutMinutes');
   });
   describe('dates and times', () => {
     /**
@@ -402,24 +516,23 @@ describe('SettingsComponent', () => {
     });
 
     /**
-     * The hidden controls still hold their loaded values, so saving from a
-     * deployment with Fleet switched off returns them unchanged rather than
-     * resetting somebody's presence choice to the default.
+     * Only the changed field is sent, so a change made from a deployment with
+     * Fleet switched off leaves somebody's hidden presence choice exactly as
+     * it was rather than resetting it to the default.
      */
-    it('are still saved unchanged while hidden', () => {
+    it('are left alone while hidden', () => {
       privacyModeService.load.mockReturnValue(
         of(settings({ presenceVisibility: 'EVERYONE', appearOffline: true })),
       );
       createComponent();
+
       component.settingsForm.controls.privacyMode.setValue(true);
 
-      component.save();
-
-      expect(privacyModeService.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          presenceVisibility: 'EVERYONE',
-          appearOffline: true,
-        }),
+      expect(privacyModeService.update).toHaveBeenCalledWith({
+        privacyMode: true,
+      });
+      expect(component.settingsForm.controls.presenceVisibility.value).toBe(
+        'EVERYONE',
       );
     });
   });
@@ -446,7 +559,7 @@ describe('SettingsComponent', () => {
         link.querySelector('.help-link__label')!.textContent,
       ]);
 
-    // Steve's decision: a link under each heading, to that panel's guide.
+    // A link under each heading, to that panel's guide.
     it('links the page and each of its panels to its own guide', () => {
       createWithEverything();
 
@@ -484,11 +597,14 @@ describe('SettingsComponent', () => {
 
     // The Help data's spec checks the guides use each of these labels; this
     // checks the page still shows them, so a control renamed without its
-    // guide fails one or the other.
+    // guide fails one or the other. One change is made first, since the
+    // "Saved" note is among them and only appears once something has saved.
     it.each(SETTINGS_FORM_LABELS)(
       'shows the label “%s” its guide quotes',
       label => {
         createWithEverything();
+        component.settingsForm.controls.privacyMode.setValue(true);
+        fixture.detectChanges();
 
         expect(fixture.nativeElement.textContent).toContain(label);
       },

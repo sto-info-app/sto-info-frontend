@@ -9,7 +9,7 @@
       slug="your-settings"
       label="Help with Settings" />
     @if (!isLoading) {
-      <form [formGroup]="settingsForm" (ngSubmit)="save()">
+      <form [formGroup]="settingsForm">
         <app-collapsible-section heading="Privacy">
           <div class="settings-content">
             <app-help-link
@@ -21,6 +21,9 @@
                 label="Privacy Mode"
                 ariaLabel="Privacy Mode"
               ></app-lcars-toggle>
+              @if (savedKey === 'privacyMode') {
+                <span class="settings-saved">Saved</span>
+              }
               <details class="settings-help">
                 <summary
                   class="settings-help-trigger"
@@ -50,17 +53,22 @@
               slug="staying-signed-in"
               label="Help with staying signed in" />
             <div class="settings-field">
-              <div class="lcars-input-container">
-                <label for="session-timeout">Login inactivity timeout</label>
-                <select
-                  id="session-timeout"
-                  formControlName="sessionTimeoutMinutes"
-                  aria-describedby="session-timeout-description"
-                >
-                  @for (option of sessionTimeoutOptions; track option.value) {
-                    <option [ngValue]="option.value">{{ option.label }}</option>
-                  }
-                </select>
+              <div class="settings-chooser">
+                <div class="lcars-input-container">
+                  <label for="session-timeout">Login inactivity timeout</label>
+                  <select
+                    id="session-timeout"
+                    formControlName="sessionTimeoutMinutes"
+                    aria-describedby="session-timeout-description"
+                  >
+                    @for (option of sessionTimeoutOptions; track option.value) {
+                      <option [ngValue]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
+                </div>
+                @if (savedKey === 'sessionTimeoutMinutes') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p id="session-timeout-description" class="settings-description">
                 How long you can be away before you are signed out. Anything you
@@ -76,20 +84,25 @@
               slug="dates-and-times"
               label="Help with dates and times" />
             <div class="settings-field">
-              <div class="lcars-input-container">
-                <label for="display-timezone">Show dates and times in</label>
-                <select
-                  id="display-timezone"
-                  formControlName="displayTimezone"
-                  aria-describedby="display-timezone-description"
-                >
-                  <option [ngValue]="null">
-                    Automatically &mdash; {{ deviceTimezoneLabel }}
-                  </option>
-                  @for (zone of timezones; track zone) {
-                    <option [ngValue]="zone">{{ describe(zone) }}</option>
-                  }
-                </select>
+              <div class="settings-chooser">
+                <div class="lcars-input-container">
+                  <label for="display-timezone">Show dates and times in</label>
+                  <select
+                    id="display-timezone"
+                    formControlName="displayTimezone"
+                    aria-describedby="display-timezone-description"
+                  >
+                    <option [ngValue]="null">
+                      Automatically &mdash; {{ deviceTimezoneLabel }}
+                    </option>
+                    @for (zone of timezones; track zone) {
+                      <option [ngValue]="zone">{{ describe(zone) }}</option>
+                    }
+                  </select>
+                </div>
+                @if (savedKey === 'displayTimezone') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p id="display-timezone-description" class="settings-description">
                 Every date and time in STO Info is shown in this zone. Left
@@ -107,18 +120,23 @@
                 slug="fleet-settings"
                 label="Help with Fleet settings" />
               <div class="settings-field">
-                <div class="lcars-input-container">
-                  <label for="export-timezone">Read Fleet roster exports as</label>
-                  <select
-                    id="export-timezone"
-                    formControlName="stoExportTimezone"
-                    aria-describedby="export-timezone-description"
-                  >
-                    <option [ngValue]="null">My device’s zone</option>
-                    @for (zone of timezones; track zone) {
-                      <option [ngValue]="zone">{{ describe(zone) }}</option>
-                    }
-                  </select>
+                <div class="settings-chooser">
+                  <div class="lcars-input-container">
+                    <label for="export-timezone">Read Fleet roster exports as</label>
+                    <select
+                      id="export-timezone"
+                      formControlName="stoExportTimezone"
+                      aria-describedby="export-timezone-description"
+                    >
+                      <option [ngValue]="null">My device’s zone</option>
+                      @for (zone of timezones; track zone) {
+                        <option [ngValue]="zone">{{ describe(zone) }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (savedKey === 'stoExportTimezone') {
+                    <span class="settings-saved">Saved</span>
+                  }
                 </div>
                 <p id="export-timezone-description" class="settings-description">
                   Star Trek Online writes the times in a roster export using the
@@ -130,17 +148,22 @@
               </div>
               @if (isChatOffered) {
               <div class="settings-field">
-                <div class="lcars-input-container">
-                  <label for="presence-visibility">Who can see when I am online</label>
-                  <select
-                    id="presence-visibility"
-                    formControlName="presenceVisibility"
-                    aria-describedby="presence-visibility-description"
-                  >
-                    @for (option of presenceOptions; track option.value) {
-                      <option [ngValue]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
+                <div class="settings-chooser">
+                  <div class="lcars-input-container">
+                    <label for="presence-visibility">Who can see when I am online</label>
+                    <select
+                      id="presence-visibility"
+                      formControlName="presenceVisibility"
+                      aria-describedby="presence-visibility-description"
+                    >
+                      @for (option of presenceOptions; track option.value) {
+                        <option [ngValue]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (savedKey === 'presenceVisibility') {
+                    <span class="settings-saved">Saved</span>
+                  }
                 </div>
                 <p id="presence-visibility-description" class="settings-description">
                   Online means you have STO Info open, never whether you are in
@@ -155,6 +178,9 @@
                   label="Appear offline"
                   ariaLabel="Appear offline"
                 ></app-lcars-toggle>
+                @if (savedKey === 'appearOffline') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p class="settings-description">
                 Hides you from everybody for now, whatever you chose above. Your
@@ -166,6 +192,9 @@
                   label="Show when I am typing"
                   ariaLabel="Show when I am typing"
                 ></app-lcars-toggle>
+                @if (savedKey === 'typingIndicatorsEnabled') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p class="settings-description">
                 Lets people in a chat see when you are writing, and lets you see
@@ -191,6 +220,9 @@
                   label="Mentions"
                   ariaLabel="Notify me about mentions"
                 ></app-lcars-toggle>
+                @if (savedKey === 'notifyMention') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <div class="settings-row">
                 <app-lcars-toggle
@@ -198,6 +230,9 @@
                   label="Replies"
                   ariaLabel="Notify me about replies"
                 ></app-lcars-toggle>
+                @if (savedKey === 'notifyReply') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <div class="settings-row">
                 <app-lcars-toggle
@@ -205,6 +240,9 @@
                   label="Direct messages"
                   ariaLabel="Notify me about direct messages"
                 ></app-lcars-toggle>
+                @if (savedKey === 'notifyDirectMessage') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p class="settings-description">
                 A direct message tells you once while you are away, and not
@@ -217,6 +255,9 @@
                   label="Roster association proposals"
                   ariaLabel="Notify me about roster association proposals"
                 ></app-lcars-toggle>
+                @if (savedKey === 'notifyRosterAssociation') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p class="settings-description">
                 Someone proposing that a character on an imported roster is yours.
@@ -229,6 +270,9 @@
                   label="Event reminders"
                   ariaLabel="Notify me about event reminders"
                 ></app-lcars-toggle>
+                @if (savedKey === 'notifyEventReminder') {
+                  <span class="settings-saved">Saved</span>
+                }
               </div>
               <p class="settings-description">
                 Only for events you have asked to be reminded about.
@@ -236,15 +280,6 @@
             </div>
           </app-collapsible-section>
         }
-        <div class="settings-actions">
-          <button
-            type="submit"
-            class="lcars-btn green"
-            [disabled]="isSaving || !settingsForm.dirty"
-          >
-            Save
-          </button>
-        </div>
       </form>
       <!--
         Outside the form, so the sections above do not count it among
@@ -273,6 +308,18 @@
         [message]="errorMessage"
       ></app-lcars-error-message>
     }
+    <!--
+      Always present, so its words are announced when they change. The
+      "Saved" notes beside the controls come and go, which is not reliably
+      read out.
+    -->
+    <p
+      class="sr-only"
+      aria-live="polite"
+      data-testid="settings-announcement"
+    >
+      {{ announcement }}
+    </p>
   </div>
   <div class="settings-side-column col">
     <app-collapsible-section

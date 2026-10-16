@@ -117,7 +117,7 @@ async function post(page: Page, place: string, text: string): Promise<void> {
 }
 
 /**
- * Sets one of the person's chat settings, and saves it if it changed.
+ * Sets one of the person's chat settings, which saves itself if it changed.
  *
  * @param page - The page.
  * @param name - The switch's name.
@@ -131,17 +131,22 @@ async function setChatSetting(
   await page.goto('/dashboard/settings');
 
   const toggle = page.getByRole('switch', { name, exact: true });
-  const save = page.getByRole('button', { name: 'Save', exact: true });
 
   await expect(toggle).toBeVisible();
 
   if ((await toggle.getAttribute('aria-checked')) !== String(on)) {
+    const kept = page.waitForResponse(
+      response =>
+        response.url().includes('/user/settings') &&
+        response.request().method() === 'PUT',
+    );
+
     await toggle.click();
-    await save.click();
+    expect((await kept).ok()).toBe(true);
+    await expect(page.getByText('Saved', { exact: true })).toBeVisible();
   }
 
   await expect(toggle).toHaveAttribute('aria-checked', String(on));
-  await expect(save).toBeDisabled();
 }
 
 /**
