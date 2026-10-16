@@ -42,14 +42,16 @@
 }
 
 // Tall and narrow in Antonio, as the panel's numbers are, and in the button's
-// colour on the page rather than on a block. The mark stands exactly as tall
-// as the bar: Antonio's question mark is 0.87 of its size, so 50.6px draws it
-// 44px high, and a line height of 0.73 puts its top on the bar's top and its
-// foot on the bar's foot.
+// colour on the page rather than on a block. The mark stands two pixels shy
+// of the bar at each end, so it sits inside the shape rather than cutting
+// through it: Antonio's question mark is 0.87 of its size, so 46px draws it
+// 40px high in a 40px block, which the row centres in the 44px bar, and a
+// line height of 0.73 puts its top on the block's top and its foot on the
+// block's foot.
 .help-link__mark {
   display: block;
-  height: 100%;
-  font-size: 50.6px;
+  height: 40px;
+  font-size: 46px;
   font-weight: 700;
   line-height: 0.73;
   color: var(--help-link-colour);
