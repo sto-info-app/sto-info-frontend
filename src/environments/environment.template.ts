@@ -2,7 +2,7 @@
 //NOTE: The app will throw an error if env vars missing/invalid.
 //NOTE: This will assist if variables are missing upon release!
 
-import packageJson from '../../package.json';
+import { version } from '../../package.json';
 import { Environment } from './models/environment.model';
 
 // These declarations silence type checking; build step replaces the tokens.
@@ -13,7 +13,7 @@ declare const __minsBeforeLogoutExpiryToRefreshToken__: number;
 
 export const environment: Environment = {
   production: __production__,
-  version: packageJson.version,
+  version,
   env_name: '__env_name__',
   env_label: '__env_label__',
   apiUrl: '__apiUrl__',
