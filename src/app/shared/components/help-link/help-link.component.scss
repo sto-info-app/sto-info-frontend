@@ -9,11 +9,11 @@
 
 // An LCARS numbered panel button: a
 // rounded cap, a large question mark standing where the panel's number would,
-// and the words on a pill rounded at its far end. Always the same blue, which
-// is not in the page's rotation, so a reader learns it as "help" wherever it
+// and the words on a pill rounded at its far end. Always the same lilac, which
+// nothing else on the site uses, so a reader learns it as "help" wherever it
 // appears.
 .help-link {
-  --help-link-colour: #{vars.$lcars-c48};
+  --help-link-colour: #{vars.$lcars-help-link};
 
   display: inline-flex;
   align-items: center;

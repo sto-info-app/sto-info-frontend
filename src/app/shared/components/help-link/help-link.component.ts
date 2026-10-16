@@ -6,10 +6,10 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 /**
  * A small link from a page to the Help guide about it (FC-049, FC-050).
  *
- * Steve's decisions of 29 September 2026 put one under each heading of the
- * Settings page and under the heading of each Fleet page, so a reader stuck
- * on a page is one step from its guide. Written once here so every page's
- * link looks and reads the same.
+ * One sits under each heading of the Settings page and under the heading of
+ * each Fleet page (decided 29 September 2026), so a reader stuck on a page is
+ * one step from its guide. Written once here so every page's link looks and
+ * reads the same, in a colour nothing else on the site uses.
  */
 @Component({
   selector: 'app-help-link',

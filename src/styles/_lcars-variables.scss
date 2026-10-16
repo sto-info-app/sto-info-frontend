@@ -120,6 +120,12 @@ $lcars-help-border: #9de0ff;
 $lcars-help-text: #f2f8ff;
 $lcars-help-note: #b8e8ff;
 
+// The help links to a guide (`<app-help-link>`): thelcars.com's Classic
+// theme lilac, used for nothing else on the site, so a reader learns it as
+// "help" wherever it appears. Not the palette's `$lcars-lilac` below, which
+// is a different, vivid colour. Black text on it reads at 5.0:1.
+$lcars-help-link: #8a72a7;
+
 // A registry entry's public / private state, and the solid wash behind the
 // public colour once its help popup is open.
 $lcars-public-green: #6fff8f;
