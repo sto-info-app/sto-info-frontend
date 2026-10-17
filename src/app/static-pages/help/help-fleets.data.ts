@@ -1109,7 +1109,7 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
           'Scanning, then Reading — nothing in it is in force yet.',
           'Imported — the export is in the roster and in force.',
           'Held — another export of this Fleet claims the same moment and says something different, so this one waits.',
-          'Refused — nothing in it was read. What a scan found is not reported.',
+          'Refused — nothing in it was read. What a scan found is not reported. If the scan could not be completed, the page says so, and sending the same export again starts a fresh import.',
           'Abandoned — it was given up on before it was read. Sending the same export again starts a fresh import, and the abandoned one stays listed.',
           'File expired or File erased — a held export whose file was deleted before anybody chose it.',
         ],

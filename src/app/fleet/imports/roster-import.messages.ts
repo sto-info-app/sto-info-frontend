@@ -165,6 +165,9 @@ export const ROSTER_IMPORT_STATUS_REASONS: Record<string, string> = {
     'one waits until the conflict is resolved.',
   SCAN_REFUSED:
     'The file did not pass the scan. What the scan found is not reported.',
+  RETRY_BUDGET_EXHAUSTED:
+    'The scan could not be completed, so the file was never judged and ' +
+    'nothing in it was read. Import the export again to start afresh.',
   ROWS_UNREADABLE: 'Some rows hold values that cannot be read.',
   EXPORT_TIMEZONE_MISSING:
     'This import does not record which timezone the export was taken in, so ' +
