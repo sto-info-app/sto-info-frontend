@@ -22,14 +22,24 @@
           {{ total }} message{{ total === 1 ? '' : 's' }}
         }
       </p>
-      @if (unreadCount > 0) {
-        <button
-          type="button"
-          class="lcars-btn lcars-btn-auto notifications-markall"
-          (click)="markAllRead()">
-          Mark all read
-        </button>
-      }
+      <div class="notifications-toolbar-actions">
+        @if (unreadCount > 0) {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto notifications-markall"
+            (click)="markAllRead()">
+            Mark all read
+          </button>
+        }
+        @if (readCount > 0) {
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red notifications-deleteread"
+            (click)="deleteAllRead()">
+            Delete all read
+          </button>
+        }
+      </div>
     </div>
 
     <ul class="notifications-items">
@@ -121,6 +131,14 @@
                   [ngClass]="
                     notification.isRead ? 'fa-envelope' : 'fa-envelope-open'
                   "></i>
+              </button>
+              <button
+                type="button"
+                class="cta-icon delete-icon"
+                (click)="remove(notification, $event)"
+                title="Delete notification"
+                aria-label="Delete notification">
+                <i class="fas fa-trash"></i>
               </button>
             </div>
           </div>

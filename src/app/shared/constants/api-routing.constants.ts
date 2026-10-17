@@ -174,6 +174,7 @@ export const API_URLS = {
   NOTIFICATIONS_BANNERS: apiUrl + '/notifications/banners',
   NOTIFICATIONS_UNREAD_COUNT: apiUrl + '/notifications/unread-count',
   NOTIFICATIONS_READ_ALL: apiUrl + '/notifications/read-all',
+  NOTIFICATIONS_DISMISS_READ: apiUrl + '/notifications/dismiss-read',
   NOTIFICATIONS_ADMIN: apiUrl + '/notifications/admin',
   NOTIFICATIONS_ADMIN_BANNERS: apiUrl + '/notifications/admin/banners',
 

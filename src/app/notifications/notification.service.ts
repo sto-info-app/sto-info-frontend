@@ -215,6 +215,44 @@ export class NotificationService {
       .pipe(tap(() => this._unreadCountSubject.next(0)));
   }
 
+  /**
+   * Deletes a notification from the inbox.
+   *
+   * Hidden for this reader alone; the notification stays for everyone else
+   * it was sent to. The unread count is read again afterwards rather than
+   * guessed, since the page may not know whether it was read.
+   *
+   * @param id - The notification ID.
+   * @returns An observable that completes when deleted.
+   */
+  dismiss(id: string): Observable<void> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.delete<void>(
+      `${API_URLS.NOTIFICATIONS}/${id}`,
+      httpOptions,
+    );
+  }
+
+  /**
+   * Deletes every read notification from the inbox.
+   *
+   * @returns An observable of the number deleted.
+   */
+  dismissAllRead(): Observable<{ dismissed: number }> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.post<{ dismissed: number }>(
+      API_URLS.NOTIFICATIONS_DISMISS_READ,
+      {},
+      httpOptions,
+    );
+  }
+
   // ----- Admin -----
 
   /**

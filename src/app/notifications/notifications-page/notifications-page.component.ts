@@ -7,6 +7,7 @@ import {
   OnInit,
   inject,
 } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import {
@@ -18,6 +19,7 @@ import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagina
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { NotificationService } from '../notification.service';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import {
   LOAD_TIMEOUT_MS,
   PAGE_SIZE,
@@ -30,7 +32,10 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
  * Full-page, paginated list of the current user's inbox notifications.
  *
  * Replaces the former header dropdown: the header "incoming transmission" alert
- * routes here, and items can be read individually or all at once.
+ * routes here, and items can be read individually or all at once. Five show
+ * at a time. A notification can be deleted, singly without asking or every
+ * read one at once behind a confirmation; deleting hides it for this reader
+ * alone and for good.
  */
 @Component({
   selector: 'app-notifications-page',
@@ -50,6 +55,7 @@ export class NotificationsPageComponent implements OnInit {
   private readonly _notificationService = inject(NotificationService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _dialog = inject(MatDialog);
 
   notifications: AppNotification[] = [];
   isLoading = false;
@@ -138,6 +144,15 @@ export class NotificationsPageComponent implements OnInit {
   }
 
   /**
+   * How many notifications in the inbox have been read, across every page.
+   *
+   * @returns The count, never below zero.
+   */
+  get readCount(): number {
+    return Math.max(0, this.total - this.unreadCount);
+  }
+
+  /**
    * Toggles a notification's read state via the appropriate endpoint and keeps
    * the local unread count in sync.
    *
@@ -207,6 +222,86 @@ export class NotificationsPageComponent implements OnInit {
           // No-op on failure.
         },
       });
+  }
+
+  /**
+   * Deletes one notification from the inbox, without asking.
+   *
+   * A notification is a notice, not a record: a wrong tap loses one message
+   * whose subject is still on the page it pointed at. The page is read again
+   * afterwards so the paging, the counts and the unread badge all come from
+   * the server rather than from arithmetic here; a page emptied by the
+   * deletion turns back one.
+   *
+   * @param notification - The notification to delete.
+   * @param event - The originating click, stopped so the card does not also act.
+   */
+  remove(notification: AppNotification, event: Event): void {
+    event.stopPropagation();
+
+    this._notificationService
+      .dismiss(notification.id)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: () => this.reloadAfterRemoval(1),
+        error: () => {
+          // Leave the list unchanged on failure.
+        },
+      });
+  }
+
+  /**
+   * Deletes every read notification from the inbox, once confirmed.
+   *
+   * Acts on many at once, so it asks first, as the site's other bulk
+   * deletions do.
+   */
+  deleteAllRead(): void {
+    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
+      width: '75%',
+      data: {
+        title: 'Delete all read notifications',
+        message: `
+          <p>Delete every notification you have read? Unread ones stay.</p>
+          <p><strong>WARNING:</strong> This cannot be undone.</p>`,
+        confirmText: 'Delete',
+        cancelText: 'Cancel',
+      },
+    });
+
+    dialogRef
+      .afterClosed()
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+
+        this._notificationService
+          .dismissAllRead()
+          .pipe(observeInZone(this._ngZone, this._cdr))
+          .subscribe({
+            next: () => this.loadPage(1),
+            error: () => {
+              // Leave the list unchanged on failure.
+            },
+          });
+      });
+  }
+
+  /**
+   * Reads the inbox again after notifications were deleted.
+   *
+   * @param removed - How many of the current page's items went.
+   */
+  private reloadAfterRemoval(removed: number): void {
+    const emptied = this.notifications.length <= removed;
+
+    this.loadPage(emptied && this.page > 1 ? this.page - 1 : this.page);
+    this._notificationService
+      .refreshUnreadCount()
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({ error: () => undefined });
   }
 
   /**

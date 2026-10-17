@@ -2,7 +2,7 @@
 
 import { NotificationSeverity } from 'src/app/models/notification.models';
 
-export const PAGE_SIZE = 15;
+export const PAGE_SIZE = 5;
 export const LOAD_TIMEOUT_MS = 12000;
 
 export interface SeverityMeta {

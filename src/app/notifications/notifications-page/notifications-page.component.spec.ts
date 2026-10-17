@@ -1,5 +1,6 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { RouterTestingModule } from '@angular/router/testing';
 import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
 import {
@@ -16,9 +17,17 @@ describe('NotificationsPageComponent', () => {
   let serviceSpy: jest.Mocked<
     Pick<
       NotificationService,
-      'getInbox' | 'markRead' | 'markUnread' | 'markAllRead'
+      | 'getInbox'
+      | 'markRead'
+      | 'markUnread'
+      | 'markAllRead'
+      | 'dismiss'
+      | 'dismissAllRead'
+      | 'refreshUnreadCount'
     >
   > & { unreadCount$: BehaviorSubject<number> };
+  let dialog: { open: jest.Mock };
+  let confirmed: boolean;
 
   const notification: AppNotification = {
     id: 'n1',
@@ -41,7 +50,7 @@ describe('NotificationsPageComponent', () => {
           items: [{ ...notification }],
           total: 1,
           page: 1,
-          pageSize: 15,
+          pageSize: 5,
           unreadCount: 1,
         }),
       ),
@@ -54,6 +63,22 @@ describe('NotificationsPageComponent', () => {
         Parameters<NotificationService['markUnread']>
       >(() => of(void 0)),
       markAllRead: jest.fn(() => of({ marked: 1 })),
+      dismiss: jest.fn<
+        ReturnType<NotificationService['dismiss']>,
+        Parameters<NotificationService['dismiss']>
+      >(() => of(void 0)),
+      dismissAllRead: jest.fn<
+        ReturnType<NotificationService['dismissAllRead']>,
+        Parameters<NotificationService['dismissAllRead']>
+      >(() => of({ dismissed: 1 })),
+      refreshUnreadCount: jest.fn<
+        ReturnType<NotificationService['refreshUnreadCount']>,
+        Parameters<NotificationService['refreshUnreadCount']>
+      >(() => of({ unreadCount: 0 })),
+    };
+    confirmed = true;
+    dialog = {
+      open: jest.fn(() => ({ afterClosed: () => of(confirmed) })),
     };
 
     await TestBed.configureTestingModule({
@@ -62,7 +87,10 @@ describe('NotificationsPageComponent', () => {
         HttpClientTestingModule,
         RouterTestingModule,
       ],
-      providers: [{ provide: NotificationService, useValue: serviceSpy }],
+      providers: [
+        { provide: NotificationService, useValue: serviceSpy },
+        { provide: MatDialog, useValue: dialog },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(NotificationsPageComponent);
@@ -71,7 +99,7 @@ describe('NotificationsPageComponent', () => {
 
   it('loads the first page on init', () => {
     fixture.detectChanges();
-    expect(serviceSpy.getInbox).toHaveBeenCalledWith({ page: 1, pageSize: 15 });
+    expect(serviceSpy.getInbox).toHaveBeenCalledWith({ page: 1, pageSize: 5 });
     expect(component.notifications).toHaveLength(1);
     expect(component.unreadCount).toBe(1);
   });
@@ -112,9 +140,154 @@ describe('NotificationsPageComponent', () => {
     expect(component.unreadCount).toBe(0);
   });
 
+  // Five a page, so a long inbox is read a handful at a time.
   it('computes the total pages', () => {
     component.total = 31;
-    expect(component.totalPages).toBe(3);
+    expect(component.totalPages).toBe(7);
+  });
+
+  it('counts the read notifications across every page', () => {
+    component.total = 31;
+    component.unreadCount = 4;
+    expect(component.readCount).toBe(27);
+
+    component.unreadCount = 40;
+    expect(component.readCount).toBe(0);
+  });
+
+  describe('deleting', () => {
+    const click = (): Event =>
+      ({ stopPropagation: jest.fn() }) as unknown as Event;
+
+    // A notice, not a record: one tap, no dialog. The page is then read
+    // again so paging and counts come from the server.
+    it('deletes one notification without asking, and reads the page again', () => {
+      fixture.detectChanges();
+      serviceSpy.getInbox.mockClear();
+      const event = click();
+
+      component.remove({ ...notification }, event);
+
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(serviceSpy.dismiss).toHaveBeenCalledWith('n1');
+      expect(dialog.open).not.toHaveBeenCalled();
+      expect(serviceSpy.getInbox).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 5,
+      });
+      expect(serviceSpy.refreshUnreadCount).toHaveBeenCalled();
+    });
+
+    it('turns back a page when the last item on it is deleted', () => {
+      component.page = 3;
+      component.notifications = [{ ...notification }];
+
+      component.remove({ ...notification }, click());
+
+      expect(serviceSpy.getInbox).toHaveBeenLastCalledWith({
+        page: 2,
+        pageSize: 5,
+      });
+    });
+
+    it('stays on the page when others remain on it', () => {
+      component.page = 3;
+      component.notifications = [
+        { ...notification },
+        { ...notification, id: 'n2' },
+      ];
+
+      component.remove({ ...notification }, click());
+
+      expect(serviceSpy.getInbox).toHaveBeenLastCalledWith({
+        page: 3,
+        pageSize: 5,
+      });
+    });
+
+    it('leaves the list alone when deleting fails', () => {
+      component.notifications = [{ ...notification }];
+      serviceSpy.dismiss.mockReturnValueOnce(
+        throwError(() => new Error('nope')),
+      );
+
+      component.remove({ ...notification }, click());
+
+      expect(component.notifications).toHaveLength(1);
+      expect(serviceSpy.getInbox).not.toHaveBeenCalled();
+    });
+
+    // Many at once, so it asks, as the site's other bulk deletions do.
+    it('deletes every read notification once confirmed, and starts again at page one', () => {
+      component.page = 4;
+
+      component.deleteAllRead();
+
+      expect(dialog.open).toHaveBeenCalled();
+      expect(serviceSpy.dismissAllRead).toHaveBeenCalled();
+      expect(serviceSpy.getInbox).toHaveBeenLastCalledWith({
+        page: 1,
+        pageSize: 5,
+      });
+    });
+
+    it('deletes nothing when the dialog is cancelled', () => {
+      confirmed = false;
+
+      component.deleteAllRead();
+
+      expect(serviceSpy.dismissAllRead).not.toHaveBeenCalled();
+      expect(serviceSpy.getInbox).not.toHaveBeenCalled();
+    });
+
+    it('leaves the list alone when deleting the read ones fails', () => {
+      component.notifications = [{ ...notification, isRead: true }];
+      serviceSpy.dismissAllRead.mockReturnValueOnce(
+        throwError(() => new Error('nope')),
+      );
+
+      component.deleteAllRead();
+
+      expect(component.notifications).toHaveLength(1);
+      expect(serviceSpy.getInbox).not.toHaveBeenCalled();
+    });
+
+    it('offers no Delete all read while nothing has been read', () => {
+      serviceSpy.getInbox.mockReturnValue(
+        of({
+          items: [{ ...notification }],
+          total: 3,
+          page: 1,
+          pageSize: 5,
+          unreadCount: 3,
+        }),
+      );
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).not.toContain(
+        'Delete all read',
+      );
+    });
+
+    it('offers Delete all read once something has been read, and a delete on each card', () => {
+      serviceSpy.getInbox.mockReturnValue(
+        of({
+          items: [{ ...notification }],
+          total: 3,
+          page: 1,
+          pageSize: 5,
+          unreadCount: 2,
+        }),
+      );
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.textContent).toContain('Delete all read');
+      expect(
+        fixture.nativeElement.querySelector(
+          'button[aria-label="Delete notification"]',
+        ),
+      ).toBeTruthy();
+    });
   });
 
   it('detects external vs internal links', () => {

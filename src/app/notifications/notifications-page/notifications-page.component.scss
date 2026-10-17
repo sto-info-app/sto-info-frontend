@@ -29,7 +29,14 @@
 
 // The pill itself is the shared `.lcars-btn`; the toolbar only takes its
 // outer margin away.
-.notifications-markall {
+.notifications-toolbar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.notifications-markall,
+.notifications-deleteread {
   margin: 0;
 }
 

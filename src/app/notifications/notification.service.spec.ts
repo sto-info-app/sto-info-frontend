@@ -4,7 +4,7 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
-import { firstValueFrom } from 'rxjs';
+import { Observable, firstValueFrom } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
 import { AppState, PaginatedInbox } from 'src/app/models/notification.models';
@@ -205,6 +205,31 @@ describe('NotificationService', () => {
     } catch (error) {
       expect((error as Error).message).toBe('No token found');
     }
+  });
+
+  it('deletes a notification from the inbox', () => {
+    service.dismiss('n1').subscribe();
+    const req = httpMock.expectOne(`${API_URLS.NOTIFICATIONS}/n1`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('deletes every read notification from the inbox', async () => {
+    const result = firstValueFrom(service.dismissAllRead());
+    const req = httpMock.expectOne(API_URLS.NOTIFICATIONS_DISMISS_READ);
+    expect(req.request.method).toBe('POST');
+    req.flush({ dismissed: 6 });
+
+    await expect(result).resolves.toEqual({ dismissed: 6 });
+  });
+
+  it.each<[string, () => Observable<unknown>]>([
+    ['dismiss', () => service.dismiss('n1')],
+    ['dismissAllRead', () => service.dismissAllRead()],
+  ])('returns error when no token for %s', async (_name, call) => {
+    authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValueOnce(null);
+
+    await expect(firstValueFrom(call())).rejects.toThrow('No token found');
   });
 
   it('returns error when no token for markAllRead', async () => {
