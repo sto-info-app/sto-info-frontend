@@ -242,6 +242,16 @@ export class CharacterFleetPanelComponent implements OnInit {
   /** How each audience is offered on the form. */
   protected audienceChoices = Object.entries(FLEET_AUDIENCE_CHOICES);
 
+  /**
+   * The audience chosen for each unanswered proposal, by proposal id.
+   *
+   * Only those changed from the default are held; the rest read as
+   * {@link FleetAudience.PRIVATE} through {@link chosenVisibility}.
+   */
+  private readonly _proposalVisibility = signal<Record<string, FleetAudience>>(
+    {},
+  );
+
   /** The search box, and what the picked Fleet is recorded as. */
   protected form = this._formBuilder.nonNullable.group({
     search: [''],
@@ -403,10 +413,39 @@ export class CharacterFleetPanelComponent implements OnInit {
   }
 
   /**
+   * The audience a proposal will be accepted with.
+   *
+   * @param proposal - The proposal.
+   * @returns What was chosen beside it, or private when nothing was.
+   */
+  protected chosenVisibility(proposal: CharacterFleetProposal): FleetAudience {
+    return this._proposalVisibility()[proposal.id] ?? FleetAudience.PRIVATE;
+  }
+
+  /**
+   * Remembers the audience chosen beside a proposal, for when it is accepted.
+   *
+   * @param proposal - The proposal.
+   * @param visibility - The audience chosen.
+   */
+  protected chooseVisibility(
+    proposal: CharacterFleetProposal,
+    visibility: string,
+  ): void {
+    this._proposalVisibility.update(chosen => ({
+      ...chosen,
+      [proposal.id]: visibility as FleetAudience,
+    }));
+  }
+
+  /**
    * Accepts a proposal, which records the membership it was proposing.
    *
-   * Private, like anything else recorded here: confirming that a Fleet's
-   * roster has your Character on it is not a decision to publish the fact.
+   * With the audience chosen beside it, and private when none was:
+   * confirming that a Fleet's roster has your Character on it is not by
+   * itself a decision to publish the fact. Accepting thirty captains one
+   * at a time and then opening each to make it public was the longer way
+   * round (17 October 2026), so the choice is part of saying yes.
    *
    * @param proposal - The proposal being accepted.
    */
@@ -415,7 +454,7 @@ export class CharacterFleetPanelComponent implements OnInit {
       this._service.accept(
         this.characterId,
         proposal.id,
-        FleetAudience.PRIVATE,
+        this.chosenVisibility(proposal),
       ),
       'That proposal could not be accepted.',
     );

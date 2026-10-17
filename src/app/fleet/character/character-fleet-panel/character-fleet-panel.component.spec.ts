@@ -6,6 +6,10 @@ import { of, throwError } from 'rxjs';
 import { CharacterFleetService } from 'src/app/fleet/character-fleet.service';
 import { FleetDirectoryService } from 'src/app/fleet/fleet-directory.service';
 import {
+  chooseFrom,
+  pressButton,
+} from 'src/app/fleet/recruitment/recruitment.testing';
+import {
   CharacterFleetMembership,
   CharacterFleetMembershipSource,
   CharacterFleetProposal,
@@ -525,7 +529,7 @@ describe('CharacterFleetPanelComponent', () => {
       ).toBeNull();
     });
 
-    it('accepts one privately, whatever else is on the panel', () => {
+    it('accepts one privately unless told otherwise, whatever else is on the panel', () => {
       const pending = proposal();
 
       service.proposals.mockReturnValue(of([pending]));
@@ -536,6 +540,65 @@ describe('CharacterFleetPanelComponent', () => {
       expect(service.accept).toHaveBeenCalledWith(
         'character-1',
         'proposal-1',
+        FleetAudience.PRIVATE,
+      );
+    });
+
+    // The audience is part of saying yes, so thirty captains need not each be
+    // opened again afterwards to be made public.
+    it('offers who can see it beside each question, starting at Only me', () => {
+      service.proposals.mockReturnValue(of([proposal()]));
+      render();
+
+      const select = (fixture.nativeElement as HTMLElement).querySelector(
+        '#proposal-visibility-proposal-1',
+      ) as HTMLSelectElement | null;
+
+      expect(select).not.toBeNull();
+      expect(select?.value).toBe(FleetAudience.PRIVATE);
+      expect(
+        Array.from(select?.options ?? []).map(option =>
+          option.textContent?.trim(),
+        ),
+      ).toEqual(['Anyone', 'Community members', 'Fleet members', 'Only me']);
+    });
+
+    it('accepts with the audience chosen beside it', () => {
+      const pending = proposal();
+
+      service.proposals.mockReturnValue(of([pending]));
+      render();
+      chooseFrom(
+        fixture,
+        '#proposal-visibility-proposal-1',
+        FleetAudience.PUBLIC,
+      );
+      pressButton(fixture, 'Yes, that is this Captain');
+
+      expect(service.accept).toHaveBeenCalledWith(
+        'character-1',
+        'proposal-1',
+        FleetAudience.PUBLIC,
+      );
+    });
+
+    it('keeps each question’s choice to itself', () => {
+      const first = proposal();
+      const second = proposal({ id: 'proposal-2' });
+
+      service.proposals.mockReturnValue(of([first, second]));
+      render();
+      chooseFrom(
+        fixture,
+        '#proposal-visibility-proposal-1',
+        FleetAudience.FLEET_MEMBERS,
+      );
+
+      component['accept'](second);
+
+      expect(service.accept).toHaveBeenCalledWith(
+        'character-1',
+        'proposal-2',
         FleetAudience.PRIVATE,
       );
     });

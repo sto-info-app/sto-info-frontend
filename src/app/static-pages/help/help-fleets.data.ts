@@ -411,9 +411,9 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
       },
       'How to answer a question about your Character': [
         'When a Fleet’s latest roster export lists a Captain with exactly the same name and account handle as one of your Characters, STO Info asks you. Anybody can register a Character under any name, so only you can say whether it is yours.',
-        'Choose “Yes, that is this Captain” to record the Fleet from when that export was taken, or “No”. Each question is answered on its own: saying yes to one Fleet leaves another Fleet’s question where it was.',
+        'Choose “Who can see this” beside the question, then “Yes, that is this Captain” to record the Fleet from when that export was taken, or “No”. Each question is answered on its own: saying yes to one Fleet leaves another Fleet’s question where it was.',
         'Joining a Fleet here, being accepted or accepting an invitation asks too. Once an officer has invited you in game, choose “Yes, I am in this Fleet”, and the Fleet is recorded from then.',
-        'A Fleet you say yes to starts as seen by you alone. A question left unanswered expires after 90 days. An expired roster question is asked again when a later export lists that name.',
+        '“Who can see this” starts at “Only me” and can be changed on the entry afterwards. A question left unanswered expires after 90 days. An expired roster question is asked again when a later export lists that name.',
       ],
       'How to leave or remove a Fleet': {
         paragraphs: [

@@ -34,6 +34,34 @@
             <app-fleet-scope-card
               class="character-fleet__proposal"
               [vm]="item.card">
+              <!--
+                Chosen as part of saying yes, so the answer and its audience
+                are one step. It starts at "Only me", as a recorded Fleet
+                does, and can be changed on the entry afterwards.
+              -->
+              <div class="character-fleet__row">
+                <div class="lcars-input-container lcars-field--short">
+                  <label [attr.for]="'proposal-visibility-' + item.proposal.id"
+                    >Who can see this</label
+                  >
+                  <select
+                    [id]="'proposal-visibility-' + item.proposal.id"
+                    [disabled]="busy()"
+                    (change)="
+                      chooseVisibility(item.proposal, $any($event.target).value)
+                    ">
+                    @for (choice of audienceChoices; track choice[0]) {
+                      <option
+                        [value]="choice[0]"
+                        [selected]="
+                          choice[0] === chosenVisibility(item.proposal)
+                        ">
+                        {{ choice[1] }}
+                      </option>
+                    }
+                  </select>
+                </div>
+              </div>
               <div class="character-fleet__actions lcars-rotate">
                 <button
                   type="button"
@@ -255,8 +283,8 @@
     -->
     <p class="character-fleet__note character-fleet__privacy">
       Saying No, leaving or removing a Fleet here changes only what this
-      Character's page says. A Fleet's roster still lists the name it
-      imported. To have your roster data erased from every Fleet,
+      Character's page says. A Fleet's roster still lists the name it imported.
+      To have your roster data erased from every Fleet,
       <a [routerLink]="'/' + contactRoute">contact us</a>.
     </p>
   }
