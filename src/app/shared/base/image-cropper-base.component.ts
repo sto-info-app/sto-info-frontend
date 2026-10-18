@@ -1,4 +1,4 @@
-import { DestroyRef, inject } from '@angular/core';
+import { ChangeDetectorRef, DestroyRef, inject } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
@@ -23,6 +23,9 @@ export abstract class ImageCropperBaseComponent {
 
   protected readonly _assetScan = inject(AssetScanService);
   protected readonly _destroyRef = inject(DestroyRef);
+
+  /** Re-renders the dialogue once a crop's preview has been read. */
+  private readonly _previewView = inject(ChangeDetectorRef);
 
   errorMessage = '';
   isSubmitting = false;
@@ -180,14 +183,24 @@ export abstract class ImageCropperBaseComponent {
       return;
     }
 
-    this.croppedImageBlob = event.blob;
+    const blob = event.blob;
+
+    this.croppedImageBlob = blob;
     this.croppedImageWidth = event.width;
     this.croppedImageHeight = event.height;
 
     const reader = new FileReader();
-    reader.readAsDataURL(event.blob);
+    reader.readAsDataURL(blob);
     reader.onloadend = () => {
+      // A newer crop, or a reset, has replaced this one while it was read.
+      if (this.croppedImageBlob !== blob) return;
+
       this.croppedImage = reader.result as string;
+      // The dialogues are OnPush, Angular 22's default, and nothing else
+      // marks them when the read finishes. Without this the crop the cropper
+      // makes on loading showed no preview and left Upload disabled until a
+      // drag of the crop box re-rendered the dialogue (18 October 2026).
+      this._previewView.markForCheck();
     };
   }
 
