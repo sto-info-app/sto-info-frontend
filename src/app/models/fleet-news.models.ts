@@ -12,6 +12,15 @@ export interface FleetNewsAuthor {
   readonly linksToProfile: boolean;
 }
 
+/**
+ * A cover's signed addresses, by the size it is drawn at: a card in a news
+ * list, and the head of the post.
+ */
+export interface FleetNewsCoverUrls {
+  readonly cover640x360: string;
+  readonly cover1920x1080: string;
+}
+
 /** A post as a listing shows it, without its body. */
 export interface FleetNewsPostSummary {
   readonly id: string;
@@ -28,8 +37,8 @@ export interface FleetNewsPostSummary {
   /** Delivery reference of its cover, or null. */
   readonly coverImageId: string | null;
   readonly coverImageAlt: string | null;
-  /** Its cover's signed address, or null (FC-040). */
-  readonly coverImageUrl: string | null;
+  /** Its cover's signed addresses, by size, or null (FC-040). */
+  readonly coverImageUrls: FleetNewsCoverUrls | null;
   /** Its author, or null when nobody can be named. */
   readonly author: FleetNewsAuthor | null;
 }

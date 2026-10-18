@@ -8,7 +8,8 @@ import {
   GovernanceScopeVm,
 } from 'src/app/fleet/governance/governance-page.directive';
 import {
-  FLEET_NEWS_AUDIENCE_BADGES,
+  fleetNewsCoverOf,
+  FleetNewsCoverSize,
   FleetNewsScopeKind,
 } from 'src/app/fleet/news/fleet-news.constants';
 import { FleetNewsService } from 'src/app/fleet/news/fleet-news.service';
@@ -68,16 +69,6 @@ export abstract class FleetNewsPageDirective<
   }
 
   /**
-   * The short badge saying who a post is for.
-   *
-   * @param post - The post.
-   * @returns The badge.
-   */
-  audienceBadgeOf(post: FleetNewsPostSummary): string {
-    return FLEET_NEWS_AUDIENCE_BADGES[post.audience];
-  }
-
-  /**
    * Where its author's registry profile is.
    *
    * @param author - The author.
@@ -91,18 +82,13 @@ export abstract class FleetNewsPageDirective<
    * A post's cover, where it has one.
    *
    * @param post - The post.
+   * @param size - Where it is drawn: across the head of the post unless said.
    * @returns The picture, or null.
    */
-  coverOf(post: FleetNewsPostSummary): FleetPicture | null {
-    if (!post.coverImageUrl) {
-      return null;
-    }
-
-    return {
-      // Signed by the API (FC-040); the browser never builds an address.
-      url: post.coverImageUrl,
-      // An empty description reads as decoration rather than a gap.
-      alt: post.coverImageAlt ?? '',
-    };
+  coverOf(
+    post: FleetNewsPostSummary,
+    size: FleetNewsCoverSize = 'page',
+  ): FleetPicture | null {
+    return fleetNewsCoverOf(post, size);
   }
 }

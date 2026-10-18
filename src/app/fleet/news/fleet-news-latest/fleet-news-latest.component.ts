@@ -10,6 +10,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
 
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import { FleetNewsCardComponent } from 'src/app/fleet/news/fleet-news-card/fleet-news-card.component';
 import { GovernanceTarget } from 'src/app/fleet/governance/fleet-governance.service';
 import { FLEET_NEWS_LATEST_COUNT } from 'src/app/fleet/news/fleet-news.constants';
 import { FleetNewsService } from 'src/app/fleet/news/fleet-news.service';
@@ -17,7 +18,6 @@ import {
   FleetNewsPage,
   FleetNewsPostSummary,
 } from 'src/app/models/fleet-news.models';
-import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** The scope whose latest news is shown. */
 export interface FleetNewsLatestVm {
@@ -42,7 +42,7 @@ export interface FleetNewsLatestVm {
   styleUrls: ['../fleet-news.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppDatePipe, RouterLink],
+  imports: [FleetNewsCardComponent, RouterLink],
 })
 export class FleetNewsLatestComponent {
   private readonly _news = inject(FleetNewsService);

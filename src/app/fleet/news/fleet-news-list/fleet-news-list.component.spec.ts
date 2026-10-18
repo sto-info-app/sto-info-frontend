@@ -65,8 +65,12 @@ describe('FleetNewsListComponent', () => {
       ...newsPage([
         newsPost({
           coverImageId: 'cover-1',
-          coverImageUrl:
-            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+          coverImageUrls: {
+            cover640x360:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover640x360?sig=c',
+            cover1920x1080:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover1920x1080?sig=c',
+          },
           coverImageAlt: 'The fleet',
         }),
         newsPost({
@@ -102,6 +106,11 @@ describe('FleetNewsListComponent', () => {
     expect(links).toContain('/community/registry/profiles/FleetOwner');
     expect(links).not.toContain('/community/registry/profiles/Hidden');
     expect(element.querySelector('img')?.getAttribute('alt')).toBe('The fleet');
+    // A card is small, so it fetches the small cover.
+    expect(element.querySelector('img')?.getAttribute('src')).toContain(
+      '/cover-1/cover640x360?',
+    );
+    expect(element.querySelectorAll('app-fleet-news-card')).toHaveLength(3);
     expect(text).not.toContain('Write a post');
     expect(findButton(fixture, 'Drafts')).toBeUndefined();
   });

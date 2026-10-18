@@ -76,20 +76,32 @@ describe('FleetNewsLatestComponent', () => {
 
     expect(news.list).toHaveBeenCalledWith(VM.target, { pageSize: 3 });
     expect(pageText(fixture)).toContain('Bring your ships.');
-    expect(links()).toEqual([
-      {
-        text: 'Refit night',
-        href: '/fleets/communities/united-federation-alliance/news/refit-night-abc',
-      },
-      {
-        text: 'Draft',
-        href: '/fleets/communities/united-federation-alliance/news/refit-night-abc',
-      },
-      {
-        text: 'All news',
-        href: '/fleets/communities/united-federation-alliance/news',
-      },
+    // Each post as the news list draws it, so the two read alike.
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        'app-fleet-news-card',
+      ),
+    ).toHaveLength(2);
+    expect(
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          '.fleet-news-card__title a',
+        ),
+      ).map(link => [link.textContent?.trim(), link.getAttribute('href')]),
+    ).toEqual([
+      [
+        'Refit night',
+        '/fleets/communities/united-federation-alliance/news/refit-night-abc',
+      ],
+      [
+        'Draft',
+        '/fleets/communities/united-federation-alliance/news/refit-night-abc',
+      ],
     ]);
+    expect(links().at(-1)).toEqual({
+      text: 'All news',
+      href: '/fleets/communities/united-federation-alliance/news',
+    });
   });
 
   it('says when nothing is published, and offers a writer a new post', async () => {

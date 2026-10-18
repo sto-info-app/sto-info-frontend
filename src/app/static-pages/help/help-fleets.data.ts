@@ -753,7 +753,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       },
     },
     whoCanSeeIt: [
-      'A post is shown only to the readers it was published to, asked afresh every time it is read. In the list each carries a badge, Public, Community or Members only, and a post’s own page says who it is “For”.',
+      'A post is shown only to the readers it was published to, asked afresh every time it is read. In the news list each post is a card whose bar names who may read it, Public, Community or Members only, and a draft’s bar is yellow. A post’s own page says who it is “For”.',
       'Drafts are seen by the news writers alone. A post’s author is shown by username to everybody who may read it, and the name links to their profile only where the registry would show them to you.',
       'Activity follows the same rule, item by item. Members joining and leaving, roster imports, roles, a new Owner and a closure are shown to members only; news and events to whoever may read them now; the rest to whoever may see the place.',
     ],

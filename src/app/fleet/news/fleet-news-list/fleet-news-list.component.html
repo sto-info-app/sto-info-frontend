@@ -41,8 +41,8 @@
           </nav>
         } @else if (data.page.isSuspended) {
           <p class="fleet-community-field-hint">
-            This is suspended, so its news cannot change until it is
-            reinstated. Drafts can still be deleted.
+            This is suspended, so its news cannot change until it is reinstated.
+            Drafts can still be deleted.
           </p>
         } @else {
           <p class="fleet-community-field-hint">
@@ -121,56 +121,10 @@
           class="fleet-news__list"
           [attr.aria-label]="data.drafts ? 'Drafts' : 'Posts, newest first'">
           @for (post of data.page.items; track post.id) {
-            <li class="fleet-news__item">
-              <article class="fleet-news__card">
-                @if (coverOf(post); as cover) {
-                  <img
-                    class="fleet-news__thumb"
-                    [src]="cover.url"
-                    [alt]="cover.alt"
-                    loading="lazy" />
-                }
-                <div class="fleet-news__card-body">
-                  <h2 class="fleet-news__title">
-                    <a [routerLink]="postLinkOf(scope, post)">{{
-                      post.title
-                    }}</a>
-                  </h2>
-                  <p class="fleet-news__meta">
-                    @if (post.publishedAt) {
-                      <time [attr.datetime]="post.publishedAt">{{
-                        post.publishedAt | appDate: 'medium'
-                      }}</time>
-                    } @else {
-                      <span>Last changed&ngsp;</span>
-                      <time [attr.datetime]="post.updatedAt">{{
-                        post.updatedAt | appDate: 'medium'
-                      }}</time>
-                    }
-                    @if (post.author; as author) {
-                      <span>&ngsp;· Posted by&ngsp;</span>
-                      @if (author.linksToProfile) {
-                        <a [routerLink]="profileLinkOf(author)">{{
-                          author.username
-                        }}</a>
-                      } @else {
-                        <span>{{ author.username }}</span>
-                      }
-                    }
-                    <span class="fleet-news__badge">{{
-                      audienceBadgeOf(post)
-                    }}</span>
-                    @if (post.status === 'DRAFT') {
-                      <span class="fleet-news__badge fleet-news__badge--draft"
-                        >Draft</span
-                      >
-                    }
-                  </p>
-                  @if (post.summary) {
-                    <p class="fleet-news__summary">{{ post.summary }}</p>
-                  }
-                </div>
-              </article>
+            <li>
+              <app-fleet-news-card
+                [post]="post"
+                [link]="postLinkOf(scope, post)" />
             </li>
           }
         </ol>

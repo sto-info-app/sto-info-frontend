@@ -14,6 +14,7 @@ import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-ta
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import { FleetNewsCardComponent } from 'src/app/fleet/news/fleet-news-card/fleet-news-card.component';
 import { GovernanceScopeVm } from 'src/app/fleet/governance/governance-page.directive';
 import { FLEET_NEWS_PAGE_SIZE } from 'src/app/fleet/news/fleet-news.constants';
 import { FleetNewsPageDirective } from 'src/app/fleet/news/fleet-news-page.directive';
@@ -22,7 +23,6 @@ import {
   FleetNewsQuery,
   FleetNewsStatus,
 } from 'src/app/models/fleet-news.models';
-import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /** A page of a scope's news, and how it was asked for. */
 export interface FleetNewsListData {
@@ -49,9 +49,9 @@ export interface FleetNewsListData {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
-    AppDatePipe,
     RouterLink,
     ArmadaTabsComponent,
+    FleetNewsCardComponent,
     FleetPageShellComponent,
     FleetTabsComponent,
   ],

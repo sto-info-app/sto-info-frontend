@@ -3,19 +3,12 @@
     @if (latest.items.length === 0) {
       <p class="fleet-community-empty">Nothing has been published here yet.</p>
     } @else {
-      <ul class="fleet-news__latest-list">
+      <ul class="fleet-news__list">
         @for (post of latest.items; track post.id) {
           <li>
-            <a [routerLink]="postLinkOf(vm, post)">{{ post.title }}</a>
-            @if (post.publishedAt) {
-              <span>&ngsp;·&ngsp;</span>
-              <time [attr.datetime]="post.publishedAt">{{
-                post.publishedAt | appDate: 'mediumDate'
-              }}</time>
-            }
-            @if (post.summary) {
-              <p class="fleet-news__summary">{{ post.summary }}</p>
-            }
+            <app-fleet-news-card
+              [post]="post"
+              [link]="postLinkOf(vm, post)" />
           </li>
         }
       </ul>

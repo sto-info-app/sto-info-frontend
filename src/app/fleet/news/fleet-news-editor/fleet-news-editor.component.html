@@ -145,7 +145,7 @@
             Save the post as a draft first; its cover can be added then.
           </p>
         } @else {
-          @if (coverOf(post); as cover) {
+          @if (coverOf(post, 'card'); as cover) {
             <img
               class="fleet-news__cover fleet-news__cover--small"
               [src]="cover.url"
@@ -171,8 +171,8 @@
           </div>
           <p class="fleet-community-field-hint">
             A new cover is checked for safety before it appears. It is shown to
-            whoever may read the post, and a link to the picture copied from
-            the page stops working at the end of the next day (UTC).
+            whoever may read the post, and a link to the picture copied from the
+            page stops working at the end of the next day (UTC).
           </p>
         }
       </app-collapsible-section>

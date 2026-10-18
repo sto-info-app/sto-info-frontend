@@ -142,10 +142,10 @@ test('News and activity', async ({ as, browser }, info) => {
     );
     await pause(page, 3_500);
     await page.goto(`${fleetPath}/news`);
-    await glide(page, page.locator('.fleet-news__badge').first());
+    await glide(page, page.locator('.fleet-news-card__audience').first());
     await caption(
       page,
-      'In the list each post carries a badge: Public, Community or Members only',
+      'Each post in the list is a card whose bar says Public, Community or Members only',
     );
     await pause(page, 3_500);
 

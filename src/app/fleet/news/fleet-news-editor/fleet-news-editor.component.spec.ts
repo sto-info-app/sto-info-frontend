@@ -264,8 +264,12 @@ describe('FleetNewsEditorComponent', () => {
         newsPost({
           summary: null,
           coverImageId: 'c-1',
-          coverImageUrl:
-            'https://cdn.test/cdn-cgi/imagedelivery/hash/c-1/public?sig=c',
+          coverImageUrls: {
+            cover640x360:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/c-1/cover640x360?sig=c',
+            cover1920x1080:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/c-1/cover1920x1080?sig=c',
+          },
         }),
       );
 
@@ -357,8 +361,12 @@ describe('FleetNewsEditorComponent', () => {
         newsPost({
           status: 'DRAFT',
           coverImageId: 'cover-1',
-          coverImageUrl:
-            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+          coverImageUrls: {
+            cover640x360:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover640x360?sig=c',
+            cover1920x1080:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover1920x1080?sig=c',
+          },
           coverImageAlt: 'The fleet',
         }),
       );
@@ -368,6 +376,12 @@ describe('FleetNewsEditorComponent', () => {
           .querySelector('.fleet-news__cover')
           ?.getAttribute('alt'),
       ).toBe('The fleet');
+      // Shown small beside the controls, so it fetches the small cover.
+      expect(
+        (fixture.nativeElement as HTMLElement)
+          .querySelector('.fleet-news__cover')
+          ?.getAttribute('src'),
+      ).toContain('/cover-1/cover640x360?');
       expect(findButton(fixture, 'Replace the cover')).toBeDefined();
 
       pressButton(fixture, 'Remove the cover');
@@ -390,8 +404,12 @@ describe('FleetNewsEditorComponent', () => {
         EDITING,
         newsPost({
           coverImageId: 'cover-1',
-          coverImageUrl:
-            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+          coverImageUrls: {
+            cover640x360:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover640x360?sig=c',
+            cover1920x1080:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover1920x1080?sig=c',
+          },
         }),
       );
       dialog.answer(false);

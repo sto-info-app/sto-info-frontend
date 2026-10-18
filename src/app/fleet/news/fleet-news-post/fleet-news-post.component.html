@@ -43,38 +43,66 @@
           {{ post.title }}
         </h2>
 
-        <p class="fleet-news__meta">
+        <!--
+          Each detail is its own item, spaced by the row's gap: a space at the
+          edge of a flex item is dropped, which ran the words together.
+        -->
+        <div class="fleet-news__meta">
           @if (post.publishedAt) {
-            <time [attr.datetime]="post.publishedAt">{{
-              post.publishedAt | appDate: 'medium'
-            }}</time>
+            <span class="fleet-news__meta-item">
+              <i
+                class="fas fa-calendar-day"
+                aria-hidden="true"></i>
+              <time [attr.datetime]="post.publishedAt">{{
+                post.publishedAt | appDate: 'longDate'
+              }}</time>
+            </span>
           } @else {
             <span class="fleet-news__badge fleet-news__badge--draft"
               >Draft</span
             >
-            <span>&ngsp;Last changed&ngsp;</span>
-            <time [attr.datetime]="post.updatedAt">{{
-              post.updatedAt | appDate: 'medium'
-            }}</time>
+            <span class="fleet-news__meta-item">
+              <i
+                class="fas fa-calendar-day"
+                aria-hidden="true"></i>
+              <span>Last changed&ngsp;</span>
+              <time [attr.datetime]="post.updatedAt">{{
+                post.updatedAt | appDate: 'medium'
+              }}</time>
+            </span>
           }
           @if (post.author; as author) {
-            <span>&ngsp;· Posted by&ngsp;</span>
-            @if (author.linksToProfile) {
-              <a [routerLink]="profileLinkOf(author)">{{ author.username }}</a>
-            } @else {
-              <span>{{ author.username }}</span>
-            }
+            <span class="fleet-news__meta-item">
+              <i
+                class="fas fa-user"
+                aria-hidden="true"></i>
+              <span>Posted by&ngsp;</span>
+              @if (author.linksToProfile) {
+                <a [routerLink]="profileLinkOf(author)">{{
+                  author.username
+                }}</a>
+              } @else {
+                <span>{{ author.username }}</span>
+              }
+            </span>
           }
-        </p>
-        <p class="fleet-news__for">For: {{ audienceOf(scope, post) }}</p>
+          <span class="fleet-news__meta-item">
+            <i
+              class="fas fa-eye"
+              aria-hidden="true"></i>
+            <span>For: {{ audienceOf(scope, post) }}</span>
+          </span>
+        </div>
 
-        @if (post.summary) {
-          <p class="fleet-news__lead">{{ post.summary }}</p>
-        }
+        <div class="fleet-news__article">
+          @if (post.summary) {
+            <p class="fleet-news__lead">{{ post.summary }}</p>
+          }
 
-        <div
-          class="fleet-news__body"
-          [innerHTML]="post.body | markdown"></div>
+          <div
+            class="fleet-news__body"
+            [innerHTML]="post.body | markdown"></div>
+        </div>
       </article>
 
       @if (error(); as refusal) {
@@ -123,8 +151,7 @@
         </nav>
         @if (view.isSuspended) {
           <p class="fleet-community-field-hint">
-            This is suspended, so its news cannot change until it is
-            reinstated.
+            This is suspended, so its news cannot change until it is reinstated.
           </p>
         } @else if (!view.isOpen) {
           <p class="fleet-community-field-hint">

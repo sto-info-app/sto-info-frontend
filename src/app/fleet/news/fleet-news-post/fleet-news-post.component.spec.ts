@@ -97,8 +97,12 @@ describe('FleetNewsPostComponent', () => {
     await render({
       post: newsPost({
         coverImageId: 'cover-1',
-        coverImageUrl:
-          'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/public?sig=c',
+        coverImageUrls: {
+          cover640x360:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover640x360?sig=c',
+          cover1920x1080:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/cover-1/cover1920x1080?sig=c',
+        },
         coverImageAlt: 'The fleet',
       }),
     });
@@ -115,6 +119,10 @@ describe('FleetNewsPostComponent', () => {
     expect(element.querySelector('strong')?.textContent).toBe('eight');
     expect(text).toContain('For: Anyone, including signed-out visitors');
     expect(element.querySelector('img')?.getAttribute('alt')).toBe('The fleet');
+    // Drawn across the page, so it fetches the large cover.
+    expect(element.querySelector('img')?.getAttribute('src')).toContain(
+      '/cover-1/cover1920x1080?',
+    );
     expect(links()).toContainEqual({
       text: 'FleetOwner',
       href: '/community/registry/profiles/FleetOwner',
