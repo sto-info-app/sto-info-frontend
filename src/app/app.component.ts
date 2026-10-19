@@ -26,6 +26,7 @@ import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
 import { SeoService } from './shared/services/seo.service';
+import { SignedImageRenewalService } from './shared/services/signed-image-renewal.service';
 import { ChatSessionService } from './fleet/chat/chat-session.service';
 import { ChatToastsComponent } from './fleet/chat/chat-toasts/chat-toasts.component';
 import { HeaderComponent } from './template/header/header.component';
@@ -72,6 +73,7 @@ export class AppComponent implements OnInit, OnDestroy {
   private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _notificationService = inject(NotificationService);
   private readonly _chatSession = inject(ChatSessionService);
+  private readonly _signedImageRenewal = inject(SignedImageRenewalService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _logRocketService = inject(LogRocketService);
   private readonly _pageTitleService = inject(PageTitleService);
@@ -110,6 +112,10 @@ export class AppComponent implements OnInit, OnDestroy {
     // Chat's socket, while signed in and chat is on, across the site
     // (FC-034): being online means having STO Info open.
     this._chatSession.start();
+
+    // A picture whose signed address expired while the page was open gets a
+    // new one, across the site.
+    this._signedImageRenewal.start();
 
     // Poll banners + unread count on a single cadence for the whole app.
     // Skip in lighthouse-audit mode to avoid non-critical network noise.

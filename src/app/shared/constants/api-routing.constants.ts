@@ -41,6 +41,9 @@ export const API_URLS = {
   // the file is in use or was refused.
   FILE_ASSET_STATUS: (assetId: string): string =>
     apiUrl + '/file-assets/' + assetId + '/status',
+  // A signed picture address lasts at most two hours; a page left open asks
+  // here for the ones that expired.
+  RENEW_IMAGE_ADDRESSES: apiUrl + '/file-assets/image-addresses/renew',
 
   // STO Account
   STO_ACCOUNT: apiUrl + '/account',

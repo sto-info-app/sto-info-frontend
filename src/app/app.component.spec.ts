@@ -12,6 +12,7 @@ import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
 import { SeoService } from './shared/services/seo.service';
+import { SignedImageRenewalService } from './shared/services/signed-image-renewal.service';
 import { UserSettingsService } from './dashboard/services/user-settings.service';
 
 describe('AppComponent', () => {
@@ -69,6 +70,7 @@ describe('AppComponent', () => {
   // The settings load is fire-and-forget; the component only has to ask.
   let mockUserSettingsService: { loadQuietly: jest.Mock<void, []> };
   let mockSeoService: { init: jest.Mock<void, []> };
+  let mockSignedImageRenewal: { start: jest.Mock<void, []> };
   let mockScriptLoaderService: {
     loadScript: jest.Mock<
       void,
@@ -166,6 +168,7 @@ describe('AppComponent', () => {
     };
 
     mockUserSettingsService = { loadQuietly: jest.fn() };
+    mockSignedImageRenewal = { start: jest.fn() };
     mockPageTitleService = {
       init: jest.fn(),
     };
@@ -204,6 +207,10 @@ describe('AppComponent', () => {
         { provide: ScriptLoaderService, useValue: mockScriptLoaderService },
         { provide: MatDialog, useValue: mockDialog },
         { provide: UserSettingsService, useValue: mockUserSettingsService },
+        {
+          provide: SignedImageRenewalService,
+          useValue: mockSignedImageRenewal,
+        },
       ],
     })
       .overrideComponent(AppComponent, {
@@ -229,6 +236,12 @@ describe('AppComponent', () => {
     expect(component).toBeTruthy();
     expect(mockPageTitleService.init).toHaveBeenCalled();
     expect(mockSeoService.init).toHaveBeenCalled();
+  });
+
+  it('should renew expired picture addresses across the site', () => {
+    fixture.detectChanges();
+
+    expect(mockSignedImageRenewal.start).toHaveBeenCalledTimes(1);
   });
 
   it('should update login state and start countdown when authenticated', () => {
