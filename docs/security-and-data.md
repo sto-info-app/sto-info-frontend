@@ -38,7 +38,7 @@ Where this is configured:
 
 - CSP is set on the **Render static site** for the frontend under the "Manage Headers" section.
 - It is currently applied to `/*`.
-- Admin/owner: single admin (Steve).
+- Admin/owner: a single site admin.
 
 ### Other security headers (frontend static site)
 

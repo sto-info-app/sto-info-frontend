@@ -87,11 +87,11 @@ slots. `angular.json` builds each as a stylesheet bundle that it does not inject
 
 ### Palette rotation
 
-Steve's decision of 12 October 2026: a page should not be one colour
-repeated. Elements that sit side by side take successive colours from one
-order — **sunflower, perano, orange, sky, gold, bluey, tangerine, cool** —
-through the custom property `--lcars-accent`. Every colour in it carries black
-text at 5.8:1 or better, and neighbours differ in hue as well as lightness.
+A page should not be one colour repeated. Elements that sit side by side take
+successive colours from one order — **sunflower, perano, orange, sky, gold,
+bluey, tangerine, cool** — through the custom property `--lcars-accent`. Every
+colour in it carries black text at 5.8:1 or better, and neighbours differ in
+hue as well as lightness.
 
 `src/styles/_lcars-rotation.scss` holds the order (`$lcars-rotation`) and the
 mixin `rotation.rotate-accent($selector, $position, $condition)`, with no
@@ -102,18 +102,17 @@ output of its own; `styles.scss` emits the rules once.
 | Where | How |
 |---|---|
 | `.buttons` (a side stack) and `.buttons-row` (an inline row) | Each child takes the next colour. A row of one — a section's lone "All news" — takes the section's colour instead, so it matches its bar. |
-| `<app-collapsible-section>`s on a page | They rotate among themselves (`nth-of-type`), whatever sits between them, and what each holds takes its colour. The bar itself stays the frame's blue on every section (Steve, 13 October 2026), so the page's headings read as one with the LCARS frame around it. A section alone in its host — a panel component's one section — takes its host's colour instead, so a row of such components rotates too. |
+| `<app-collapsible-section>`s on a page | They rotate among themselves (`nth-of-type`), whatever sits between them, and what each holds takes its colour. The bar itself stays the frame's blue on every section, so the page's headings read as one with the LCARS frame around it. A section alone in its host — a panel component's one section — takes its host's colour instead, so a row of such components rotates too. |
 
 **What reads the accent** — each falls back to the colour it had before when
 nothing around it rotates: `.lcars-btn` (background), `.full-width-btn-link`
 in a stack, `.buttons a`, `.lcars-input-container` (`--lci-color`),
 `.lcars-select-container` (background) and `<app-lcars-panel>`. Section bars
-and tab strips do **not** (Steve, 13 October 2026): they belong to the LCARS
-frame around the content, so every bar is the frame's blue with a light-blue
-title, and every tab strip has perano labels with the open tab in sunflower,
-whatever rotates around them. Because the property inherits, a
-section's pills and fields take the section's colour unless they rotate among
-themselves.
+and tab strips do **not**: they belong to the LCARS frame around the content,
+so every bar is the frame's blue with a light-blue title, and every tab strip
+has perano labels with the open tab in sunflower, whatever rotates around
+them. Because the property inherits, a section's pills and fields take the
+section's colour unless they rotate among themselves.
 
 **Choosing colours yourself**
 
@@ -128,8 +127,7 @@ themselves.
   its colour outright. Keep those for colours that mean something — a status,
   a news category, a rarity, a faction — and leave the rest to the rotation.
 
-**Green and red** are not in the order (Steve's decisions of 12 and 13
-October 2026):
+**Green and red** are not in the order:
 
 - **Green** — a control that commits or confirms: Save, Create, Send, Submit,
   Upload, Publish, the yes of a dialog; and one that accepts something offered
@@ -518,8 +516,8 @@ pairing, which is why this is a component rather than repeated markup.
 
 **`<app-lcars-panel>`** — a block of a page drawn as an LCARS panel card: a
 coloured spine, a solid heading block carrying its name, and a tinted body.
-Steve's decision of 12 October 2026 replaced the bare dark boxes a page used to
-put a block in — a follow box, a filter box, a list of alerts — with it.
+Since 12 October 2026 it has replaced the bare dark boxes a page used to put a
+block in — a follow box, a filter box, a list of alerts.
 
 | Input | Type | Notes |
 |---|---|---|
@@ -874,7 +872,7 @@ section or guide whose feature is off says so instead, and a part of a guide
 about it is left out. A section or guide whose feature could not be asked
 about is read as usual, under the `app-feature-unavailable` "Connection Lost"
 notice (`unreachableFeature`): transient unavailability must not hide useful
-help (plan §5; Steve's decision of 2 October 2026, FC-044).
+help (plan §5; FC-044).
 
 **Fleets and Running the site** (FC-050). Fleets is second and waits on Fleet
 Community as a whole; Running the site is last, and for site administrators
@@ -914,7 +912,7 @@ What follows is only what Fleet adds.
 ### Colour
 
 Fleet used to be drawn in sky throughout — fields, choosers, tab strips,
-table headers. Steve's decision of 12 October 2026 retired that: Fleet's
+table headers. That was retired on 12 October 2026: Fleet's
 pages take the [palette rotation](#palette-rotation) like every other page,
 with green and red kept for accepting and refusing. Community, Fleet and Armada are *not* three colours: they
 are told apart by a label and an icon, which leaves the palette free to mean
