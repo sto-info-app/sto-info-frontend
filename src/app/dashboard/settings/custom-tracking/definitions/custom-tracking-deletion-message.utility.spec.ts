@@ -67,6 +67,10 @@ describe('deletionConfirmation', () => {
   // than lost outright, and it belongs in the sentence that asks.
   it('says how long a deletion is kept', () => {
     expect(messageFor('section', 'Ships', 1, 1, 1)).toContain('180 days');
+    // A picture is published, so it is not kept with the rest.
+    expect(messageFor('section', 'Ships', 1, 1, 1)).toMatch(
+      /apart from pictures, which are taken\s+down at once/,
+    );
   });
 
   // Angular sanitises what it renders, so this is not what stands between the

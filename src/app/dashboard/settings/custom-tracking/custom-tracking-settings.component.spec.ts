@@ -313,6 +313,7 @@ describe('CustomTrackingSettingsComponent', () => {
     fixture.detectChanges();
 
     expect(text()).toContain('180 days');
+    expect(text()).toContain('Pictures are the exception');
   });
 
   // Only the value editor holds unsaved work, and only once it is on the

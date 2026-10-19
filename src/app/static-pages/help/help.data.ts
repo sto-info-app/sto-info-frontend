@@ -560,6 +560,7 @@ const CUSTOM_TRACKING_TOPIC: HelpTopic = {
         guideSection('Deleting, and the 180 days', [
           'Deleting a section, tab or field takes the answers recorded against it as well — across every account or captain, not only the one you happen to be looking at. The confirmation counts the tabs, fields and recorded answers that would go before you agree to it, because “delete this section” and “delete this section and sixty-three answers” are different decisions.',
           'Deleted definitions and answers are kept for 180 days and are then removed for good. None of it can be undone from the page itself, so if you delete something by mistake, ask us within that window.',
+          'Pictures are the exception. A picture recorded in a deleted field is taken down at once, so it cannot be put back.',
         ]),
       ],
       relatedLinks: [

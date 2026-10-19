@@ -93,8 +93,8 @@ export function deletionConfirmation(
       <p>Delete the ${kind} <strong>${escapeForMarkup(name)}</strong>?</p>
       ${alsoGoing}
       <p><strong>WARNING:</strong> Deleted definitions and answers are kept for
-      180 days and then removed for good. Nothing here can be undone from this
-      page.</p>`,
+      180 days and then removed for good, apart from pictures, which are taken
+      down at once. Nothing here can be undone from this page.</p>`,
     confirmText: 'Delete',
     cancelText: 'Cancel',
   };

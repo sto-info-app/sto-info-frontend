@@ -287,6 +287,9 @@ describe('help data', () => {
     it('should explain the visibility chain and the retention window', () => {
       expect(copy()).toContain('all of these are public at the same time');
       expect(copy()).toContain('kept for 180 days');
+      expect(copy()).toContain(
+        'A picture recorded in a deleted field is taken down at once',
+      );
     });
   });
 
