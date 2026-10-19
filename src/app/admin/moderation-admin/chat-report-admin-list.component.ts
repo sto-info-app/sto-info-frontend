@@ -66,11 +66,10 @@ const SCOPE_LABELS: Readonly<Record<string, string>> = {
  * The site admins' queue of chat reports (FC-035): each reported message,
  * with the twenty before it held as evidence, oldest report first.
  *
- * Steve's decisions of 29 September 2026: an admin resolves or dismisses a
- * report with a note, and may remove the message, which is logged and leaves
- * the evidence as it was. The reporter is never told the outcome. Chat
- * reports never sit under review, so the queue offers open, resolved and
- * dismissed.
+ * An admin resolves or dismisses a report with a note, and may remove the
+ * message, which is logged and leaves the evidence as it was. The reporter
+ * is never told the outcome. Chat reports never sit under review, so the
+ * queue offers open, resolved and dismissed.
  */
 @Component({
   selector: 'app-chat-report-admin-list',

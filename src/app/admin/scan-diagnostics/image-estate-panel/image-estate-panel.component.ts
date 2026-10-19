@@ -60,12 +60,12 @@ export const IMAGE_ESTATE_COUNT_LABELS: Readonly<Record<string, string>> = {
 /**
  * Private image delivery, on Scan Diagnostics (FC-040).
  *
- * Steve's decisions of 29 September 2026. Every picture becomes a private
- * Cloudflare Images object that only an address the API signs can reach.
- * The site admin takes an inventory, which reports and changes nothing;
- * copies every public picture to a private one; checks the site; and then
- * retires the old public copies. A copy can be undone until then. Each run
- * is checkpointed, may be paused and resumed, and is logged with a reason.
+ * Every picture becomes a private Cloudflare Images object that only an
+ * address the API signs can reach. The site admin takes an inventory, which
+ * reports and changes nothing; copies every public picture to a private one;
+ * checks the site; and then retires the old public copies. A copy can be
+ * undone until then. Each run is checkpointed, may be paused and resumed,
+ * and is logged with a reason.
  */
 @Component({
   selector: 'app-image-estate-panel',

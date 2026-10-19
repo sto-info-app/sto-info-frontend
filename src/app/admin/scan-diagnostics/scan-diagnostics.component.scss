@@ -1,7 +1,7 @@
 @use 'lcars-variables' as vars;
 
 // Each section's figures are drawn in that section's colour, which comes from
-// its place in the page's rotation (Steve's decision of 12 October 2026).
+// its place in the page's rotation.
 $scan-diagnostics-colour: var(--lcars-accent, #{vars.$lcars-sunflower});
 
 .scan-diagnostics__read {

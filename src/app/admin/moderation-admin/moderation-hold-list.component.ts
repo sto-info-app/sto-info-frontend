@@ -82,13 +82,12 @@ export const HOLD_ACTION_LABELS: Readonly<Record<string, string>> = {
 /**
  * The site admins' holds on chat evidence (FC-036).
  *
- * Steve's decisions of 29 September 2026: a hold keeps a chat report's
- * evidence past its 90 days, or everything one member wrote in chat past the
- * 45-day purge, with a reason, an owner and a review date at most 180 days
- * ahead. What it keeps is read here alone, each time with a purpose that is
- * logged; nobody else, scope moderators included, sees it. A hold passing
- * its review date is flagged, and the system releases it 14 days later
- * unless it is extended first (FC-037).
+ * A hold keeps a chat report's evidence past its 90 days, or everything one
+ * member wrote in chat past the 45-day purge, with a reason, an owner and a
+ * review date at most 180 days ahead. What it keeps is read here alone, each
+ * time with a purpose that is logged; nobody else, scope moderators
+ * included, sees it. A hold passing its review date is flagged, and the
+ * system releases it 14 days later unless it is extended first (FC-037).
  */
 @Component({
   selector: 'app-moderation-hold-list',

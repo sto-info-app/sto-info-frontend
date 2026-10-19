@@ -104,8 +104,8 @@ describe('AdminComponent', () => {
     expect(component.getRouteLink('admin/news')).toBe('/admin/news');
   });
 
-  // Steve's decision of 30 September 2026: a site administrator reaches any
-  // Community's dispute page, and this is the way in to a hidden one (FC-050).
+  // A site administrator reaches any Community's dispute page, and this is
+  // the way in to a hidden one (FC-050).
   it.each([
     [
       'the permission overrides page',
@@ -127,8 +127,8 @@ describe('AdminComponent', () => {
     expect(link?.textContent).toContain(label);
   });
 
-  // Steve's decision of 30 September 2026: the kill switch for publication
-  // sits under Operations, with the scanner it holds back.
+  // The kill switch for publication sits under Operations, with the scanner
+  // it holds back.
   it('offers the publication pause under Operations (FC-042)', () => {
     fixture.detectChanges();
 
@@ -139,8 +139,7 @@ describe('AdminComponent', () => {
     expect(element.textContent).toContain('Pause publication');
   });
 
-  // Steve's decision of 6 October 2026: no feature switch needs SQL, and
-  // they sit beside the publication pause.
+  // No feature switch needs SQL, and they sit beside the publication pause.
   it('offers the feature switches under Operations, after the publication pause (FC-045)', () => {
     fixture.detectChanges();
 

@@ -277,8 +277,8 @@ describe('FailedJobsPanelComponent (FC-042)', () => {
     expect(text()).toContain('The job queues cannot be reached.');
   });
 
-  // Steve's decision: a page view is one Security Log entry, and the server
-  // logs the list apart only for a queue chosen or a later page.
+  // A page view is one Security Log entry, and the server logs the list
+  // apart only for a queue chosen or a later page.
   it('goes back to every queue’s first page when the page refreshes', async () => {
     failedJobs.list.mockReturnValue(of(pageOf([jobOf()], { total: 60 })));
     await show();

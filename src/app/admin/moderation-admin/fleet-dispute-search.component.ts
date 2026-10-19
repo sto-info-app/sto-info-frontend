@@ -37,11 +37,11 @@ const STATUS_LABELS: Readonly<Record<FleetScopeStatus, string>> = {
 /**
  * The Admin area's way to a Community's dispute page (FC-050).
  *
- * Steve's decision of 30 September 2026: a site administrator reaches every
- * Community's dispute page, members-only and private ones included. Those
- * are on no directory, and their own pages are closed to a site administrator
- * who is not in them, so this finds any live Community by name or web
- * address, whoever may see it, and links straight to its dispute page.
+ * A site administrator reaches every Community's dispute page, members-only
+ * and private ones included. Those are on no directory, and their own pages
+ * are closed to a site administrator who is not in them, so this finds any
+ * live Community by name or web address, whoever may see it, and links
+ * straight to its dispute page.
  */
 @Component({
   selector: 'app-fleet-dispute-search',

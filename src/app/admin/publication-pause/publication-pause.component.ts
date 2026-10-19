@@ -108,10 +108,10 @@ const ACTIONS = {
 /**
  * The publication pause, on the Admin page (FC-042).
  *
- * Steve's decision of 30 September 2026: a kill switch for everything the
- * scanner clears. While it is on, uploads are still accepted and scanned,
- * and nothing is published; when it is off, everything held publishes.
- * Each change asks for a reason, kept in the Security Log.
+ * It is a kill switch for everything the scanner clears. While it is on,
+ * uploads are still accepted and scanned, and nothing is published; when it
+ * is off, everything held publishes. Each change asks for a reason, kept in
+ * the Security Log.
  */
 @Component({
   selector: 'app-publication-pause',

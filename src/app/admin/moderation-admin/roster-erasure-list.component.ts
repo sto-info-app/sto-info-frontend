@@ -34,13 +34,13 @@ export const ROSTER_ERASURE_REASON_LIMITS = { min: 10, max: 500 } as const;
 /**
  * The site admins' verified erasure of roster data (FC-038).
  *
- * Steve's decisions of 29 September 2026: a request arrives through Contact
- * us, and a site admin verifies the person off-site before erasing. Here the
- * admin names the Character and @handle, sees which Fleets' rosters name
- * them, gives a reason and confirms. Erasure anonymises every roster row and
- * alias, deletes every stored file naming them and keeps them out of every
- * future import; it cannot be undone. The list never names who was erased,
- * only the pseudonym that replaced them.
+ * A request arrives through Contact us, and a site admin verifies the
+ * person off-site before erasing. Here the admin names the Character and
+ * @handle, sees which Fleets' rosters name them, gives a reason and
+ * confirms. Erasure anonymises every roster row and alias, deletes every
+ * stored file naming them and keeps them out of every future import; it
+ * cannot be undone. The list never names who was erased, only the pseudonym
+ * that replaced them.
  *
  * After a database restore, the server makes again every erasure the restore
  * lost by itself when it starts, before it serves anything (FC-042); those

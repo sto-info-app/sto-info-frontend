@@ -100,10 +100,10 @@ export function switchOutcome(entry: FeatureSwitchState): string {
 /**
  * The site features' master switches, on the Admin page (FC-045).
  *
- * Steve's decisions of 6 October 2026: Fleet Communities, Storytime and
- * Custom Tracking are each switched here rather than with SQL; each change
- * asks for a reason, kept in the Security Log; and the capability flags
- * beneath each, which the environment sets, are shown but cannot be changed.
+ * Fleet Communities, Storytime and Custom Tracking are each switched here
+ * rather than with SQL; each change asks for a reason, kept in the Security
+ * Log; and the capability flags beneath each, which the environment sets,
+ * are shown but cannot be changed.
  */
 @Component({
   selector: 'app-feature-switches',

@@ -39,8 +39,8 @@
 }
 
 // What an admin page's sections hold, once their bars became collapsible
-// sections (Steve's decision of 12 October 2026): the content sits under its
-// bar rather than in a dark box of its own.
+// sections: the content sits under its bar rather than in a dark box of its
+// own.
 .admin-section-body {
   display: flex;
   flex-direction: column;
@@ -370,7 +370,7 @@
   }
 
   // Accepting answers in green, as removing answers in red: the two colours
-  // are kept for those (Steve's decision of 12 October 2026).
+  // are kept for those.
   .approve-icon {
     @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-green);
   }

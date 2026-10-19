@@ -49,7 +49,7 @@
 
   // An action that refuses or takes something away answers in red, one that
   // accepts, restores or keeps answers in green, and the rest in orange
-  // (Steve's decision of 12 October 2026: green and red are kept for those).
+  // (green and red are kept for those).
   .moderation-record-actions {
     .cta-icon {
       @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);

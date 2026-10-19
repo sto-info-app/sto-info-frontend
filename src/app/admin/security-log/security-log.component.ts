@@ -83,11 +83,11 @@ function inWords(code: string): string {
 /**
  * The site admins' Security Log (FC-039).
  *
- * Steve's decision of 29 September 2026: one feed, newest first and
- * filterable by source, of what site admins did and what the retention jobs
- * did — who, when, what, to whom or what, and why — read from the logs that
- * already hold each. Nothing in it is content: reasons and purposes are the
- * admins' own words, and details are codes, counts and IDs.
+ * One feed, newest first and filterable by source, of what site admins did
+ * and what the retention jobs did — who, when, what, to whom or what, and
+ * why — read from the logs that already hold each. Nothing in it is
+ * content: reasons and purposes are the admins' own words, and details are
+ * codes, counts and IDs.
  */
 @Component({
   selector: 'app-security-log',

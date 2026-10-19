@@ -35,9 +35,9 @@
       list-style: none;
 
       // The spine, a shade darker than the card's name block. The grid
-      // rotates through the palette (Steve's decision of 12 October 2026), so
-      // a card's colour comes from where it sits rather than from a colour of
-      // its own; grey is only for a card that sits outside the rotation.
+      // rotates through the palette, so a card's colour comes from where it
+      // sits rather than from a colour of its own; grey is only for a card
+      // that sits outside the rotation.
       border-left: 4px solid
         color-mix(
           in srgb,

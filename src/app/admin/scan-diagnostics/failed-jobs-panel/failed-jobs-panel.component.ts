@@ -95,12 +95,11 @@ export function discardOutcome(result: DiscardUnretryableResult): string {
 /**
  * Failed background jobs, on Scan Diagnostics (FC-042).
  *
- * Steve's decisions of 30 September 2026. Every job a queue gave up on is
- * listed, queue by queue, newest failure first, by internal IDs and a reason
- * code only. A site admin retries one a retry can help, discards any, or
- * does either to them all; each asks for a reason, kept in the Security Log.
- * It reads when the page opens and when the page is refreshed; it does not
- * poll.
+ * Every job a queue gave up on is listed, queue by queue, newest failure
+ * first, by internal IDs and a reason code only. A site admin retries one a
+ * retry can help, discards any, or does either to them all; each asks for a
+ * reason, kept in the Security Log. It reads when the page opens and when
+ * the page is refreshed; it does not poll.
  */
 @Component({
   selector: 'app-failed-jobs-panel',

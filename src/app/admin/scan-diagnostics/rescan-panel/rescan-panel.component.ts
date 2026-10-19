@@ -96,12 +96,12 @@ const DECISIONS = {
 /**
  * Rescan campaigns, on Scan Diagnostics (FC-041).
  *
- * Steve's decisions of 29 September 2026. A site admin rescans a selection
- * of published pictures (by kind, upload date and how long since each was
- * last scanned), behind new uploads, with a reason. Each campaign can be
- * paused, resumed and cancelled. The page shows what each found, by count,
- * and every infection and policy refusal, by asset ID and code only: an
- * infection is taken down, a refusal is left up for a site admin to decide.
+ * A site admin rescans a selection of published pictures (by kind, upload
+ * date and how long since each was last scanned), behind new uploads, with a
+ * reason. Each campaign can be paused, resumed and cancelled. The page shows
+ * what each found, by count, and every infection and policy refusal, by
+ * asset ID and code only: an infection is taken down, a refusal is left up
+ * for a site admin to decide.
  */
 @Component({
   selector: 'app-rescan-panel',
