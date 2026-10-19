@@ -214,8 +214,8 @@ describe('HelpTopicComponent (FC-048)', () => {
     },
   );
 
-  // FC-044, Steve's decision of 2 October 2026: transient unavailability
-  // must not hide useful help, so the section is read, with a notice.
+  // FC-044: transient unavailability must not hide useful help, so the
+  // section is read, with a notice.
   it('keeps a Storytime section readable while Storytime cannot be asked', () => {
     createComponent('storytime', STORYTIME_AVAILABILITY_UNAVAILABLE);
 

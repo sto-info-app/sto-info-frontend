@@ -503,8 +503,8 @@ describe('help data', () => {
   });
 
   describe('feature switches (FC-049)', () => {
-    // Steve's decision of 30 September 2026 (FC-050): only Storytime's help
-    // goes with it; Fleet Community's and its chat's stay, noted.
+    // Only Storytime's help goes with it (FC-050); Fleet Community's and its
+    // chat's stay, noted.
     it('should hide only Storytime’s help while it is off', () => {
       expect(HELP_HIDDEN_WHEN_OFF).toEqual({
         STORYTIME: true,
@@ -548,8 +548,8 @@ describe('help data', () => {
       expect(blockingFeature(ALL_ON)).toBeNull();
     });
 
-    // FC-044, Steve's decision of 2 October 2026: transient unavailability
-    // must not hide useful help (plan section 5).
+    // FC-044: transient unavailability must not hide useful help (plan
+    // section 5).
     it('should keep a page whose switch could not be asked, and name it for a notice', () => {
       const unknown = featuresWith({ STORYTIME: 'UNAVAILABLE' });
 
@@ -639,9 +639,8 @@ describe('help data', () => {
         ])
         .join(' ');
 
-    // Steve's order of 29 September 2026: Fleets second, settings after STO
-    // Storytime, before the guides almost nobody is shown, and Running the
-    // site last (FC-050).
+    // The order: Fleets second, settings after STO Storytime, before the
+    // guides almost nobody is shown, and Running the site last (FC-050).
     it('should come after STO Storytime and before Running Storytime', () => {
       expect(HELP_TOPICS.map(topic => topic.id)).toEqual([
         'community',

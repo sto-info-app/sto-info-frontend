@@ -424,7 +424,7 @@ const templatesUnder = (folder: string): string[] =>
 const read = (path: string): string => readFileSync(join(APP, path), 'utf8');
 
 describe('Help link placements (FC-050)', () => {
-  // Steve's rule: one link per page, under its heading, to its own guide.
+  // The rule: one link per page, under its heading, to its own guide.
   it.each(PLACEMENTS)('gives %s one link, to %s', (template, slug, label) => {
     expect(linksIn(read(template))).toEqual([{ slug, label }]);
   });

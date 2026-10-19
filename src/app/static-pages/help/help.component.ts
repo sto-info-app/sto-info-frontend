@@ -24,9 +24,9 @@ import { HelpTopic } from './help.models';
  * The help index.
  *
  * One tile for each section on offer, which opens the section's own page
- * (FC-048, Steve's decisions of 29 September 2026). The guides themselves are
- * content held in `help.data.ts`; this page only decides which sections a
- * given visitor may be shown, and how many guides each holds for them.
+ * (FC-048). The guides themselves are content held in `help.data.ts`; this
+ * page only decides which sections a given visitor may be shown, and how
+ * many guides each holds for them.
  *
  * It checks the feature switches itself rather than being told, because it is
  * reachable whether or not Storytime or Fleet Community exists — unlike their

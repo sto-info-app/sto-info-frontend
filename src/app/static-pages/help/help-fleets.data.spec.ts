@@ -64,8 +64,8 @@ describe.each([
 });
 
 describe('the Fleets topic (FC-050)', () => {
-  // Steve's decisions of 29 and 30 September 2026: second on the Help home,
-  // waiting on Fleet Community as a whole, and listed while it is off.
+  // Second on the Help home, waiting on Fleet Community as a whole, and
+  // listed while it is off.
   it('should be second, and wait on Fleet Community as a whole', () => {
     expect(HELP_TOPICS[1]).toBe(FLEETS_TOPIC);
     expect(FLEETS_TOPIC.requiresFeature).toBe('FLEET');

@@ -1110,9 +1110,8 @@ const PRESENCE_LABEL: Readonly<Record<string, string>> = Object.fromEntries(
  * The STO Info settings guides (FC-049).
  *
  * One guide for each panel of the Settings page, in the order the page shows
- * them, and one about the page itself: Steve's decision of 29 September 2026.
- * Each panel's heading on the page links to its guide, and each guide links
- * back.
+ * them, and one about the page itself. Each panel's heading on the page
+ * links to its guide, and each guide links back.
  *
  * The labels are the form's own, and those the form draws from a list are
  * drawn from the same list here. The guides about Fleet controls wait on
@@ -1331,8 +1330,8 @@ const SETTINGS_TOPIC: HelpTopic = {
  * Storytime waits on its feature switch — a reader with Storytime switched off
  * should still open the help to something rather than to an apology. The STO
  * Info settings follow (FC-049), and the guides for running Storytime come
- * last, because almost nobody is shown them. Steve's order of 29 September
- * 2026 puts Fleets second, once FC-050 writes them.
+ * last, because almost nobody is shown them. Fleets come second, once FC-050
+ * writes them.
  */
 export const HELP_TOPICS: HelpTopic[] = [
   COMMUNITY_TOPIC,
@@ -1357,8 +1356,7 @@ export const HELP_FEATURE_NAMES: Readonly<Record<HelpFeature, string>> = {
  * Storytime's does: its route guard answers with the not-found page, and
  * help naming it would advertise what the switch is there to hide. Fleet
  * Community's and its chat's stay, each with a note saying the feature is
- * off, so that their guides can still be found. Steve's decision of 30
- * September 2026 (FC-050).
+ * off, so that their guides can still be found (FC-050).
  */
 export const HELP_HIDDEN_WHEN_OFF: Readonly<Record<HelpFeature, boolean>> = {
   STORYTIME: true,
@@ -1514,8 +1512,8 @@ export function visibleHelpTopics(
  * it blocks a page; the others' pages are shown with a note (FC-050).
  *
  * A switch the backend could not be asked about blocks nothing: transient
- * unavailability must not hide useful help (plan section 5; Steve's decision
- * of 2 October 2026, FC-044). {@link unreachableFeature} notes it instead.
+ * unavailability must not hide useful help (plan section 5; FC-044).
+ * {@link unreachableFeature} notes it instead.
  *
  * @param features Where each switch stands.
  * @param waitsOn The switches the page waits on, outermost first.

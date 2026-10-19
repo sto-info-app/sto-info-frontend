@@ -515,8 +515,8 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
 
 /**
  * Running the site, last on the Help home and offered to site administrators
- * alone (Steve's decision of 29 September 2026). No permission stands for the
- * role, so the section waits on it; its guides stay out of the sitemap.
+ * alone. No permission stands for the role, so the section waits on it; its
+ * guides stay out of the sitemap.
  */
 export const SITE_ADMIN_TOPIC: HelpTopic = {
   id: 'site-admin',

@@ -19,10 +19,10 @@ import { HelpFeature, HelpGuide, HelpTopic } from '../help.models';
 /**
  * One section of the help: its introduction and the guides in it (FC-048).
  *
- * Steve's decision of 29 September 2026 gives each section a page of its own
- * at `/help/topics/<id>`, which the Help home's tiles open and each guide's
- * breadcrumb leads back to. The address has two parts where a guide's has
- * one, so a section can never answer for a guide, or a guide for a section.
+ * Each section has a page of its own at `/help/topics/<id>`, which the Help
+ * home's tiles open and each guide's breadcrumb leads back to. The address
+ * has two parts where a guide's has one, so a section can never answer for a
+ * guide, or a guide for a section.
  *
  * It decides what to show the way a guide does. An unknown section, one for
  * site administrators asked for by anybody else (FC-050), and one whose

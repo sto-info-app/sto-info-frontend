@@ -1286,12 +1286,10 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
 ];
 
 /**
- * The Fleets section, second on the Help home (Steve's decision of 29
- * September 2026).
+ * The Fleets section, second on the Help home.
  *
  * It waits on Fleet Community, but stays listed while that is switched off,
- * with a note saying so, so that its guides can still be found (Steve's
- * decision of 30 September 2026).
+ * with a note saying so, so that its guides can still be found.
  */
 export const FLEETS_TOPIC: HelpTopic = {
   id: 'fleets',

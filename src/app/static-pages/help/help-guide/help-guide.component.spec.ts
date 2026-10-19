@@ -264,8 +264,8 @@ describe('HelpGuideComponent', () => {
 
   // An outage is not a missing page either, and it is not the same thing as
   // the switch being off. Transient unavailability must not hide useful help
-  // (plan section 5; Steve's decision of 2 October 2026, FC-044), so the
-  // guide is read, under a notice saying the systems are not answering.
+  // (plan section 5; FC-044), so the guide is read, under a notice saying
+  // the systems are not answering.
   it('should keep the guide, saying the systems are not answering, when the backend cannot be reached', () => {
     createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_UNAVAILABLE);
 
@@ -395,9 +395,8 @@ describe('HelpGuideComponent', () => {
     expect(navigateSpy).not.toHaveBeenCalled();
   });
 
-  // Steve's decision of 30 September 2026 (FC-050): Fleet Community's and
-  // chat's guides stay while they are off, so they can still be found, and
-  // say that they are off.
+  // Fleet Community's and chat's guides stay while they are off (FC-050), so
+  // they can still be found, and say that they are off.
   describe('guides about Fleet Community and chat (FC-049, FC-050)', () => {
     const notes = () =>
       [...fixture.nativeElement.querySelectorAll('.help-switched-off')].map(

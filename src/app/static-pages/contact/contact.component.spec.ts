@@ -78,7 +78,7 @@ describe('ContactComponent', () => {
       ),
     ).map(option => option.textContent?.trim() ?? '');
 
-  // Steve's decision of 6 October 2026 (FC-045).
+  // Decided on 6 October 2026 (FC-045).
   it('offers no Fleet Communities topic while Fleet is off', () => {
     expect(offered()).toEqual(CONTACT_TOPICS.map(topic => topic.label));
     expect(offered()).not.toContain('Fleet Communities');

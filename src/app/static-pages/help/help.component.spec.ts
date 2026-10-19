@@ -133,8 +133,8 @@ describe('HelpComponent', () => {
     );
   });
 
-  // Steve's decision: the Help home is tiles only; the guides are listed on
-  // each section's page.
+  // The Help home is tiles only; the guides are listed on each section's
+  // page.
   it('should list no guide on the Help home itself', () => {
     createComponent(true);
 
