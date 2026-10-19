@@ -17,9 +17,8 @@ export interface StorytimeAdminLink {
    * A key rather than a class name because two pages show these cards and each
    * names its own — `storytime-landing__card--moderation` on the landing page,
    * `admin-landing__card--moderation` on the Admin page. Neither page colours a
-   * card by it any longer: the cards take the palette rotation in turn
-   * (Steve's decision of 12 October 2026), so a card's colour depends on where
-   * it sits among the cards shown.
+   * card by it any longer: the cards take the palette rotation in turn, so a
+   * card's colour depends on where it sits among the cards shown.
    */
   cardKey: string;
 }

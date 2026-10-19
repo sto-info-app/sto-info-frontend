@@ -27,10 +27,10 @@
   }
 
   // The shape a Storytime panel takes, in the next colour of the grid's
-  // rotation (Steve's decision of 12 October 2026) rather than one colour per
-  // section, which left every guide on a section's page the same. The colour
-  // is read at runtime, so the spine and the wash are mixed from it here
-  // rather than by the build-time mixin, as `<app-lcars-panel>` does.
+  // rotation rather than one colour per section, which left every guide on a
+  // section's page the same. The colour is read at runtime, so the spine and
+  // the wash are mixed from it here rather than by the build-time mixin, as
+  // `<app-lcars-panel>` does.
   .help-panel-card {
     --help-panel-accent: var(--lcars-accent, #{vars.$lcars-perano});
 

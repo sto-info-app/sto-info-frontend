@@ -21,9 +21,8 @@ let nextCollapsibleSectionId = 0;
  *
  * Sections open expanded. A reader arriving at a page wants to read it, not to
  * open it first. What a reader folds stays folded on their next visit to the
- * page (Steve's decision of 12 October 2026), and folded content is hidden
- * rather than taken out of the page, so a form part way through keeps what was
- * typed into it.
+ * page, and folded content is hidden rather than taken out of the page, so a
+ * form part way through keeps what was typed into it.
  *
  * A host that needs a control of its own on the bar - an edit pen beside the
  * caret - marks it `sectionActions`, and it is laid in the bar's actions group

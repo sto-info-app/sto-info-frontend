@@ -298,9 +298,8 @@ function buildUnfriendAction(username: string): MemberCardAction {
  * Builds the Block button.
  *
  * Red, as the Unfriend button beside it is: red is kept for a control that
- * removes or refuses (Steve's decision of 12 October 2026), and both end the
- * friendship. Their labels tell them apart; only blocking also hides the two
- * members from each other.
+ * removes or refuses, and both end the friendship. Their labels tell them
+ * apart; only blocking also hides the two members from each other.
  *
  * @param username - The member the button acts on.
  * @returns The action.

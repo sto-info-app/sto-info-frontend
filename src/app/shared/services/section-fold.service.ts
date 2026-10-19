@@ -7,11 +7,10 @@ const STORAGE_PREFIX = 'lcars-folded-sections:';
 /**
  * Remembers which sections a reader has folded away, page by page.
  *
- * Steve's decision of 12 October 2026: every section that heads a block of
- * content folds, everything starts open, and what a reader folds stays folded
- * on their next visit to that page. It is a convenience of this browser only,
- * so storage that is missing, full or refused leaves every section open rather
- * than failing the page.
+ * Every section that heads a block of content folds, everything starts open,
+ * and what a reader folds stays folded on their next visit to that page. It is
+ * a convenience of this browser only, so storage that is missing, full or
+ * refused leaves every section open rather than failing the page.
  */
 @Injectable({ providedIn: 'root' })
 export class SectionFoldService {

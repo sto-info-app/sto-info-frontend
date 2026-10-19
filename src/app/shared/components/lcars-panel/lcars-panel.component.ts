@@ -27,9 +27,9 @@ let nextLcarsPanelId = 0;
  * A block of a page drawn as an LCARS panel card: a coloured spine down its
  * left, a solid block across its top carrying its name, and a tinted body.
  *
- * Steve's decision of 12 October 2026 replaced the bare dark boxes a page used
- * to put a block in — a follow box, a filter box, a list of alerts — with this
- * one shape, the one the dashboard and Storytime already draw their cards in.
+ * Since 12 October 2026 this one shape, the one the dashboard and Storytime
+ * already draw their cards in, has replaced the bare dark boxes a page used
+ * to put a block in — a follow box, a filter box, a list of alerts.
  *
  * Its colour comes from the page's rotation (`--lcars-accent`), so a run of
  * panels varies by itself; `accent` names one where a panel must keep a colour

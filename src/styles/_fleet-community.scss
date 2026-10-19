@@ -20,11 +20,10 @@
 // be traced to it from the browser's inspector without searching.
 // ---
 // Colour: the Fleet system takes the palette's rotation, as every page does
-// since Steve's decision of 12 October 2026, rather than the one sky it was
-// drawn in before. The palette is named from `lcars-variables`, never written
-// out as a literal, and the colours that carry meaning — a Fleet's
-// recruitment state, an upload's scan state — are left to the components that
-// say those things.
+// since 12 October 2026, rather than the one sky it was drawn in before. The
+// palette is named from `lcars-variables`, never written out as a literal, and
+// the colours that carry meaning — a Fleet's recruitment state, an upload's
+// scan state — are left to the components that say those things.
 
 // The blocks a Fleet page projects into its shell — a filter, a form, a panel,
 // a table — each take the next colour of the rotation, so a page's lone field

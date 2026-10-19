@@ -382,11 +382,10 @@ $storytime-comment-colours: (
 
 // A panel of fields takes the palette in turn down its rows and on along each
 // row, so a field never shares a colour with the one beside it or the first of
-// the row above (Steve's decision of 12 October 2026). The panel's own
-// children rotate as any group does; a field after the first in a row takes
-// the colour after its neighbour's, counting on from the row's own. The
-// positions sit in `:where()` so a colour class on a field still names its
-// own.
+// the row above. The panel's own children rotate as any group does; a field
+// after the first in a row takes the colour after its neighbour's, counting on
+// from the row's own. The positions sit in `:where()` so a colour class on a
+// field still names its own.
 $storytime-rotation-colours: map.values(rotation.$lcars-rotation);
 $storytime-rotation-count: list.length($storytime-rotation-colours);
 
@@ -539,9 +538,9 @@ app-storytime-editor-actions {
 }
 
 // Every row of pills in the feature takes the palette in turn, as the site's
-// own `.buttons-row` does (Steve's decision of 12 October 2026), so a row
-// never repeats one colour down its length. A pill that accepts or refuses
-// something keeps its green or red, which a colour class names outright.
+// own `.buttons-row` does, so a row never repeats one colour down its length.
+// A pill that accepts or refuses something keeps its green or red, which a
+// colour class names outright.
 .storytime-page-actions,
 .storytime-form-actions,
 .storytime-actions,

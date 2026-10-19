@@ -37,10 +37,10 @@
 @use 'fleet-community';
 
 // ─── Palette rotation ────────────────────────────────────────────────────────
-// Steve's decision of 12 October 2026: elements side by side take successive
-// LCARS colours, as the dashboard's tiles do, through `--lcars-accent`. Pills,
-// fields, choosers and panels read it, each falling back
-// to the colour it had before when nothing around it rotates.
+// Elements side by side take successive LCARS colours, as the dashboard's
+// tiles do, through `--lcars-accent`. Pills, fields, choosers and panels read
+// it, each falling back to the colour it had before when nothing around it
+// rotates.
 
 // Any group of controls can rotate by carrying the class: a form's fields, a
 // row of panels, a list of choosers. A group of one takes its surroundings'
@@ -60,10 +60,10 @@
 }
 
 // Sections on a page rotate among themselves, whatever else sits between
-// them. The bar itself stays the frame's blue (Steve, 13 October 2026); what
-// the section holds takes its colour. A section alone in its host —
-// a panel component's one section — does not count itself first: it takes the
-// colour its host was given, so a row of such components rotates as well.
+// them. The bar itself stays the frame's blue; what the section holds takes
+// its colour. A section alone in its host — a panel component's one section —
+// does not count itself first: it takes the colour its host was given, so a
+// row of such components rotates as well.
 app-collapsible-section {
   @include rotation.rotate-accent('&', 'nth-of-type', ':not(:only-of-type)');
 }
