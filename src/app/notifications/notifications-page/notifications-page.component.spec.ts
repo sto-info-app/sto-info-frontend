@@ -205,6 +205,26 @@ describe('NotificationsPageComponent', () => {
       });
     });
 
+    // The badge catches up on its own next poll; the page is still read
+    // again, and nothing escapes into the console as an unhandled error.
+    it('reads the page again even when the unread count cannot be refreshed', () => {
+      fixture.detectChanges();
+      serviceSpy.getInbox.mockClear();
+      serviceSpy.refreshUnreadCount.mockReturnValueOnce(
+        throwError(() => new Error('offline')),
+      );
+
+      expect(() =>
+        component.remove({ ...notification }, click()),
+      ).not.toThrow();
+
+      expect(serviceSpy.refreshUnreadCount).toHaveBeenCalled();
+      expect(serviceSpy.getInbox).toHaveBeenCalledWith({
+        page: 1,
+        pageSize: 5,
+      });
+    });
+
     it('leaves the list alone when deleting fails', () => {
       component.notifications = [{ ...notification }];
       serviceSpy.dismiss.mockReturnValueOnce(
