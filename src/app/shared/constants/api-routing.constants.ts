@@ -34,6 +34,7 @@ export const API_URLS = {
   CLOSE_ACCOUNT_COMMUNITIES: apiUrl + '/user/close-account/communities',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
+  REMOVE_USER_PROFILE_PIC: apiUrl + '/user/profile-pic',
 
   // Uploads. Every picture the site accepts is scanned before it is
   // published, so a page that has just sent one asks this until it is told

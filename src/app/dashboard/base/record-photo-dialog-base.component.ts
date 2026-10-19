@@ -1,7 +1,9 @@
 import { ChangeDetectorRef, inject, NgZone } from '@angular/core';
-import { Observable } from 'rxjs';
+import { MatDialog } from '@angular/material/dialog';
+import { Observable, take } from 'rxjs';
 
 import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 
@@ -20,8 +22,9 @@ export interface RecordPhotoLayout {
  * of their Characters (FC-012).
  *
  * Both dialogues share one template and differ only in the record, its
- * wording and their own stylesheets, so the template and the upload are
- * written once here. The photo is cropped square and sent as a PNG.
+ * wording and their own stylesheets, so the template, the upload and the
+ * removal are written once here. The photo is cropped square and sent as a
+ * PNG.
  */
 export abstract class RecordPhotoDialogBaseComponent extends ImageCropperBaseComponent {
   /** The heading over the dialogue. */
@@ -41,6 +44,7 @@ export abstract class RecordPhotoDialogBaseComponent extends ImageCropperBaseCom
 
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _confirm = inject(MatDialog);
 
   /**
    * Whether there is a record to set the photo on.
@@ -48,6 +52,40 @@ export abstract class RecordPhotoDialogBaseComponent extends ImageCropperBaseCom
    * @returns True once the record is known.
    */
   abstract get hasRecord(): boolean;
+
+  /**
+   * Whether the record shows a photo that could be removed.
+   *
+   * @returns True when the record has a photo.
+   */
+  abstract get hasPhoto(): boolean;
+
+  /**
+   * Asks before taking the photo off the record, since it cannot be put back
+   * without uploading it again.
+   */
+  onRemoveImageClick(): void {
+    this.resetErrorMessage();
+
+    this._confirm
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: 'Remove the photo?',
+          message:
+            'The photo will be taken down straight away and cannot be put ' +
+            'back without uploading it again.',
+          confirmText: 'Remove',
+          cancelText: 'Keep it',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe(confirmed => {
+        if (confirmed) {
+          this.remove();
+        }
+      });
+  }
 
   /**
    * Sends the crop to be scanned, and reports where the scan has got to
@@ -87,4 +125,28 @@ export abstract class RecordPhotoDialogBaseComponent extends ImageCropperBaseCom
    * @returns What the upload endpoint answered.
    */
   protected abstract send(formData: FormData): Observable<AcceptedAsset>;
+
+  /**
+   * Takes the photo off the record.
+   *
+   * @returns Completes once the server has taken it down.
+   */
+  protected abstract sendRemoval(): Observable<void>;
+
+  /**
+   * Takes the photo off the record, closing so the page behind fetches the
+   * record again.
+   */
+  private remove(): void {
+    this.isSubmitting = true;
+    this.sendRemoval()
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: () => this._dialogRef?.close(true),
+        error: error => {
+          this.handleHttpError(error);
+          this.isSubmitting = false;
+        },
+      });
+  }
 }

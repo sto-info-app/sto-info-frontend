@@ -109,6 +109,23 @@ export class DashboardService {
   }
 
   /**
+   * Takes the member's profile picture off, and down.
+   *
+   * @returns Completes once it is down.
+   */
+  removeProfilePic(): Observable<void> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.delete<void>(
+      API_URLS.REMOVE_USER_PROFILE_PIC,
+      httpOptions,
+    );
+  }
+
+  /**
    * What closing the account would do to each open Fleet Community the user
    * owns (FC-038).
    *

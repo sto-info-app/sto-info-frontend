@@ -112,6 +112,16 @@
     (click)="onUploadImageClick(); $event.preventDefault()">
     Upload
   </button>
+  @if (hasPhoto && !imageChangedEvent) {
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      [disabled]="isSubmitting"
+      (click)="onRemoveImageClick()">
+      Remove
+    </button>
+  }
   <button
     type="button"
     class="lcars-btn"

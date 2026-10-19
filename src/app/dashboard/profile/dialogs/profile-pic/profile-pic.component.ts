@@ -59,6 +59,11 @@ export class ProfilePicComponent extends RecordPhotoDialogBaseComponent {
     return !!this.data?.user;
   }
 
+  /** @returns True when the member's record shows a photo. */
+  get hasPhoto(): boolean {
+    return !!this.data?.user?.profile?.profilePicture;
+  }
+
   /**
    * Sends the photo to the member's own record.
    *
@@ -67,5 +72,14 @@ export class ProfilePicComponent extends RecordPhotoDialogBaseComponent {
    */
   protected send(formData: FormData): Observable<AcceptedAsset> {
     return this._dashboardService.updateProfilePic(formData);
+  }
+
+  /**
+   * Takes the photo off the member's own record.
+   *
+   * @returns Completes once it is down.
+   */
+  protected sendRemoval(): Observable<void> {
+    return this._dashboardService.removeProfilePic();
   }
 }

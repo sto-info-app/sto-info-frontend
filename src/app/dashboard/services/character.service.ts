@@ -169,6 +169,22 @@ export class CharacterService {
   }
 
   /**
+   * Takes a character's profile picture off, and down.
+   * @param characterId The character ID.
+   * @returns Completes once it is down.
+   */
+  removeCharacterProfilePic(characterId: string): Observable<void> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.delete<void>(
+      `${API_URLS.CHARACTER}/${characterId}/profile-image`,
+      httpOptions,
+    );
+  }
+
+  /**
    * Deletes a character.
    * @param id The character ID.
    * @returns An observable of the deletion result.

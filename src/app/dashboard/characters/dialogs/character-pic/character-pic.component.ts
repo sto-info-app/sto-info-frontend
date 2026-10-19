@@ -57,6 +57,11 @@ export class CharacterPicComponent extends RecordPhotoDialogBaseComponent {
     return !!this.data.character;
   }
 
+  /** @returns True when the Character shows a photo. */
+  get hasPhoto(): boolean {
+    return !!this.data.character?.profilePicture;
+  }
+
   /**
    * Sends the portrait to the Character's record.
    *
@@ -67,6 +72,17 @@ export class CharacterPicComponent extends RecordPhotoDialogBaseComponent {
     return this._characterService.updateCharacterProfilePic(
       this.data.character.id,
       formData,
+    );
+  }
+
+  /**
+   * Takes the photo off the Character's record.
+   *
+   * @returns Completes once it is down.
+   */
+  protected sendRemoval(): Observable<void> {
+    return this._characterService.removeCharacterProfilePic(
+      this.data.character.id,
     );
   }
 }
