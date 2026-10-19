@@ -290,6 +290,9 @@ describe('help data', () => {
       expect(copy()).toContain(
         'A picture recorded in a deleted field is taken down at once',
       );
+      expect(copy()).toContain(
+        'Deleting an STO account or a captain does the same',
+      );
     });
   });
 
