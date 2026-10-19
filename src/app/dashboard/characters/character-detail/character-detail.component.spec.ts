@@ -224,6 +224,39 @@ describe('CharacterDetailComponent', () => {
       }),
     );
 
+    // Read out to anybody who cannot see the icon, so it names the rank.
+    it.each([
+      ['Fleet Admiral', 'Fleet Admiral'],
+      ['', 'Rank icon'],
+    ])(
+      'should describe the rank icon by its rank (%p)',
+      fakeAsync((title: string, described: string) => {
+        const character: Character = {
+          ...mockCharacter,
+          rank: { title, levelRange: '65', iconUrl: 'https://cdn/rank.png' },
+        };
+        mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+        mockCharacterService.getCharactersByAccount.mockReturnValue(
+          of([character]),
+        );
+        mockCharacterService.getCharacter.mockReturnValue(of(character));
+
+        fixture.detectChanges();
+        routeParamsSubject.next({
+          handle: 'TestAccount',
+          characterHandle: 'TestChar',
+        });
+        tick();
+        fixture.detectChanges();
+
+        const icon = (fixture.nativeElement as HTMLElement).querySelector(
+          'img.rank-icon',
+        ) as HTMLImageElement;
+        expect(icon.alt).toBe(described);
+        expect(icon.title).toBe(described);
+      }),
+    );
+
     it('should fold the data, biography and notes away as three sections', fakeAsync(() => {
       const character = {
         ...mockCharacter,

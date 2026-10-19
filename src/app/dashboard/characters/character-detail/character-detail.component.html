@@ -86,8 +86,8 @@
           <img
             [src]="character.rank!.iconUrl"
             class="rank-icon"
-            alt="character.rank?.title ?? Rank Icon"
-            title="Rank Icon" />
+            [alt]="character.rank?.title || 'Rank icon'"
+            [title]="character.rank?.title || 'Rank icon'" />
         }
         <h1>{{ character.handle }}</h1>
       </div>
