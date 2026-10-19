@@ -54,12 +54,11 @@ export interface FleetHoldingsData {
 /**
  * The tier of each of a Fleet's holdings, and how they changed (FC-023).
  *
- * Public, as Steve decided on 28 September 2026: whoever may see the Fleet
- * sees its tiers and history, and a member sees who recorded each change.
- * A `holdings.write` holder records one holding at a time — its own tier
- * and its departments' — each within its own range, lower as well as
- * higher, with an optional reason. Nothing is worked out from
- * contributions, and there is no XP.
+ * Public: whoever may see the Fleet sees its tiers and history, and a
+ * member sees who recorded each change. A `holdings.write` holder records
+ * one holding at a time — its own tier and its departments' — each within
+ * its own range, lower as well as higher, with an optional reason. Nothing
+ * is worked out from contributions, and there is no XP.
  */
 @Component({
   selector: 'app-fleet-holdings',

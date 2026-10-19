@@ -67,13 +67,13 @@ type Correction = 'EXCLUSION' | 'PARTIAL' | 'TIMEZONE';
  * made (FC-019, FC-020).
  *
  * Each needs a reason, given once above them all, and each can be undone by
- * another, so none asks to be confirmed (Steve's decision of 25 September
- * 2026). An import can be taken out of the Fleet's history and put back,
- * said to list perhaps not everybody, or read again through the timezone it
- * was really taken in. Where the export's stamp names two moments in that
- * zone — the hour the clock went back over — the page works out both and
- * asks which, as the upload does. Choosing between exports of one moment is
- * the Conflicting exports page's, which this links to.
+ * another, so none asks to be confirmed. An import can be taken out of the
+ * Fleet's history and put back, said to list perhaps not everybody, or read
+ * again through the timezone it was really taken in. Where the export's
+ * stamp names two moments in that zone — the hour the clock went back
+ * over — the page works out both and asks which, as the upload does.
+ * Choosing between exports of one moment is the Conflicting exports page's,
+ * which this links to.
  *
  * Every correction is answered with the import as it now is, which is
  * passed up for the page to show; the Fleet's roster is replayed afterwards

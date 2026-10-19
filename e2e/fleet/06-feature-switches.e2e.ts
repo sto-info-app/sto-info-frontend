@@ -11,7 +11,7 @@ import {
 
 /**
  * The feature switches on the Admin page (FC-045), and the release smoke
- * test Steve asked for on 6 October 2026: Fleet Communities switched off
+ * test asked for on 6 October 2026: Fleet Communities switched off
  * from the page takes every Fleet page away for everybody, and switched on
  * again brings it back, each change with a reason the Security Log keeps.
  * The contact form offers its Fleet Communities topic only while Fleet is

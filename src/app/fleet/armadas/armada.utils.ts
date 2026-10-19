@@ -18,9 +18,8 @@ export type FleetNamer = (fleet: ArmadaFleetRef) => string;
  * Builds a namer for the Fleets in view.
  *
  * Two Fleets in one list with the same exact name get their Community's
- * name after it, as Steve chose on 28 September 2026. One Fleet named more
- * than once, as in a history, is still one Fleet. A Fleet the reader may not
- * see is named as such.
+ * name after it. One Fleet named more than once, as in a history, is still
+ * one Fleet. A Fleet the reader may not see is named as such.
  *
  * @param fleets - Every Fleet the list shows.
  * @param communityName - The Community holding them.

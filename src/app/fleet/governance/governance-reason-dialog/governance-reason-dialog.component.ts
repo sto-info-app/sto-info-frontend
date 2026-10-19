@@ -20,10 +20,10 @@ export interface GovernanceReasonDialogData {
   readonly label: string;
   readonly confirmText: string;
   /**
-   * What confirming does, which colours the buttons (Steve's decision of 13
-   * October 2026): `accept` (the default) for the yes of a confirmation,
-   * green, with Cancel red as the no; `refuse` for taking something away,
-   * red, with Cancel left to the rotation so two reds never sit together.
+   * What confirming does, which colours the buttons: `accept` (the default)
+   * for the yes of a confirmation, green, with Cancel red as the no; `refuse`
+   * for taking something away, red, with Cancel left to the rotation so two
+   * reds never sit together.
    */
   readonly confirmTone?: 'refuse' | 'accept';
   /** The fewest characters, trimmed; one by default. */

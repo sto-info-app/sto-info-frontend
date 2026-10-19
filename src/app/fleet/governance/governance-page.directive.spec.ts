@@ -227,7 +227,7 @@ describe('GovernancePageDirective', () => {
     expect(route.scopes.resolveCommunity).toHaveBeenLastCalledWith('');
   });
 
-  // Steve's decision of 30 September 2026, for the pages that ask for it.
+  // For the pages that ask for it.
   describe('a site administrator’s own read (FC-050)', () => {
     let governance: { resolveCommunityAsSiteAdmin: jest.Mock };
 

@@ -68,8 +68,8 @@ export const FLEET_AUDIENCE_LABELS: Readonly<Record<string, string>> = {
  * How each visibility setting is worded when it is a Community's own.
  *
  * "Fleet members" on a Community is not one Fleet's members but the members
- * of every Fleet in it, with its Owner and Admins, by Steve's decision of 30
- * September 2026 (FC-050). The rest read as they do on a Fleet.
+ * of every Fleet in it, with its Owner and Admins (FC-050). The rest read as
+ * they do on a Fleet.
  */
 export const COMMUNITY_AUDIENCE_LABELS: Readonly<Record<string, string>> = {
   ...FLEET_AUDIENCE_LABELS,
@@ -107,15 +107,14 @@ export const FLEET_AUDIENCE_CHOICES: Readonly<Record<string, string>> = {
 /**
  * What the audience choices mean when the thing being seen is a Community.
  *
- * Both count the approved members of every Fleet in the Community, by Steve's
- * decision of 30 September 2026 (FC-050), so a Fleet's members reach their
- * own Fleet without following. "Community members" adds its followers and
- * whoever holds a role there, and means the same on its Fleets, so a member
- * of one Fleet sees a sibling set to it; "Fleet members" leaves followers
- * out, adding only the Owner, its Admins and whoever holds `members.view`
- * there. The two differ, so the form says how rather than offering one fewer
- * choice. The last sentence is the consequence people miss: a Fleet's page
- * reads its Community first.
+ * Both count the approved members of every Fleet in the Community (FC-050),
+ * so a Fleet's members reach their own Fleet without following. "Community
+ * members" adds its followers and whoever holds a role there, and means the
+ * same on its Fleets, so a member of one Fleet sees a sibling set to it;
+ * "Fleet members" leaves followers out, adding only the Owner, its Admins
+ * and whoever holds `members.view` there. The two differ, so the form says
+ * how rather than offering one fewer choice. The last sentence is the
+ * consequence people miss: a Fleet's page reads its Community first.
  */
 export const COMMUNITY_AUDIENCE_HINT =
   'For a Community, “Community members” means its followers, the members ' +

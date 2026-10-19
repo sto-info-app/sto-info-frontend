@@ -5,9 +5,9 @@ import { RouterLink } from '@angular/router';
  * The way back from a Fleet page to the one above it — Manage, a Fleet's
  * applications — drawn as a pill on a row of its own.
  *
- * A link that stands on its own as a destination is a pill (Steve's decision
- * of 12 October 2026), and one component rather than the same row written
- * into every Manage page keeps them all the same shape.
+ * A link that stands on its own as a destination is a pill, and one
+ * component rather than the same row written into every Manage page keeps
+ * them all the same shape.
  */
 @Component({
   selector: 'app-fleet-back-link',

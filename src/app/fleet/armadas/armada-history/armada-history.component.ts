@@ -34,10 +34,9 @@ export interface ArmadaHistoryData {
 /**
  * How an Armada's shape changed, newest change first (FC-026).
  *
- * Shown to whoever may see the Armada, as Steve decided on 28 September
- * 2026. Each change reads as one sentence for each Fleet it moved; who made
- * it and why are shown to the Armada's members alone. Paged by the address,
- * as the roster history is.
+ * Shown to whoever may see the Armada. Each change reads as one sentence for
+ * each Fleet it moved; who made it and why are shown to the Armada's members
+ * alone. Paged by the address, as the roster history is.
  */
 @Component({
   selector: 'app-armada-history',

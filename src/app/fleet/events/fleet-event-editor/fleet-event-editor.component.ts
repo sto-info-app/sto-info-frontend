@@ -81,10 +81,10 @@ const RULES: readonly { key: FleetEventRecurrence; label: string }[] = [
  * Writes an event, or changes one from now on (FC-030).
  *
  * For the scope's event managers while it is open; the server checks again.
- * Steve's decisions of 28 September 2026: its own page, with the rule's
- * preview beside the form, flagging every occurrence daylight saving moves
- * and every month a monthly day skips, before anything is saved. The time is
- * on the clock of the zone chosen, the Community's own unless another is.
+ * It has its own page, with the rule's preview beside the form, flagging
+ * every occurrence daylight saving moves and every month a monthly day
+ * skips, before anything is saved. The time is on the clock of the zone
+ * chosen, the Community's own unless another is.
  */
 @Component({
   selector: 'app-fleet-event-editor',

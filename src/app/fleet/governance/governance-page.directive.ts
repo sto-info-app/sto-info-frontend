@@ -118,10 +118,10 @@ export abstract class GovernancePageDirective<T> {
    * Whether a site administrator finds the Community through their own read,
    * whoever may see it (FC-050), rather than the public one.
    *
-   * Steve's decision of 30 September 2026: a site administrator reaches every
-   * Community's dispute page, and the Manage hub that leads to it. Those two
-   * pages turn this on; every other page, and everybody but a site
-   * administrator on those two, still asks the public read.
+   * A site administrator reaches every Community's dispute page, and the
+   * Manage hub that leads to it. Those two pages turn this on; every other
+   * page, and everybody but a site administrator on those two, still asks the
+   * public read.
    */
   protected readonly _siteAdminFindsAnyCommunity: boolean = false;
 

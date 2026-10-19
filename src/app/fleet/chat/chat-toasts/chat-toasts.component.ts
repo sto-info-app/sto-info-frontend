@@ -27,8 +27,8 @@ export interface ChatToast {
  * Chat's toasts (FC-034): a direct message or a mention of the reader,
  * wherever they are on the site, unless that place is already open.
  *
- * Steve's decision of 29 September 2026: who and where, never what — the
- * text is read in chat — for eight seconds, with a way into it.
+ * Who and where, never what — the text is read in chat — for eight seconds,
+ * with a way into it.
  */
 @Component({
   selector: 'app-chat-toasts',

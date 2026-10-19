@@ -663,8 +663,8 @@ describe('CommunityDisputeComponent', () => {
     },
   );
 
-  // Steve's decision of 30 September 2026: a site administrator reaches any
-  // Community's dispute page, whoever may see it; nobody else gains anything.
+  // A site administrator reaches any Community's dispute page, whoever may
+  // see it; nobody else gains anything.
   describe('whoever may see the Community (FC-050)', () => {
     /** The answer the public read gives a reader it hides a Community from. */
     const hidden = (): Observable<never> =>

@@ -104,9 +104,9 @@ describe('GovernanceReasonDialogComponent', () => {
     expect(close).toHaveBeenCalledWith();
   });
 
-  // Steve's decision of 13 October 2026: the yes of a confirmation is green
-  // and its Cancel red; a confirmation that takes something away is red, and
-  // its Cancel is left to the rotation so two reds never sit together.
+  // The yes of a confirmation is green and its Cancel red; a confirmation
+  // that takes something away is red, and its Cancel is left to the rotation
+  // so two reds never sit together.
   it.each([
     [undefined, 'green', 'red'],
     ['accept', 'green', 'red'],

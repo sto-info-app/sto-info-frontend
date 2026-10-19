@@ -65,8 +65,8 @@ export interface RosterTimelineData {
  * For the Fleet's members. Their stretches of membership, bounded by the
  * exports either side; every change, contribution included, oldest first;
  * and their row on each export listing them, with the contribution drawn
- * export by export (Steve's decisions of 25 September 2026). The registry
- * link follows the roster's rule, for the latest export listing them.
+ * export by export. The registry link follows the roster's rule, for the
+ * latest export listing them.
  */
 @Component({
   selector: 'app-roster-timeline',

@@ -131,7 +131,7 @@ export function chatCursorOf(message: ChatMessage): string {
 /**
  * Chat's live connection (FC-032).
  *
- * Steve's decisions of 28 September 2026:
+ * Decisions of 28 September 2026:
  *
  * - WebSocket only, opened when a chat page first needs it. The access token
  *   is sent in the first message, never in the address, and again with a

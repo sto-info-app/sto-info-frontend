@@ -125,9 +125,9 @@ export class CommunityDisputeComponent extends GovernancePageDirective<Community
 
   /**
    * A site administrator finds the Community whoever may see it, so a
-   * members-only or private one's page opens for them too (Steve's decision
-   * of 30 September 2026). Anybody else is answered by the public read, as
-   * on every other page, and is then told this page is not for them.
+   * members-only or private one's page opens for them too. Anybody else is
+   * answered by the public read, as on every other page, and is then told
+   * this page is not for them.
    */
   protected override readonly _siteAdminFindsAnyCommunity = true;
   readonly reasonLimit = GOVERNANCE_REASON_LIMIT;

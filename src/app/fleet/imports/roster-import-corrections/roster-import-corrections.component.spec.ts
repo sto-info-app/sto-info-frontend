@@ -360,8 +360,8 @@ describe('RosterImportCorrectionsComponent', () => {
       expect(button('Read it again').disabled).toBe(true);
     });
 
-    // Steve's decision of 30 September 2026: a wrong clock is usually why
-    // it clashed, so correcting it is offered at once.
+    // A wrong clock is usually why it clashed, so correcting it is offered
+    // at once.
     it('offers the zone while another export claims its moment, saying what it does', () => {
       render(detail({ conflictGroupId: 'group-1' }));
 

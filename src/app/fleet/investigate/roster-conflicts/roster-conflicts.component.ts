@@ -99,8 +99,8 @@ export interface RosterConflictsData {
  * stand for the moment. An investigator selects another with a reason; a
  * held export is then read into force and the roster history rebuilt,
  * which the server does on its own queue. A group reopened by a later
- * export that disagrees keeps its selection until somebody changes it
- * (Steve's decision of 25 September 2026: the choice is made here).
+ * export that disagrees keeps its selection until somebody changes it (the
+ * choice is made here).
  */
 @Component({
   selector: 'app-roster-conflicts',

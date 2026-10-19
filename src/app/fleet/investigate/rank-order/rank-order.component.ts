@@ -69,7 +69,7 @@ export interface RankOrderData {
  *
  * An edit replaces the whole order, gives a reason, and sends the order as
  * this page read it, so one made after somebody else's is refused rather
- * than overwriting it (Steve's decisions of 25 September 2026).
+ * than overwriting it.
  */
 @Component({
   selector: 'app-rank-order',

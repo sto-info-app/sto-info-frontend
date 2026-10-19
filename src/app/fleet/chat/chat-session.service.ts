@@ -12,10 +12,10 @@ import { ChatSocketService } from './chat-socket.service';
  * Keeps chat's socket open for as long as somebody is signed in and chat is
  * switched on, across the whole site (FC-034).
  *
- * Steve's decision of 29 September 2026: being online means having STO Info
- * open, not only the chat page, so every signed-in tab holds a socket — which
- * also lets a direct message or a mention reach the reader wherever they are.
- * Signing out, or chat being switched off, closes it.
+ * Being online means having STO Info open, not only the chat page, so every
+ * signed-in tab holds a socket — which also lets a direct message or a
+ * mention reach the reader wherever they are. Signing out, or chat being
+ * switched off, closes it.
  */
 @Injectable({
   providedIn: 'root',

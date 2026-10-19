@@ -45,10 +45,10 @@ export interface FleetUpcomingItem {
 /**
  * What is coming up (FC-030).
  *
- * Steve's decisions of 28 September 2026: a Community page shows its next
- * five occurrences and a link to the calendar; the dashboard shows the
- * reader's own next thirty days — what they answered Going or Maybe, are
- * waiting for, or asked to be reminded of — each naming its scope.
+ * A Community page shows its next five occurrences and a link to the
+ * calendar; the dashboard shows the reader's own next thirty days — what
+ * they answered Going or Maybe, are waiting for, or asked to be reminded
+ * of — each naming its scope.
  */
 @Component({
   selector: 'app-fleet-events-upcoming',

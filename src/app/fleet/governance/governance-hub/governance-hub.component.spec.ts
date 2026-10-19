@@ -279,9 +279,9 @@ describe('GovernanceHubComponent', () => {
     expect(pageText(fixture)).not.toContain('Close this');
   });
 
-  // Steve's decision of 30 September 2026: a site administrator reaches any
-  // Community's dispute page, and this hub that leads to it, whoever may see
-  // the Community; nobody else gains anything.
+  // A site administrator reaches any Community's dispute page, and this hub
+  // that leads to it, whoever may see the Community; nobody else gains
+  // anything.
   describe('whoever may see the Community (FC-050)', () => {
     /** The public read's answer to a reader it hides a Community from. */
     const hidden = (): Observable<never> =>

@@ -59,10 +59,10 @@ export type RosterImportRowsState =
  *
  * An excluded row leaves its member unknown at that export rather than
  * gone. Rows are ticked on the page shown, and a page turned clears the
- * ticks, so a request only ever names rows the investigator could see
- * (Steve's decision of 25 September 2026). The server refuses a request
- * naming any row already as asked, so excluding is offered only when every
- * row ticked counts, and putting back only when every one is excluded.
+ * ticks, so a request only ever names rows the investigator could see. The
+ * server refuses a request naming any row already as asked, so excluding is
+ * offered only when every row ticked counts, and putting back only when
+ * every one is excluded.
  */
 @Component({
   selector: 'app-roster-import-rows',

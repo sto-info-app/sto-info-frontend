@@ -46,10 +46,9 @@ export interface RosterHistoryData {
  *
  * For the Fleet's members. Each interval between two exports shows its
  * summary and the joins, departures, renames, rank and Join Date changes its
- * later export revealed; contribution appears only as each interval's totals
- * (Steve's decision of 25 September 2026). Nothing is dated more exactly than
- * the two exports a change lies between, and a change bounded more widely
- * than its interval says so.
+ * later export revealed; contribution appears only as each interval's
+ * totals. Nothing is dated more exactly than the two exports a change lies
+ * between, and a change bounded more widely than its interval says so.
  */
 @Component({
   selector: 'app-roster-history',

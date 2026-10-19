@@ -109,14 +109,14 @@ export const CHAT_TYPING_SHOWN_MS = 5_000;
  * One channel or conversation (FC-033): its messages, live, and the
  * composer.
  *
- * Steve's decisions of 28 and 29 September 2026: plain text only — every
- * message is written as text, never markup — with mentions picked from a list
- * of people who can read the place, replies quoting the first 80 characters
- * of what they answer, and system emoji. Enter sends and Shift+Enter starts
- * a new line. Messages go back four hours, and the top says so. Authors
- * delete their own; the place's moderators remove anybody's, with a reason.
- * Readers report others' messages to the site's admins (FC-035), and are
- * thanked, never told the outcome.
+ * Plain text only — every message is written as text, never markup — with
+ * mentions picked from a list of people who can read the place, replies
+ * quoting the first 80 characters of what they answer, and system emoji.
+ * Enter sends and Shift+Enter starts a new line. Messages go back four
+ * hours, and the top says so. Authors delete their own; the place's
+ * moderators remove anybody's, with a reason. Readers report others'
+ * messages to the site's admins (FC-035), and are thanked, never told the
+ * outcome.
  *
  * It joins its place when shown and leaves it when changed or destroyed, and
  * holds no timer or subscription past its own life.

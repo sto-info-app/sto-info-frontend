@@ -52,11 +52,10 @@ export interface FleetEventCalendarData {
 /**
  * A Community's, a Fleet's or an Armada's calendar (FC-030).
  *
- * Steve's decision of 28 September 2026: a month grid, with a toggle to an
- * agenda, the agenda by default on a narrow screen. The view and the month
- * are in the address, so each is a link of its own. Times are in the
- * reader's own zone, which the page names. Its event managers are offered a
- * new event while the scope is open.
+ * A month grid, with a toggle to an agenda, the agenda by default on a
+ * narrow screen. The view and the month are in the address, so each is a
+ * link of its own. Times are in the reader's own zone, which the page names.
+ * Its event managers are offered a new event while the scope is open.
  */
 @Component({
   selector: 'app-fleet-event-calendar',
