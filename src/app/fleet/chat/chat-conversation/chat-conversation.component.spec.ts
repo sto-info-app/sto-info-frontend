@@ -20,6 +20,7 @@ import { ReportReason } from 'src/app/models/moderation.models';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { FLEET_CONFIGURATION } from 'src/app/shared/services/fleet-configuration.testing';
 
+import { ChatEmojiButtonComponent } from '../chat-emoji-button/chat-emoji-button.component';
 import { ChatRemoveDialogComponent } from '../chat-remove-dialog/chat-remove-dialog.component';
 import { ChatReportDialogComponent } from '../chat-report-dialog/chat-report-dialog.component';
 import { ChatSocketError, ChatSocketService } from '../chat-socket.service';
@@ -744,6 +745,73 @@ describe('ChatConversationComponent', () => {
     });
   });
 
+  describe('emoji', () => {
+    beforeEach(async () => {
+      await show();
+    });
+
+    /** The face in the box's corner, and the picker it opens. */
+    const picker = (): ChatEmojiButtonComponent =>
+      fixture.debugElement.query(By.directive(ChatEmojiButtonComponent))
+        .componentInstance as ChatEmojiButtonComponent;
+
+    it('sits inside the message box', () => {
+      expect(
+        element.querySelector('.chat-composer__field app-chat-emoji-button'),
+      ).not.toBeNull();
+    });
+
+    it('puts a picked emoji in at the caret, over what is selected, with the caret after it', async () => {
+      type('Hail Odo, and welcome');
+      composer().setSelectionRange(5, 8);
+      socket.typing.mockClear();
+
+      picker().picked.emit('🖖');
+
+      expect(composer().value).toBe('Hail 🖖, and welcome');
+      expect(composer().selectionStart).toBe(7);
+      expect(socket.typing).toHaveBeenCalledWith(GENERAL);
+
+      picker().picked.emit('👍🏽');
+
+      expect(composer().value).toBe('Hail 🖖👍🏽, and welcome');
+    });
+
+    it('sends an emoji on its own as a message', async () => {
+      picker().picked.emit('👍');
+      await settle();
+
+      expect(button('Send').disabled).toBe(false);
+
+      press('Enter');
+      await settle();
+
+      expect(socket.send).toHaveBeenCalledWith(GENERAL, '👍', {
+        mentions: [],
+      });
+    });
+
+    it('leaves out an emoji that would take the message past its limit', () => {
+      type('x'.repeat(1_999));
+
+      picker().picked.emit('👍');
+
+      expect(composer().value).toHaveLength(1_999);
+
+      picker().picked.emit('☺');
+
+      expect(composer().value).toHaveLength(2_000);
+    });
+
+    it('hands the focus back to the box when the picker is closed with Escape', () => {
+      button('All chats').focus();
+
+      picker().dismissed.emit();
+
+      expect(document.activeElement).toBe(composer());
+    });
+  });
+
   describe('mentions', () => {
     beforeEach(async () => {
       await show();
@@ -1119,6 +1187,7 @@ describe('ChatConversationComponent', () => {
     await show({ mayPost: false });
 
     expect(composer()).toBeNull();
+    expect(element.querySelector('app-chat-emoji-button')).toBeNull();
     expect(button('Reply')).toBeUndefined();
     expect(press('Enter', false, button('All chats'))).toBe(false);
     expect(texts('.chat-conversation__read-only')).toEqual([

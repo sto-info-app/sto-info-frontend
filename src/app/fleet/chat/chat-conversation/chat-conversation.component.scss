@@ -322,11 +322,20 @@
   font-size: 0.85rem;
 }
 
+// The box, with the emoji picker's face in its bottom right-hand corner and
+// the picker above it: both are placed against this.
+.chat-composer__field {
+  position: relative;
+}
+
 .chat-composer__input {
+  display: block;
   width: 100%;
   min-height: 3rem;
   resize: vertical;
-  padding: 0.5rem;
+
+  // Room on the right, so the text never runs under the face.
+  padding: 0.5rem 2.5rem 0.5rem 0.5rem;
   border: 1px solid var(--lcars-accent, #{vars.$lcars-sky});
   border-radius: 0.5rem;
   background: vars.$lcars-black;

@@ -53,6 +53,7 @@ import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-su
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
+import { ChatEmojiButtonComponent } from '../chat-emoji-button/chat-emoji-button.component';
 import { ChatRemoveDialogComponent } from '../chat-remove-dialog/chat-remove-dialog.component';
 import { ChatReportDialogComponent } from '../chat-report-dialog/chat-report-dialog.component';
 import { ChatSocketService } from '../chat-socket.service';
@@ -111,7 +112,8 @@ export const CHAT_TYPING_SHOWN_MS = 5_000;
  *
  * Plain text only — every message is written as text, never markup — with
  * mentions picked from a list of people who can read the place, replies
- * quoting the first 80 characters of what they answer, and system emoji.
+ * quoting the first 80 characters of what they answer, and emoji from the
+ * picker in the message box's corner or from the reader's own keyboard.
  * Enter sends and Shift+Enter starts a new line. Messages go back four
  * hours, and the top says so. Authors delete their own; the place's
  * moderators remove anybody's, with a reason. Readers report others'
@@ -128,6 +130,7 @@ export const CHAT_TYPING_SHOWN_MS = 5_000;
   standalone: true,
   imports: [
     AppDatePipe,
+    ChatEmojiButtonComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     LoadingBarComponent,
@@ -530,6 +533,31 @@ export class ChatConversationComponent implements OnDestroy {
     ]);
     this._mentionAt = null;
     this.offer([]);
+  }
+
+  /**
+   * Puts an emoji from the picker in at the caret, or over what is selected,
+   * leaving the caret after it. The focus stays in the picker, so another can
+   * follow. One that would take the message past its limit is left out, as
+   * the box's own `maxlength` would leave out a typed one.
+   *
+   * @param emoji - Its characters.
+   * @param textarea - The composer.
+   */
+  protected insertEmoji(emoji: string, textarea: HTMLTextAreaElement): void {
+    const { selectionStart, selectionEnd, value } = textarea;
+    const text =
+      value.slice(0, selectionStart) + emoji + value.slice(selectionEnd);
+
+    if (text.length > CHAT_MESSAGE_MAX_LENGTH) {
+      return;
+    }
+
+    const caret = selectionStart + emoji.length;
+
+    textarea.value = text;
+    textarea.setSelectionRange(caret, caret);
+    this.onInput(textarea);
   }
 
   /** Forgets the mention being typed once the list closes, however it did. */

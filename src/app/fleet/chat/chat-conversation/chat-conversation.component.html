@@ -294,16 +294,22 @@
         for="chat-composer-input"
         >Message {{ title() }}</label
       >
-      <textarea
-        #composer
-        id="chat-composer-input"
-        class="chat-composer__input"
-        rows="2"
-        placeholder="Write a message. Enter sends; Shift+Enter starts a new line."
-        matAutocompletePosition="above"
-        [matAutocomplete]="mentions"
-        [attr.maxlength]="maxLength"
-        (input)="onInput(composer)"></textarea>
+      <!-- The emoji picker's face sits in the box's bottom right-hand corner. -->
+      <div class="chat-composer__field">
+        <textarea
+          #composer
+          id="chat-composer-input"
+          class="chat-composer__input"
+          rows="2"
+          placeholder="Write a message. Enter sends; Shift+Enter starts a new line."
+          matAutocompletePosition="above"
+          [matAutocomplete]="mentions"
+          [attr.maxlength]="maxLength"
+          (input)="onInput(composer)"></textarea>
+        <app-chat-emoji-button
+          (picked)="insertEmoji($event, composer)"
+          (dismissed)="composer.focus()" />
+      </div>
       <mat-autocomplete
         #mentions="matAutocomplete"
         class="fleet-community-mention-list"

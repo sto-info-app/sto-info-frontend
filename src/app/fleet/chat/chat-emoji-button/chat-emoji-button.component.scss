@@ -1,0 +1,97 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// The face and the panel are both placed against the message box around
+// them, which is positioned, so the panel opens above the whole box rather
+// than over its text. The element itself takes no box of its own.
+:host {
+  display: contents;
+}
+
+// A small face in the box's bottom right-hand corner, in the place's colour
+// like the box's own border.
+.chat-emoji__toggle {
+  @include mixins.lcars-bare-button;
+
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-size: 1.1rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible,
+  &[aria-expanded='true'] {
+    color: vars.$lcars-white;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$a11y-white;
+    outline-offset: 1px;
+  }
+}
+
+// Above the message box, from its right-hand edge, over the foot of the log.
+.chat-emoji__panel {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.5rem);
+  z-index: 10;
+  overflow: hidden;
+  border: 1px solid var(--lcars-accent, #{vars.$lcars-sky});
+  border-radius: 0.5rem;
+  background: vars.$lcars-black;
+  box-shadow: 0 4px 12px vars.$black-a50;
+}
+
+.chat-emoji__note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  color: vars.$lcars-grey-light;
+  font-size: 0.85rem;
+}
+
+// The picker is made in script, so it never carries this component's
+// encapsulation attribute. ::ng-deep reaches it, and the leading class keeps
+// the rule to this panel. Its colours are custom properties it reads inside
+// its own shadow root; set on the element, they win over its own defaults.
+/* stylelint-disable selector-pseudo-element-no-unknown */
+.chat-emoji__picker ::ng-deep emoji-picker {
+  --background: #{vars.$lcars-black};
+  --border-size: 0;
+  --border-color: #{vars.$lcars-grey-border};
+  --indicator-color: var(--lcars-accent, #{vars.$lcars-sky});
+  --input-border-color: var(--lcars-accent, #{vars.$lcars-sky});
+  --input-font-color: #{vars.$lcars-white};
+  --input-placeholder-color: #{vars.$lcars-grey-light};
+  --input-font-size: 0.9rem;
+  --outline-color: #{vars.$a11y-white};
+  --category-font-color: var(--lcars-accent, #{vars.$lcars-sky});
+  --category-font-size: 0.85rem;
+  --button-hover-background: #{vars.$lcars-card-surface-hover};
+  --button-active-background: #{vars.$lcars-card-surface};
+  --emoji-size: 1.25rem;
+  --emoji-padding: 0.35rem;
+  --num-columns: 8;
+
+  height: min(20rem, 55dvh);
+  color-scheme: dark;
+
+  // Narrower on a phone, so it sits over the message box rather than the
+  // side bar. The row of nine category icons sets its narrowest, so they
+  // shrink too.
+  @media (width < 720px) {
+    --num-columns: 5;
+    --category-emoji-size: 1rem;
+    --category-emoji-padding: 0.25rem;
+  }
+}
+/* stylelint-enable selector-pseudo-element-no-unknown */

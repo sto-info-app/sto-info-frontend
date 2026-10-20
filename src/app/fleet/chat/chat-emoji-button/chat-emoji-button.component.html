@@ -1,0 +1,31 @@
+<button
+  type="button"
+  class="chat-emoji__toggle"
+  aria-label="Add an emoji"
+  title="Add an emoji"
+  aria-controls="chat-emoji-panel"
+  [attr.aria-expanded]="isOpen()"
+  (click)="toggle()">
+  <i
+    class="fa-solid fa-face-smile"
+    aria-hidden="true"></i>
+</button>
+
+@if (isOpen()) {
+  <div
+    id="chat-emoji-panel"
+    class="chat-emoji__panel"
+    role="group"
+    aria-label="Emoji">
+    @if (failed()) {
+      <p class="chat-emoji__note">
+        Emoji could not be loaded. Close this and try again.
+      </p>
+    } @else if (!isReady()) {
+      <p class="chat-emoji__note">Loading emoji…</p>
+    }
+    <div
+      #slot
+      class="chat-emoji__picker"></div>
+  </div>
+}
