@@ -147,6 +147,38 @@ describe('HelpGuideComponent', () => {
 
   // One route serves every guide, so route data cannot name the page and the
   // component has to.
+  it('should show a guide’s video under its summary', () => {
+    createComponent('finding-a-fleet');
+
+    const summary = fixture.nativeElement.querySelector(
+      '.help-guide__summary',
+    ) as Element;
+
+    expect(summary.nextElementSibling?.tagName).toBe('APP-HELP-VIDEO');
+    expect(
+      fixture.nativeElement.querySelector('.help-video__poster .sr-only')
+        ?.textContent,
+    ).toBe('Play the video: Finding a Fleet on STO Info');
+  });
+
+  it('should show no video for a guide without one', () => {
+    createComponent('roster-history-and-corrections');
+
+    expect(component.guide?.slug).toBe('roster-history-and-corrections');
+    expect(fixture.nativeElement.querySelector('app-help-video')).toBeNull();
+  });
+
+  // The videos are the site's own help, so no switch hides them.
+  it('should still show a Fleet guide’s video while Fleet is off', () => {
+    createComponent('finding-a-fleet', STORYTIME_AVAILABILITY_ENABLED, [], {
+      FLEET: 'DISABLED',
+    });
+
+    expect(
+      fixture.nativeElement.querySelector('app-help-video'),
+    ).not.toBeNull();
+  });
+
   it('should set the page title from the guide', () => {
     createComponent(firstGuide.slug);
 

@@ -98,6 +98,33 @@ describe('the Fleets topic (FC-050)', () => {
   });
 });
 
+describe('the Fleet guides’ videos', () => {
+  const withVideo = FLEETS_TOPIC.guides.filter(guide => guide.video);
+
+  // Every guide but one has its walk-through on the site's YouTube channel.
+  it('should give every Fleet guide a video but the roster history one', () => {
+    expect(
+      FLEETS_TOPIC.guides
+        .filter(guide => !guide.video)
+        .map(guide => guide.slug),
+    ).toEqual(['roster-history-and-corrections']);
+  });
+
+  it.each(withVideo.map(guide => [guide.slug, guide] as const))(
+    'gives %s a YouTube identifier and a title',
+    (_slug, guide) => {
+      expect(guide.video?.videoId).toMatch(/^[\w-]{11}$/);
+      expect(guide.video?.title).toMatch(/\S/);
+    },
+  );
+
+  it('should give no two guides the same video', () => {
+    const ids = withVideo.map(guide => guide.video?.videoId);
+
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+});
+
 describe('the Running the site topic (FC-050)', () => {
   it('should be last, and for site administrators alone', () => {
     expect(HELP_TOPICS[HELP_TOPICS.length - 1]).toBe(SITE_ADMIN_TOPIC);

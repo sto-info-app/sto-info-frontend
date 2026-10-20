@@ -68,6 +68,10 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
     title: 'Communities, Fleets and Armadas',
     summary:
       'The three kinds of record, how they fit together, and why two records can share one name.',
+    video: {
+      videoId: '2bCryZ1EzLA',
+      title: 'Communities, Fleets and Armadas on STO Info',
+    },
     whatItIsFor: {
       paragraphs: [
         'The Fleet section records the groups people play Star Trek Online with. It uses three words, and they mean the same thing on every page:',
@@ -130,6 +134,10 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
     title: 'Finding a Fleet',
     summary:
       'Searching the three directories, reading a record, and following a Community.',
+    video: {
+      videoId: 'v0ZLFFfK8HY',
+      title: 'Finding a Fleet on STO Info',
+    },
     whatItIsFor: [
       'The Fleet Directory lists the public Communities, Fleets and Armadas recorded here. Use it to find a group to join, to look a Fleet up before you register it, or to tell two records of the same name apart.',
     ],
@@ -209,6 +217,10 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
     title: 'Registering a Community, Fleet or Armada',
     summary:
       'Registering your Community first, then its Fleets and Armadas, confirming a Fleet nobody here runs, and changing a record afterwards.',
+    video: {
+      videoId: 'n-Am1MdMdn0',
+      title: 'Registering a Community, Fleet or Armada on STO Info',
+    },
     whatItIsFor: [
       'Registering puts your group on the site: a Community first, as your umbrella, then the Fleets and Armadas it holds. It is a record, not a claim: nothing checks it against the game.',
     ],
@@ -285,6 +297,10 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
     title: 'Roles, ownership and closing',
     summary:
       'Who runs a Community, Fleet or Armada, handing a Community over, closing a record, and what a suspension means.',
+    video: {
+      videoId: 'pxaHmQMQK6g',
+      title: 'Fleet roles, ownership and closing on STO Info',
+    },
     whatItIsFor: [
       'Every Community, Fleet and Armada is run through the same four fixed roles. Nobody can invent a role, and a rank in the game never gives anybody one here. This guide covers what each role may do, handing a Community over, and closing a record.',
     ],
@@ -378,6 +394,10 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
     title: 'Your Characters and their Fleets',
     summary:
       'Recording which Fleet a Character is in, answering a Fleet’s question about it, and how that differs from a roster, membership and following.',
+    video: {
+      videoId: '7v7nn2oqVog',
+      title: 'Your Characters and their Fleets on STO Info',
+    },
     whatItIsFor: {
       paragraphs: [
         'Each of your Characters can say which Fleet it is in now, and which Fleets it was in before. That record is yours: you write it, you decide who sees it, and nothing a Fleet does can write it for you.',
@@ -456,6 +476,10 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
     title: 'Joining and applying to a Fleet',
     summary:
       'How a Fleet recruits, joining or applying with a Character, invitations, and running recruitment.',
+    video: {
+      videoId: '8XXYX08mhL0',
+      title: 'Joining and applying to a Fleet on STO Info',
+    },
     whatItIsFor: [
       'Recruitment is how you become a member of a Fleet on STO Info: an approved member, who can see what the Fleet keeps for its members. Every way in, whether joining, applying or accepting an invitation, is made with one of your Characters.',
       'It happens here and only here. STO Info cannot invite anybody in game, so an officer still sends the in-game invitation, and you confirm the Fleet on your Character’s page once they have.',
@@ -566,6 +590,10 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
     title: 'Armadas',
     summary:
       'How a Community’s Fleets join and leave an Armada, where each sits, and what belonging to one gives a Fleet’s members.',
+    video: {
+      videoId: '_y873nBi1uo',
+      title: 'Armadas on STO Info: joining, placing and leaving',
+    },
     whatItIsFor: [
       'An Armada is a group of allied Fleets from one Community, arranged the way Star Trek Online arranges them: one Alpha, up to three Betas, and up to three Gammas under each Beta. It is optional: a Community holds its Fleets directly, and an Armada groups some of them.',
       'On STO Info an Armada is kept by hand. Roster exports say nothing about Armadas, so an import never adds a Fleet to one, moves it or takes it out: every placement was made by a person.',
@@ -643,6 +671,10 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
     title: 'Fleet holdings',
     summary:
       'The tier of each of a Fleet’s holdings, recorded by hand, and who sees what.',
+    video: {
+      videoId: '8mXf8U-q56s',
+      title: 'Recording Fleet holdings on STO Info',
+    },
     whatItIsFor: [
       'The Holdings tab shows how far a Fleet has got with each of its holdings, from the Fleet Starbase to the Fleet Colony World, track by track.',
       'It is kept by hand. Nothing is read from the game or worked out from contributions, and there is no XP here: a tier is what somebody recorded, and nothing else sets it.',
@@ -699,6 +731,10 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     title: 'News and activity',
     summary:
       'A Community’s, Fleet’s or Armada’s own news, its activity feed, and which things reach you as a notice instead.',
+    video: {
+      videoId: 'c11c6f5VuYg',
+      title: 'Fleet news and activity on STO Info',
+    },
     whatItIsFor: [
       'Every Community, Fleet and Armada has news of its own: posts its writers publish for the people they choose. Beside it runs an activity feed, a quiet record of what has happened there, such as a post published, an event added or a member joining.',
       'Neither appears in the site’s own News, and a Community’s news and activity are its own, not its Fleets’ or Armadas’.',
@@ -775,6 +811,10 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     title: 'Events',
     summary:
       'Scheduling events, answering them as a Character, places and waitlists, reminders and attendance.',
+    video: {
+      videoId: '4X42Wy5eZ8k',
+      title: 'Fleet events on STO Info: scheduling, answering, reminders',
+    },
     whatItIsFor: [
       'Every Community, Fleet and Armada has a calendar. An event can happen once or repeat, is shown to the people it is for, and lets them say whether they are coming. It can carry a link, such as a Discord event, but what happens on the night happens in the game.',
     ],
@@ -854,6 +894,10 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     summary:
       'Channels for your Fleet, Armada and Community, direct messages between friends, and what chat does with what you write.',
     requiresFeature: 'CHAT',
+    video: {
+      videoId: 'QrojAE8bXa0',
+      title: 'Fleet chat on STO Info: channels, mentions, replies, reports',
+    },
     whatItIsFor: [
       'Chat is live conversation for the people in a Fleet, its Armada and its Community, and between friends. It is for talking now: you can read back the last four hours, and nothing older.',
       'Messages are plain text. Emoji from your own keyboard work like any other character; there are no attachments, reactions, threads or group conversations.',
@@ -925,6 +969,10 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     title: 'How long things are kept',
     summary:
       'What Fleet Community keeps and for how long, and the difference between removing something and having it erased.',
+    video: {
+      videoId: 'TOg_KDgn39s',
+      title: 'How long things are kept on STO Info',
+    },
     whatItIsFor: [
       'Fleet Community keeps some things for a set time and then forgets them, on a daily schedule that runs even while Fleet Community is switched off. This guide gives the times, and explains what you can remove yourself and what has to be asked for.',
     ],
@@ -999,6 +1047,10 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     title: 'When a moderator acts',
     summary:
       'What you see when something is removed or taken down, a report is decided, or a Fleet, a membership or a registration is dealt with.',
+    video: {
+      videoId: 'yUjq8O8juSA',
+      title: 'When a moderator acts on STO Info: suspensions explained',
+    },
     whatItIsFor: [
       'Two kinds of people can step in. A Community’s, Fleet’s or Armada’s own Owner and Admins look after it. The site’s administrators look after the whole of STO Info, and settle what a Fleet cannot settle for itself. This guide describes what their actions look like from where you stand.',
     ],
@@ -1078,6 +1130,10 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
     title: 'Importing a roster export',
     summary:
       'Checking a Star Trek Online roster export, importing it into a Fleet, recording the Fleet’s former names, and what is kept.',
+    video: {
+      videoId: 'Z74dCYe7aus',
+      title: 'Importing a Star Trek Online roster export into STO Info',
+    },
     whatItIsFor: [
       'A roster export is the file Star Trek Online writes listing a Fleet’s members: each Character and @handle, with their level, class, rank, contribution total, Join Date, Last Active date and public comment.',
       'Each export is a snapshot of one moment. The Fleet’s Roster, History and reports are built from the exports imported, so the more often one is imported, the more they can say.',
@@ -1223,6 +1279,10 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
     title: 'Fleet reports',
     summary:
       'The reports a Fleet offers, what each can and cannot say, who sees them, and downloading them.',
+    video: {
+      videoId: 'ughW8NoHs-M',
+      title: 'Fleet reports on STO Info: growth, activity, tenure and more',
+    },
     whatItIsFor: [
       'The Reports tab turns a Fleet’s records into tables and charts. Five are built from its roster history — Growth, Activity, Tenure, Ranks and Contribution — and three from what the Fleet does on STO Info: Attendance, Recruitment and Holdings.',
     ],
