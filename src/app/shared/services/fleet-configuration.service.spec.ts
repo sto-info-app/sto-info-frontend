@@ -127,6 +127,45 @@ describe('FleetConfigurationService', () => {
     });
   });
 
+  describe('isChatOffered', () => {
+    it('offers chat once the server says Fleet Community and chat are on', () => {
+      const emitted: boolean[] = [];
+      service.isChatOffered().subscribe(offered => emitted.push(offered));
+
+      expect(emitted).toEqual([false]);
+
+      httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush(CONFIGURATION);
+
+      expect(emitted).toEqual([false, true]);
+    });
+
+    it.each([
+      ['Fleet Community', { isEnabled: false }],
+      ['chat', { chatEnabled: false }],
+    ])('offers nothing while %s is off', (_name, features) => {
+      const emitted: boolean[] = [];
+      service.isChatOffered().subscribe(offered => emitted.push(offered));
+
+      httpMock.expectOne(API_URLS.FLEET_CONFIGURATION).flush({
+        ...CONFIGURATION,
+        features: { ...CONFIGURATION.features, ...features },
+      });
+
+      expect(emitted).toEqual([false]);
+    });
+
+    it('keeps offering chat when the request fails', () => {
+      let result: boolean | undefined;
+      service.isChatOffered().subscribe(offered => (result = offered));
+
+      httpMock
+        .expectOne(API_URLS.FLEET_CONFIGURATION)
+        .error(new ProgressEvent('network error'));
+
+      expect(result).toBe(true);
+    });
+  });
+
   describe('isOffered', () => {
     /**
      * A link that appears and then disappears is worse than one that

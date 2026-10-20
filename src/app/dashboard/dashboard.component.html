@@ -87,6 +87,19 @@
               </div>
             </a>
           }
+
+          @if (isChatOffered$ | async) {
+            <a
+              class="dashboard-tile african-violet"
+              [routerLink]="getRouteLink(appRoutes.CHAT)">
+              <div class="tile-icon">
+                <i class="fa-solid fa-comments"></i>
+              </div>
+              <div class="tile-content">
+                <span class="tile-stat">Chat</span>
+              </div>
+            </a>
+          }
         </div>
       </div>
     }
@@ -148,6 +161,13 @@
               [routerLink]="getRouteLink(appRoutes.FLEET_MY_APPLICATIONS)"
               class="full-width-btn-link"
               >Your Fleet Applications</a
+            >
+          }
+          @if (isChatOffered$ | async) {
+            <a
+              [routerLink]="getRouteLink(appRoutes.CHAT)"
+              class="full-width-btn-link"
+              >Chat</a
             >
           }
           <a

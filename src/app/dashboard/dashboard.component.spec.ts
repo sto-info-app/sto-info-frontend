@@ -7,6 +7,7 @@ import { AuthService } from '../core/auth/auth.service';
 import { CommunitySubscriptionService } from '../fleet/community-subscription.service';
 import { FollowedCommunity } from '../models/fleet.models';
 import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
+import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
 import * as random from '../shared/utils/random.utils';
 import { DashboardComponent } from './dashboard.component';
@@ -68,6 +69,7 @@ describe('DashboardComponent', () => {
     // issues a request that fails, and a failure is read as offered.
     mockFleetConfiguration = {
       isOffered: jest.fn().mockReturnValue(of(true)),
+      isChatOffered: jest.fn().mockReturnValue(of(true)),
     } as unknown as jest.Mocked<FleetConfigurationService>;
 
     mockSubscriptions = {
@@ -243,6 +245,32 @@ describe('DashboardComponent', () => {
     );
   });
 
+  describe('the way into chat', () => {
+    const chatLinks = (): HTMLElement[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll('a') as NodeListOf<HTMLElement>,
+      ).filter(link => link.textContent?.trim() === 'Chat');
+
+    it('should offer a Chat tile and side link while chat is on', () => {
+      fixture.detectChanges();
+
+      expect(chatLinks()).toHaveLength(2);
+      expect(mockRoutingService.getLink).toHaveBeenCalledWith(APP_ROUTES.CHAT);
+      expect(
+        fixture.nativeElement.querySelector('.dashboard-tile .fa-comments'),
+      ).not.toBeNull();
+    });
+
+    it('should offer neither while chat is off', () => {
+      mockFleetConfiguration.isChatOffered.mockReturnValue(of(false));
+      fixture = TestBed.createComponent(DashboardComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      expect(chatLinks()).toEqual([]);
+    });
+  });
+
   describe('the Fleet tile', () => {
     const follows = (count: number): FollowedCommunity[] =>
       Array.from({ length: count }, () => ({}) as FollowedCommunity);
@@ -324,7 +352,7 @@ describe('DashboardComponent', () => {
     it('should make every tile a link a keyboard can reach', () => {
       fixture.detectChanges();
 
-      expect(tiles()).toHaveLength(5);
+      expect(tiles()).toHaveLength(6);
       expect(tiles().every(tile => tile.tagName === 'A')).toBe(true);
     });
   });

@@ -87,6 +87,27 @@ export class FleetConfigurationService {
   }
 
   /**
+   * Asks whether to offer a way into chat, read as `isOffered` reads the
+   * section: hidden until the server answers, taken away only when it says
+   * Fleet Community or its chat is off, and kept when it cannot be reached,
+   * since the chat page explains an outage itself.
+   *
+   * @returns An observable of whether to offer chat.
+   */
+  isChatOffered(): Observable<boolean> {
+    return this.getConfiguration().pipe(
+      map(
+        configuration =>
+          configuration === null ||
+          (configuration.features.isEnabled &&
+            configuration.features.chatEnabled),
+      ),
+      startWith(false),
+      distinctUntilChanged(),
+    );
+  }
+
+  /**
    * Reads the configuration, once, and shares it.
    *
    * @returns An observable of the configuration, or null when it cannot be read.

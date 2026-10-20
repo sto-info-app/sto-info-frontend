@@ -81,6 +81,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   readonly isFleetOffered$ = this._fleetConfiguration.isOffered();
 
+  /** Whether to offer chat: only while Fleet Community and its chat are on. */
+  readonly isChatOffered$ = this._fleetConfiguration.isChatOffered();
+
   ngOnInit() {
     this.isUserLoading = true;
     this.userLoadError = '';
