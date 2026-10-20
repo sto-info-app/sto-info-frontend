@@ -1279,7 +1279,7 @@ const SETTINGS_TOPIC: HelpTopic = {
       requiresFeature: 'FLEET',
       sections: [
         guideSection('Where notices arrive', [
-          'Notices arrive in STO Info only, under Notifications, never by email. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
+          'Notices arrive in STO Info only, under Notifications, never by email. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
           'Notifications shows five at a time, newest first. Each can be marked read or unread, or deleted, and Delete all read clears every one you have read; a deleted notice is gone from your inbox for good, though it changes nothing it told you about.',
           'Each switch under Notifications stops that kind of notice as soon as it is switched off. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
         ]),
