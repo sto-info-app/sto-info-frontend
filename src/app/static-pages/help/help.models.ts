@@ -54,6 +54,17 @@ export interface HelpGuideLink {
 }
 
 /**
+ * A video walking through what a guide describes, published on the site's
+ * YouTube channel.
+ */
+export interface HelpGuideVideo {
+  /** The video's eleven-character YouTube identifier. */
+  videoId: string;
+  /** The video's title on YouTube, which a screen reader is told it is. */
+  title: string;
+}
+
+/**
  * One help guide.
  *
  * Guides are content, not components: they are written here as data and
@@ -67,6 +78,14 @@ export interface HelpGuide {
   title: string;
   /** One sentence describing the guide, shown on the help index. */
   summary: string;
+  /**
+   * The guide's video, shown under its summary. Absent on a guide with none.
+   *
+   * Shown whatever the site's switches say: it is the site's own help, not
+   * something a member embedded, so `STORYTIME_YOUTUBE_ENABLED` does not
+   * govern it.
+   */
+  video?: HelpGuideVideo;
   /** The guide itself, in the order it is read. */
   sections: HelpGuideSection[];
   /** Places to go and try what the guide describes. */

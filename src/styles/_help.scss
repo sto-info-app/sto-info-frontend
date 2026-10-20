@@ -131,6 +131,54 @@
     color: vars.$lcars-sunflower;
   }
 
+  // A guide's video, under its summary. The still, the button holding it and
+  // the player that replaces it are one size, so pressing play swaps a picture
+  // for a video rather than resizing the page around it.
+  .help-video {
+    max-width: 48rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .help-video__poster,
+  .help-video__still,
+  .help-video__player {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: none;
+    border-radius: 6px;
+  }
+
+  // The still is a picture, not one of the site's buttons, so the sizing every
+  // LCARS button is given is taken back here, along with the strip of line box
+  // a baseline-aligned image would leave beneath it.
+  .help-video__poster {
+    position: relative;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background: none;
+    line-height: 0;
+    cursor: pointer;
+  }
+
+  .help-video__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: vars.$lcars-white;
+    text-shadow: 0 2px 8px vars.$black-a70;
+  }
+
+  .help-video__caption {
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+  }
+
   .collapsible-section__content {
     max-width: 92%;
   }

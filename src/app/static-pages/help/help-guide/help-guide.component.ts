@@ -4,6 +4,7 @@ import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsib
 import { FeatureUnavailableComponent } from 'src/app/shared/components/feature-unavailable/feature-unavailable.component';
 
 import { HelpPageDirective } from '../help-page.directive';
+import { HelpVideoComponent } from '../help-video/help-video.component';
 import {
   blockingFeature,
   findHelpGuide,
@@ -50,6 +51,7 @@ import {
     RouterModule,
     CollapsibleSectionComponent,
     FeatureUnavailableComponent,
+    HelpVideoComponent,
   ],
 })
 export class HelpGuideComponent extends HelpPageDirective implements OnInit {

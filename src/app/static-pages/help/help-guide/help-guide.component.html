@@ -30,6 +30,10 @@
 
     <p class="help-guide__summary">{{ guide.summary }}</p>
 
+    @if (guide.video; as video) {
+      <app-help-video [video]="video" />
+    }
+
     @if (unreachableFeatureName; as featureName) {
       <app-feature-unavailable
         [featureName]="featureName"

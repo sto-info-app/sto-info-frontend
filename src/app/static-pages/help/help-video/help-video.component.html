@@ -1,0 +1,45 @@
+<figure class="help-video">
+  @if (embedSource; as source) {
+    <iframe
+      class="help-video__player"
+      [src]="source"
+      [title]="video.title"
+      allow="
+        accelerometer;
+        autoplay;
+        clipboard-write;
+        encrypted-media;
+        gyroscope;
+        picture-in-picture;
+      "
+      referrerpolicy="strict-origin-when-cross-origin"
+      allowfullscreen></iframe>
+  } @else {
+    <button
+      type="button"
+      class="help-video__poster"
+      (click)="play()">
+      <img
+        class="help-video__still"
+        [src]="stillSource"
+        (error)="onStillMissing()"
+        alt=""
+        loading="lazy" />
+      <span
+        class="help-video__play"
+        aria-hidden="true">
+        <i class="fa-solid fa-play"></i>
+      </span>
+      <span class="sr-only">Play the video: {{ video.title }}</span>
+    </button>
+  }
+
+  <figcaption class="help-video__caption">
+    <a
+      [href]="watchUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+      >Watch on YouTube</a
+    >
+  </figcaption>
+</figure>
