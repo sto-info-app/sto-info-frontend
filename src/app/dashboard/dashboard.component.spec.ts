@@ -1,11 +1,12 @@
 import { NO_ERRORS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { BehaviorSubject, of, throwError } from 'rxjs';
 
 import { AuthService } from '../core/auth/auth.service';
 import { CommunitySubscriptionService } from '../fleet/community-subscription.service';
 import { FollowedCommunity } from '../models/fleet.models';
+import { NotificationService } from '../notifications/notification.service';
 import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { APP_ROUTES } from '../shared/constants/app-routing.constants';
 import { RoutingService } from '../shared/services/routing.service';
@@ -25,6 +26,7 @@ describe('DashboardComponent', () => {
   let mockStoAccountService: jest.Mocked<StoAccountService>;
   let mockFleetConfiguration: jest.Mocked<FleetConfigurationService>;
   let mockSubscriptions: jest.Mocked<CommunitySubscriptionService>;
+  let unreadCount$: BehaviorSubject<number>;
 
   const mockUser: User = {
     id: '123',
@@ -76,6 +78,8 @@ describe('DashboardComponent', () => {
       listFollowed: jest.fn().mockReturnValue(of([])),
     } as unknown as jest.Mocked<CommunitySubscriptionService>;
 
+    unreadCount$ = new BehaviorSubject(0);
+
     await TestBed.configureTestingModule({
       imports: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
@@ -89,6 +93,7 @@ describe('DashboardComponent', () => {
           useValue: mockFleetConfiguration,
         },
         { provide: CommunitySubscriptionService, useValue: mockSubscriptions },
+        { provide: NotificationService, useValue: { unreadCount$ } },
         { provide: ActivatedRoute, useValue: {} },
       ],
     }).compileComponents();
@@ -245,6 +250,52 @@ describe('DashboardComponent', () => {
     );
   });
 
+  describe('the way to the notifications', () => {
+    const tileName = (): string =>
+      (
+        fixture.nativeElement.querySelector(
+          '.dashboard-tile .fa-bell',
+        ) as HTMLElement
+      )
+        .closest('a')
+        ?.querySelector('.tile-stat')
+        ?.textContent?.replace(/\s+/g, ' ')
+        .trim() ?? '';
+
+    it('should offer a Notifications tile and side link', () => {
+      fixture.detectChanges();
+
+      expect(tileName()).toBe('Notifications');
+      expect(
+        Array.from(
+          fixture.nativeElement.querySelectorAll(
+            '.personnel-buttons a',
+          ) as NodeListOf<HTMLElement>,
+        ).map(link => link.textContent?.trim()),
+      ).toContain('Notifications');
+      expect(mockRoutingService.getLink).toHaveBeenCalledWith(
+        APP_ROUTES.NOTIFICATIONS,
+      );
+    });
+
+    it('should put the unread count in brackets after the name', () => {
+      unreadCount$.next(3);
+      fixture.detectChanges();
+
+      expect(tileName()).toBe('Notifications (3 unread)');
+      expect(
+        fixture.nativeElement.querySelector('.tile-stat .sr-only')?.textContent,
+      ).toBe('\u00a0unread');
+    });
+
+    it('should cap the count at 99+', () => {
+      unreadCount$.next(150);
+      fixture.detectChanges();
+
+      expect(tileName()).toBe('Notifications (99+ unread)');
+    });
+  });
+
   describe('the way into chat', () => {
     const chatLinks = (): HTMLElement[] =>
       Array.from(
@@ -352,7 +403,7 @@ describe('DashboardComponent', () => {
     it('should make every tile a link a keyboard can reach', () => {
       fixture.detectChanges();
 
-      expect(tiles()).toHaveLength(6);
+      expect(tiles()).toHaveLength(7);
       expect(tiles().every(tile => tile.tagName === 'A')).toBe(true);
     });
   });

@@ -100,6 +100,25 @@
               </div>
             </a>
           }
+
+          <!-- The count follows the name only while something is unread. -->
+          @let unreadCount = (unreadCount$ | async) ?? 0;
+          <a
+            class="dashboard-tile ice"
+            [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)">
+            <div class="tile-icon">
+              <i class="fa-solid fa-bell"></i>
+            </div>
+            <div class="tile-content">
+              <span class="tile-stat"
+                >Notifications
+                @if (unreadCount > 0) {
+                  ({{ unreadCount > 99 ? '99+' : unreadCount
+                  }}<span class="sr-only">&nbsp;unread</span>)
+                }
+              </span>
+            </div>
+          </a>
         </div>
       </div>
     }
@@ -170,6 +189,11 @@
               >Chat</a
             >
           }
+          <a
+            [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)"
+            class="full-width-btn-link"
+            >Notifications</a
+          >
           <a
             [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_SETTINGS)"
             class="full-width-btn-link"

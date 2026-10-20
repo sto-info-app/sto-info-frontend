@@ -27,6 +27,7 @@ import { FleetConfigurationService } from '../shared/services/fleet-configuratio
 import { RoutingService } from '../shared/services/routing.service';
 import { randomInt } from '../shared/utils/random.utils';
 import { User } from './models/user.model';
+import { NotificationService } from '../notifications/notification.service';
 import { DashboardService } from './services/dashboard.service';
 import { StoAccountService } from './services/sto-account.service';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
@@ -83,6 +84,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   /** Whether to offer chat: only while Fleet Community and its chat are on. */
   readonly isChatOffered$ = this._fleetConfiguration.isChatOffered();
+
+  /**
+   * How many notifications are unread, for the Notifications tile. The
+   * header's poll keeps it current, so the tile asks nothing of its own.
+   */
+  readonly unreadCount$ = inject(NotificationService).unreadCount$;
 
   ngOnInit() {
     this.isUserLoading = true;
