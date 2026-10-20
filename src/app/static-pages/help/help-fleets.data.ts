@@ -908,7 +908,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     ],
     whereToFindIt: [
       'Chat has a page of its own. Reach it from the Chat tile or the Chat button on your Dashboard, the Chat tab in the Community section, Open chat on Communities You Follow, or the Chat tab on a Fleet or Armada you belong to.',
-      'The list down the side groups channels under each Community, Armada and Fleet, then your Direct messages. The list and the open conversation each scroll on their own, so the message box stays at the foot of the conversation. Hide chats folds the list away to give the messages the page’s width, and Show chats brings it back; this browser remembers which. To start a conversation with a friend, open their profile and choose Message.',
+      'The list down the side groups channels under each Community, Armada and Fleet, then your Direct messages. The list and the open conversation each scroll on their own, so the message box stays at the foot of the conversation. Hide chats folds the list away to give the messages the page’s width, and Show chats brings it back; this browser remembers which. To start a conversation with a friend, press the + beside Direct messages and choose them, searching by username if you have many, or open their profile and choose Message.',
     ],
     how: {
       'How channels work': [
