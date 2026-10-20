@@ -183,6 +183,23 @@ describe('CharacterDetailComponent', () => {
 
       expect(component.character).toEqual(mockCharacter);
       expect(component.isLoading).toBe(false);
+
+      // Between switching Captain and pinning, the way to the account's
+      // Endeavour Perks. The router is mocked here, so where it leads is
+      // checked through getEndeavoursLink.
+      fixture.detectChanges();
+      const actions = [
+        ...fixture.nativeElement.querySelector('.header-actions').children,
+      ] as HTMLElement[];
+      const endeavours = actions[1];
+      expect(actions[0].tagName).toBe('APP-STO-SWITCHER-BUTTON');
+      expect(endeavours.tagName).toBe('A');
+      expect(endeavours.getAttribute('aria-label')).toBe('Endeavour Perks');
+      expect(endeavours.querySelector('i')?.className).toBe(
+        'fa-kit fa-sto-endeavor',
+      );
+      expect(actions[2].querySelector('.fa-thumbtack')).not.toBeNull();
+
       expect(mockStoAccountService.getAccounts).toHaveBeenCalled();
       expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
         'acc-1',
@@ -524,6 +541,12 @@ describe('CharacterDetailComponent', () => {
 
     it('should get route link', () => {
       expect(component.getRouteLink('test')).toBe('/test');
+    });
+
+    it('should link to the account’s Endeavour Perks', () => {
+      expect(component.getEndeavoursLink()).toBe(
+        `/dashboard/accounts/${encodeStoHandle('TestAccount')}/endeavours`,
+      );
     });
   });
 

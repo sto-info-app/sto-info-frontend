@@ -366,6 +366,23 @@ export class CharacterDetailComponent
   }
 
   /**
+   * The Endeavour Perks page of the STO Account this Captain belongs to.
+   * Endeavours are the account's, not the Captain's, so every Captain on one
+   * account leads to the same page.
+   *
+   * @returns The page's path.
+   */
+  getEndeavoursLink(): string {
+    return (
+      '/' +
+      APP_ROUTES.STO_ACCOUNT_ENDEAVOURS.replace(
+        ':handle',
+        encodeStoHandle(this.accountHandle),
+      )
+    );
+  }
+
+  /**
    * Switches the active tab and reflects it in the URL via the ?tab= query
    * parameter so the section can be bookmarked and returned to directly. The
    * default (overview) tab drops the parameter to keep the URL clean.

@@ -95,6 +95,15 @@
         <app-sto-switcher-button
           [currentAccountId]="character.accountId"
           [currentCharacterId]="character.id"></app-sto-switcher-button>
+        <a
+          class="cta-icon"
+          [routerLink]="getEndeavoursLink()"
+          title="Endeavour Perks"
+          aria-label="Endeavour Perks"
+          ><i
+            class="fa-kit fa-sto-endeavor"
+            aria-hidden="true"></i
+        ></a>
         <button
           type="button"
           class="cta-icon"
