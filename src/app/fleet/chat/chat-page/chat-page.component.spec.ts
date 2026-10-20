@@ -210,6 +210,28 @@ describe('ChatPageComponent', () => {
         each.textContent?.includes(label) ||
         each.getAttribute('aria-label') === label,
     ) as HTMLButtonElement;
+  /**
+   * Opens a channel's actions with its ⋮, when they are shut, and finds one.
+   *
+   * @param element - The page.
+   * @param channel - The channel's name.
+   * @param label - The action's label.
+   * @returns The action's button.
+   */
+  const action = (
+    element: HTMLElement,
+    channel: string,
+    label: string,
+  ): HTMLButtonElement => {
+    const toggle = button(element, `Actions for ${channel}`);
+
+    if (toggle.getAttribute('aria-expanded') !== 'true') {
+      toggle.click();
+      harness.detectChanges();
+    }
+
+    return button(element, label);
+  };
 
   describe('the list', () => {
     it('lists each scope’s channels and the conversations, asking to choose one', async () => {
@@ -391,13 +413,65 @@ describe('ChatPageComponent', () => {
   });
 
   describe('running channels', () => {
+    it('keeps a channel’s actions behind its ⋮, one channel at a time', async () => {
+      chat.channels.mockReturnValue(
+        of([{ ...FLEET, mayExport: true, channels: [GENERAL, OFFICERS] }]),
+      );
+      const element = await open('/chat');
+      const general = button(element, 'Actions for General');
+      const officers = button(element, 'Actions for Officers');
+
+      expect(element.querySelector('.chat-page__manage')).toBeNull();
+      expect(general.getAttribute('aria-expanded')).toBe('false');
+
+      general.click();
+      harness.detectChanges();
+      expect(general.getAttribute('aria-expanded')).toBe('true');
+      expect(general.getAttribute('aria-controls')).toBe(
+        'chat-actions-general',
+      );
+      expect(texts(element, '#chat-actions-general button')).toEqual([
+        'Export',
+      ]);
+
+      officers.click();
+      harness.detectChanges();
+      expect(general.getAttribute('aria-expanded')).toBe('false');
+      expect(texts(element, '#chat-actions-officers button')).toEqual([
+        'Export',
+        'Change',
+        'Archive',
+      ]);
+
+      officers.click();
+      harness.detectChanges();
+      expect(element.querySelector('.chat-page__manage')).toBeNull();
+    });
+
+    it('offers no ⋮ on a channel with nothing to do', async () => {
+      const element = await open('/chat');
+
+      expect(button(element, 'Actions for General')).toBeUndefined();
+      expect(button(element, 'Actions for Officers')).toBeDefined();
+    });
+
+    it('shuts a channel’s actions once one is chosen', async () => {
+      const element = await open('/chat');
+
+      dialogResults = [undefined];
+      action(element, 'Officers', 'Change Officers').click();
+      harness.detectChanges();
+
+      expect(element.querySelector('.chat-page__manage')).toBeNull();
+    });
+
     it('adds a channel and opens it', async () => {
       const element = await open('/chat');
 
       dialogResults = [
         { name: 'Away team', readRole: 'MEMBER', postRole: 'MEMBER' },
       ];
-      button(element, 'Add channel').click();
+      button(element, 'Add a channel to Fixture Fleet').click();
       await settle();
 
       expect(dialog.open).toHaveBeenCalledWith(ChatChannelDialogComponent, {
@@ -415,7 +489,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       dialogResults = [undefined];
-      button(element, 'Change Officers').click();
+      action(element, 'Officers', 'Change Officers').click();
 
       expect(chat.update).not.toHaveBeenCalled();
     });
@@ -424,7 +498,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       dialogResults = [{ name: 'Officers', readRole: 'OFFICER' }];
-      button(element, 'Change Officers').click();
+      action(element, 'Officers', 'Change Officers').click();
       await settle();
       expect(chat.update).toHaveBeenCalledWith(FLEET.target, 'officers', {
         name: 'Officers',
@@ -437,7 +511,7 @@ describe('ChatPageComponent', () => {
         })),
       );
       dialogResults = [{ name: 'General', readRole: 'MEMBER' }];
-      button(element, 'Change Officers').click();
+      action(element, 'Officers', 'Change Officers').click();
       await settle();
       expect(texts(element, 'app-lcars-error-message')[0]).toContain(
         'Channel not saved',
@@ -445,7 +519,7 @@ describe('ChatPageComponent', () => {
 
       chat.update.mockReturnValue(throwError(() => ({})));
       dialogResults = [{ name: 'General', readRole: 'MEMBER' }];
-      button(element, 'Change Officers').click();
+      action(element, 'Officers', 'Change Officers').click();
       await settle();
       expect(element.querySelectorAll('app-lcars-error-message')).toHaveLength(
         1,
@@ -456,11 +530,11 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat/channels/officers');
 
       dialogResults = [false];
-      button(element, 'Archive Officers').click();
+      action(element, 'Officers', 'Archive Officers').click();
       expect(chat.archive).not.toHaveBeenCalled();
 
       dialogResults = [true];
-      button(element, 'Archive Officers').click();
+      action(element, 'Officers', 'Archive Officers').click();
       await settle();
 
       expect(chat.archive).toHaveBeenCalledWith(FLEET.target, 'officers');
@@ -472,7 +546,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat/channels/general');
 
       dialogResults = [true];
-      button(element, 'Archive Officers').click();
+      action(element, 'Officers', 'Archive Officers').click();
       await settle();
 
       expect(router.url).toBe('/chat/channels/general');
@@ -484,7 +558,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       dialogResults = [true];
-      button(element, 'Archive Officers').click();
+      action(element, 'Officers', 'Archive Officers').click();
       await settle();
 
       expect(texts(element, 'app-lcars-error-message')).toHaveLength(1);
@@ -551,7 +625,7 @@ describe('ChatPageComponent', () => {
       expect(element.textContent).toContain('Transcripts you asked for');
 
       dialogResults = [undefined];
-      button(element, 'Export a transcript of General').click();
+      action(element, 'General', 'Export a transcript of General').click();
       expect(chat.requestTranscript).not.toHaveBeenCalled();
 
       const ask = {
@@ -561,7 +635,7 @@ describe('ChatPageComponent', () => {
       };
 
       dialogResults = [ask];
-      button(element, 'Export a transcript of General').click();
+      action(element, 'General', 'Export a transcript of General').click();
       await settle();
 
       expect(dialog.open).toHaveBeenLastCalledWith(
@@ -586,7 +660,7 @@ describe('ChatPageComponent', () => {
 
       const element = await open('/chat');
 
-      button(element, 'Export a transcript of General').click();
+      action(element, 'General', 'Export a transcript of General').click();
 
       expect(dialog.open).not.toHaveBeenCalled();
     });
@@ -600,7 +674,7 @@ describe('ChatPageComponent', () => {
         })),
       );
       dialogResults = [{}];
-      button(element, 'Export a transcript of General').click();
+      action(element, 'General', 'Export a transcript of General').click();
       await settle();
       expect(texts(element, 'app-lcars-error-message')[0]).toContain(
         'A transcript reaches back 7 days at most.',
@@ -608,7 +682,7 @@ describe('ChatPageComponent', () => {
 
       chat.requestTranscript.mockReturnValue(throwError(() => ({})));
       dialogResults = [{}];
-      button(element, 'Export a transcript of General').click();
+      action(element, 'General', 'Export a transcript of General').click();
       await settle();
       expect(texts(element, 'app-lcars-error-message')[0]).toContain(
         'The transcript could not be asked for.',
@@ -661,7 +735,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       chat.transcripts.mockReturnValue(throwError(() => new Error('offline')));
-      button(element, 'Refresh').click();
+      button(element, 'Refresh your transcripts').click();
       await settle();
 
       expect(texts(element, 'app-lcars-error-message')[0]).toContain(

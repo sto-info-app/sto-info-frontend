@@ -1,17 +1,22 @@
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
+// The conversation fills whatever the page gives it: the chat page's pane is
+// one screen tall, and the log takes what the header and the message box
+// leave, scrolling inside itself.
 :host {
-  display: block;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
+  min-height: 0;
 }
 
 .chat-conversation {
   display: flex;
+  flex: 1 1 auto;
   flex-direction: column;
   gap: 0.5rem;
-  height: 100%;
-  min-height: 24rem;
+  min-height: 0;
   position: relative;
 }
 
@@ -49,9 +54,8 @@
 }
 
 .chat-conversation__log {
-  flex: 1 1 auto;
-  min-height: 16rem;
-  max-height: 60vh;
+  flex: 1 1 0;
+  min-height: 8rem;
   overflow: hidden auto;
   padding: 0.5rem;
   border: 1px solid vars.$lcars-grey-border;

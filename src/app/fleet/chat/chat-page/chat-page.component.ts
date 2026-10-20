@@ -192,6 +192,9 @@ export class ChatPageComponent {
   readonly transcripts = signal<ChatTranscript[]>([]);
   readonly transcriptError = signal<string | null>(null);
 
+  /** The channel whose export, change and archive are shown, if any. */
+  readonly actionsOpenFor = signal<string | null>(null);
+
   /** Whether a transcript is still being written. */
   readonly hasPending = computed(() =>
     this.transcripts().some(transcript => transcript.status === 'PENDING'),
@@ -318,6 +321,23 @@ export class ChatPageComponent {
       selection?.kind === 'conversation' &&
       selection.conversation.id === conversation.id
     );
+  }
+
+  /**
+   * Shows a channel's actions, or hides them again; showing one channel's
+   * hides any other's.
+   *
+   * @param channel - The channel.
+   */
+  protected toggleActions(channel: ChatChannel): void {
+    this.actionsOpenFor.update(open =>
+      open === channel.id ? null : channel.id,
+    );
+  }
+
+  /** Hides the channel actions, once one of them is chosen. */
+  protected closeActions(): void {
+    this.actionsOpenFor.set(null);
   }
 
   /**
