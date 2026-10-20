@@ -55,7 +55,14 @@
           >
         </output>
       } @else {
-        @if (isLoggedIn ? (unreadCount$ | async) : 0; as unreadCount) {
+        <!--
+          Signed in, the cascade area is the way to the notifications: loud
+          while something is unread, quiet when nothing is, so the page is
+          always one press away (20 October 2026). Signed out, it is the
+          data cascade.
+        -->
+        @let unreadCount = isLoggedIn ? ((unreadCount$ | async) ?? 0) : null;
+        @if (unreadCount) {
           <output
             class="comms-alert"
             id="header-comms-alert"
@@ -70,6 +77,18 @@
               {{ unreadCount > 99 ? '99+' : unreadCount }} Unread
             </a>
           </output>
+        } @else if (unreadCount === 0) {
+          <div
+            class="comms-alert comms-alert-quiet"
+            id="header-comms-quiet">
+            <span class="comms-alert-heading">No New Transmissions</span>
+            <a
+              class="full-width-btn-link comms-alert-button"
+              [routerLink]="getRouteLink(appRoutes.NOTIFICATIONS)"
+              aria-label="No unread notifications. Open notifications.">
+              Notifications
+            </a>
+          </div>
         } @else {
           <div class="cascade-wrapper">
             <div

@@ -66,6 +66,17 @@
   }
 }
 
+// The same place with nothing unread: still the way to the notifications, but
+// quiet. No pulse and a smaller heading in a colour that is not asking for
+// anything, so it does not read as an alert.
+.comms-alert-quiet {
+  .comms-alert-heading {
+    color: vars.$lcars-perano;
+    font-size: clamp(0.95rem, 0.5rem + 1.6vw, 1.6rem);
+    animation: none;
+  }
+}
+
 // Same shape as the comms alert, in warning gold: shown while the API has
 // failed several health checks in a row but is not yet considered down. It
 // carries no button because there is nothing for the user to do; it clears
