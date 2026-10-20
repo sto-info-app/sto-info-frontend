@@ -34,6 +34,29 @@
   }
 }
 
+// Sets back what the theme's element rule gives every `button` — a 200 by 60
+// px pill with a right-aligned label, a margin and a dimming filter — for a
+// button that is a small control rather than one of the site's LCARS buttons.
+// Without it such a button takes that size whatever its own rule says, as the
+// chat page's channel controls did.
+@mixin lcars-bare-button {
+  width: auto;
+  height: auto;
+  margin: 0;
+  border-radius: 0;
+  font-family: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  text-align: inherit;
+  text-transform: none;
+
+  &:hover,
+  &:focus,
+  &:active {
+    filter: none;
+  }
+}
+
 @mixin lcars-icon-button(
   $base-color: vars.$lcars-perano,
   $hover-color: vars.$lcars-sunflower

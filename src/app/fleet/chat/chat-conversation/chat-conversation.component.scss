@@ -1,4 +1,5 @@
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
 
 :host {
   display: block;
@@ -22,12 +23,13 @@
 }
 
 // The way back to the list only on a narrow screen, where the two are
-// stacked.
+// stacked. Important, because `.lcars-btn` sets its display that way and
+// would otherwise show it beside the list on a wide one.
 .chat-conversation__back {
-  display: none;
+  display: none !important;
 
   @media (width < 720px) {
-    display: inline-flex;
+    display: inline-flex !important;
     gap: 0.4rem;
     align-items: center;
   }
@@ -167,6 +169,8 @@
 }
 
 .chat-message__reply-to {
+  @include mixins.lcars-bare-button;
+
   display: flex;
   gap: 0.4rem;
   max-width: 100%;
@@ -235,6 +239,8 @@
 }
 
 .chat-message__action {
+  @include mixins.lcars-bare-button;
+
   padding: 0.1rem 0.4rem;
   border: 1px solid vars.$lcars-grey-border;
   border-radius: 0.75rem;

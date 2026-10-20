@@ -170,10 +170,13 @@
 
 .chat-page__manage {
   display: flex;
+  flex: 0 0 auto;
   gap: 0.25rem;
 }
 
 .chat-page__manage-button {
+  @include mixins.lcars-bare-button;
+
   padding: 0.2rem 0.35rem;
   border: 0;
   background: none;
