@@ -907,14 +907,14 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       'Direct messages are only between friends, and only while neither has blocked the other. Leaving a Fleet, or having your membership suspended, closes its chat to you at once.',
     ],
     whereToFindIt: [
-      'Chat has a page of its own. Reach it from the Chat tab in the Community section, Open chat on Communities You Follow, or the Chat tab on a Fleet or Armada you belong to.',
-      'The list down the side groups channels under each Community, Armada and Fleet, then your Direct messages. To start a conversation with a friend, open their profile and choose Message.',
+      'Chat has a page of its own. Reach it from the Chat tile or the Chat button on your Dashboard, the Chat tab in the Community section, Open chat on Communities You Follow, or the Chat tab on a Fleet or Armada you belong to.',
+      'The list down the side groups channels under each Community, Armada and Fleet, then your Direct messages. The list and the open conversation each scroll on their own, so the message box stays at the foot of the conversation. To start a conversation with a friend, open their profile and choose Message.',
     ],
     how: {
       'How channels work': [
         'Every Community, Fleet and Armada has one standard channel, General, for all its members. It cannot be renamed or archived.',
-        'Its chat moderators, the Admins and Owner and anybody the Owner gives Moderate chat under Delegation, can add up to three more with Add channel. Each has a Name, “Who reads it” and “Who posts in it”: Members, Officers and up, Admins and the Owner, or The Owner. Posting is never open to more people than reading, and a channel kept for a role is marked with it in the list.',
-        'A channel can be changed later, or archived. Nobody reads or posts in an archived channel again.',
+        'Its chat moderators, the Admins and Owner and anybody the Owner gives Moderate chat under Delegation, can add up to three more with the + beside its name in the list. Each has a Name, “Who reads it” and “Who posts in it”: Members, Officers and up, Admins and the Owner, or The Owner. Posting is never open to more people than reading, and a channel kept for a role is marked with it in the list.',
+        'A channel can be changed later, or archived: press the ⋮ beside it in the list, then Change or Archive. Nobody reads or posts in an archived channel again.',
       ],
       'How to send, reply and mention': [
         'Enter sends and Shift+Enter starts a new line. A message can be up to 2,000 characters, and a count appears as you near the end. You can send ten messages in any ten seconds.',
@@ -941,7 +941,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       ],
       'How to export a transcript': {
         paragraphs: [
-          'Whoever holds Export transcripts at a Community, Fleet or Armada — its Admins and Owner, and anybody the Owner gives it under Delegation — finds an export button beside each of its channels in the list down the side. Nobody can export a conversation between friends.',
+          'Whoever holds Export transcripts at a Community, Fleet or Armada — its Admins and Owner, and anybody the Owner gives it under Delegation — finds Export behind the ⋮ beside each of its channels in the list down the side. Nobody can export a conversation between friends.',
           'Export transcript asks for the span, From and To, from any time in the last seven days, in your device’s time, and a “Purpose (10 to 500 characters)”. Choose Export, and the transcript is written in the background, in plain text and in UTC.',
           'Under Your transcripts, at the foot of the list, each one you asked for in the last day shows its channel, its span and how it stands: Being written, Ready, Not written or Expired. You are sent the notice “Transcript ready”, and Download, beside it, is yours alone for 24 hours. The request, its purpose and each download are logged, and the purpose is printed at the head of the file.',
         ],
