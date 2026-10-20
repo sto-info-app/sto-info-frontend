@@ -49,6 +49,11 @@
                 "input": "generated",
                 "output": ".",
                 "ignore": [".gitkeep"]
+              },
+              {
+                "glob": "data.json",
+                "input": "node_modules/emoji-picker-element-data/en/emojibase",
+                "output": "assets/emoji"
               }
             ],
             "styles": [
