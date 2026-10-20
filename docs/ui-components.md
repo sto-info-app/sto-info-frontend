@@ -1551,6 +1551,15 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
   through it, Enter or Tab picks, Escape closes it. Reply starts a reply, and Escape stops it. A
   message shows as "Sending…" until the server has it, or "Not sent" with the reason, "Try again"
   and "Discard".
+- **Emoji.** `ChatEmojiButtonComponent` is the face in the message box's bottom right-hand corner.
+  It opens `emoji-picker-element` above the box: search, categories, skin tones and favourites,
+  with British labels. Each emoji picked goes in at the caret, over any selection, unless it
+  would take the message past 2,000 characters, and the picker stays open for another. The face,
+  Escape (which hands the focus back to the box) or a press anywhere else closes it.
+  - The picker is its own chunk, loaded the first time it opens (`CHAT_EMOJI_PICKER_LOADER`).
+  - Its English emoji data comes from `emoji-picker-element-data`, which `angular.json` copies to
+    `/assets/emoji/data.json`, so nothing is fetched from another host and the CSP is unchanged.
+  - The picker keeps that data, the skin tone and the favourites in the browser's IndexedDB.
 - **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Until
   then they are clipped to nothing rather than not displayed, so they stay in the Tab order: a
   keyboard reaches Reply, and the row's actions appear because one of them has focus (FC-044;
