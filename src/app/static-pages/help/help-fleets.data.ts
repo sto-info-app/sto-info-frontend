@@ -900,7 +900,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
     },
     whatItIsFor: [
       'Chat is live conversation for the people in a Fleet, its Armada and its Community, and between friends. It is for talking now: you can read back the last four hours, and nothing older.',
-      'Messages are plain text. Emoji from your own keyboard work like any other character; there are no attachments, reactions, threads or group conversations.',
+      'Messages are plain text. Emoji come from the smiling face in the corner of the message box, or from your own keyboard; there are no attachments, reactions, threads or group conversations.',
     ],
     whoCanUseIt: [
       'Members, never followers. A Fleet’s approved members take part in its channels, its Armada’s and its Community’s; a Community’s channels are for its own members and the members of every Fleet in it. Officers, Admins and the Owner also reach the channels kept for them.',
@@ -920,6 +920,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
         'Enter sends and Shift+Enter starts a new line. A message can be up to 2,000 characters, and a count appears as you near the end. You can send ten messages in any ten seconds.',
         'Reply, beside a message, shows “Replying to” and who wrote it above what you type; Escape stops replying. Your reply, once sent, carries their name and the first 80 characters of their message. Once that message is deleted or older than four hours, the reply shows “Earlier message” instead.',
         'In a channel, type @ and the start of a name, then pick somebody who can read it from the list. Only people picked from the list are mentioned and told; there is no way to mention everybody.',
+        'The smiling face in the corner of the message box opens the emoji. Search them, browse by category, choose a skin tone, or pick again from your favourites. Each one goes in where your cursor is, and the picker stays open for another; the face, Escape or a click anywhere else closes it.',
         'Delete, beside your own message, leaves “Message deleted” in its place for everybody. Messages cannot be edited.',
       ],
       'How online and writing work': [
