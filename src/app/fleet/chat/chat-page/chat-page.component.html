@@ -202,10 +202,20 @@
         <section class="chat-page__scope">
           <div class="chat-page__scope-head">
             <h2 class="chat-page__scope-name">Direct messages</h2>
+            <button
+              type="button"
+              class="chat-page__icon-button"
+              aria-label="Message a friend"
+              title="Message a friend"
+              (click)="messageFriend()">
+              <i
+                class="fas fa-plus"
+                aria-hidden="true"></i>
+            </button>
           </div>
           @if (conversations().length === 0) {
             <p class="chat-page__place-note chat-page__group-note">
-              Open a conversation from a friend’s profile.
+              Message a friend with the +, or from their profile.
             </p>
           } @else {
             <ul class="chat-page__places">

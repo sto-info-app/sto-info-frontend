@@ -20,6 +20,7 @@ import { FLEET_CONFIGURATION } from 'src/app/shared/services/fleet-configuration
 import * as saving from 'src/app/shared/utils/save-file.utils';
 
 import { ChatChannelDialogComponent } from '../chat-channel-dialog/chat-channel-dialog.component';
+import { ChatFriendDialogComponent } from '../chat-friend-dialog/chat-friend-dialog.component';
 import { ChatTranscriptDialogComponent } from '../chat-transcript-dialog/chat-transcript-dialog.component';
 import { ChatPresenceService } from '../chat-presence.service';
 import { ChatSocketService } from '../chat-socket.service';
@@ -344,7 +345,7 @@ describe('ChatPageComponent', () => {
         'You have no chats yet.',
       );
       expect(texts(element, '.chat-page__place-note')).toEqual([
-        'Open a conversation from a friend’s profile.',
+        'Message a friend with the +, or from their profile.',
       ]);
     });
 
@@ -438,6 +439,50 @@ describe('ChatPageComponent', () => {
 
       expect(chat.channels).toHaveBeenCalledTimes(2);
       expect(router.url).toBe('/chat');
+    });
+  });
+
+  describe('messaging a friend', () => {
+    it('opens a conversation already in the list, without reading it again', async () => {
+      const element = await open('/chat');
+
+      dialogResults = [TALK];
+      button(element, 'Message a friend').click();
+      await settle();
+
+      expect(dialog.open).toHaveBeenCalledWith(ChatFriendDialogComponent);
+      expect(chat.conversations).toHaveBeenCalledTimes(1);
+      expect(router.url).toBe('/chat/direct/talk');
+    });
+
+    it('reads the list again for a new conversation, then opens it', async () => {
+      const element = await open('/chat');
+      const quark: ChatConversation = {
+        id: 'quark',
+        other: { userId: 'q', username: 'Quark' },
+      };
+
+      chat.conversations.mockReturnValue(of([TALK, quark]));
+      dialogResults = [quark];
+      button(element, 'Message a friend').click();
+      await settle();
+
+      expect(chat.conversations).toHaveBeenCalledTimes(2);
+      expect(router.url).toBe('/chat/direct/quark');
+      expect(texts(element, '.chat-conversation__title')).toEqual([
+        'Quark Direct messages',
+      ]);
+    });
+
+    it('stays where it was when the dialog is cancelled', async () => {
+      const element = await open('/chat/channels/general');
+
+      dialogResults = [undefined];
+      button(element, 'Message a friend').click();
+      await settle();
+
+      expect(chat.conversations).toHaveBeenCalledTimes(1);
+      expect(router.url).toBe('/chat/channels/general');
     });
   });
 

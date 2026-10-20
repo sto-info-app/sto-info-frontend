@@ -50,6 +50,7 @@ import {
   ChatChannelDialogData,
 } from '../chat-channel-dialog/chat-channel-dialog.component';
 import { ChatConversationComponent } from '../chat-conversation/chat-conversation.component';
+import { ChatFriendDialogComponent } from '../chat-friend-dialog/chat-friend-dialog.component';
 import { ChatPresenceService } from '../chat-presence.service';
 import {
   ChatTranscriptDialogComponent,
@@ -158,7 +159,8 @@ const SCOPE_LABELS: Readonly<Record<ChatScopeChannels['kind'], string>> = {
  *
  * The address says what is open: `/chat/channels/:id` or
  * `/chat/direct/:id`, and a scope's Chat tab's `/chat/fleets/:id` (or
- * `communities`, `armadas`), which opens its first channel. A scope's
+ * `communities`, `armadas`), which opens its first channel. The + beside
+ * Direct messages opens a conversation with any friend. A scope's
  * moderators add, change and archive its custom channels here, and its
  * transcript exporters ask for a channel's transcript and download it for a
  * day (FC-035).
@@ -484,6 +486,31 @@ export class ChatPageComponent {
    */
   protected onRemoved(): void {
     this.load().subscribe(() => this.showList());
+  }
+
+  /**
+   * Picks a friend and opens the conversation with them, reading the list
+   * again first when it is new to it.
+   */
+  protected messageFriend(): void {
+    this._dialog
+      .open(ChatFriendDialogComponent)
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((conversation: ChatConversation | undefined) => {
+        if (conversation === undefined) {
+          return;
+        }
+
+        const go = () =>
+          void this._router.navigate(['/chat', 'direct', conversation.id]);
+
+        if (this.conversations().some(each => each.id === conversation.id)) {
+          go();
+        } else {
+          this.load().subscribe(go);
+        }
+      });
   }
 
   /**
