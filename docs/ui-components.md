@@ -895,6 +895,16 @@ each of its panels. A help link under each of the page's headings leads to
 that panel's guide. The guides quote the form's own labels; `help.testing.ts`
 lists them, and the specs for the page and for the Help data both check them.
 
+**Videos.** A guide with a `video` (its YouTube identifier and title) shows it
+under its summary through `<app-help-video>`. Every Fleet guide but Roster
+history and corrections has one, from the site's "STO Info App Help"
+playlist, and `help-fleets.data.spec.ts` checks it. Like a Chapter's video and
+a Custom Tracking one, nothing is loaded from YouTube until the reader presses
+play: until then the page shows YouTube's still from `i.ytimg.com`, and the
+player comes from `youtube-nocookie.com` through `trustedYouTubeEmbed`. No
+switch hides the videos, `STORYTIME_YOUTUBE_ENABLED` included, since they are
+the site's own help. A "Watch on YouTube" link under each opens it there.
+
 `help-guide-slugs.json` lists every public guide and every section anybody may
 open; Running the site's are left out. `scripts/generate-content.mjs` reads it for the sitemap, and
 `help.data.spec.ts` fails if it and the guides disagree.
