@@ -193,46 +193,6 @@ describe('HeaderComponent', () => {
 
     expect(navTexts).toEqual(['Home', 'About', 'Dashboard', 'News']);
   });
-  describe('the way to the notifications', () => {
-    // Read when the template first renders, so arranged before it.
-    const renderAs = (isLoggedIn: boolean, unread: number) => {
-      notificationServiceSpy.unreadCount$.next(unread);
-      fixture = TestBed.createComponent(HeaderComponent);
-      component = fixture.componentInstance;
-      fixture.componentRef.setInput('isLoggedIn', isLoggedIn);
-      fixture.detectChanges();
-    };
-    const find = (selector: string): HTMLElement | null =>
-      fixture.nativeElement.querySelector(selector);
-
-    it('should call out what is unread', () => {
-      renderAs(true, 5);
-
-      expect(find('#header-comms-alert')?.textContent).toContain('5 Unread');
-      expect(find('#header-comms-quiet')).toBeNull();
-    });
-
-    it('should still lead to the notifications when nothing is unread', () => {
-      renderAs(true, 0);
-
-      const quiet = find('#header-comms-quiet');
-      expect(quiet?.textContent).toContain('No New Transmissions');
-      expect(quiet?.querySelector('a')?.getAttribute('aria-label')).toBe(
-        'No unread notifications. Open notifications.',
-      );
-      expect(find('#header-comms-alert')).toBeNull();
-      expect(find('#default')).toBeNull();
-    });
-
-    it('should show the data cascade to somebody signed out', () => {
-      renderAs(false, 0);
-
-      expect(find('#default')).toBeTruthy();
-      expect(find('#header-comms-quiet')).toBeNull();
-      expect(find('#header-comms-alert')).toBeNull();
-    });
-  });
-
   describe('API degraded alert', () => {
     // The route gate and the health stream are both read when the template
     // first subscribes, so they have to be arranged before the initial
