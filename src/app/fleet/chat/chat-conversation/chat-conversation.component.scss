@@ -15,7 +15,7 @@
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.35rem;
   min-height: 0;
   position: relative;
 }
@@ -53,17 +53,28 @@
   color: vars.$lcars-grey-light;
 }
 
-.chat-conversation__log {
+// The reading pane: one box holding the log and, along its foot, whoever is
+// typing, so the message box can sit just beneath it.
+.chat-conversation__pane {
+  display: flex;
   flex: 1 1 0;
+  flex-direction: column;
   min-height: 8rem;
-  overflow: hidden auto;
-  padding: 0.5rem;
+  overflow: hidden;
   border: 1px solid vars.$lcars-grey-border;
   border-radius: 0.5rem;
   background: vars.$lcars-grey-bg;
+}
+
+.chat-conversation__log {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden auto;
+  padding: 0.5rem;
 
   &:focus-visible {
     outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
+    outline-offset: -2px;
   }
 }
 
@@ -273,12 +284,17 @@
   font-size: 0.8rem;
 }
 
+// Kept to one small line whether or not anybody is typing, so the log above
+// it never jumps.
 .chat-conversation__typing {
-  min-height: 1.2em;
+  flex: 0 0 auto;
+  min-height: 1.3em;
   margin: 0;
+  padding: 0 0.5rem 0.15rem;
   color: vars.$lcars-grey-light;
-  font-size: 0.85rem;
+  font-size: 0.7rem;
   font-style: italic;
+  line-height: 1.3;
 }
 
 .chat-conversation__unseen {

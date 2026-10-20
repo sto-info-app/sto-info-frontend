@@ -54,197 +54,205 @@
     scrolling area by itself (WCAG 2.1.1). SonarQube's rule against a focusable
     non-interactive element is accepted for this one element.
   -->
-  <div
-    #log
-    class="chat-conversation__log"
-    role="log"
-    aria-live="polite"
-    aria-relevant="additions"
-    tabindex="0"
-    [attr.aria-label]="'Messages in ' + title()"
-    (scroll)="onScroll()">
-    @if (!isLoading() && errorMessage() === null) {
-      <div class="chat-conversation__edge">
-        @if (before() !== null) {
-          <button
-            type="button"
-            class="lcars-btn"
-            [disabled]="isLoadingOlder()"
-            (click)="loadOlder()">
-            {{ isLoadingOlder() ? 'Loading…' : 'Load earlier' }}
-          </button>
-        } @else if (edgeNote(); as note) {
-          <p class="chat-conversation__edge-note">{{ note }}</p>
-        }
-      </div>
-    }
-
-    <ol class="chat-conversation__messages">
-      @for (row of rows(); track row.message.id) {
-        @if (row.day; as day) {
-          <li class="chat-conversation__day">
-            {{ day }}
-            <hr class="chat-conversation__day-rule" />
-          </li>
-        }
-        <li
-          class="chat-message"
-          tabindex="-1"
-          [id]="'chat-message-' + row.message.id"
-          [class.chat-message--grouped]="row.grouped"
-          [class.chat-message--mine]="row.message.mine"
-          [class.chat-message--deleted]="row.message.deleted">
-          @if (row.message.replyTo; as answered) {
+  <!--
+    The reading pane: the log, with whoever is typing named small along its
+    foot, so the message box sits just beneath it.
+  -->
+  <div class="chat-conversation__pane">
+    <div
+      #log
+      class="chat-conversation__log"
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions"
+      tabindex="0"
+      [attr.aria-label]="'Messages in ' + title()"
+      (scroll)="onScroll()">
+      @if (!isLoading() && errorMessage() === null) {
+        <div class="chat-conversation__edge">
+          @if (before() !== null) {
             <button
               type="button"
-              class="chat-message__reply-to"
-              (click)="showAnswered(answered.id)">
-              <i
-                class="fas fa-reply"
-                aria-hidden="true"></i>
-              @if (answered.excerpt === null) {
-                <span>Earlier message</span>
-              } @else {
-                <span class="chat-message__reply-author"
-                  >{{ nameOf(answered.author) }}:</span
-                >&ngsp;<span class="chat-message__reply-excerpt">{{
-                  answered.excerpt
+              class="lcars-btn"
+              [disabled]="isLoadingOlder()"
+              (click)="loadOlder()">
+              {{ isLoadingOlder() ? 'Loading…' : 'Load earlier' }}
+            </button>
+          } @else if (edgeNote(); as note) {
+            <p class="chat-conversation__edge-note">{{ note }}</p>
+          }
+        </div>
+      }
+
+      <ol class="chat-conversation__messages">
+        @for (row of rows(); track row.message.id) {
+          @if (row.day; as day) {
+            <li class="chat-conversation__day">
+              {{ day }}
+              <hr class="chat-conversation__day-rule" />
+            </li>
+          }
+          <li
+            class="chat-message"
+            tabindex="-1"
+            [id]="'chat-message-' + row.message.id"
+            [class.chat-message--grouped]="row.grouped"
+            [class.chat-message--mine]="row.message.mine"
+            [class.chat-message--deleted]="row.message.deleted">
+            @if (row.message.replyTo; as answered) {
+              <button
+                type="button"
+                class="chat-message__reply-to"
+                (click)="showAnswered(answered.id)">
+                <i
+                  class="fas fa-reply"
+                  aria-hidden="true"></i>
+                @if (answered.excerpt === null) {
+                  <span>Earlier message</span>
+                } @else {
+                  <span class="chat-message__reply-author"
+                    >{{ nameOf(answered.author) }}:</span
+                  >&ngsp;<span class="chat-message__reply-excerpt">{{
+                    answered.excerpt
+                  }}</span>
+                }
+              </button>
+            }
+            <div class="chat-message__line">
+              <time
+                class="chat-message__time"
+                [attr.datetime]="row.message.createdAt"
+                [title]="
+                  row.message.createdAt | appDate: 'EEEE d MMMM y, HH:mm'
+                "
+                >{{ row.message.createdAt | appDate: 'HH:mm' }}</time
+              >
+              @if (!row.grouped && !row.message.hidden) {
+                <span class="chat-message__author">{{
+                  nameOf(row.message.author)
                 }}</span>
               }
-            </button>
-          }
-          <div class="chat-message__line">
-            <time
-              class="chat-message__time"
-              [attr.datetime]="row.message.createdAt"
-              [title]="row.message.createdAt | appDate: 'EEEE d MMMM y, HH:mm'"
-              >{{ row.message.createdAt | appDate: 'HH:mm' }}</time
-            >
-            @if (!row.grouped && !row.message.hidden) {
-              <span class="chat-message__author">{{
-                nameOf(row.message.author)
-              }}</span>
-            }
-            @if (row.message.hidden) {
-              <span class="chat-message__text chat-message__text--deleted"
-                >Message from a member you can’t see</span
-              >
-            } @else if (row.message.removed) {
-              <span class="chat-message__text chat-message__text--deleted"
-                >Message removed by a moderator</span
-              >
-            } @else if (row.message.deleted) {
-              <span class="chat-message__text chat-message__text--deleted"
-                >Message deleted</span
-              >
-            } @else {
-              <span class="chat-message__text">
-                @for (segment of row.segments; track $index) {
-                  @if (segment.mention) {
-                    <span class="chat-message__mention">{{
-                      segment.text
-                    }}</span>
-                  } @else {
-                    {{ segment.text }}
+              @if (row.message.hidden) {
+                <span class="chat-message__text chat-message__text--deleted"
+                  >Message from a member you can’t see</span
+                >
+              } @else if (row.message.removed) {
+                <span class="chat-message__text chat-message__text--deleted"
+                  >Message removed by a moderator</span
+                >
+              } @else if (row.message.deleted) {
+                <span class="chat-message__text chat-message__text--deleted"
+                  >Message deleted</span
+                >
+              } @else {
+                <span class="chat-message__text">
+                  @for (segment of row.segments; track $index) {
+                    @if (segment.mention) {
+                      <span class="chat-message__mention">{{
+                        segment.text
+                      }}</span>
+                    } @else {
+                      {{ segment.text }}
+                    }
                   }
+                </span>
+              }
+            </div>
+            @if (!row.message.deleted && !row.message.hidden) {
+              <div class="chat-message__actions">
+                @if (mayPost()) {
+                  <button
+                    type="button"
+                    class="chat-message__action"
+                    [attr.aria-label]="'Reply to ' + nameOf(row.message.author)"
+                    (click)="reply(row.message)">
+                    <i
+                      class="fas fa-reply"
+                      aria-hidden="true"></i>
+                    Reply
+                  </button>
                 }
-              </span>
+                @if (row.message.mine) {
+                  <button
+                    type="button"
+                    class="chat-message__action chat-message__action--danger"
+                    aria-label="Delete your message"
+                    (click)="deleteOwn(row.message)">
+                    <i
+                      class="fas fa-trash"
+                      aria-hidden="true"></i>
+                    Delete
+                  </button>
+                } @else if (mayModerate()) {
+                  <button
+                    type="button"
+                    class="chat-message__action chat-message__action--danger"
+                    [attr.aria-label]="
+                      'Remove the message from ' + nameOf(row.message.author)
+                    "
+                    (click)="moderate(row.message)">
+                    <i
+                      class="fas fa-ban"
+                      aria-hidden="true"></i>
+                    Remove
+                  </button>
+                }
+                @if (!row.message.mine && mayReport()) {
+                  <button
+                    type="button"
+                    class="chat-message__action"
+                    [attr.aria-label]="
+                      'Report the message from ' + nameOf(row.message.author)
+                    "
+                    (click)="report(row.message)">
+                    <i
+                      class="fas fa-flag"
+                      aria-hidden="true"></i>
+                    Report
+                  </button>
+                }
+              </div>
             }
-          </div>
-          @if (!row.message.deleted && !row.message.hidden) {
-            <div class="chat-message__actions">
-              @if (mayPost()) {
+          </li>
+        }
+        @for (line of pending(); track line.localId) {
+          <li
+            class="chat-message chat-message--mine chat-message--pending"
+            [class.chat-message--failed]="line.failure !== null">
+            <div class="chat-message__line">
+              <span class="chat-message__time">
+                {{ line.failure === null ? 'Sending…' : 'Not sent' }}
+              </span>
+              <span class="chat-message__text">{{ line.body }}</span>
+            </div>
+            @if (line.failure; as failure) {
+              <div class="chat-message__actions chat-message__actions--shown">
+                <span class="chat-message__failure">{{ failure }}</span>
                 <button
                   type="button"
                   class="chat-message__action"
-                  [attr.aria-label]="'Reply to ' + nameOf(row.message.author)"
-                  (click)="reply(row.message)">
-                  <i
-                    class="fas fa-reply"
-                    aria-hidden="true"></i>
-                  Reply
+                  (click)="retry(line)">
+                  Try again
                 </button>
-              }
-              @if (row.message.mine) {
                 <button
                   type="button"
                   class="chat-message__action chat-message__action--danger"
-                  aria-label="Delete your message"
-                  (click)="deleteOwn(row.message)">
-                  <i
-                    class="fas fa-trash"
-                    aria-hidden="true"></i>
-                  Delete
+                  (click)="discard(line)">
+                  Discard
                 </button>
-              } @else if (mayModerate()) {
-                <button
-                  type="button"
-                  class="chat-message__action chat-message__action--danger"
-                  [attr.aria-label]="
-                    'Remove the message from ' + nameOf(row.message.author)
-                  "
-                  (click)="moderate(row.message)">
-                  <i
-                    class="fas fa-ban"
-                    aria-hidden="true"></i>
-                  Remove
-                </button>
-              }
-              @if (!row.message.mine && mayReport()) {
-                <button
-                  type="button"
-                  class="chat-message__action"
-                  [attr.aria-label]="
-                    'Report the message from ' + nameOf(row.message.author)
-                  "
-                  (click)="report(row.message)">
-                  <i
-                    class="fas fa-flag"
-                    aria-hidden="true"></i>
-                  Report
-                </button>
-              }
-            </div>
-          }
-        </li>
-      }
-      @for (line of pending(); track line.localId) {
-        <li
-          class="chat-message chat-message--mine chat-message--pending"
-          [class.chat-message--failed]="line.failure !== null">
-          <div class="chat-message__line">
-            <span class="chat-message__time">
-              {{ line.failure === null ? 'Sending…' : 'Not sent' }}
-            </span>
-            <span class="chat-message__text">{{ line.body }}</span>
-          </div>
-          @if (line.failure; as failure) {
-            <div class="chat-message__actions chat-message__actions--shown">
-              <span class="chat-message__failure">{{ failure }}</span>
-              <button
-                type="button"
-                class="chat-message__action"
-                (click)="retry(line)">
-                Try again
-              </button>
-              <button
-                type="button"
-                class="chat-message__action chat-message__action--danger"
-                (click)="discard(line)">
-                Discard
-              </button>
-            </div>
-          }
-        </li>
-      }
-    </ol>
-  </div>
+              </div>
+            }
+          </li>
+        }
+      </ol>
+    </div>
 
-  <p
-    class="chat-conversation__typing"
-    aria-live="polite">
-    {{ typingLine() ?? '' }}
-  </p>
+    <p
+      class="chat-conversation__typing"
+      aria-live="polite">
+      {{ typingLine() ?? '' }}
+    </p>
+  </div>
 
   @if (unseen() > 0) {
     <button
