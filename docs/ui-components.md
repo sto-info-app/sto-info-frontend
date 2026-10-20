@@ -1518,6 +1518,12 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
   - a place the list does not hold says so, with the way back.
 - **The connection.** A banner says when it is reconnecting, when five other tabs pushed this one
   out ("Use chat here" opens it again), or when the session ended.
+- **Messaging a friend.** The + on the Direct messages heading opens `ChatFriendDialogComponent`:
+  - every friend at once, 20 at a time with "Show more friends", searched by username as typed
+    (after a 300ms pause), each with their picture and online dot;
+  - choosing one opens the conversation by the friendship, or the one already there, and the page
+    reads its list again when the conversation is new to it;
+  - with no friends, it points to the Friends page.
 - **Custom channels.** A scope's moderators add them ("Add channel"), and change or archive each.
   Changing opens `ChatChannelDialogComponent`: a name, who reads it, and who posts, never looser
   than reading. Archiving asks first with the LCARS confirmation.
@@ -1584,6 +1590,7 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
 - a Chat door at the end of each Fleet's and Armada's strip, for its members and role holders;
 - a Chat door at the end of the Community strip, for anybody signed in;
 - "Open chat" on the dashboard's Fleets page;
+- the + beside Direct messages, for any friend;
 - a Message button on a friend's profile, which opens the conversation by the friendship.
 
 Each is offered only while chat is switched on.
