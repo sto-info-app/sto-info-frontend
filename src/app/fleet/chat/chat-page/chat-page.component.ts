@@ -101,6 +101,23 @@ export function transcriptFilename(transcript: ChatTranscript): string {
   return `chat-${slug}-${transcript.toAt.slice(0, 10)}.txt`;
 }
 
+/** Where this browser remembers that the list of chats was hidden. */
+export const CHAT_LIST_HIDDEN_KEY = 'chat-list-hidden';
+
+/**
+ * Whether the reader hid the list of chats on this browser. Storage that is
+ * missing or refused leaves the list shown.
+ *
+ * @returns True when it was hidden.
+ */
+function readListHidden(): boolean {
+  try {
+    return localStorage.getItem(CHAT_LIST_HIDDEN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
 /**
  * What a failed transcript download says.
  *
@@ -194,6 +211,12 @@ export class ChatPageComponent {
 
   /** The channel whose export, change and archive are shown, if any. */
   readonly actionsOpenFor = signal<string | null>(null);
+
+  /**
+   * Whether the list of chats is hidden, giving the open place the page's
+   * width. Remembered on this browser, across every chat.
+   */
+  readonly isListHidden = signal(readListHidden());
 
   /** Whether a transcript is still being written. */
   readonly hasPending = computed(() =>
@@ -333,6 +356,23 @@ export class ChatPageComponent {
     this.actionsOpenFor.update(open =>
       open === channel.id ? null : channel.id,
     );
+  }
+
+  /** Hides the list of chats, or shows it again, and remembers which. */
+  protected toggleList(): void {
+    const hidden = !this.isListHidden();
+
+    this.isListHidden.set(hidden);
+
+    try {
+      if (hidden) {
+        localStorage.setItem(CHAT_LIST_HIDDEN_KEY, 'true');
+      } else {
+        localStorage.removeItem(CHAT_LIST_HIDDEN_KEY);
+      }
+    } catch {
+      // Storage refused: the choice lasts for this visit only.
+    }
   }
 
   /** Hides the channel actions, once one of them is chosen. */

@@ -46,8 +46,32 @@
       title="Chat"
       [message]="error"></app-lcars-error-message>
   } @else {
-    <div class="chat-page__layout">
+    <!--
+      The list folds away to give the messages the page's width, and stays
+      folded on this browser until it is shown again. Not on a phone, where
+      the list and the open place already take turns.
+    -->
+    <div class="chat-page__toolbar">
+      <button
+        type="button"
+        class="chat-page__list-toggle"
+        aria-controls="chat-page-list"
+        [attr.aria-expanded]="!isListHidden()"
+        (click)="toggleList()">
+        <i
+          class="fas"
+          [class.fa-chevron-left]="!isListHidden()"
+          [class.fa-chevron-right]="isListHidden()"
+          aria-hidden="true"></i>
+        {{ isListHidden() ? 'Show chats' : 'Hide chats' }}
+      </button>
+    </div>
+
+    <div
+      class="chat-page__layout"
+      [class.chat-page__layout--list-hidden]="isListHidden()">
       <nav
+        id="chat-page-list"
         class="chat-page__list lcars-rotate"
         aria-label="Your chats">
         @if (scopes().length === 0 && conversations().length === 0) {

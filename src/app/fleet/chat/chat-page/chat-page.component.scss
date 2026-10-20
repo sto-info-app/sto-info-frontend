@@ -47,6 +47,47 @@
 
 // The theme lays a <nav> out from its foot (`justify-content: flex-end`, for
 // the side bar), which left a short list sitting at the bottom of its pane.
+.chat-page__toolbar {
+  display: flex;
+
+  @media (width < 720px) {
+    display: none;
+  }
+}
+
+.chat-page__list-toggle {
+  @include mixins.lcars-bare-button;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.75rem;
+  border: 1px solid vars.$lcars-perano;
+  border-radius: 1rem;
+  background: none;
+  color: vars.$lcars-perano;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: vars.$lcars-white;
+    color: vars.$lcars-white;
+  }
+}
+
+// Hidden, the open place takes the whole width. Only from 720px: below it
+// the list is the page whenever nothing is open, and must stay reachable.
+@media (width >= 720px) {
+  .chat-page__layout--list-hidden {
+    grid-template-columns: minmax(0, 1fr);
+
+    .chat-page__list {
+      display: none;
+    }
+  }
+}
+
 .chat-page__list {
   display: flex;
   flex-direction: column;

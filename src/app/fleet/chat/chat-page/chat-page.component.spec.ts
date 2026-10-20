@@ -25,7 +25,10 @@ import { ChatPresenceService } from '../chat-presence.service';
 import { ChatSocketService } from '../chat-socket.service';
 import { CHAT_ROUTES } from '../chat.routes';
 import { ChatService } from '../chat.service';
-import { transcriptFilename } from './chat-page.component';
+import {
+  CHAT_LIST_HIDDEN_KEY,
+  transcriptFilename,
+} from './chat-page.component';
 
 const GENERAL: ChatChannel = {
   id: 'general',
@@ -232,6 +235,70 @@ describe('ChatPageComponent', () => {
 
     return button(element, label);
   };
+
+  describe('hiding the list', () => {
+    afterEach(() => {
+      localStorage.removeItem(CHAT_LIST_HIDDEN_KEY);
+      jest.restoreAllMocks();
+    });
+
+    const toggle = (element: HTMLElement): HTMLButtonElement =>
+      element.querySelector('.chat-page__list-toggle') as HTMLButtonElement;
+    const isHidden = (element: HTMLElement): boolean =>
+      element.querySelector('.chat-page__layout--list-hidden') !== null;
+
+    it('hides the list and shows it again, remembering which', async () => {
+      const element = await open('/chat/channels/general');
+
+      expect(toggle(element).textContent?.trim()).toBe('Hide chats');
+      expect(toggle(element).getAttribute('aria-expanded')).toBe('true');
+      expect(toggle(element).getAttribute('aria-controls')).toBe(
+        'chat-page-list',
+      );
+      expect(element.querySelector('#chat-page-list')).not.toBeNull();
+      expect(isHidden(element)).toBe(false);
+
+      toggle(element).click();
+      harness.detectChanges();
+
+      expect(isHidden(element)).toBe(true);
+      expect(toggle(element).textContent?.trim()).toBe('Show chats');
+      expect(toggle(element).getAttribute('aria-expanded')).toBe('false');
+      expect(localStorage.getItem(CHAT_LIST_HIDDEN_KEY)).toBe('true');
+
+      toggle(element).click();
+      harness.detectChanges();
+
+      expect(isHidden(element)).toBe(false);
+      expect(localStorage.getItem(CHAT_LIST_HIDDEN_KEY)).toBeNull();
+    });
+
+    it('opens with the list hidden when it was hidden before', async () => {
+      localStorage.setItem(CHAT_LIST_HIDDEN_KEY, 'true');
+
+      const element = await open('/chat/channels/general');
+
+      expect(isHidden(element)).toBe(true);
+    });
+
+    it('shows the list, and still hides it for the visit, when storage is refused', async () => {
+      jest.spyOn(Storage.prototype, 'getItem').mockImplementation(() => {
+        throw new Error('refused');
+      });
+      jest.spyOn(Storage.prototype, 'setItem').mockImplementation(() => {
+        throw new Error('refused');
+      });
+
+      const element = await open('/chat/channels/general');
+
+      expect(isHidden(element)).toBe(false);
+
+      toggle(element).click();
+      harness.detectChanges();
+
+      expect(isHidden(element)).toBe(true);
+    });
+  });
 
   describe('the list', () => {
     it('lists each scope’s channels and the conversations, asking to choose one', async () => {
