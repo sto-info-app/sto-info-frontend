@@ -45,9 +45,12 @@
   }
 }
 
+// The theme lays a <nav> out from its foot (`justify-content: flex-end`, for
+// the side bar), which left a short list sitting at the bottom of its pane.
 .chat-page__list {
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   gap: 1rem;
   min-width: 0;
   min-height: 0;
