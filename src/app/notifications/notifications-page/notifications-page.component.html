@@ -3,7 +3,10 @@
 }
 
 <div id="notifications-page">
-  <h1>Notifications</h1>
+  <div class="page-heading-row">
+    <h1>Notifications</h1>
+    <app-settings-link [target]="settingsLink" />
+  </div>
 
   @if (errorMessage) {
     <app-lcars-error-message

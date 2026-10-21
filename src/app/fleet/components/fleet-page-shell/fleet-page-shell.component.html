@@ -30,7 +30,10 @@
 }
 
 <div class="fleet-page-shell">
-  <h1>{{ heading }}</h1>
+  <div class="page-heading-row">
+    <h1>{{ heading }}</h1>
+    <app-settings-link [target]="settingsLink" />
+  </div>
 
   @if (helpSlug) {
     <app-help-link

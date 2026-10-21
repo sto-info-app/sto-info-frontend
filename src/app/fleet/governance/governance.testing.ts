@@ -193,6 +193,7 @@ export function governanceRoute(
   };
   const auth = {
     isLoggedInAsAdmin: jest.fn(() => reader.isSiteAdmin ?? false),
+    isLoggedIn: jest.fn(() => true),
   };
 
   return {

@@ -11,6 +11,8 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 
 import { CommunityTabsComponent } from './community-tabs/community-tabs.component';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /**
  * The Community landing page — the About tab — introducing the Galactic
@@ -27,9 +29,13 @@ import { CommunityTabsComponent } from './community-tabs/community-tabs.componen
     RouterModule,
     CommunityTabsComponent,
     CollapsibleSectionComponent,
+    SettingsLinkComponent,
   ],
 })
 export class CommunityComponent {
+  /** The cog on the registry's bar, to whether the reader is listed. */
+  readonly settingsLink = SETTINGS_LINKS.registry;
+
   private readonly _authService = inject(AuthService);
   private readonly _fleetConfiguration = inject(FleetConfigurationService);
 

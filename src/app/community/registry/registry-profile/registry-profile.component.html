@@ -35,12 +35,17 @@
     }
 
     @if (profile) {
-      <h1>
-        {{ profile.username }}
-        @if (isOnline) {
-          <span class="registry-online">Online</span>
+      <div class="page-heading-row">
+        <h1>
+          {{ profile.username }}
+          @if (isOnline) {
+            <span class="registry-online">Online</span>
+          }
+        </h1>
+        @if (relationship === relationshipStatus.SELF) {
+          <app-settings-link [target]="settingsLink" />
         }
-      </h1>
+      </div>
 
       <div id="registry-profile-main-content">
         <app-collapsible-section heading="Officer Details">

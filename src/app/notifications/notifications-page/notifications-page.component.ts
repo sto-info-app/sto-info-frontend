@@ -27,6 +27,8 @@ import {
   SeverityMeta,
 } from 'src/app/shared/constants/notifications.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /**
  * Full-page, paginated list of the current user's inbox notifications.
@@ -49,6 +51,7 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     LcarsPaginationComponent,
+    SettingsLinkComponent,
   ],
 })
 export class NotificationsPageComponent implements OnInit {
@@ -56,6 +59,9 @@ export class NotificationsPageComponent implements OnInit {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _dialog = inject(MatDialog);
+
+  /** The cog beside the heading, to the switches for each kind of notice. */
+  readonly settingsLink = SETTINGS_LINKS.notifications;
 
   notifications: AppNotification[] = [];
   isLoading = false;

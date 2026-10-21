@@ -60,6 +60,8 @@ import { buildRegistryAccountCard } from '../registry-card.builders';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /**
  * One public account, with the card and the values the controls work on.
@@ -108,6 +110,7 @@ export const REGISTRY_ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
     CommunityTabsComponent,
     CollapsibleSectionComponent,
     FormsModule,
+    SettingsLinkComponent,
   ],
 })
 export class RegistryProfileComponent
@@ -137,6 +140,9 @@ export class RegistryProfileComponent
   private readonly _presence = inject(ChatPresenceService);
 
   relationshipStatus = RelationshipStatus;
+
+  /** The cog beside the reader's own record, to whether it is listed. */
+  readonly settingsLink = SETTINGS_LINKS.registry;
 
   username = '';
   profile: RegistryProfile | null = null;

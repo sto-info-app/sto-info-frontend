@@ -30,6 +30,8 @@ import {
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 const PAGE_SIZE = 12;
 
@@ -98,6 +100,7 @@ const MODE_CONFIG: Record<
     CommunityTabsComponent,
     CollapsibleSectionComponent,
     LcarsPaginationComponent,
+    SettingsLinkComponent,
   ],
 })
 export class RegistryListComponent
@@ -105,6 +108,9 @@ export class RegistryListComponent
   implements OnInit
 {
   private readonly _userSettingsService = inject(UserSettingsService);
+
+  /** The cog beside the heading, to whether the reader is listed here. */
+  readonly settingsLink = SETTINGS_LINKS.registry;
   private readonly _registryService = inject(RegistryService);
   private readonly _communityService = inject(CommunityService);
   private readonly _authService = inject(AuthService);

@@ -44,6 +44,8 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { saveFile } from 'src/app/shared/utils/save-file.utils';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 import {
   ChatChannelDialogComponent,
@@ -179,6 +181,7 @@ const SCOPE_LABELS: Readonly<Record<ChatScopeChannels['kind'], string>> = {
     LcarsWarningMessageComponent,
     LoadingBarComponent,
     RouterLink,
+    SettingsLinkComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -199,6 +202,7 @@ export class ChatPageComponent {
     { initialValue: null },
   );
 
+  readonly settingsLink = SETTINGS_LINKS.chat;
   readonly scopeLabels = SCOPE_LABELS;
   readonly roleLabels = CHAT_ROLE_LABELS;
   readonly transcriptStatusLabels = TRANSCRIPT_STATUS_LABELS;

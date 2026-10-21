@@ -6,6 +6,7 @@ import { RouterTestingHarness } from '@angular/router/testing';
 
 import { Observable, of, Subject, throwError } from 'rxjs';
 
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 import {
   ChatChannel,
@@ -161,6 +162,7 @@ describe('ChatPageComponent', () => {
         { provide: ChatService, useValue: chat },
         { provide: ChatSocketService, useValue: socket },
         { provide: MatDialog, useValue: dialog },
+        { provide: AuthService, useValue: { isLoggedIn: () => true } },
         {
           provide: ChatPresenceService,
           useValue: { watch: jest.fn(() => of(new Set(['Kira']))) },
@@ -320,6 +322,16 @@ describe('ChatPageComponent', () => {
         'Choose a channel or a conversation.',
       ]);
       expect(element.querySelector('.chat-page--open')).toBeNull();
+    });
+
+    it('offers a cog to chat’s settings beside the heading', async () => {
+      const element = await open('/chat');
+
+      expect(
+        element
+          .querySelector('.page-heading-row app-settings-link a')
+          ?.getAttribute('href'),
+      ).toBe('/dashboard/settings?tab=chat');
     });
 
     it('marks the friends who are online (FC-034)', async () => {

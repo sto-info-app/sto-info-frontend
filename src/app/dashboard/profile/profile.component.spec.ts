@@ -55,6 +55,7 @@ describe('ProfileComponent', () => {
     } as unknown as jest.Mocked<DashboardService>;
 
     mockAuthService = {
+      isLoggedIn: jest.fn(() => true),
       performLogout: jest.fn(),
       refreshToken: jest.fn().mockReturnValue(of({ success: true })),
     } as unknown as jest.Mocked<AuthService>;

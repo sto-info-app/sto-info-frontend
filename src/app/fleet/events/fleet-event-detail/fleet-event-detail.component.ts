@@ -39,6 +39,8 @@ import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsib
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { MarkdownPipe } from 'src/app/shared/pipes/markdown.pipe';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /** An event, and the reader's Characters to answer as. */
 export interface FleetEventDetailData {
@@ -74,10 +76,14 @@ export interface FleetEventDetailData {
     FleetTabsComponent,
     LcarsErrorMessageComponent,
     CollapsibleSectionComponent,
+    SettingsLinkComponent,
   ],
 })
 export class FleetEventDetailComponent extends FleetEventsPageDirective<FleetEventDetailData> {
   private readonly _accounts = inject(StoAccountService);
+
+  /** The cog beside the reminders, to the switch that stops them all. */
+  readonly reminderSettingsLink = SETTINGS_LINKS.eventReminders;
 
   readonly leads = FLEET_REMINDER_LEADS;
   readonly leadLabels = FLEET_REMINDER_LABELS;

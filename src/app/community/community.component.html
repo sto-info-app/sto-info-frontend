@@ -8,6 +8,9 @@
 
     <div id="community-main-content">
       <app-collapsible-section heading="Galactic Personnel Registry">
+        <app-settings-link
+          sectionActions
+          [target]="settingsLink" />
         <div class="community-inner-content">
           <p>
             A directory of officers who have chosen to make their record public.
@@ -15,8 +18,8 @@
             record with the fleet.
           </p>
           <p>
-            Nothing appears here until you opt in from your profile, and your real
-            name, email address and private notes are never shown.
+            Nothing appears here until you opt in from your profile or Settings,
+            and your real name, email address and private notes are never shown.
           </p>
         </div>
       </app-collapsible-section>

@@ -35,6 +35,8 @@ import { PrivacyModeService } from '../services/privacy-mode.service';
 import { EditPersonalDetailsComponent } from './dialogs/edit-personal-details/edit-personal-details.component';
 import { ProfilePicComponent } from './dialogs/profile-pic/profile-pic.component';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 interface ProfileEditDialogResult {
   stayLoggedIn?: boolean;
@@ -53,6 +55,7 @@ interface ProfileEditDialogResult {
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
+    SettingsLinkComponent,
   ],
 })
 export class ProfileComponent implements OnInit, OnDestroy {
@@ -64,6 +67,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
   /** Precomputed router link to the settings page. */
   readonly settingsLink = `/${APP_ROUTES.STO_DASHBOARD_SETTINGS}`;
+
+  /** The cog beside the registry line, to the same switch in Settings. */
+  readonly registrySettingsLink = SETTINGS_LINKS.registry;
 
   readonly appRouteTitles = APP_ROUTE_TITLES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;

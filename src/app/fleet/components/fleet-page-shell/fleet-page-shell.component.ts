@@ -12,6 +12,8 @@ import { filter, map } from 'rxjs';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 import { FleetShellTab } from './fleet-page-shell.model';
 
@@ -40,9 +42,13 @@ import { FleetShellTab } from './fleet-page-shell.model';
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     HelpLinkComponent,
+    SettingsLinkComponent,
   ],
 })
 export class FleetPageShellComponent {
+  /** The cog beside every Fleet page's heading, to the Fleet settings. */
+  readonly settingsLink = SETTINGS_LINKS.fleet;
+
   /** The page's heading, rendered as its `<h1>`. */
   @Input({ required: true }) heading!: string;
 

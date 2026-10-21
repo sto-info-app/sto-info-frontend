@@ -46,6 +46,8 @@ import {
   deviceTimezone,
   isUsableTimezone,
 } from 'src/app/shared/utils/timezone.utils';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /** What to say when the Fleet could not be read for any reason but absence. */
 export const ROSTER_CHECK_ERROR =
@@ -175,9 +177,13 @@ export interface RosterImportRepeatNotice {
     LcarsWarningMessageComponent,
     LoadingBarComponent,
     CollapsibleSectionComponent,
+    SettingsLinkComponent,
   ],
 })
 export class RosterImportComponent {
+  /** The cog beside the help, to the zone an import starts on. */
+  readonly settingsLink = SETTINGS_LINKS.rosterExports;
+
   private readonly _route = inject(ActivatedRoute);
   private readonly _scopeService = inject(FleetScopeService);
   private readonly _importService = inject(RosterImportService);

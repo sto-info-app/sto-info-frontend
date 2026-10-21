@@ -36,6 +36,8 @@ import { buildCharacterFleetCardVm } from '../../fleet-card.builders';
 import { RECRUITED_BY_LINES } from '../../recruitment/recruitment.constants';
 import { FleetDirectoryService } from '../../fleet-directory.service';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /** How many Fleets the picker offers at once. */
 const PICKER_RESULTS = 8;
@@ -105,12 +107,16 @@ export const PROPOSALS_MIXED_NOTE =
     LoadingBarComponent,
     LcarsErrorMessageComponent,
     FleetScopeCardComponent,
+    SettingsLinkComponent,
   ],
   providers: [AppDatePipe],
 })
 export class CharacterFleetPanelComponent implements OnInit {
   /** The Character this panel is about. */
   @Input({ required: true }) characterId!: string;
+
+  /** The cog beside the proposals, to the switch for their notices. */
+  readonly proposalSettingsLink = SETTINGS_LINKS.rosterProposals;
 
   private readonly _service = inject(CharacterFleetService);
   private readonly _directory = inject(FleetDirectoryService);

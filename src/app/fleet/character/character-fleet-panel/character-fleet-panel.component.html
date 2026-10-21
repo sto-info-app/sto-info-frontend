@@ -22,7 +22,10 @@
     -->
     @if (pending().length > 0) {
       <div class="character-fleet__proposals">
-        <h3 class="character-fleet__heading">Awaiting your answer</h3>
+        <div class="character-fleet__heading-row">
+          <h3 class="character-fleet__heading">Awaiting your answer</h3>
+          <app-settings-link [target]="proposalSettingsLink" />
+        </div>
         <p class="character-fleet__note">{{ pendingNote() }}</p>
 
         <!--

@@ -21,9 +21,12 @@
         <span>Import a roster export</span>
       </div>
 
-      <app-help-link
-        slug="importing-a-roster"
-        label="Help with importing a roster" />
+      <div class="page-heading-row">
+        <app-help-link
+          slug="importing-a-roster"
+          label="Help with importing a roster" />
+        <app-settings-link [target]="settingsLink" />
+      </div>
 
       <p class="roster-import__fleet">
         <a [routerLink]="state.fleetLink">{{ state.fleet.exactGameName }}</a>

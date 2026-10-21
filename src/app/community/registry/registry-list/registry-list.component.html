@@ -8,7 +8,10 @@
   <div
     id="registry-list-main-column"
     class="col">
-    <h1>{{ heading }}</h1>
+    <div class="page-heading-row">
+      <h1>{{ heading }}</h1>
+      <app-settings-link [target]="settingsLink" />
+    </div>
 
     @if (errorMessage) {
       <app-lcars-error-message
