@@ -1552,8 +1552,12 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
     the last day in the pane a conversation takes: a `fleet-community-table` row each (channel and
     scope, range, status, message count), with Download while it is ready and within its day, and
     labelled lines on a phone. The download is fetched with the reader's token and saved as
-    `chat-<channel>-<date>.txt`. A failed one says "There was an issue generating the transcript.
-    Try again later.", since nothing was kept and a site admin's retry ends with the hour.
+    `stoinfo-chat-<channel>-<date>.txt`, as the server names it too.
+  - Something wrong shows as a status and a message across the messages and download columns
+    (`transcriptProblem`), the message on a line of its own on a phone: **Error**, "There was an
+    issue generating the transcript. Try again later.", once given up on, since nothing was kept;
+    **Warning**, "There was an issue generating the transcript. Check back later.", while it still
+    waits but its job has failed (`jobFailed`), the case in which a site admin may retry it.
   - The list keeps one link there, "Your transcripts", with a count of those ready to download. They
     are read with the list, and again each time they are opened.
   - An in-app notice, linking `/chat/transcripts`, says when one is ready. Refresh reads them again;
