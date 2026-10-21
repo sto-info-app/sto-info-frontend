@@ -1540,8 +1540,8 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
   - choosing one opens the conversation by the friendship, or the one already there, and the page
     reads its list again when the conversation is new to it;
   - with no friends, it points to the Friends page.
-- **Custom channels.** A scope's moderators add them ("Add channel"), and change or archive each.
-  Changing opens `ChatChannelDialogComponent`: a name, who reads it, and who posts, never looser
+- **Custom channels.** A scope's moderators add them ("Add channel"), and edit or archive each from
+  the ⋮ beside it. Edit opens `ChatChannelDialogComponent`: a name, who reads it, and who posts, never looser
   than reading. Archiving asks first with the LCARS confirmation.
 - **Transcripts** (FC-035). Where the reader may export (`mayExport`), each channel has an export
   button. It opens `ChatTranscriptDialogComponent`:
