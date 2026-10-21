@@ -171,6 +171,34 @@ describe('CollapsibleSectionComponent', () => {
     expect(toggleButton().getAttribute('aria-expanded')).toBe('true');
   });
 
+  // A link to something inside a folded section opens it, and leaves an open
+  // one as it is.
+  it('should open when revealed, and remember it open', () => {
+    const section = fixture.debugElement.children[0]
+      .componentInstance as CollapsibleSectionComponent;
+
+    section.reveal();
+    fixture.detectChanges();
+
+    expect(contentShown()).toBe(true);
+
+    toggleButton().click();
+    fixture.detectChanges();
+    section.reveal();
+    fixture.detectChanges();
+
+    expect(contentShown()).toBe(true);
+
+    const again = TestBed.createComponent(HostComponent);
+    again.detectChanges();
+
+    expect(
+      (again.nativeElement as HTMLElement)
+        .querySelector('button')
+        ?.getAttribute('aria-expanded'),
+    ).toBe('true');
+  });
+
   it('should say which way the toggle goes', () => {
     expect(toggleButton().getAttribute('title')).toBe('Collapse');
 

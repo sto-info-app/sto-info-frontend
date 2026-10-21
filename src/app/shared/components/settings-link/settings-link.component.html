@@ -1,0 +1,13 @@
+@if (isSignedIn) {
+  <a
+    class="settings-link"
+    [routerLink]="settingsPath"
+    [queryParams]="{ tab: target().tab }"
+    [fragment]="target().setting"
+    [attr.aria-label]="target().label"
+    [title]="target().label"
+    ><i
+      class="fas fa-gear"
+      aria-hidden="true"></i
+  ></a>
+}

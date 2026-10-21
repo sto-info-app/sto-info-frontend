@@ -1,0 +1,33 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: inline-flex;
+}
+
+// A cog in the lilac the help links wear, so the two asides to a page read as
+// a pair: one says how the page works, the other where to change it.
+.settings-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 50%;
+  color: vars.$lcars-help-link;
+  font-size: 1.5rem;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-white;
+    transform: rotate(45deg);
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sunflower;
+    outline-offset: 2px;
+  }
+}

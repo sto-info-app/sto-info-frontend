@@ -1387,6 +1387,21 @@ button.lcars-btn-auto {
   white-space: nowrap;
 }
 
+// A page's heading with a cog beside it (`app-settings-link`), going to the
+// settings for that page. The heading keeps the margins the theme gives every
+// h1, and the cog stands on its line, wrapping beneath it on a narrow screen
+// rather than squeezing it.
+.page-heading-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.75rem;
+
+  > h1 {
+    min-width: 0;
+  }
+}
+
 // FC-044: less motion everywhere for everybody whose system asks for it, not
 // only where a component remembered to ask. Animations stop on the element's
 // own resting style rather than a frame of the animation, so nothing blinks,

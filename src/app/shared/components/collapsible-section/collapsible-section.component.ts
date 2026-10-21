@@ -1,5 +1,11 @@
 import { NgClass } from '@angular/common';
-import { Component, Input, OnInit, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  Input,
+  OnInit,
+  inject,
+} from '@angular/core';
 
 import { SectionFoldService } from 'src/app/shared/services/section-fold.service';
 
@@ -36,6 +42,7 @@ let nextCollapsibleSectionId = 0;
 })
 export class CollapsibleSectionComponent implements OnInit {
   private readonly _folds = inject(SectionFoldService);
+  private readonly _cdr = inject(ChangeDetectorRef);
 
   /** The heading shown in the bar. */
   @Input({ required: true }) heading!: string;
@@ -83,6 +90,18 @@ export class CollapsibleSectionComponent implements OnInit {
   toggle(): void {
     this.isExpanded = !this.isExpanded;
     this._folds.setFolded(this.key(), !this.isExpanded);
+  }
+
+  /**
+   * Opens the section if it is folded, for a link that leads to something
+   * inside it, and remembers it open. Called from outside the section, so it
+   * marks the section to be drawn again itself.
+   */
+  reveal(): void {
+    if (!this.isExpanded) {
+      this.toggle();
+      this._cdr.markForCheck();
+    }
   }
 
   /**
