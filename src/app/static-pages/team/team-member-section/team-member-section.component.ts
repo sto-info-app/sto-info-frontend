@@ -6,6 +6,7 @@ import { MemberVm } from '../models/member-vm.model';
 @Component({
   selector: 'app-team-member-section',
   templateUrl: './team-member-section.component.html',
+  styleUrls: ['./team-member-section.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [RouterModule, CollapsibleSectionComponent],

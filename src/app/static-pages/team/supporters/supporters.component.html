@@ -1,6 +1,6 @@
 <div
   id="team-supporters-container"
-  class="team-page">
+  class="team-page lcars-rotate">
   <h1>{{ appRouteTitles.ABOUT_SUPPORTERS }}</h1>
   <p>Starfleet runs on cooperation, and STO Info is no different.</p>
   <p>
@@ -14,20 +14,38 @@
     support is genuinely appreciated.
   </p>
 
+  <!--
+    Each supporter is a panel card, in the shape every panel on the site takes:
+    the name on a solid block across the top and the note, where there is one,
+    beneath it. The grid rotates the palette across the cards. Current and past
+    supporters share the one shape, so it is drawn once.
+  -->
+  <ng-template
+    #supporterGrid
+    let-supporters>
+    <ul class="team-grid lcars-rotate">
+      @for (supporter of supporters; track supporter.name) {
+        <li class="team-card">
+          <div class="team-card__heading">
+            <h3 class="team-card__name">{{ supporter.name }}</h3>
+          </div>
+          @if (supporter.note) {
+            <p class="team-card__body">
+              <span class="team-card__title">{{ supporter.note }}</span>
+            </p>
+          }
+        </li>
+      }
+    </ul>
+  </ng-template>
+
   <app-collapsible-section heading="Current Supporters">
     @if (currentSupporters.length > 0) {
-      <ul class="team-grid">
-        @for (supporter of currentSupporters; track supporter.name) {
-          <li class="team-card">
-            <div class="team-card-details">
-              <div class="team-card-name">{{ supporter.name }}</div>
-              @if (supporter.note) {
-                <div class="team-card-title">{{ supporter.note }}</div>
-              }
-            </div>
-          </li>
-        }
-      </ul>
+      <ng-container
+        *ngTemplateOutlet="
+          supporterGrid;
+          context: { $implicit: currentSupporters }
+        " />
     } @else {
       <p class="empty-state">
         We currently have no
@@ -44,18 +62,11 @@
 
   <app-collapsible-section heading="Past Supporters">
     @if (pastSupporters.length > 0) {
-      <ul class="team-grid">
-        @for (supporter of pastSupporters; track supporter.name) {
-          <li class="team-card">
-            <div class="team-card-details">
-              <div class="team-card-name">{{ supporter.name }}</div>
-              @if (supporter.note) {
-                <div class="team-card-title">{{ supporter.note }}</div>
-              }
-            </div>
-          </li>
-        }
-      </ul>
+      <ng-container
+        *ngTemplateOutlet="
+          supporterGrid;
+          context: { $implicit: pastSupporters }
+        " />
     } @else {
       <p class="empty-state">No past supporters listed yet.</p>
     }

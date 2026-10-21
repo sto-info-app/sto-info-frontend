@@ -1,5 +1,5 @@
-@use 'sass:color';
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
 
 .team-page {
   display: flex;
@@ -7,49 +7,109 @@
   gap: 1rem;
 }
 
+// Two to a row, stacking on a phone. The grid rotates the palette across the
+// cards it holds, so a row of them is varied rather than one colour repeated;
+// a card alone in its grid takes its section's colour instead.
 .team-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1.25rem;
   margin: 0.5rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
 }
 
+// The panel card the rest of the site draws: a coloured spine down the left,
+// the name on a solid block across the top, and the body beneath it. The
+// colour is read at runtime from the grid's rotation, so the spine and the
+// wash are mixed from it by the accent mixin rather than at build time.
 .team-card {
+  @include mixins.lcars-accent-panel-card;
+
+  min-width: 0;
+  box-shadow:
+    inset 0 1px 0 vars.$white-a8,
+    inset 0 -1px 0 vars.$black-a30,
+    0 4px 8px vars.$black-a40;
+}
+
+// A developer or volunteer card opens the member's page, and lifts under the
+// pointer to say so; a supporter's card is a plain record and stays put.
+.team-card--link {
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+
+  &:hover,
+  &:focus-within {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 vars.$white-a12,
+      inset 0 -1px 0 vars.$black-a30,
+      0 6px 12px vars.$black-a50;
+  }
+}
+
+// The anchor fills the panel, so the padding belongs to the pieces inside it:
+// the name sits on a block of colour that has to run the panel's full width.
+.team-card__link {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--lcars-panel-accent);
+    outline-offset: 2px;
+  }
+
+  // The block brightens with the lift, so the thing under the pointer is the
+  // thing that answers.
+  &:hover .team-card__heading,
+  &:focus-visible .team-card__heading {
+    filter: brightness(1.08);
+  }
+}
+
+.team-card__heading {
+  @include mixins.lcars-accent-panel-card-heading;
+}
+
+.team-card__name {
+  @include mixins.lcars-panel-card-name;
+}
+
+// The way on, at the block's right-hand end: the whole card is the link, and
+// the chevron says so without a second control to find.
+.team-card__marks {
+  @include mixins.lcars-panel-card-marks;
+
+  color: vars.$black-a60;
+  font-size: 0.8rem;
+}
+
+.team-card__body {
+  @include mixins.lcars-panel-card-body;
+
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
-  text-decoration: none;
-  border-radius: 6px;
-  background-color: vars.$lcars-grey-bg;
+  margin: 0;
   color: vars.$lcars-white;
-  transition: background-color 0.2s ease;
-
-  &:hover {
-    background-color: color.change(vars.$lcars-cool, $alpha: 0.3);
-  }
-
-  img {
-    width: 100px;
-    height: 100px;
-    border-radius: 6px;
-    object-fit: cover;
-  }
 }
 
-.team-card-details {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
+.team-card__photo {
+  flex: 0 0 auto;
+  width: 80px;
+  height: 80px;
+  border-radius: 6px;
+  object-fit: cover;
 }
 
-.team-card-name {
-  font-size: 1.2rem;
-  text-transform: uppercase;
-}
-
-.team-card-title {
-  color: vars.$lcars-perano;
+// The member's title, or the supporter's note, in the card's own colour.
+.team-card__title {
+  color: var(--lcars-panel-accent);
   font-size: 0.95rem;
 }
 

@@ -1,26 +1,38 @@
 <!--
   The only section this component draws, so it takes the colour its host is
-  given by the page's rotation.
+  given by the page's rotation. Each member is a panel card, in the shape
+  every panel on the site takes: the name on a solid block across the top,
+  the photo and title beneath, and the whole card the way to the member's
+  page. The grid rotates the palette across the cards.
 -->
 <app-collapsible-section [heading]="title">
   @if (vms.length > 0) {
-    <div class="team-grid">
+    <ul class="team-grid lcars-rotate">
       @for (vm of vms; track vm.member.slug) {
-        <a
-          class="team-card"
-          [routerLink]="vm.link">
-          <img
-            [src]="vm.thumbnailUrl"
-            [alt]="vm.member.name"
-            title="Team member photo"
-            loading="lazy" />
-          <div class="team-card-details">
-            <div class="team-card-name">{{ vm.member.name }}</div>
-            <div class="team-card-title">{{ vm.member.title }}</div>
-          </div>
-        </a>
+        <li class="team-card team-card--link">
+          <a
+            class="team-card__link"
+            [routerLink]="vm.link">
+            <div class="team-card__heading">
+              <h3 class="team-card__name">{{ vm.member.name }}</h3>
+              <span class="team-card__marks">
+                <i
+                  class="fas fa-chevron-right"
+                  aria-hidden="true"></i>
+              </span>
+            </div>
+            <div class="team-card__body">
+              <img
+                class="team-card__photo"
+                [src]="vm.thumbnailUrl"
+                alt=""
+                loading="lazy" />
+              <span class="team-card__title">{{ vm.member.title }}</span>
+            </div>
+          </a>
+        </li>
       }
-    </div>
+    </ul>
   } @else {
     <p class="empty-state">{{ emptyMessage }}</p>
   }
