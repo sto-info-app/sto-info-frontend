@@ -477,7 +477,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     ],
     how: {
       'How to write and publish news': [
-        'Manage News lists every post, drafts first and then the published newest first, with its category, date, status, title and summary. New post asks for a Title, a Slug, which is made from the title when left empty, a Summary for the list, a Category — Release notes, Announcement or General — and a Status, Draft or Published. The post itself goes under “Markdown Content”, and Show preview renders it as readers will see it.',
+        'Manage News lists every post, five to a page, drafts first and then the published newest first, with its category, date, status, title and summary. New post asks for a Title, a Slug, which is made from the title when left empty, a Summary, shown in the list and at the head of the post, a Category — Release notes, Announcement or General — and a Status, Draft or Published. The post itself goes under “Markdown Content”, and Show preview renders it as readers will see it.',
         'A post saved as Published is dated from that moment, and so is a draft published later, by Publish post in the list or by changing its Status. Editing a published post keeps its date. Taking a post back to Draft removes it from News, and publishing it again dates it afresh.',
         'Edit post opens the form again, and Delete post asks you to confirm. A deleted post cannot be put back.',
       ],
