@@ -86,14 +86,18 @@ export const ROADMAP_COMPLETE: RoadmapEntry[] = [
       'Custom account and character tracking options.',
     ],
   },
+  {
+    title: 'Fleet Communities',
+    details: [
+      'Characters now record the Fleet they are in.',
+      'Fleet Communities, Fleets and Armadas can be registered, found in the Fleet Directory and run through roles, recruitment and holdings.',
+      'Fleet roster management was added, with imports, history, reports, news, events and notifications.',
+      'Chat was added for Fleet, Armada and Community channels and between friends.',
+    ],
+  },
 ];
 
-export const ROADMAP_IN_PROGRESS: string[] = [
-  'Character fleet tracking.',
-  'Fleet-focused tracking and management capabilities.',
-  'Fleet roster management, news and notifications.',
-  'Chat functionality for fleet and friend communication.',
-];
+export const ROADMAP_IN_PROGRESS: string[] = [];
 
 export const ROADMAP_PLANNED: string[] = [
   'Space and Ground builds.',
