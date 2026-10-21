@@ -1,7 +1,10 @@
 @use 'lcars-variables' as vars;
 
+// At the top of whatever line it sits on: a flex row's, or a line of text's.
 :host {
   display: inline-flex;
+  align-self: flex-start;
+  vertical-align: top;
 }
 
 // A cog in the lilac the help links wear, so the two asides to a page read as
@@ -10,11 +13,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.75rem;
-  height: 2.75rem;
+  width: 1.375rem;
+  height: 1.375rem;
   border-radius: 50%;
   color: vars.$lcars-help-link;
-  font-size: 1.5rem;
+  font-size: 0.75rem;
   text-decoration: none;
   transition:
     color 0.2s ease,
