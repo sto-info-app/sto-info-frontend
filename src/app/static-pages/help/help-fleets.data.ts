@@ -914,7 +914,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       'How channels work': [
         'Every Community, Fleet and Armada has one standard channel, General, for all its members. It cannot be renamed or archived.',
         'Its chat moderators, the Admins and Owner and anybody the Owner gives Moderate chat under Delegation, can add up to three more with the + beside its name in the list. Each has a Name, “Who reads it” and “Who posts in it”: Members, Officers and up, Admins and the Owner, or The Owner. Posting is never open to more people than reading, and a channel kept for a role is marked with it in the list.',
-        'A channel can be changed later, or archived: press the ⋮ beside it in the list, then Change or Archive. Nobody reads or posts in an archived channel again.',
+        'A channel can be changed later, or archived: press the ⋮ beside it in the list, then Edit or Archive. Nobody reads or posts in an archived channel again.',
       ],
       'How to send, reply and mention': [
         'Enter sends and Shift+Enter starts a new line. A message can be up to 2,000 characters, and a count appears as you near the end. You can send ten messages in any ten seconds.',
