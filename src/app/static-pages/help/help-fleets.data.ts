@@ -944,7 +944,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
         paragraphs: [
           'Whoever holds Export transcripts at a Community, Fleet or Armada — its Admins and Owner, and anybody the Owner gives it under Delegation — finds Export behind the ⋮ beside each of its channels in the list down the side. Nobody can export a conversation between friends.',
           'Export transcript asks for the span, From and To, from any time in the last seven days, in your device’s time, and a “Purpose (10 to 500 characters)”. Choose Export, and the transcript is written in the background, in plain text and in UTC.',
-          'Under Your transcripts, at the foot of the list, each one you asked for in the last day shows its channel, its span and how it stands: Being written, Ready, Not written or Expired. You are sent the notice “Transcript ready”, and Download, beside it, is yours alone for 24 hours. The request, its purpose and each download are logged, and the purpose is printed at the head of the file.',
+          'Your transcripts, at the foot of the list, opens them where a conversation shows, and counts those ready to download; asking for one opens them too. Each one you asked for in the last day shows its channel, its span, how it stands and how many messages it holds: Being written, Ready or Expired, or “There was an issue generating the transcript. Try again later.” when one could not be made; nothing is kept then, so export the channel again. You are sent the notice “Transcript ready”, and Download, beside it, is yours alone for 24 hours. The request, its purpose and each download are logged, and the purpose is printed at the head of the file.',
         ],
       },
     },
@@ -1023,7 +1023,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       'How chat’s records are read': {
         paragraphs: [
           'A report’s copies are read only by site administrators. So is what a hold keeps, and they give a purpose every time they read it, which is logged. A Fleet’s own officers never see either.',
-          'A transcript can be downloaded only by the person who asked for it. Under Your transcripts on the Chat page it reads Being written, Ready, Not written or Expired.',
+          'A transcript can be downloaded only by the person who asked for it. Opened from Your transcripts on the Chat page, it reads Being written, Ready or Expired, or “There was an issue generating the transcript. Try again later.” when it could not be made.',
         ],
         requiresFeature: 'CHAT',
       },
