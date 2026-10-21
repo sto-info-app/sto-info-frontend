@@ -124,6 +124,43 @@ describe('NewsDetailComponent', () => {
     expect(body.textContent).toContain('<script>alert(1)</script>');
   });
 
+  // The post's category colours its page as it colours its card in the list,
+  // and the summary the list shows heads the post.
+  it('wears its category and shows its summary', async () => {
+    slug = 'my-slug';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(
+      of(
+        buildPost({
+          category: NewsCategory.RELEASE_NOTES,
+          summary: 'What changed, in a line.',
+        }),
+      ),
+    );
+
+    fixture.detectChanges();
+
+    const container: HTMLElement = fixture.nativeElement.querySelector(
+      '#news-detail-container',
+    );
+    expect(container.classList).toContain('category-RELEASE_NOTES');
+    expect(container.querySelector('.news-summary')?.textContent?.trim()).toBe(
+      'What changed, in a line.',
+    );
+    expect(container.querySelector('.news-nav')?.classList).toContain(
+      'lcars-rotate',
+    );
+  });
+
+  it('shows no summary when the post has none', async () => {
+    slug = 'my-slug';
+    await configure();
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.news-summary')).toBeNull();
+  });
+
   // Previous is the older post, on the left, and Next the newer, on the
   // right, each named beneath its pill, with Back to News between them.
   it('leads to the posts either side, older first, with their titles', async () => {

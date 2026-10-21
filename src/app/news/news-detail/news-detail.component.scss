@@ -1,17 +1,29 @@
 @use 'sass:color';
 @use 'lcars-variables' as vars;
+@use 'news-colours' as news;
 
 // The post takes the page's whole width; the way to the other posts sits at
-// its foot rather than in a column of its own.
+// its foot rather than in a column of its own. The post's category colours
+// its title, its meta bar, its edge and its headings, as it colours its card
+// in the list; a post of no known category keeps the list's grey.
 #news-detail-container {
+  --news-colour: #{news.$news-category-edge-default};
+
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
   min-width: 0;
   padding: 1rem;
 
+  @each $category, $colour in news.$news-category-colours {
+    &.category-#{$category} {
+      --news-colour: #{$colour};
+    }
+  }
+
   h1 {
     margin: 0;
+    color: var(--news-colour);
     text-transform: uppercase;
     line-height: 1.2;
   }
@@ -69,14 +81,18 @@
   font-size: 0.9rem;
 }
 
+// The category and the date at either end of a bar in the category's colour,
+// as the list's card heads each post.
 .news-meta {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 1.5rem;
   padding: 0.75rem 1.2rem;
   border-radius: 28px;
-  background: color.change(vars.$lcars-c46, $alpha: 0.2);
+  background: var(--news-colour);
+  color: vars.$lcars-black;
 
   .news-category,
   .news-date {
@@ -84,22 +100,27 @@
     align-items: center;
     gap: 0.5rem;
     text-transform: uppercase;
+    font-weight: 700;
     font-size: 0.85rem;
     letter-spacing: 0.08em;
   }
 
   .news-date {
-    opacity: 0.75;
-  }
-
-  .news-category-icon,
-  .news-date-icon {
-    color: vars.$lcars-c44;
+    margin-left: auto;
+    color: vars.$black-a80;
   }
 }
 
+// The summary the list shows, in its own colour between the bar and the post.
+.news-summary {
+  margin: 0;
+  color: vars.$lcars-gold;
+  font-size: 1.1rem;
+  line-height: 1.5;
+}
+
 .news-article {
-  border-left: 12px solid vars.$lcars-c47;
+  border-left: 12px solid var(--news-colour);
   border-radius: 0 28px 28px 0;
   padding: 1rem 1.2rem;
   background: color.change(vars.$lcars-c46, $alpha: 0.2);
@@ -117,6 +138,7 @@
 .news-body ::ng-deep {
   :is(h1, h2, h3, h4, h5, h6) {
     margin: 1.5rem 0 0.5rem;
+    color: var(--news-colour);
   }
 
   p {

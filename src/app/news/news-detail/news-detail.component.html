@@ -2,7 +2,9 @@
   <app-loading-bar loadingText="Loading post"></app-loading-bar>
 }
 
-<div id="news-detail-container">
+<div
+  id="news-detail-container"
+  [ngClass]="post ? 'category-' + post.category : ''">
   @if (errorMessage) {
     <app-lcars-error-message
       title="Transmission failed"
@@ -41,6 +43,10 @@
       }
     </div>
 
+    @if (post.summary) {
+      <p class="news-summary">{{ post.summary }}</p>
+    }
+
     <article class="news-article">
       <div
         class="news-body"
@@ -50,10 +56,11 @@
     <!--
       The posts either side of this one in the news, older to the left and
       newer to the right, with the way back to the list between them. A side
-      with no post stays empty, so the others keep their places.
+      with no post stays empty, so the others keep their places. The three
+      take successive colours of the palette.
     -->
     <nav
-      class="news-nav"
+      class="news-nav lcars-rotate"
       aria-label="Other posts">
       <div class="news-nav__side news-nav__side--previous">
         @if (post.previous; as previous) {
