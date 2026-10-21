@@ -69,6 +69,11 @@
   font-size: 0.85rem;
 }
 
+// Each date and time on one line; the range breaks only around "to".
+.chat-transcripts__when {
+  white-space: nowrap;
+}
+
 .chat-transcripts__download {
   margin: 0;
   white-space: nowrap;

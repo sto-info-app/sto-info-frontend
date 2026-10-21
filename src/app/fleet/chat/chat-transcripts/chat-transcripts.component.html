@@ -76,8 +76,13 @@
                 }
               </td>
               <td data-label="From – to">
-                {{ transcript.fromAt | appDate: 'short' }} to
-                {{ transcript.toAt | appDate: 'short' }}
+                <span class="chat-transcripts__when">{{
+                  transcript.fromAt | appDate: 'short'
+                }}</span>
+                to
+                <span class="chat-transcripts__when">{{
+                  transcript.toAt | appDate: 'short'
+                }}</span>
               </td>
               <td
                 data-label="Status"
