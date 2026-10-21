@@ -742,7 +742,7 @@ describe('ChatPageComponent', () => {
 
       const element = await open('/chat');
 
-      expect(element.querySelector('.chat-page__count')).toBeNull();
+      expect(element.querySelector('.header-count-badge')).toBeNull();
     });
 
     it('opens them beside the list, a row each, with a download while ready', async () => {

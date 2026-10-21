@@ -261,13 +261,13 @@
             <ul class="chat-page__places">
               <li class="chat-page__place">
                 <a
-                  class="chat-page__place-link"
+                  class="chat-page__place-link chat-page__place-link--count"
                   [routerLink]="['/chat', 'transcripts']"
                   [attr.aria-current]="isTranscriptsOpen() ? 'page' : null"
                   [class.chat-page__place-link--open]="isTranscriptsOpen()">
                   <span>Your transcripts</span>
                   @if (readyCount() > 0) {
-                    &ngsp;<span class="chat-page__count"
+                    &ngsp;<span class="header-count-badge"
                       >{{ readyCount()
                       }}<span class="sr-only"> ready</span></span
                     >

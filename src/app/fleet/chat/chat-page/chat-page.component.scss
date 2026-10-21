@@ -290,7 +290,9 @@
   min-width: 0;
   min-height: 0;
 
-  > app-chat-conversation {
+  // Each fills the pane, so whatever scrolls inside it has the height to.
+  > app-chat-conversation,
+  > app-chat-transcripts {
     flex: 1 1 auto;
     min-height: 0;
   }
@@ -319,16 +321,39 @@
   }
 }
 
-// How many transcripts are ready, beside the link to them: a small pill in
-// the group's colour.
-.chat-page__count {
-  display: inline-block;
-  min-width: 1.4em;
-  margin-left: 0.25rem;
-  padding: 0 0.4em;
-  border-radius: 1em;
-  background: var(--chat-group-accent, #{vars.$lcars-sky});
-  color: vars.$lcars-black;
-  font-size: 0.8rem;
-  text-align: center;
+// The link to the transcripts, its name at the start and its count at the
+// end of one row, rather than the column a channel's name and note take.
+.chat-page__place-link--count {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+// How many transcripts are ready: the count badge every heading uses. That
+// rule is scoped to `.lcars-text-bar`, so it is restated for the list here,
+// as the friends page restates it for its side menu.
+.header-count-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background-color: vars.$lcars-tangerine;
+  color: vars.$a11y-black;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+
+  // On the open link, which takes its group's colour, it is the black pill
+  // the friends page's coloured side buttons carry instead, so it never
+  // sinks into a colour close to its own.
+  .chat-page__place-link--open & {
+    background-color: vars.$lcars-black;
+    color: vars.$lcars-white;
+  }
 }
