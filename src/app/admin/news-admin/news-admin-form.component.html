@@ -5,7 +5,7 @@
 <div
   id="news-admin-form-page"
   class="admin-layout">
-  <div class="admin-content admin-main-column">
+  <div class="admin-content">
     <h1>{{ isEdit ? 'Edit post' : 'New post' }}</h1>
     <app-help-link
       slug="site-admin-site-content"
@@ -40,7 +40,7 @@
               <small class="field-error">A title is required.</small>
             }
           </div>
-          <div class="lcars-input-container">
+          <div class="lcars-input-container admin-field-full">
             <label for="news-slug-input">Slug</label>
             <input
               id="news-slug-input"
@@ -50,13 +50,13 @@
               maxlength="280" />
           </div>
 
-          <div class="lcars-input-container">
+          <div class="lcars-input-container admin-field-full">
             <label for="news-summary-input">Summary</label>
-            <input
+            <textarea
               id="news-summary-input"
-              type="text"
               formControlName="summary"
-              maxlength="500" />
+              rows="3"
+              maxlength="500"></textarea>
           </div>
 
           <div class="lcars-select-container">
@@ -135,15 +135,10 @@
         </button>
       </div>
     </form>
-  </div>
 
-  <div class="admin-side-column col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
+    <div class="admin-page-foot">
       <a
-        class="full-width-btn-link"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="'/' + appRoutes.ADMIN_NEWS"
         >Back to posts</a
       >

@@ -5,7 +5,7 @@
 <div
   id="news-admin-page"
   class="admin-layout">
-  <div class="admin-content admin-main-column">
+  <div class="admin-content">
     <h1>Manage News</h1>
     <app-help-link
       slug="site-admin-site-content"
@@ -107,21 +107,18 @@
           }
         </div>
       }
-    </app-collapsible-section>
-  </div>
 
-  <div class="admin-side-column col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
+      @if (totalPages > 1) {
+        <app-lcars-pagination
+          [page]="page"
+          [pageCount]="totalPages"
+          (turn)="load(page + $event)" />
+      }
+    </app-collapsible-section>
+
+    <div class="admin-page-foot">
       <a
-        class="full-width-btn-link"
-        [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
-        >New post</a
-      >
-      <a
-        class="full-width-btn-link"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

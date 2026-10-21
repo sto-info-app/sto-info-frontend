@@ -38,6 +38,18 @@
   color: vars.$white-a76;
 }
 
+// The way off a page that has no side column, at its foot: the news pages,
+// whose content takes the whole width.
+.admin-page-foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+
+  .lcars-btn {
+    margin: 0;
+  }
+}
+
 // What an admin page's sections hold, once their bars became collapsible
 // sections: the content sits under its bar rather than in a dark box of its
 // own.

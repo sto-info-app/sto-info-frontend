@@ -78,10 +78,41 @@ describe('NewsAdminListComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('loads posts on init', () => {
+  it('loads the first page of five posts on init', () => {
     fixture.detectChanges();
+    expect(serviceSpy.getAllNewsForAdmin).toHaveBeenCalledWith({
+      page: 1,
+      pageSize: 5,
+    });
     expect(component.posts).toHaveLength(1);
+    expect(component.total).toBe(1);
+    expect(component.totalPages).toBe(1);
     expect(component.isLoading).toBe(false);
+    expect(
+      fixture.nativeElement.querySelector('app-lcars-pagination'),
+    ).toBeNull();
+  });
+
+  it('turns the pages, five posts to each', () => {
+    serviceSpy.getAllNewsForAdmin.mockReturnValue(
+      of({ items: [post], total: 12, page: 1, pageSize: 5 }),
+    );
+
+    fixture.detectChanges();
+
+    expect(component.totalPages).toBe(3);
+    const pager: HTMLElement = fixture.nativeElement.querySelector(
+      'app-lcars-pagination',
+    );
+    expect(pager).not.toBeNull();
+
+    pager.querySelectorAll('button')[1].click();
+
+    expect(component.page).toBe(2);
+    expect(serviceSpy.getAllNewsForAdmin).toHaveBeenLastCalledWith({
+      page: 2,
+      pageSize: 5,
+    });
   });
 
   it('handles empty datasets', () => {
@@ -141,7 +172,34 @@ describe('NewsAdminListComponent', () => {
       expect.anything(),
     );
     expect(serviceSpy.deleteNews).toHaveBeenCalledWith('1');
-    expect(component.posts).toHaveLength(0);
+    // The page is read again, so the next post moves up into its place.
+    expect(serviceSpy.getAllNewsForAdmin).toHaveBeenCalledTimes(2);
+    expect(serviceSpy.getAllNewsForAdmin).toHaveBeenLastCalledWith({
+      page: 1,
+      pageSize: 5,
+    });
+  });
+
+  // Deleting the only post of a later page would leave an empty page, so
+  // the list goes back one.
+  it('goes back a page when the last post of a later page is deleted', () => {
+    const dialogRefSpy = {
+      afterClosed: jest.fn().mockReturnValue(of(true)),
+    } as unknown as MatDialogRef<unknown>;
+    dialogSpy.open.mockReturnValue(dialogRefSpy);
+    serviceSpy.getAllNewsForAdmin.mockReturnValue(
+      of({ items: [post], total: 6, page: 2, pageSize: 5 }),
+    );
+
+    fixture.detectChanges();
+    component.load(2);
+    component.remove(post);
+
+    expect(serviceSpy.getAllNewsForAdmin).toHaveBeenLastCalledWith({
+      page: 1,
+      pageSize: 5,
+    });
+    expect(component.page).toBe(1);
   });
 
   it('does not delete a post when cancelled', () => {

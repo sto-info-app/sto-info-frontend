@@ -25,13 +25,15 @@ import {
 import { NewsService } from 'src/app/news/news.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 
-const PAGE_SIZE = 20;
+/** Posts to a page: few enough to read down with their summaries. */
+const PAGE_SIZE = 5;
 const LOAD_TIMEOUT_MS = 12000;
 
 /**
- * Admin listing of all news posts (including drafts) with publish/delete
- * actions.
+ * Admin listing of all news posts (including drafts), five to a page, with
+ * publish/delete actions.
  */
 @Component({
   selector: 'app-news-admin-list',
@@ -47,6 +49,7 @@ const LOAD_TIMEOUT_MS = 12000;
     HelpLinkComponent,
     LcarsErrorMessageComponent,
     CollapsibleSectionComponent,
+    LcarsPaginationComponent,
   ],
 })
 export class NewsAdminListComponent implements OnInit {
@@ -62,22 +65,36 @@ export class NewsAdminListComponent implements OnInit {
   newsStatus = NewsStatus;
 
   posts: NewsPost[] = [];
+  page = 1;
+  total = 0;
   isLoading = false;
   errorMessage = '';
 
   /**
-   * Loads all posts on init.
+   * Loads the first page of posts on init.
    */
   ngOnInit(): void {
     this.load();
   }
 
   /**
-   * Loads all posts for administration.
+   * How many pages the posts make.
+   *
+   * @returns The page count, at least 1.
    */
-  load(): void {
+  get totalPages(): number {
+    return Math.max(1, Math.ceil(this.total / PAGE_SIZE));
+  }
+
+  /**
+   * Loads a page of posts for administration.
+   *
+   * @param page - The 1-based page number; the current page by default.
+   */
+  load(page = this.page): void {
     this.isLoading = true;
     this.errorMessage = '';
+    this.page = page;
 
     const loadingTimeout = setTimeout(() => {
       if (!this.isLoading) {
@@ -94,7 +111,7 @@ export class NewsAdminListComponent implements OnInit {
     }, LOAD_TIMEOUT_MS);
 
     this._newsService
-      .getAllNewsForAdmin({ page: 1, pageSize: PAGE_SIZE })
+      .getAllNewsForAdmin({ page, pageSize: PAGE_SIZE })
       .pipe(
         take(1),
         observeInZone(this._ngZone, this._cdr),
@@ -103,6 +120,7 @@ export class NewsAdminListComponent implements OnInit {
       .subscribe({
         next: result => {
           this.posts = Array.isArray(result?.items) ? result.items : [];
+          this.total = result?.total ?? 0;
           this.isLoading = false;
         },
         error: () => {
@@ -128,7 +146,9 @@ export class NewsAdminListComponent implements OnInit {
   }
 
   /**
-   * Deletes a post after confirmation.
+   * Deletes a post after confirmation, then reads the page again so the
+   * next post moves up into its place; the last post of a later page takes
+   * the list back a page.
    *
    * @param post - The post to delete.
    */
@@ -156,7 +176,12 @@ export class NewsAdminListComponent implements OnInit {
           .deleteNews(post.id)
           .pipe(observeInZone(this._ngZone, this._cdr))
           .subscribe({
-            next: () => (this.posts = this.posts.filter(p => p.id !== post.id)),
+            next: () =>
+              this.load(
+                this.posts.length === 1 && this.page > 1
+                  ? this.page - 1
+                  : this.page,
+              ),
             error: () => (this.errorMessage = 'Failed to delete the post.'),
           });
       });
