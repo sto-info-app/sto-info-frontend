@@ -1,4 +1,8 @@
 @use 'lcars-variables' as vars;
+@use 'lcars-tabs' as tabs;
+
+// The strip of tabs along the top of the page.
+@include tabs.lcars-tab-strip($min-width: 0);
 
 // `main` gives the page a left gutter but no right one, and the two columns
 // here sit directly against each other. Both gaps are the column stack's to
@@ -193,6 +197,24 @@
       font-weight: 700;
       text-transform: uppercase;
     }
+  }
+}
+
+// A setting a cog led to, ringed in the page's highlight for a moment so the
+// eye finds it among the rest. Kept still for those who asked for less motion.
+.settings-marked {
+  border-radius: 8px;
+  outline: 2px solid vars.$lcars-sunflower;
+  outline-offset: 6px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: settings-marked-in 400ms ease-out;
+  }
+}
+
+@keyframes settings-marked-in {
+  from {
+    outline-color: transparent;
   }
 }
 

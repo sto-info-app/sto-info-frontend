@@ -9,299 +9,438 @@
       slug="your-settings"
       label="Help with Settings" />
     @if (!isLoading) {
+      <!--
+        One tab a part of the site. The address names the tab, so a cog
+        elsewhere can open the page on it, and the arrows move between them.
+      -->
+      <div
+        class="lcars-tabs"
+        role="tablist"
+        aria-label="Settings">
+        @for (tab of tabs; track tab) {
+          <button
+            type="button"
+            role="tab"
+            class="lcars-tab"
+            [id]="'settings-tab-' + tab"
+            [class.active]="activeTab === tab"
+            [attr.aria-selected]="activeTab === tab"
+            [attr.tabindex]="activeTab === tab ? 0 : -1"
+            [attr.aria-controls]="'settings-panel-' + tab"
+            (keydown)="onTabKeydown($event)"
+            (click)="select(tab)">
+            {{ tabLabels[tab] }}
+          </button>
+        }
+        <span
+          class="lcars-tabs-filler"
+          aria-hidden="true"></span>
+      </div>
+
       <form [formGroup]="settingsForm">
-        <app-collapsible-section heading="Privacy">
-          <div class="settings-content">
-            <app-help-link
-              slug="privacy-mode"
-              label="Help with Privacy Mode" />
-            <div class="settings-row">
-              <app-lcars-toggle
-                formControlName="privacyMode"
-                label="Privacy Mode"
-                ariaLabel="Privacy Mode"
-              ></app-lcars-toggle>
-              @if (savedKey === 'privacyMode') {
-                <span class="settings-saved">Saved</span>
-              }
-              <details class="settings-help">
-                <summary
-                  class="settings-help-trigger"
-                  aria-label="Privacy mode details"
-                  title="Privacy mode details"
-                >
-                  <i class="fas fa-question-circle" aria-hidden="true"></i>
-                </summary>
-                <div class="settings-help-popup">
-                  <p>
-                    <strong>Privacy mode</strong>
-                    <span>
-                      Private details like email addresses and usernames are
-                      hidden while this is on. This helps protect your privacy if
-                      you are broadcasting, sharing your screen or recording
-                      videos.
-                    </span>
-                  </p>
-                </div>
-              </details>
-            </div>
-          </div>
-        </app-collapsible-section>
-        <app-collapsible-section heading="Security">
-          <div class="settings-content">
-            <app-help-link
-              slug="staying-signed-in"
-              label="Help with staying signed in" />
-            <div class="settings-field">
-              <div class="settings-chooser">
-                <div class="lcars-input-container">
-                  <label for="session-timeout">Login inactivity timeout</label>
-                  <select
-                    id="session-timeout"
-                    formControlName="sessionTimeoutMinutes"
-                    aria-describedby="session-timeout-description"
-                  >
-                    @for (option of sessionTimeoutOptions; track option.value) {
-                      <option [ngValue]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
-                </div>
-                @if (savedKey === 'sessionTimeoutMinutes') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p id="session-timeout-description" class="settings-description">
-                How long you can be away before you are signed out. Anything you
-                do here keeps the session going, so the countdown only runs while
-                you are idle. You will be warned shortly before it runs out.
-              </p>
-            </div>
-          </div>
-        </app-collapsible-section>
-        <app-collapsible-section heading="Dates and times">
-          <div class="settings-content">
-            <app-help-link
-              slug="dates-and-times"
-              label="Help with dates and times" />
-            <div class="settings-field">
-              <div class="settings-chooser">
-                <div class="lcars-input-container">
-                  <label for="display-timezone">Show dates and times in</label>
-                  <select
-                    id="display-timezone"
-                    formControlName="displayTimezone"
-                    aria-describedby="display-timezone-description"
-                  >
-                    <option [ngValue]="null">
-                      Automatically &mdash; {{ deviceTimezoneLabel }}
-                    </option>
-                    @for (zone of timezones; track zone) {
-                      <option [ngValue]="zone">{{ describe(zone) }}</option>
-                    }
-                  </select>
-                </div>
-                @if (savedKey === 'displayTimezone') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p id="display-timezone-description" class="settings-description">
-                Every date and time in STO Info is shown in this zone. Left
-                automatic, it follows whichever device you are using, which is
-                what most people want. Choose a zone if you would rather your
-                dates stayed put when you travel.
-              </p>
-            </div>
-          </div>
-        </app-collapsible-section>
-        @if (isFleetOffered) {
-          <app-collapsible-section heading="Fleet">
+        <div
+          id="settings-panel-account"
+          role="tabpanel"
+          aria-labelledby="settings-tab-account"
+          [hidden]="activeTab !== 'account'">
+          <app-collapsible-section heading="Privacy">
             <div class="settings-content">
               <app-help-link
-                slug="fleet-settings"
-                label="Help with Fleet settings" />
-              <div class="settings-field">
+                slug="privacy-mode"
+                label="Help with Privacy Mode" />
+              <div
+                class="settings-row"
+                [id]="anchors.privacyMode">
+                <app-lcars-toggle
+                  formControlName="privacyMode"
+                  label="Privacy Mode"
+                  ariaLabel="Privacy Mode"
+                ></app-lcars-toggle>
+                @if (savedKey === 'privacyMode') {
+                  <span class="settings-saved">Saved</span>
+                }
+                <details class="settings-help">
+                  <summary
+                    class="settings-help-trigger"
+                    aria-label="Privacy mode details"
+                    title="Privacy mode details"
+                  >
+                    <i class="fas fa-question-circle" aria-hidden="true"></i>
+                  </summary>
+                  <div class="settings-help-popup">
+                    <p>
+                      <strong>Privacy mode</strong>
+                      <span>
+                        Private details like email addresses and usernames are
+                        hidden while this is on. This helps protect your privacy
+                        if you are broadcasting, sharing your screen or recording
+                        videos.
+                      </span>
+                    </p>
+                  </div>
+                </details>
+              </div>
+            </div>
+          </app-collapsible-section>
+          <app-collapsible-section heading="Galactic Personnel Registry">
+            <div class="settings-content">
+              <app-help-link
+                slug="listing-your-own-record"
+                label="Help with the registry" />
+              <div class="settings-field settings-registry">
+                @switch (registryState) {
+                  @case ('loading') {
+                    <p class="settings-description">
+                      Reading your registry setting…
+                    </p>
+                  }
+                  @case ('failed') {
+                    <p class="settings-description">
+                      Your registry setting could not be read. Change it from
+                      your <a [routerLink]="profileLink">Personnel Record</a>
+                      instead.
+                    </p>
+                  }
+                  @default {
+                    <div
+                      class="settings-row"
+                      [id]="anchors.registry">
+                      <app-lcars-toggle
+                        [formControl]="registryControl"
+                        [label]="registryLabel"
+                        [ariaLabel]="registryLabel"
+                      ></app-lcars-toggle>
+                      @if (savedKey === 'publiclyVisible') {
+                        <span class="settings-saved">Saved</span>
+                      }
+                    </div>
+                    <p class="settings-description">
+                      When on, your username, profile picture, join date and
+                      last sign-in date become public, along with any STO
+                      accounts and captains you have also marked as publicly
+                      visible. Your real name, email address and private notes
+                      are never shown. The same switch is on your Personnel
+                      Record.
+                    </p>
+                  }
+                }
+              </div>
+            </div>
+          </app-collapsible-section>
+          <app-collapsible-section heading="Security">
+            <div class="settings-content">
+              <app-help-link
+                slug="staying-signed-in"
+                label="Help with staying signed in" />
+              <div
+                class="settings-field"
+                [id]="anchors.sessionTimeout">
                 <div class="settings-chooser">
                   <div class="lcars-input-container">
-                    <label for="export-timezone">Read Fleet roster exports as</label>
+                    <label for="session-timeout">Login inactivity timeout</label>
                     <select
-                      id="export-timezone"
-                      formControlName="stoExportTimezone"
-                      aria-describedby="export-timezone-description"
+                      id="session-timeout"
+                      formControlName="sessionTimeoutMinutes"
+                      aria-describedby="session-timeout-description"
                     >
-                      <option [ngValue]="null">My device’s zone</option>
+                      @for (option of sessionTimeoutOptions; track option.value) {
+                        <option [ngValue]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (savedKey === 'sessionTimeoutMinutes') {
+                    <span class="settings-saved">Saved</span>
+                  }
+                </div>
+                <p id="session-timeout-description" class="settings-description">
+                  How long you can be away before you are signed out. Anything
+                  you do here keeps the session going, so the countdown only
+                  runs while you are idle. You will be warned shortly before it
+                  runs out.
+                </p>
+              </div>
+            </div>
+          </app-collapsible-section>
+          <app-collapsible-section heading="Dates and times">
+            <div class="settings-content">
+              <app-help-link
+                slug="dates-and-times"
+                label="Help with dates and times" />
+              <div
+                class="settings-field"
+                [id]="anchors.displayTimezone">
+                <div class="settings-chooser">
+                  <div class="lcars-input-container">
+                    <label for="display-timezone">Show dates and times in</label>
+                    <select
+                      id="display-timezone"
+                      formControlName="displayTimezone"
+                      aria-describedby="display-timezone-description"
+                    >
+                      <option [ngValue]="null">
+                        Automatically &mdash; {{ deviceTimezoneLabel }}
+                      </option>
                       @for (zone of timezones; track zone) {
                         <option [ngValue]="zone">{{ describe(zone) }}</option>
                       }
                     </select>
                   </div>
-                  @if (savedKey === 'stoExportTimezone') {
+                  @if (savedKey === 'displayTimezone') {
                     <span class="settings-saved">Saved</span>
                   }
                 </div>
-                <p id="export-timezone-description" class="settings-description">
-                  Star Trek Online writes the times in a roster export using the
-                  clock of the computer it was exported from, without saying which
-                  zone that was. An import starts on the zone chosen here, or on
-                  the zone of the device you import on. It is separate from the
-                  setting above, and you can change it for a single import.
+                <p id="display-timezone-description" class="settings-description">
+                  Every date and time in STO Info is shown in this zone. Left
+                  automatic, it follows whichever device you are using, which is
+                  what most people want. Choose a zone if you would rather your
+                  dates stayed put when you travel.
                 </p>
               </div>
-              @if (isChatOffered) {
-              <div class="settings-field">
-                <div class="settings-chooser">
-                  <div class="lcars-input-container">
-                    <label for="presence-visibility">Who can see when I am online</label>
-                    <select
-                      id="presence-visibility"
-                      formControlName="presenceVisibility"
-                      aria-describedby="presence-visibility-description"
-                    >
-                      @for (option of presenceOptions; track option.value) {
-                        <option [ngValue]="option.value">{{ option.label }}</option>
-                      }
-                    </select>
+            </div>
+          </app-collapsible-section>
+        </div>
+
+        @if (isChatOffered) {
+          <div
+            id="settings-panel-chat"
+            role="tabpanel"
+            aria-labelledby="settings-tab-chat"
+            [hidden]="activeTab !== 'chat'">
+            <app-collapsible-section heading="Online and typing">
+              <div class="settings-content">
+                <app-help-link
+                  slug="chat-settings"
+                  label="Help with chat settings" />
+                <div
+                  class="settings-field"
+                  [id]="anchors.presence">
+                  <div class="settings-chooser">
+                    <div class="lcars-input-container">
+                      <label for="presence-visibility">Who can see when I am online</label>
+                      <select
+                        id="presence-visibility"
+                        formControlName="presenceVisibility"
+                        aria-describedby="presence-visibility-description"
+                      >
+                        @for (option of presenceOptions; track option.value) {
+                          <option [ngValue]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    @if (savedKey === 'presenceVisibility') {
+                      <span class="settings-saved">Saved</span>
+                    }
                   </div>
-                  @if (savedKey === 'presenceVisibility') {
+                  <p id="presence-visibility-description" class="settings-description">
+                    Online means you have STO Info open, never whether you are
+                    in the game. Only people who can already see your profile
+                    are ever included, and nobody you have blocked or who has
+                    blocked you.
+                  </p>
+                </div>
+                <div class="settings-field">
+                  <div
+                    class="settings-row"
+                    [id]="anchors.appearOffline">
+                    <app-lcars-toggle
+                      formControlName="appearOffline"
+                      label="Appear offline"
+                      ariaLabel="Appear offline"
+                    ></app-lcars-toggle>
+                    @if (savedKey === 'appearOffline') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <p class="settings-description">
+                    Hides you from everybody for now, whatever you chose above.
+                    Your choice is remembered for when you switch this back off.
+                  </p>
+                </div>
+                <div class="settings-field">
+                  <div
+                    class="settings-row"
+                    [id]="anchors.typing">
+                    <app-lcars-toggle
+                      formControlName="typingIndicatorsEnabled"
+                      label="Show when I am typing"
+                      ariaLabel="Show when I am typing"
+                    ></app-lcars-toggle>
+                    @if (savedKey === 'typingIndicatorsEnabled') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <p class="settings-description">
+                    Lets people in a chat see when you are writing, and lets you
+                    see when they are. Off unless you turn it on.
+                  </p>
+                </div>
+              </div>
+            </app-collapsible-section>
+          </div>
+        }
+
+        @if (isFleetOffered) {
+          <div
+            id="settings-panel-fleet"
+            role="tabpanel"
+            aria-labelledby="settings-tab-fleet"
+            [hidden]="activeTab !== 'fleet'">
+            <app-collapsible-section heading="Roster imports">
+              <div class="settings-content">
+                <app-help-link
+                  slug="fleet-settings"
+                  label="Help with Fleet settings" />
+                <div
+                  class="settings-field"
+                  [id]="anchors.exportTimezone">
+                  <div class="settings-chooser">
+                    <div class="lcars-input-container">
+                      <label for="export-timezone">Read Fleet roster exports as</label>
+                      <select
+                        id="export-timezone"
+                        formControlName="stoExportTimezone"
+                        aria-describedby="export-timezone-description"
+                      >
+                        <option [ngValue]="null">My device’s zone</option>
+                        @for (zone of timezones; track zone) {
+                          <option [ngValue]="zone">{{ describe(zone) }}</option>
+                        }
+                      </select>
+                    </div>
+                    @if (savedKey === 'stoExportTimezone') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <p id="export-timezone-description" class="settings-description">
+                    Star Trek Online writes the times in a roster export using
+                    the clock of the computer it was exported from, without
+                    saying which zone that was. An import starts on the zone
+                    chosen here, or on the zone of the device you import on. It
+                    is separate from the zone dates are shown in, and you can
+                    change it for a single import.
+                  </p>
+                </div>
+              </div>
+            </app-collapsible-section>
+          </div>
+
+          <div
+            id="settings-panel-notifications"
+            role="tabpanel"
+            aria-labelledby="settings-tab-notifications"
+            [hidden]="activeTab !== 'notifications'">
+            <app-collapsible-section heading="Notifications">
+              <div class="settings-content">
+                <app-help-link
+                  slug="what-you-are-notified-about"
+                  label="Help with notifications" />
+                <p class="settings-description">
+                  These arrive in STO Info only. Everything else a Fleet does
+                  &mdash; news, imports, events being scheduled &mdash; stays in
+                  the activity feed rather than your inbox.
+                </p>
+                @if (isChatOffered) {
+                  <div
+                    class="settings-row"
+                    [id]="anchors.mentions">
+                    <app-lcars-toggle
+                      formControlName="notifyMention"
+                      label="Mentions"
+                      ariaLabel="Notify me about mentions"
+                    ></app-lcars-toggle>
+                    @if (savedKey === 'notifyMention') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <div
+                    class="settings-row"
+                    [id]="anchors.replies">
+                    <app-lcars-toggle
+                      formControlName="notifyReply"
+                      label="Replies"
+                      ariaLabel="Notify me about replies"
+                    ></app-lcars-toggle>
+                    @if (savedKey === 'notifyReply') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <div
+                    class="settings-row"
+                    [id]="anchors.directMessages">
+                    <app-lcars-toggle
+                      formControlName="notifyDirectMessage"
+                      label="Direct messages"
+                      ariaLabel="Notify me about direct messages"
+                    ></app-lcars-toggle>
+                    @if (savedKey === 'notifyDirectMessage') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <p class="settings-description">
+                    A direct message tells you once while you are away, and not
+                    again until you open the conversation.
+                  </p>
+                }
+                <div
+                  class="settings-row"
+                  [id]="anchors.rosterProposals">
+                  <app-lcars-toggle
+                    formControlName="notifyRosterAssociation"
+                    label="Roster association proposals"
+                    ariaLabel="Notify me about roster association proposals"
+                  ></app-lcars-toggle>
+                  @if (savedKey === 'notifyRosterAssociation') {
                     <span class="settings-saved">Saved</span>
                   }
                 </div>
-                <p id="presence-visibility-description" class="settings-description">
-                  Online means you have STO Info open, never whether you are in
-                  the game. Only people who can already see your profile are
-                  ever included, and nobody you have blocked or who has blocked
-                  you.
+                <p class="settings-description">
+                  Someone proposing that a character on an imported roster is
+                  yours. You always decide; switching this off means we stop
+                  telling you, and an unanswered proposal eventually expires.
+                </p>
+                <div
+                  class="settings-row"
+                  [id]="anchors.eventReminders">
+                  <app-lcars-toggle
+                    formControlName="notifyEventReminder"
+                    label="Event reminders"
+                    ariaLabel="Notify me about event reminders"
+                  ></app-lcars-toggle>
+                  @if (savedKey === 'notifyEventReminder') {
+                    <span class="settings-saved">Saved</span>
+                  }
+                </div>
+                <p class="settings-description">
+                  Only for events you have asked to be reminded about.
                 </p>
               </div>
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="appearOffline"
-                  label="Appear offline"
-                  ariaLabel="Appear offline"
-                ></app-lcars-toggle>
-                @if (savedKey === 'appearOffline') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p class="settings-description">
-                Hides you from everybody for now, whatever you chose above. Your
-                choice is remembered for when you switch this back off.
-              </p>
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="typingIndicatorsEnabled"
-                  label="Show when I am typing"
-                  ariaLabel="Show when I am typing"
-                ></app-lcars-toggle>
-                @if (savedKey === 'typingIndicatorsEnabled') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p class="settings-description">
-                Lets people in a chat see when you are writing, and lets you see
-                when they are. Off unless you turn it on.
-              </p>
-              }
-            </div>
-          </app-collapsible-section>
-          <app-collapsible-section heading="Notifications">
-            <div class="settings-content">
-              <app-help-link
-                slug="what-you-are-notified-about"
-                label="Help with notifications" />
-              <p class="settings-description">
-                These arrive in STO Info only. Everything else a Fleet does
-                &mdash; news, imports, events being scheduled &mdash; stays in the
-                activity feed rather than your inbox.
-              </p>
-              @if (isChatOffered) {
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="notifyMention"
-                  label="Mentions"
-                  ariaLabel="Notify me about mentions"
-                ></app-lcars-toggle>
-                @if (savedKey === 'notifyMention') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="notifyReply"
-                  label="Replies"
-                  ariaLabel="Notify me about replies"
-                ></app-lcars-toggle>
-                @if (savedKey === 'notifyReply') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="notifyDirectMessage"
-                  label="Direct messages"
-                  ariaLabel="Notify me about direct messages"
-                ></app-lcars-toggle>
-                @if (savedKey === 'notifyDirectMessage') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p class="settings-description">
-                A direct message tells you once while you are away, and not
-                again until you open the conversation.
-              </p>
-              }
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="notifyRosterAssociation"
-                  label="Roster association proposals"
-                  ariaLabel="Notify me about roster association proposals"
-                ></app-lcars-toggle>
-                @if (savedKey === 'notifyRosterAssociation') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p class="settings-description">
-                Someone proposing that a character on an imported roster is yours.
-                You always decide; switching this off means we stop telling you,
-                and an unanswered proposal eventually expires.
-              </p>
-              <div class="settings-row">
-                <app-lcars-toggle
-                  formControlName="notifyEventReminder"
-                  label="Event reminders"
-                  ariaLabel="Notify me about event reminders"
-                ></app-lcars-toggle>
-                @if (savedKey === 'notifyEventReminder') {
-                  <span class="settings-saved">Saved</span>
-                }
-              </div>
-              <p class="settings-description">
-                Only for events you have asked to be reminded about.
-              </p>
-            </div>
-          </app-collapsible-section>
+            </app-collapsible-section>
+          </div>
         }
       </form>
-      <!--
-        Outside the form, so the sections above do not count it among
-        themselves; it carries on their run of colours by name instead.
-      -->
-      <app-collapsible-section
-        class="accent-bluey"
-        heading="Custom Tracking">
-        <div class="settings-content">
-          <app-help-link
-            slug="what-custom-tracking-is"
-            label="Help with Custom Tracking" />
-          <p class="settings-description">
-            Decide what else to record about your own accounts and characters, and
-            fill it in. Everything you add is private until you say otherwise.
-          </p>
-        </div>
-        <div class="settings-actions">
-          <a [routerLink]="customTrackingLink" class="lcars-btn lcars-btn-auto"
-          >Configure Custom Tracking</a>
-        </div>
-      </app-collapsible-section>
+
+      <div
+        id="settings-panel-custom-tracking"
+        role="tabpanel"
+        aria-labelledby="settings-tab-custom-tracking"
+        [hidden]="activeTab !== 'custom-tracking'">
+        <app-collapsible-section heading="Custom Tracking">
+          <div class="settings-content">
+            <app-help-link
+              slug="what-custom-tracking-is"
+              label="Help with Custom Tracking" />
+            <p class="settings-description">
+              Decide what else to record about your own accounts and characters,
+              and fill it in. Everything you add is private until you say
+              otherwise.
+            </p>
+          </div>
+          <div class="settings-actions">
+            <a [routerLink]="customTrackingLink" class="lcars-btn lcars-btn-auto"
+            >Configure Custom Tracking</a>
+          </div>
+        </app-collapsible-section>
+      </div>
     }
     @if (errorMessage) {
       <app-lcars-error-message

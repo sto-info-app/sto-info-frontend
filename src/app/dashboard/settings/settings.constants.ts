@@ -1,3 +1,5 @@
+import { SettingsTab } from 'src/app/shared/constants/settings-links.constants';
+
 import { PresenceVisibility, UserSettings } from '../models/user.model';
 
 /**
@@ -35,4 +37,20 @@ export const SETTING_LABELS: Readonly<Record<keyof UserSettings, string>> = {
   notifyDirectMessage: 'Direct messages',
   notifyRosterAssociation: 'Roster association proposals',
   notifyEventReminder: 'Event reminders',
+};
+
+/**
+ * What the registry switch is called, on Settings as on the Personnel
+ * Record's edit dialog. It belongs to the profile rather than the settings,
+ * so it has no entry above.
+ */
+export const REGISTRY_LABEL = 'Show me in the Galactic Personnel Registry';
+
+/** What each tab of the page says. */
+export const SETTINGS_TAB_LABELS: Readonly<Record<SettingsTab, string>> = {
+  account: 'Account',
+  chat: 'Chat',
+  fleet: 'Fleet',
+  notifications: 'Notifications',
+  'custom-tracking': 'Custom Tracking',
 };

@@ -1,19 +1,47 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { provideRouter, Router } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import { Subject, of, throwError } from 'rxjs';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { FLEET_FEATURES_DISABLED } from 'src/app/models/fleet.models';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
-import { UserSettings } from '../models/user.model';
+import {
+  User,
+  UserProfileUpdateResult,
+  UserSettings,
+} from '../models/user.model';
+import { DashboardService } from '../services/dashboard.service';
 import { PrivacyModeService } from '../services/privacy-mode.service';
 import { DEFAULT_USER_SETTINGS } from '../services/user-settings.service';
 import { findHelpGuide } from 'src/app/static-pages/help/help.data';
 import { SETTINGS_FORM_LABELS } from 'src/app/static-pages/help/help.testing';
 import {
   SAVED_NOTE_DURATION_MS,
+  SETTING_MARK_CLASS,
+  SETTING_MARK_DURATION_MS,
   SettingsComponent,
 } from './settings.component';
+
+/** The reader, with their profile as the Personnel Record has it. */
+function userOf(publiclyVisible = false): User {
+  return {
+    id: 'u1',
+    email: 'kira@example.test',
+    emailVerified: true,
+    createdAt: new Date('2026-01-01T00:00:00Z'),
+    updatedAt: new Date('2026-01-01T00:00:00Z'),
+    profile: {
+      userId: 'u1',
+      username: 'kira.nerys',
+      firstName: 'Kira',
+      lastName: 'Nerys',
+      publiclyVisible,
+      createdAt: new Date('2026-01-01T00:00:00Z'),
+      updatedAt: new Date('2026-01-01T00:00:00Z'),
+    },
+  };
+}
 
 describe('SettingsComponent', () => {
   let fixture: ComponentFixture<SettingsComponent>;
@@ -24,6 +52,10 @@ describe('SettingsComponent', () => {
     refreshToken: jest.Mock;
   };
   let fleetConfigurationService: { getFeatures: jest.Mock };
+  let dashboardService: {
+    getUser: jest.Mock;
+    updatePersonalDetails: jest.Mock;
+  };
 
   const settings = (overrides: Partial<UserSettings> = {}): UserSettings => ({
     ...DEFAULT_USER_SETTINGS,
@@ -52,11 +84,30 @@ describe('SettingsComponent', () => {
       refreshToken: jest.fn().mockReturnValue(of({})),
     };
 
+    dashboardService = {
+      getUser: jest.fn().mockReturnValue(of(userOf())),
+      updatePersonalDetails: jest.fn(
+        (): ReturnType<DashboardService['updatePersonalDetails']> =>
+          of({
+            affected: 1,
+            userProfileData: userOf(true).profile ?? null,
+          } satisfies UserProfileUpdateResult),
+      ),
+    };
+
+    // Not in JSDOM.
+    Element.prototype.scrollIntoView = jest.fn();
+    localStorage.clear();
+
     await TestBed.configureTestingModule({
-      imports: [SettingsComponent, RouterTestingModule],
+      imports: [SettingsComponent],
       providers: [
+        provideRouter([
+          { path: 'dashboard/settings', component: SettingsComponent },
+        ]),
         { provide: PrivacyModeService, useValue: privacyModeService },
         { provide: AuthService, useValue: authService },
+        { provide: DashboardService, useValue: dashboardService },
         {
           provide: FleetConfigurationService,
           useValue: fleetConfigurationService,
@@ -452,7 +503,7 @@ describe('SettingsComponent', () => {
 
       expect(select.options[0].textContent).toContain('My device’s zone');
       expect(fixture.nativeElement.textContent).toContain(
-        'It is separate from the setting above',
+        'It is separate from the zone dates are shown in',
       );
     });
 
@@ -537,6 +588,334 @@ describe('SettingsComponent', () => {
     });
   });
 
+  describe('its tabs', () => {
+    let harness: RouterTestingHarness | undefined;
+
+    afterEach(() => {
+      harness = undefined;
+    });
+
+    /**
+     * Opens the page at an address.
+     *
+     * @param url - The address.
+     * @returns The page.
+     */
+    async function openAt(url: string): Promise<HTMLElement> {
+      harness ??= await RouterTestingHarness.create();
+      component = await harness.navigateByUrl(url, SettingsComponent);
+      harness.detectChanges();
+
+      return harness.routeNativeElement as HTMLElement;
+    }
+
+    const withEverything = (chatEnabled = true): void => {
+      fleetConfigurationService.getFeatures.mockReturnValue(
+        of({ ...FLEET_FEATURES_DISABLED, isEnabled: true, chatEnabled }),
+      );
+    };
+    const tabs = (page: HTMLElement): HTMLButtonElement[] =>
+      Array.from(page.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const tabNames = (page: HTMLElement): string[] =>
+      tabs(page).map(tab => tab.textContent?.trim() ?? '');
+    const selected = (page: HTMLElement): string | undefined =>
+      tabs(page)
+        .find(tab => tab.getAttribute('aria-selected') === 'true')
+        ?.textContent?.trim();
+    const panelShown = (page: HTMLElement, tab: string): boolean =>
+      !(page.querySelector(`#settings-panel-${tab}`) as HTMLElement).hidden;
+
+    it('shows Account and Custom Tracking alone while Fleet Community is off', async () => {
+      const page = await openAt('/dashboard/settings');
+
+      expect(
+        page.querySelector('[role="tablist"]')?.getAttribute('aria-label'),
+      ).toBe('Settings');
+      expect(tabNames(page)).toEqual(['Account', 'Custom Tracking']);
+      expect(selected(page)).toBe('Account');
+      expect(tabs(page).map(tab => tab.getAttribute('tabindex'))).toEqual([
+        '0',
+        '-1',
+      ]);
+      expect(panelShown(page, 'account')).toBe(true);
+      expect(panelShown(page, 'custom-tracking')).toBe(false);
+    });
+
+    it('adds Chat, Fleet and Notifications while they are on', async () => {
+      withEverything();
+      const page = await openAt('/dashboard/settings');
+
+      expect(tabNames(page)).toEqual([
+        'Account',
+        'Chat',
+        'Fleet',
+        'Notifications',
+        'Custom Tracking',
+      ]);
+    });
+
+    it('leaves Chat out while chat is off', async () => {
+      withEverything(false);
+      const page = await openAt('/dashboard/settings');
+
+      expect(tabNames(page)).toEqual([
+        'Account',
+        'Fleet',
+        'Notifications',
+        'Custom Tracking',
+      ]);
+    });
+
+    it('opens on the tab its address names, and on Account for one not shown', async () => {
+      withEverything(false);
+      let page = await openAt('/dashboard/settings?tab=fleet');
+
+      expect(selected(page)).toBe('Fleet');
+      expect(panelShown(page, 'fleet')).toBe(true);
+      expect(panelShown(page, 'account')).toBe(false);
+
+      page = await openAt('/dashboard/settings?tab=chat');
+
+      expect(selected(page)).toBe('Account');
+
+      page = await openAt('/dashboard/settings?tab=nonsense');
+
+      expect(selected(page)).toBe('Account');
+    });
+
+    it('names the tab chosen in the address', async () => {
+      withEverything();
+      const page = await openAt('/dashboard/settings');
+
+      tabs(page)[3].click();
+      await harness?.fixture.whenStable();
+      harness?.detectChanges();
+
+      expect(TestBed.inject(Router).url).toBe(
+        '/dashboard/settings?tab=notifications',
+      );
+      expect(selected(page)).toBe('Notifications');
+      expect(panelShown(page, 'notifications')).toBe(true);
+    });
+
+    it('moves between the tabs with the arrows, Home and End', async () => {
+      withEverything();
+      const page = await openAt('/dashboard/settings');
+
+      /**
+       * Presses a key on the selected tab, and lets the address follow.
+       *
+       * @param key - The key.
+       * @returns Whether the page took it.
+       */
+      const press = async (key: string): Promise<boolean> => {
+        const event = new KeyboardEvent('keydown', { key, cancelable: true });
+
+        tabs(page)
+          .find(tab => tab.getAttribute('aria-selected') === 'true')
+          ?.dispatchEvent(event);
+        await harness?.fixture.whenStable();
+        harness?.detectChanges();
+
+        return event.defaultPrevented;
+      };
+
+      expect(await press('ArrowRight')).toBe(true);
+      expect(selected(page)).toBe('Chat');
+      expect(document.activeElement?.textContent?.trim()).toBe('Chat');
+
+      expect(await press('End')).toBe(true);
+      expect(selected(page)).toBe('Custom Tracking');
+
+      expect(await press('ArrowRight')).toBe(true);
+      expect(selected(page)).toBe('Account');
+
+      expect(await press('a')).toBe(false);
+      expect(selected(page)).toBe('Account');
+    });
+
+    describe('going straight to a setting', () => {
+      it('opens its tab and its folded section, then focuses and marks it for a moment', async () => {
+        jest.useFakeTimers({ advanceTimers: true });
+        try {
+          withEverything();
+          let page = await openAt('/dashboard/settings?tab=chat');
+          const caret = page.querySelector(
+            '#settings-panel-chat .collapsible-section button',
+          ) as HTMLButtonElement;
+
+          caret.click();
+          harness?.detectChanges();
+          expect(caret.getAttribute('aria-expanded')).toBe('false');
+
+          page = await openAt('/dashboard/settings?tab=chat#setting-typing');
+          harness?.detectChanges();
+          const typing = page.querySelector('#setting-typing') as HTMLElement;
+
+          expect(
+            page
+              .querySelector('#settings-panel-chat .collapsible-section button')
+              ?.getAttribute('aria-expanded'),
+          ).toBe('true');
+          expect(typing.scrollIntoView).toHaveBeenCalledWith({
+            block: 'center',
+          });
+          expect(typing.contains(document.activeElement)).toBe(true);
+          expect(typing.classList.contains(SETTING_MARK_CLASS)).toBe(true);
+
+          jest.advanceTimersByTime(SETTING_MARK_DURATION_MS);
+
+          expect(typing.classList.contains(SETTING_MARK_CLASS)).toBe(false);
+        } finally {
+          jest.useRealTimers();
+        }
+      });
+
+      it('waits for the registry switch to be read before going to it', async () => {
+        const user = new Subject<User>();
+
+        dashboardService.getUser.mockReturnValue(user);
+        const page = await openAt('/dashboard/settings#setting-registry');
+
+        expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+
+        user.next(userOf());
+        harness?.detectChanges();
+
+        expect(
+          page
+            .querySelector('#setting-registry')
+            ?.classList.contains(SETTING_MARK_CLASS),
+        ).toBe(true);
+        expect(document.activeElement?.getAttribute('role')).toBe('switch');
+      });
+
+      it('leaves alone a setting that is not there, or not on the tab showing', async () => {
+        withEverything();
+        const page = await openAt('/dashboard/settings#setting-typing');
+
+        expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+        expect(
+          page
+            .querySelector('#setting-typing')
+            ?.classList.contains(SETTING_MARK_CLASS),
+        ).toBe(false);
+
+        await openAt('/dashboard/settings#setting-nothing');
+        harness?.detectChanges();
+
+        expect(Element.prototype.scrollIntoView).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('the registry switch', () => {
+    const registry = (): HTMLElement =>
+      fixture.nativeElement.querySelector('.settings-registry') as HTMLElement;
+    const toggle = (): HTMLButtonElement =>
+      registry().querySelector('[role="switch"]') as HTMLButtonElement;
+
+    it('shows it as the profile has it, on the Account tab', () => {
+      dashboardService.getUser.mockReturnValue(of(userOf(true)));
+      createComponent();
+
+      expect(
+        fixture.nativeElement
+          .querySelector('#settings-panel-account')
+          .contains(registry()),
+      ).toBe(true);
+      expect(toggle().getAttribute('aria-label')).toBe(
+        'Show me in the Galactic Personnel Registry',
+      );
+      expect(toggle().getAttribute('aria-checked')).toBe('true');
+      expect(registry().textContent).toContain(
+        'The same switch is on your Personnel Record.',
+      );
+    });
+
+    it('says so while it is read, and when it cannot be', () => {
+      const user = new Subject<User>();
+
+      dashboardService.getUser.mockReturnValue(user);
+      createComponent();
+
+      expect(registry().textContent).toContain(
+        'Reading your registry setting…',
+      );
+
+      user.error(new Error('nope'));
+      fixture.detectChanges();
+
+      expect(registry().textContent).toContain(
+        'Your registry setting could not be read.',
+      );
+      expect(registry().querySelector('a')?.getAttribute('href')).toBe(
+        '/dashboard/profile',
+      );
+    });
+
+    it('cannot be read from a user with no profile', () => {
+      dashboardService.getUser.mockReturnValue(
+        of({ ...userOf(), profile: undefined }),
+      );
+      createComponent();
+
+      expect(registry().textContent).toContain(
+        'Your registry setting could not be read.',
+      );
+    });
+
+    it('saves it with the personal details as they stand, and says so', () => {
+      createComponent();
+
+      toggle().click();
+      fixture.detectChanges();
+
+      expect(dashboardService.updatePersonalDetails).toHaveBeenCalledWith({
+        firstName: 'Kira',
+        lastName: 'Nerys',
+        username: 'kira.nerys',
+        publiclyVisible: true,
+      });
+      expect(toggle().getAttribute('aria-checked')).toBe('true');
+      expect(registry().querySelector('.settings-saved')?.textContent).toBe(
+        'Saved',
+      );
+      expect(component.announcement).toBe(
+        'Show me in the Galactic Personnel Registry saved.',
+      );
+      expect(privacyModeService.update).not.toHaveBeenCalled();
+    });
+
+    it('keeps what was chosen when the answer carries no profile', () => {
+      dashboardService.updatePersonalDetails.mockReturnValue(
+        of({ affected: 0, userProfileData: null }),
+      );
+      createComponent();
+
+      toggle().click();
+      fixture.detectChanges();
+
+      expect(toggle().getAttribute('aria-checked')).toBe('true');
+    });
+
+    it('puts it back, naming it, when it cannot be saved', () => {
+      dashboardService.updatePersonalDetails.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+      createComponent();
+
+      toggle().click();
+      fixture.detectChanges();
+
+      expect(toggle().getAttribute('aria-checked')).toBe('false');
+      expect(component.errorMessage).toBe(
+        'Unable to save Show me in the Galactic Personnel Registry. It has been put back.',
+      );
+      expect(dashboardService.updatePersonalDetails).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('its Help (FC-049)', () => {
     /** Shows the page with Fleet Community and chat on. */
     const createWithEverything = (): void => {
@@ -566,8 +945,10 @@ describe('SettingsComponent', () => {
       expect(helpLinks()).toEqual([
         ['/help/your-settings', 'Help with Settings'],
         ['/help/privacy-mode', 'Help with Privacy Mode'],
+        ['/help/listing-your-own-record', 'Help with the registry'],
         ['/help/staying-signed-in', 'Help with staying signed in'],
         ['/help/dates-and-times', 'Help with dates and times'],
+        ['/help/chat-settings', 'Help with chat settings'],
         ['/help/fleet-settings', 'Help with Fleet settings'],
         ['/help/what-you-are-notified-about', 'Help with notifications'],
         ['/help/what-custom-tracking-is', 'Help with Custom Tracking'],
@@ -589,6 +970,7 @@ describe('SettingsComponent', () => {
       expect(helpLinks().map(([href]) => href)).toEqual([
         '/help/your-settings',
         '/help/privacy-mode',
+        '/help/listing-your-own-record',
         '/help/staying-signed-in',
         '/help/dates-and-times',
         '/help/what-custom-tracking-is',
