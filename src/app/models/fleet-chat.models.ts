@@ -199,6 +199,11 @@ export interface ChatTranscript {
   readonly readyAt: string | null;
   /** When its download stops working. */
   readonly expiresAt: string | null;
+  /**
+   * Whether its job ran out of attempts while it still waits: the case in
+   * which a site admin may retry it, so its requester is told to check back.
+   */
+  readonly jobFailed: boolean;
 }
 
 /** A reader's report of a message (FC-035). */

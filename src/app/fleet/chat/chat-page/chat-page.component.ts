@@ -94,7 +94,7 @@ export function transcriptFilename(transcript: ChatTranscript): string {
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/^-|-$/g, '') || 'channel';
 
-  return `chat-${slug}-${transcript.toAt.slice(0, 10)}.txt`;
+  return `stoinfo-chat-${slug}-${transcript.toAt.slice(0, 10)}.txt`;
 }
 
 /** What a failed channel action is headed with. */

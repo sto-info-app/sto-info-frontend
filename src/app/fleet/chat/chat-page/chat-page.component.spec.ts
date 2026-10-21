@@ -96,6 +96,7 @@ function transcriptOf(overrides: Partial<ChatTranscript> = {}): ChatTranscript {
     createdAt: '2026-09-28T12:00:00.000Z',
     readyAt: '2026-09-28T12:01:00.000Z',
     expiresAt: new Date(Date.now() + HOUR).toISOString(),
+    jobFailed: false,
     ...overrides,
   };
 }
@@ -808,12 +809,52 @@ describe('ChatPageComponent', () => {
 
       const element = await open('/chat/transcripts');
 
-      expect(statuses(element)).toEqual([
+      expect(statuses(element)).toEqual(['Error']);
+      expect(
+        element
+          .querySelector('.chat-transcripts__status')
+          ?.classList.contains('chat-transcripts__status--error'),
+      ).toBe(true);
+      expect(texts(element, '.chat-transcripts__problem')).toEqual([
         'There was an issue generating the transcript. Try again later.',
       ]);
       expect(
+        element
+          .querySelector('.chat-transcripts__problem')
+          ?.getAttribute('colspan'),
+      ).toBe('2');
+      expect(
         element.querySelectorAll('.chat-transcripts__download'),
       ).toHaveLength(0);
+    });
+
+    it('warns to check back on one still waiting whose job failed, while a site admin may retry it', async () => {
+      chat.transcripts.mockReturnValue(
+        of([
+          transcriptOf({
+            id: 'stuck',
+            status: 'PENDING',
+            messageCount: null,
+            readyAt: null,
+            expiresAt: null,
+            jobFailed: true,
+          }),
+        ]),
+      );
+
+      const element = await open('/chat/transcripts');
+
+      expect(statuses(element)).toEqual(['Warning']);
+      expect(
+        element
+          .querySelector('.chat-transcripts__status')
+          ?.classList.contains('chat-transcripts__status--warning'),
+      ).toBe(true);
+      expect(texts(element, '.chat-transcripts__problem')).toEqual([
+        'There was an issue generating the transcript. Check back later.',
+      ]);
+      // Nothing else is being written, so nothing to refresh for.
+      expect(element.textContent).not.toContain('Refresh to see one');
     });
 
     it('says how to ask for one when there are none', async () => {
@@ -945,7 +986,7 @@ describe('ChatPageComponent', () => {
       expect(chat.downloadTranscript).toHaveBeenCalledWith('transcript-1');
       expect(save).toHaveBeenCalledWith(
         expect.any(Blob),
-        'chat-general-2026-09-28.txt',
+        'stoinfo-chat-general-2026-09-28.txt',
       );
       save.mockRestore();
     });
@@ -987,9 +1028,9 @@ describe('ChatPageComponent', () => {
     it('names a transcript file by its channel and last day', () => {
       expect(
         transcriptFilename(transcriptOf({ channelName: '<Away team>' })),
-      ).toBe('chat-away-team-2026-09-28.txt');
+      ).toBe('stoinfo-chat-away-team-2026-09-28.txt');
       expect(transcriptFilename(transcriptOf({ channelName: '!!!' }))).toBe(
-        'chat-channel-2026-09-28.txt',
+        'stoinfo-chat-channel-2026-09-28.txt',
       );
     });
   });

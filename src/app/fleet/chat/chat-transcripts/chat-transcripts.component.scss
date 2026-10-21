@@ -69,6 +69,22 @@
   font-size: 0.85rem;
 }
 
+// Error and Warning in the colours the site's error and warning messages
+// wear, and what to do in plain text beside them.
+.chat-transcripts__status--error {
+  color: vars.$lcars-error-text;
+  font-weight: 700;
+}
+
+.chat-transcripts__status--warning {
+  color: vars.$lcars-orange;
+  font-weight: 700;
+}
+
+.chat-transcripts__problem {
+  color: vars.$lcars-white;
+}
+
 // Each date and time on one line; the range breaks only around "to".
 .chat-transcripts__when {
   white-space: nowrap;

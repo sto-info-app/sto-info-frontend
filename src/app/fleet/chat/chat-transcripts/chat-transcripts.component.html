@@ -84,29 +84,52 @@
                   transcript.toAt | appDate: 'short'
                 }}</span>
               </td>
-              <td
-                data-label="Status"
-                class="chat-transcripts__status">
-                {{ statusLabels[transcript.status] }}
-              </td>
-              <td
-                data-label="Messages"
-                class="fleet-community-table__number">
-                {{ transcript.messageCount ?? '—' }}
-              </td>
-              <td>
-                @if (isDownloadable(transcript)) {
-                  <button
-                    type="button"
-                    class="lcars-btn lcars-btn-auto chat-transcripts__download"
-                    [attr.aria-label]="
-                      'Download the transcript of ' + transcript.channelName
-                    "
-                    (click)="download.emit(transcript)">
-                    Download
-                  </button>
-                }
-              </td>
+              @if (problemOf(transcript); as problem) {
+                <!--
+                  Something wrong: the status says what kind, and what to do
+                  runs across the messages and the download it has none of.
+                -->
+                <td
+                  data-label="Status"
+                  class="chat-transcripts__status"
+                  [class.chat-transcripts__status--error]="
+                    problem.kind === 'error'
+                  "
+                  [class.chat-transcripts__status--warning]="
+                    problem.kind === 'warning'
+                  ">
+                  {{ problem.label }}
+                </td>
+                <td
+                  colspan="2"
+                  class="chat-transcripts__problem">
+                  {{ problem.message }}
+                </td>
+              } @else {
+                <td
+                  data-label="Status"
+                  class="chat-transcripts__status">
+                  {{ statusLabels[transcript.status] }}
+                </td>
+                <td
+                  data-label="Messages"
+                  class="fleet-community-table__number">
+                  {{ transcript.messageCount ?? '—' }}
+                </td>
+                <td>
+                  @if (isDownloadable(transcript)) {
+                    <button
+                      type="button"
+                      class="lcars-btn lcars-btn-auto chat-transcripts__download"
+                      [attr.aria-label]="
+                        'Download the transcript of ' + transcript.channelName
+                      "
+                      (click)="download.emit(transcript)">
+                      Download
+                    </button>
+                  }
+                </td>
+              }
             </tr>
           }
         </tbody>

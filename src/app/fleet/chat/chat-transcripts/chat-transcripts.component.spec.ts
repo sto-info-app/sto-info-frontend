@@ -31,6 +31,7 @@ function transcriptOf(overrides: Partial<ChatTranscript> = {}): ChatTranscript {
     createdAt: '2026-09-28T12:00:00.000Z',
     readyAt: '2026-09-28T12:01:00.000Z',
     expiresAt: new Date(Date.now() + HOUR).toISOString(),
+    jobFailed: false,
     ...overrides,
   };
 }

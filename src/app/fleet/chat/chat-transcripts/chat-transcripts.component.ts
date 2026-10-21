@@ -19,11 +19,55 @@ export const TRANSCRIPT_STATUS_LABELS: Readonly<
 > = {
   PENDING: 'Being written',
   READY: 'Ready',
-  // Whatever stopped it, nothing was kept and nothing can be retried, so it
-  // says so and points to asking again.
-  FAILED: 'There was an issue generating the transcript. Try again later.',
+  FAILED: 'Error',
   EXPIRED: 'Expired',
 };
+
+/** Something wrong with a transcript, said across its row. */
+export interface TranscriptProblem {
+  readonly kind: 'error' | 'warning';
+  /** What its status says instead. */
+  readonly label: string;
+  readonly message: string;
+}
+
+/**
+ * Gave up on: whatever stopped it, nothing was kept and nothing can be
+ * retried, so it points to asking again.
+ */
+const TRANSCRIPT_ERROR: TranscriptProblem = {
+  kind: 'error',
+  label: TRANSCRIPT_STATUS_LABELS.FAILED,
+  message: 'There was an issue generating the transcript. Try again later.',
+};
+
+/**
+ * Still waiting, but its job has failed: a site admin may yet retry it, so
+ * it points to checking back.
+ */
+const TRANSCRIPT_WARNING: TranscriptProblem = {
+  kind: 'warning',
+  label: 'Warning',
+  message: 'There was an issue generating the transcript. Check back later.',
+};
+
+/**
+ * What is wrong with a transcript, if anything.
+ *
+ * @param transcript - The transcript.
+ * @returns The problem, or null.
+ */
+export function transcriptProblem(
+  transcript: ChatTranscript,
+): TranscriptProblem | null {
+  if (transcript.status === 'FAILED') {
+    return TRANSCRIPT_ERROR;
+  }
+
+  return transcript.status === 'PENDING' && transcript.jobFailed
+    ? TRANSCRIPT_WARNING
+    : null;
+}
 
 /**
  * Whether a transcript may be downloaded now.
@@ -68,9 +112,12 @@ export class ChatTranscriptsComponent {
 
   readonly statusLabels = TRANSCRIPT_STATUS_LABELS;
   readonly isDownloadable = isTranscriptDownloadable;
+  readonly problemOf = transcriptProblem;
 
-  /** Whether one is still being written. */
+  /** Whether one is still being written, with nothing wrong. */
   readonly hasPending = computed(() =>
-    this.transcripts().some(transcript => transcript.status === 'PENDING'),
+    this.transcripts().some(
+      transcript => transcript.status === 'PENDING' && !transcript.jobFailed,
+    ),
   );
 }
