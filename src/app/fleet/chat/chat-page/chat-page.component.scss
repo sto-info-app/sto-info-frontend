@@ -90,7 +90,11 @@
 
 .chat-page__list {
   display: flex;
-  flex-direction: column;
+
+  // A column that never wraps: the theme lets a <nav> wrap, which turned a
+  // list taller than its pane into a second column beside the first rather
+  // than scrolling it.
+  flex-flow: column nowrap;
   justify-content: flex-start;
   gap: 1rem;
   min-width: 0;
@@ -315,20 +319,16 @@
   }
 }
 
-.chat-page__transcript {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0.4rem 0.5rem;
-  border-bottom: 1px solid vars.$white-a12;
-  font-size: 0.9rem;
-}
-
-.chat-page__transcript-status {
+// How many transcripts are ready, beside the link to them: a small pill in
+// the group's colour.
+.chat-page__count {
+  display: inline-block;
+  min-width: 1.4em;
+  margin-left: 0.25rem;
+  padding: 0 0.4em;
+  border-radius: 1em;
+  background: var(--chat-group-accent, #{vars.$lcars-sky});
+  color: vars.$lcars-black;
   font-size: 0.8rem;
-}
-
-.chat-page__transcript-download {
-  align-self: flex-start;
-  margin-top: 0.25rem;
+  text-align: center;
 }

@@ -31,12 +31,23 @@ describe('chat routes', () => {
     },
   );
 
-  it.each(['channels', 'elsewhere/abc', 'channels/abc/more'])(
-    'matches nothing else: %s',
-    path => {
-      expect(chatMatcher(segmentsOf(path))).toBeNull();
-    },
-  );
+  it('matches /chat/transcripts, with no ID', () => {
+    const segments = segmentsOf('transcripts');
+
+    expect(chatMatcher(segments)).toEqual({
+      consumed: segments,
+      posParams: { kind: segments[0] },
+    });
+  });
+
+  it.each([
+    'channels',
+    'elsewhere/abc',
+    'channels/abc/more',
+    'transcripts/abc',
+  ])('matches nothing else: %s', path => {
+    expect(chatMatcher(segmentsOf(path))).toBeNull();
+  });
 
   it('loads the page', async () => {
     const component = await (

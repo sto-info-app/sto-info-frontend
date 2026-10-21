@@ -1,0 +1,75 @@
+@use 'lcars-variables' as vars;
+
+// Fills the chat page's pane as a conversation does, the table scrolling
+// inside it so the heading and Refresh stay in view.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.chat-transcripts {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-height: 0;
+}
+
+.chat-transcripts__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+// The way back to the list only on a narrow screen, where the two are
+// stacked, as the conversation's is. Important, because `.lcars-btn` sets its
+// display and would otherwise show it beside the list on a wide one.
+.chat-transcripts__back {
+  display: none !important;
+
+  @media (width < 720px) {
+    display: inline-flex !important;
+    gap: 0.4rem;
+    align-items: center;
+  }
+}
+
+.chat-transcripts__title {
+  flex: 1 1 auto;
+  margin: 0;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-family: vars.$font-antonio;
+}
+
+.chat-transcripts__refresh {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+  margin: 0;
+}
+
+.chat-transcripts__note {
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  font-size: 0.9rem;
+}
+
+.chat-transcripts__table {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.chat-transcripts__scope {
+  display: block;
+  color: vars.$lcars-grey-light;
+  font-size: 0.85rem;
+}
+
+.chat-transcripts__download {
+  margin: 0;
+  white-space: nowrap;
+}

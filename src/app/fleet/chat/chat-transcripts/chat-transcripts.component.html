@@ -1,0 +1,111 @@
+<section
+  class="chat-transcripts"
+  aria-labelledby="chat-transcripts-title">
+  <header class="chat-transcripts__header">
+    <button
+      type="button"
+      class="lcars-btn chat-transcripts__back"
+      (click)="back.emit()">
+      <i
+        class="fas fa-chevron-left"
+        aria-hidden="true"></i>
+      All chats
+    </button>
+    <h2
+      id="chat-transcripts-title"
+      class="chat-transcripts__title">
+      Your transcripts
+    </h2>
+    <button
+      type="button"
+      class="lcars-btn lcars-btn-auto chat-transcripts__refresh"
+      aria-label="Refresh your transcripts"
+      (click)="refresh.emit()">
+      <i
+        class="fas fa-rotate-right"
+        aria-hidden="true"></i>
+      Refresh
+    </button>
+  </header>
+
+  <p class="chat-transcripts__note">
+    Transcripts you asked for in the last day. Each can be downloaded for 24
+    hours; you’ll get a notice when one is ready.
+  </p>
+
+  @if (hasPending()) {
+    <p class="chat-transcripts__note">
+      Refresh to see one being written once it is ready.
+    </p>
+  }
+
+  @if (error(); as message) {
+    <app-lcars-error-message
+      title="Transcripts"
+      [message]="message"></app-lcars-error-message>
+  }
+
+  @if (transcripts().length === 0) {
+    <p class="chat-transcripts__note chat-transcripts__empty">
+      You have asked for no transcripts in the last day. Export a channel’s
+      transcript from the ⋮ beside it in the list.
+    </p>
+  } @else {
+    <div class="chat-transcripts__table">
+      <table class="fleet-community-table">
+        <thead>
+          <tr>
+            <th scope="col">Channel</th>
+            <th scope="col">From – to</th>
+            <th scope="col">Status</th>
+            <th
+              scope="col"
+              class="fleet-community-table__number">
+              Messages
+            </th>
+            <th scope="col"><span class="sr-only">Download</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (transcript of transcripts(); track transcript.id) {
+            <tr class="chat-transcripts__row">
+              <td data-label="Channel">
+                # {{ transcript.channelName }}
+                @if (transcript.scopeName; as scopeName) {
+                  <span class="chat-transcripts__scope">{{ scopeName }}</span>
+                }
+              </td>
+              <td data-label="From – to">
+                {{ transcript.fromAt | appDate: 'short' }} to
+                {{ transcript.toAt | appDate: 'short' }}
+              </td>
+              <td
+                data-label="Status"
+                class="chat-transcripts__status">
+                {{ statusLabels[transcript.status] }}
+              </td>
+              <td
+                data-label="Messages"
+                class="fleet-community-table__number">
+                {{ transcript.messageCount ?? '—' }}
+              </td>
+              <td>
+                @if (isDownloadable(transcript)) {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto chat-transcripts__download"
+                    [attr.aria-label]="
+                      'Download the transcript of ' + transcript.channelName
+                    "
+                    (click)="download.emit(transcript)">
+                    Download
+                  </button>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</section>

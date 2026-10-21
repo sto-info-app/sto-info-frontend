@@ -14,17 +14,28 @@ export const CHAT_ROUTE_KINDS = [
 /** One kind of address beneath `/chat`. */
 export type ChatRouteKind = (typeof CHAT_ROUTE_KINDS)[number];
 
+/** The reader's transcripts (FC-035): `/chat/transcripts`, with no ID. */
+export const CHAT_TRANSCRIPTS_PATH = 'transcripts';
+
+/** Any kind of address beneath `/chat`, with an ID or without. */
+export type ChatAddressKind = ChatRouteKind | typeof CHAT_TRANSCRIPTS_PATH;
+
 /**
  * Matches `/chat` and each address beneath it with one route, so moving
  * between places keeps the page — its list and its connection — and only
  * changes what it shows.
  *
  * @param segments - The address beneath `/chat`.
- * @returns The match, with `kind` and `id`, or null.
+ * @returns The match, with `kind` and `id`, or null; `kind` alone for the
+ *   reader's transcripts.
  */
 export function chatMatcher(segments: UrlSegment[]): UrlMatchResult | null {
   if (segments.length === 0) {
     return { consumed: [] };
+  }
+
+  if (segments.length === 1 && segments[0].path === CHAT_TRANSCRIPTS_PATH) {
+    return { consumed: segments, posParams: { kind: segments[0] } };
   }
 
   if (

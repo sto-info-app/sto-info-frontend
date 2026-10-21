@@ -33,7 +33,6 @@ import {
   ChatScopeChannels,
   ChatTranscript,
   ChatTranscriptRequest,
-  ChatTranscriptStatus,
 } from 'src/app/models/fleet-chat.models';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
@@ -41,7 +40,6 @@ import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-erro
 import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
 import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
-import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { saveFile } from 'src/app/shared/utils/save-file.utils';
 import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
@@ -52,6 +50,10 @@ import {
   ChatChannelDialogData,
 } from '../chat-channel-dialog/chat-channel-dialog.component';
 import { ChatConversationComponent } from '../chat-conversation/chat-conversation.component';
+import {
+  ChatTranscriptsComponent,
+  isTranscriptDownloadable,
+} from '../chat-transcripts/chat-transcripts.component';
 import { ChatFriendDialogComponent } from '../chat-friend-dialog/chat-friend-dialog.component';
 import { ChatPresenceService } from '../chat-presence.service';
 import {
@@ -60,7 +62,7 @@ import {
 } from '../chat-transcript-dialog/chat-transcript-dialog.component';
 import { ChatSocketService } from '../chat-socket.service';
 import { CHAT_ROLE_LABELS } from '../chat.text';
-import { ChatRouteKind } from '../chat.routes';
+import { CHAT_TRANSCRIPTS_PATH, ChatAddressKind } from '../chat.routes';
 import { ChatService } from '../chat.service';
 
 /** What the page shows beside the list. */
@@ -76,15 +78,6 @@ export type ChatSelection =
       readonly place: ChatPlace;
       readonly conversation: ChatConversation;
     };
-
-/** What each transcript status is shown as (FC-035). */
-const TRANSCRIPT_STATUS_LABELS: Readonly<Record<ChatTranscriptStatus, string>> =
-  {
-    PENDING: 'Being written',
-    READY: 'Ready',
-    FAILED: 'Not written',
-    EXPIRED: 'Expired',
-  };
 
 /**
  * The name a transcript is saved under: letters, digits and hyphens only.
@@ -103,6 +96,9 @@ export function transcriptFilename(transcript: ChatTranscript): string {
 
   return `chat-${slug}-${transcript.toAt.slice(0, 10)}.txt`;
 }
+
+/** What a failed channel action is headed with. */
+const CHANNEL_NOT_SAVED = 'Channel not saved';
 
 /** Where this browser remembers that the list of chats was hidden. */
 export const CHAT_LIST_HIDDEN_KEY = 'chat-list-hidden';
@@ -140,7 +136,7 @@ function transcriptDownloadError(status: number | undefined): string {
 
 /** Which of a target's IDs a scope's own Chat address names. */
 const SCOPE_ADDRESS_KEYS: Readonly<
-  Partial<Record<ChatRouteKind, 'communityId' | 'fleetId' | 'armadaId'>>
+  Partial<Record<ChatAddressKind, 'communityId' | 'fleetId' | 'armadaId'>>
 > = {
   communities: 'communityId',
   fleets: 'fleetId',
@@ -173,8 +169,8 @@ const SCOPE_LABELS: Readonly<Record<ChatScopeChannels['kind'], string>> = {
   styleUrls: ['./chat-page.component.scss'],
   standalone: true,
   imports: [
-    AppDatePipe,
     ChatConversationComponent,
+    ChatTranscriptsComponent,
     HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsInformationMessageComponent,
@@ -205,13 +201,15 @@ export class ChatPageComponent {
   readonly settingsLink = SETTINGS_LINKS.chat;
   readonly scopeLabels = SCOPE_LABELS;
   readonly roleLabels = CHAT_ROLE_LABELS;
-  readonly transcriptStatusLabels = TRANSCRIPT_STATUS_LABELS;
 
   readonly scopes = signal<ChatScopeChannels[]>([]);
   readonly conversations = signal<ChatConversation[]>([]);
   readonly isLoading = signal(true);
   readonly errorMessage = signal<string | null>(null);
+  /** What a channel action or a transcript request failed with, if so. */
   readonly actionError = signal<string | null>(null);
+  /** What the failure is headed with. */
+  readonly actionErrorTitle = signal(CHANNEL_NOT_SAVED);
   readonly transcripts = signal<ChatTranscript[]>([]);
   readonly transcriptError = signal<string | null>(null);
 
@@ -224,9 +222,12 @@ export class ChatPageComponent {
    */
   readonly isListHidden = signal(readListHidden());
 
-  /** Whether a transcript is still being written. */
-  readonly hasPending = computed(() =>
-    this.transcripts().some(transcript => transcript.status === 'PENDING'),
+  /**
+   * How many transcripts may be downloaded, for the count beside the link
+   * to them. As of the last time they were read.
+   */
+  readonly readyCount = computed(
+    () => this.transcripts().filter(isTranscriptDownloadable).length,
   );
 
   /** Whether the reader may export a transcript anywhere (FC-035). */
@@ -263,11 +264,14 @@ export class ChatPageComponent {
 
   private readonly _conversation = viewChild(ChatConversationComponent);
 
+  /** Whether the transcripts were read while open, since they were opened. */
+  private _transcriptsReadOpen = false;
+
   /** What the address asks for. */
   private readonly _address = toSignal(
     this._route.paramMap.pipe(
       map(params => ({
-        kind: params.get('kind') as ChatRouteKind | null,
+        kind: params.get('kind') as ChatAddressKind | null,
         id: params.get('id'),
       })),
     ),
@@ -308,6 +312,11 @@ export class ChatPageComponent {
     return null;
   });
 
+  /** Whether the reader's transcripts are open beside the list. */
+  readonly isTranscriptsOpen = computed(
+    () => this._address().kind === CHAT_TRANSCRIPTS_PATH,
+  );
+
   /** Whether the address names something the list does not hold. */
   readonly isMissing = computed(
     () =>
@@ -320,9 +329,17 @@ export class ChatPageComponent {
 
   constructor() {
     this.load().subscribe();
-    this._route.paramMap
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.openScopeChat());
+    this._route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.openScopeChat();
+
+      // Read afresh each time they are opened, unless the page's own first
+      // reading has already read them open.
+      if (!this.isTranscriptsOpen()) {
+        this._transcriptsReadOpen = false;
+      } else if (!this._transcriptsReadOpen && !this.isLoading()) {
+        this.loadTranscripts();
+      }
+    });
   }
 
   /**
@@ -420,15 +437,21 @@ export class ChatPageComponent {
           return;
         }
 
-        this.transcriptError.set(null);
+        this.actionError.set(null);
         this._chat
           .requestTranscript(channel.id, request)
           .pipe(take(1), takeUntilDestroyed(this._destroyRef))
           .subscribe({
-            next: transcript =>
-              this.transcripts.update(each => [transcript, ...each]),
+            // Opened where it shows as being written, since the list
+            // holds only a link to them.
+            next: transcript => {
+              this.transcripts.update(each => [transcript, ...each]);
+              void this._router.navigate(['/chat', CHAT_TRANSCRIPTS_PATH]);
+            },
+            // Said above the list, where the request was made from.
             error: (error: { error?: { message?: string } }) =>
-              this.transcriptError.set(
+              this.failAction(
+                'Transcript not asked for',
                 error.error?.message ??
                   'The transcript could not be asked for.',
               ),
@@ -436,23 +459,21 @@ export class ChatPageComponent {
       });
   }
 
+  /**
+   * Says, above the list, what a channel action or a transcript request
+   * failed with.
+   *
+   * @param title - What it is headed with.
+   * @param message - What went wrong.
+   */
+  private failAction(title: string, message: string): void {
+    this.actionErrorTitle.set(title);
+    this.actionError.set(message);
+  }
+
   /** Reads the reader's transcripts again. */
   protected refreshTranscripts(): void {
     this.loadTranscripts();
-  }
-
-  /**
-   * Whether a transcript may be downloaded now.
-   *
-   * @param transcript - The transcript.
-   * @returns True while it is written and its day has not passed.
-   */
-  protected isDownloadable(transcript: ChatTranscript): boolean {
-    return (
-      transcript.status === 'READY' &&
-      transcript.expiresAt !== null &&
-      new Date(transcript.expiresAt).getTime() > Date.now()
-    );
   }
 
   /**
@@ -582,7 +603,10 @@ export class ChatPageComponent {
               this.load().subscribe();
             },
             error: () =>
-              this.actionError.set(`${channel.name} could not be archived.`),
+              this.failAction(
+                CHANNEL_NOT_SAVED,
+                `${channel.name} could not be archived.`,
+              ),
           });
       });
   }
@@ -620,7 +644,8 @@ export class ChatPageComponent {
               );
             },
             error: (error: { error?: { message?: string } }) =>
-              this.actionError.set(
+              this.failAction(
+                CHANNEL_NOT_SAVED,
                 error.error?.message ?? 'The channel could not be saved.',
               ),
           });
@@ -641,7 +666,7 @@ export class ChatPageComponent {
         this.isLoading.set(false);
         this.openScopeChat();
 
-        if (this.mayExport()) {
+        if (this.mayExport() || this.isTranscriptsOpen()) {
           this.loadTranscripts();
         }
       }),
@@ -661,6 +686,7 @@ export class ChatPageComponent {
 
   /** Reads the transcripts the reader asked for in the last day. */
   private loadTranscripts(): void {
+    this._transcriptsReadOpen = this.isTranscriptsOpen();
     this._chat
       .transcripts()
       .pipe(take(1), takeUntilDestroyed(this._destroyRef))

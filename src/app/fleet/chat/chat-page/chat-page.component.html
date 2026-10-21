@@ -1,7 +1,9 @@
 <div
   id="chat-page"
   class="chat-page"
-  [class.chat-page--open]="selection() !== null || isMissing()">
+  [class.chat-page--open]="
+    selection() !== null || isMissing() || isTranscriptsOpen()
+  ">
   <div class="page-heading-row">
     <h1>Chat</h1>
     <app-settings-link [target]="settingsLink" />
@@ -38,7 +40,7 @@
 
   @if (actionError(); as error) {
     <app-lcars-error-message
-      title="Channel not saved"
+      [title]="actionErrorTitle()"
       [message]="error"></app-lcars-error-message>
   }
 
@@ -250,84 +252,29 @@
           }
         </section>
 
+        <!--
+          The transcripts open beside the list, where a conversation sits; the
+          list holds only the way there, with how many are ready.
+        -->
         @if (mayExport() || transcripts().length > 0) {
-          <section
-            class="chat-page__scope chat-page__transcripts"
-            aria-labelledby="chat-transcripts-heading">
-            <div class="chat-page__scope-head">
-              <h2
-                id="chat-transcripts-heading"
-                class="chat-page__scope-name">
-                Your transcripts
-              </h2>
-              <button
-                type="button"
-                class="chat-page__icon-button"
-                aria-label="Refresh your transcripts"
-                title="Refresh your transcripts"
-                (click)="refreshTranscripts()">
-                <i
-                  class="fas fa-rotate-right"
-                  aria-hidden="true"></i>
-              </button>
-            </div>
-            @if (transcriptError(); as error) {
-              <app-lcars-error-message
-                title="Transcripts"
-                [message]="error"></app-lcars-error-message>
-            }
-            @if (transcripts().length === 0) {
-              <p class="chat-page__place-note chat-page__group-note">
-                Export a channel’s transcript from the ⋮ beside it. Transcripts
-                you asked for in the last day show here.
-              </p>
-            }
-            @if (hasPending()) {
-              <p class="chat-page__place-note chat-page__group-note">
-                You’ll get a notice when a transcript is ready. Refresh to see
-                it here.
-              </p>
-            }
-            @if (transcripts().length > 0) {
-              <ul class="chat-page__places">
-                @for (transcript of transcripts(); track transcript.id) {
-                  <li class="chat-page__transcript">
-                    <span class="chat-page__transcript-name">
-                      # {{ transcript.channelName }}
-                      @if (transcript.scopeName; as scopeName) {
-                        &ngsp;<span class="chat-page__place-note">{{
-                          scopeName
-                        }}</span>
-                      }
-                    </span>
-                    <span class="chat-page__place-note">
-                      {{ transcript.fromAt | appDate: 'short' }} to
-                      {{ transcript.toAt | appDate: 'short' }}
-                    </span>
-                    <span class="chat-page__transcript-status">
-                      {{ transcriptStatusLabels[transcript.status] }}
-                      @if (transcript.messageCount !== null) {
-                        · {{ transcript.messageCount }}
-                        {{
-                          transcript.messageCount === 1 ? 'message' : 'messages'
-                        }}
-                      }
-                    </span>
-                    @if (isDownloadable(transcript)) {
-                      <button
-                        type="button"
-                        class="chat-page__manage-button chat-page__transcript-download"
-                        [attr.aria-label]="
-                          'Download the transcript of ' + transcript.channelName
-                        "
-                        (click)="download(transcript)">
-                        Download
-                      </button>
-                    }
-                  </li>
-                }
-              </ul>
-            }
+          <section class="chat-page__scope">
+            <ul class="chat-page__places">
+              <li class="chat-page__place">
+                <a
+                  class="chat-page__place-link"
+                  [routerLink]="['/chat', 'transcripts']"
+                  [attr.aria-current]="isTranscriptsOpen() ? 'page' : null"
+                  [class.chat-page__place-link--open]="isTranscriptsOpen()">
+                  <span>Your transcripts</span>
+                  @if (readyCount() > 0) {
+                    &ngsp;<span class="chat-page__count"
+                      >{{ readyCount()
+                      }}<span class="sr-only"> ready</span></span
+                    >
+                  }
+                </a>
+              </li>
+            </ul>
           </section>
         }
       </nav>
@@ -356,6 +303,13 @@
               (removed)="onRemoved()"
               (back)="showList()"></app-chat-conversation>
           }
+        } @else if (isTranscriptsOpen()) {
+          <app-chat-transcripts
+            [transcripts]="transcripts()"
+            [error]="transcriptError()"
+            (refresh)="refreshTranscripts()"
+            (download)="download($event)"
+            (back)="showList()" />
         } @else if (isMissing()) {
           <app-lcars-error-message
             title="Not found"

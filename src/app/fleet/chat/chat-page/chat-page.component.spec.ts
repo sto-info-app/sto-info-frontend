@@ -696,6 +696,15 @@ describe('ChatPageComponent', () => {
       chat.channels.mockReturnValue(of([COMMUNITY, EXPORTING]));
     });
 
+    const link = (element: HTMLElement): HTMLAnchorElement | undefined =>
+      [
+        ...element.querySelectorAll<HTMLAnchorElement>(
+          '.chat-page__place-link',
+        ),
+      ].find(each => each.textContent?.includes('Your transcripts'));
+    const statuses = (element: HTMLElement): string[] =>
+      texts(element, '.chat-transcripts__status');
+
     it('offers no transcripts to a reader who may export nowhere', async () => {
       chat.channels.mockReturnValue(of([COMMUNITY, FLEET]));
 
@@ -706,7 +715,37 @@ describe('ChatPageComponent', () => {
       expect(chat.transcripts).not.toHaveBeenCalled();
     });
 
-    it('lists the reader’s transcripts, with a download while ready', async () => {
+    it('keeps one link to them in the list, counting those ready', async () => {
+      chat.transcripts.mockReturnValue(
+        of([
+          transcriptOf(),
+          transcriptOf({ id: 'waiting', status: 'PENDING' }),
+          transcriptOf({ id: 'also-ready' }),
+        ]),
+      );
+
+      const element = await open('/chat');
+
+      expect(link(element)?.getAttribute('href')).toBe('/chat/transcripts');
+      expect(link(element)?.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+        'Your transcripts 2 ready',
+      );
+      expect(link(element)?.getAttribute('aria-current')).toBeNull();
+      expect(element.querySelector('app-chat-transcripts')).toBeNull();
+      expect(element.querySelector('.chat-page--open')).toBeNull();
+    });
+
+    it('shows no count while none is ready', async () => {
+      chat.transcripts.mockReturnValue(
+        of([transcriptOf({ status: 'PENDING' })]),
+      );
+
+      const element = await open('/chat');
+
+      expect(element.querySelector('.chat-page__count')).toBeNull();
+    });
+
+    it('opens them beside the list, a row each, with a download while ready', async () => {
       chat.transcripts.mockReturnValue(
         of([
           transcriptOf(),
@@ -729,24 +768,95 @@ describe('ChatPageComponent', () => {
         ]),
       );
 
-      const element = await open('/chat');
+      const element = await open('/chat/transcripts');
 
-      expect(texts(element, '.chat-page__transcript-status')).toEqual([
-        'Ready · 12 messages',
-        'Being written · 1 message',
+      expect(link(element)?.getAttribute('aria-current')).toBe('page');
+      expect(element.querySelector('.chat-page--open')).not.toBeNull();
+      expect(statuses(element)).toEqual([
+        'Ready',
         'Being written',
-        'Ready · 12 messages',
+        'Being written',
+        'Ready',
       ]);
       expect(
-        element.querySelectorAll('.chat-page__transcript-download'),
+        texts(
+          element,
+          '.chat-transcripts__row td.fleet-community-table__number',
+        ),
+      ).toEqual(['12', '1', '—', '12']);
+      expect(
+        element.querySelectorAll('.chat-transcripts__download'),
       ).toHaveLength(1);
-      expect(element.textContent).toContain('get a notice when a transcript');
+      expect(element.textContent).toContain('get a notice when one is ready');
+      expect(element.textContent).toContain(
+        'Refresh to see one being written once it is ready.',
+      );
     });
 
-    it('asks for a transcript of a channel, and lists it', async () => {
+    it('says a transcript that could not be made should be asked for again, with no download', async () => {
+      chat.transcripts.mockReturnValue(
+        of([
+          transcriptOf({
+            id: 'failed',
+            status: 'FAILED',
+            messageCount: null,
+            readyAt: null,
+            expiresAt: null,
+          }),
+        ]),
+      );
+
+      const element = await open('/chat/transcripts');
+
+      expect(statuses(element)).toEqual([
+        'There was an issue generating the transcript. Try again later.',
+      ]);
+      expect(
+        element.querySelectorAll('.chat-transcripts__download'),
+      ).toHaveLength(0);
+    });
+
+    it('says how to ask for one when there are none', async () => {
+      const element = await open('/chat/transcripts');
+
+      expect(texts(element, '.chat-transcripts__empty')).toEqual([
+        'You have asked for no transcripts in the last day. Export a channel’s transcript from the ⋮ beside it in the list.',
+      ]);
+    });
+
+    it('reads them afresh each time they are opened from the list', async () => {
       const element = await open('/chat');
 
-      expect(element.textContent).toContain('Transcripts you asked for');
+      expect(chat.transcripts).toHaveBeenCalledTimes(1);
+
+      link(element)?.click();
+      await settle();
+
+      expect(router.url).toBe('/chat/transcripts');
+      expect(chat.transcripts).toHaveBeenCalledTimes(2);
+    });
+
+    it('reads them at their address for a reader who may export nowhere now', async () => {
+      chat.channels.mockReturnValue(of([COMMUNITY, FLEET]));
+      chat.transcripts.mockReturnValue(of([transcriptOf()]));
+
+      const element = await open('/chat/transcripts');
+
+      expect(chat.transcripts).toHaveBeenCalledTimes(1);
+      expect(statuses(element)).toEqual(['Ready']);
+    });
+
+    it('goes back to the list from them', async () => {
+      const element = await open('/chat/transcripts');
+
+      button(element, 'All chats').click();
+      await settle();
+
+      expect(router.url).toBe('/chat');
+    });
+
+    it('asks for a transcript of a channel, then opens them to show it', async () => {
+      const element = await open('/chat');
 
       dialogResults = [undefined];
       action(element, 'General', 'Export a transcript of General').click();
@@ -758,6 +868,10 @@ describe('ChatPageComponent', () => {
         purpose: 'Looking into a complaint',
       };
 
+      // As the server answers once it has it.
+      chat.transcripts.mockReturnValue(
+        of([transcriptOf({ id: 'asked', status: 'PENDING', readyAt: null })]),
+      );
       dialogResults = [ask];
       action(element, 'General', 'Export a transcript of General').click();
       await settle();
@@ -773,9 +887,8 @@ describe('ChatPageComponent', () => {
         },
       );
       expect(chat.requestTranscript).toHaveBeenCalledWith('general', ask);
-      expect(texts(element, '.chat-page__transcript-status')).toEqual([
-        'Being written · 12 messages',
-      ]);
+      expect(router.url).toBe('/chat/transcripts');
+      expect(statuses(element)).toEqual(['Being written']);
     });
 
     // FC-044: the reach is the server's figure; without it there is none.
@@ -789,7 +902,7 @@ describe('ChatPageComponent', () => {
       expect(dialog.open).not.toHaveBeenCalled();
     });
 
-    it('says why a transcript could not be asked for', async () => {
+    it('says above the list why a transcript could not be asked for', async () => {
       const element = await open('/chat');
 
       chat.requestTranscript.mockReturnValue(
@@ -801,8 +914,12 @@ describe('ChatPageComponent', () => {
       action(element, 'General', 'Export a transcript of General').click();
       await settle();
       expect(texts(element, 'app-lcars-error-message')[0]).toContain(
+        'Transcript not asked for',
+      );
+      expect(texts(element, 'app-lcars-error-message')[0]).toContain(
         'A transcript reaches back 7 days at most.',
       );
+      expect(router.url).toBe('/chat');
 
       chat.requestTranscript.mockReturnValue(throwError(() => ({})));
       dialogResults = [{}];
@@ -820,9 +937,9 @@ describe('ChatPageComponent', () => {
 
       chat.transcripts.mockReturnValue(of([transcriptOf()]));
 
-      const element = await open('/chat');
+      const element = await open('/chat/transcripts');
 
-      button(element, 'Download').click();
+      button(element, 'Download the transcript of General').click();
       await settle();
 
       expect(chat.downloadTranscript).toHaveBeenCalledWith('transcript-1');
@@ -838,16 +955,16 @@ describe('ChatPageComponent', () => {
       [403, 'You may no longer export that channel.'],
       [500, 'The transcript could not be downloaded.'],
     ])(
-      'says why a download failed with %s, and reads the list again',
+      'says why a download failed with %s, and reads them again',
       async (code, message) => {
         chat.transcripts.mockReturnValue(of([transcriptOf()]));
         chat.downloadTranscript.mockReturnValue(
           throwError(() => ({ status: code })),
         );
 
-        const element = await open('/chat');
+        const element = await open('/chat/transcripts');
 
-        button(element, 'Download').click();
+        button(element, 'Download the transcript of General').click();
         await settle();
 
         expect(texts(element, 'app-lcars-error-message')[0]).toContain(message);
@@ -855,8 +972,8 @@ describe('ChatPageComponent', () => {
       },
     );
 
-    it('reads the list again on Refresh, and says when it cannot', async () => {
-      const element = await open('/chat');
+    it('reads them again on Refresh, and says when it cannot', async () => {
+      const element = await open('/chat/transcripts');
 
       chat.transcripts.mockReturnValue(throwError(() => new Error('offline')));
       button(element, 'Refresh your transcripts').click();
