@@ -668,6 +668,7 @@ describe('help data', () => {
         'privacy-mode',
         'staying-signed-in',
         'dates-and-times',
+        'chat-settings',
         'fleet-settings',
         'what-you-are-notified-about',
       ]);
@@ -684,18 +685,16 @@ describe('help data', () => {
         'fleet-settings',
         'what-you-are-notified-about',
       ]);
+      expect(byFeature('CHAT').map(guide => guide.slug)).toEqual([
+        'chat-settings',
+      ]);
       expect(
         guides.flatMap(guide =>
           guide.sections
             .filter(section => section.requiresFeature === 'CHAT')
             .map(section => section.heading),
         ),
-      ).toEqual([
-        'Who can see when I am online',
-        'Appear offline',
-        'Show when I am typing',
-        'Mentions, replies and direct messages',
-      ]);
+      ).toEqual(['Mentions, replies and direct messages']);
       expect(
         findHelpGuide('dates-and-times')?.guide.sections[1].requiresFeature,
       ).toBe('FLEET');

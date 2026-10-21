@@ -263,7 +263,7 @@ const COMMUNITY_TOPIC: HelpTopic = {
         'Opting in, deciding what is shown account by account, and opting out again.',
       sections: [
         guideSection('Opt in from your profile', [
-          'Go to your profile, edit your personal details, and turn on “Show me in the Galactic Personnel Registry”. Your profile page tells you which way the switch is set at any time.',
+          'Go to your profile, edit your personal details, and turn on “Show me in the Galactic Personnel Registry”. The same switch is on the Account tab of Settings, saved as soon as you change it; the cog beside the registry on your profile, the registry itself and the Community page goes there. Your profile page tells you which way the switch is set at any time.',
           'Nothing about you appears anywhere in the registry until you do this.',
         ]),
         guideSection(
@@ -1109,9 +1109,9 @@ const PRESENCE_LABEL: Readonly<Record<string, string>> = Object.fromEntries(
 /**
  * The STO Info settings guides (FC-049).
  *
- * One guide for each panel of the Settings page, in the order the page shows
- * them, and one about the page itself. Each panel's heading on the page
- * links to its guide, and each guide links back.
+ * One guide for each part of the Settings page, in the order its tabs and
+ * sections show them, and one about the page itself. Each section's heading
+ * on the page links to its guide, and each guide links back.
  *
  * The labels are the form's own, and those the form draws from a list are
  * drawn from the same list here. The guides about Fleet controls wait on
@@ -1136,7 +1136,12 @@ const SETTINGS_TOPIC: HelpTopic = {
       sections: [
         guideSection('Where to find them', [
           'Sign in, open your Dashboard and choose Settings. Everything on the page is about how STO Info behaves for you, and nobody else sees any of it.',
-          'Each panel has a help link under its heading, leading to the guide for that panel.',
+          'The page has a tab for each part of the site: Account, Chat, Fleet, Notifications and Custom Tracking. Chat’s tab is there while chat is switched on, and Fleet’s and Notifications’ while Fleet Community is. The arrow keys move between the tabs.',
+          'Each section has a help link under its heading, leading to the guide for that section.',
+        ]),
+        guideSection('Going straight to a setting', [
+          'A cog beside a heading elsewhere on the site goes straight to the settings for that place: beside Chat’s heading, Notifications’ heading and every Fleet page’s heading, beside an event’s reminders, a roster import’s help and the roster proposals on a Character, and beside the Galactic Personnel Registry on the registry, the Community page, your own registry record and your Personnel Record.',
+          'It opens the right tab and, where it leads to one setting, scrolls to that setting, puts the keyboard on it and rings it for a moment. The cog is shown only while you are signed in.',
         ]),
         guideSection('Saving', [
           'There is nothing to press. Each setting is saved the moment you change it, and a brief Saved note appears beside it. Change one at a time or several in a row; each is saved in turn.',
@@ -1147,7 +1152,7 @@ const SETTINGS_TOPIC: HelpTopic = {
           'Settings describe how this site behaves for you. None of them changes anything in Star Trek Online, on your STO accounts, or in what other people can see of them.',
         ]),
         guideSection('Custom Tracking', [
-          'The Custom Tracking panel at the foot of Settings leads to Configure Custom Tracking, where you decide what else to record about your own accounts and captains. It is not saved with the rest of the page, and it has guides of its own in the Custom Tracking section of Help.',
+          'The Custom Tracking tab leads to Configure Custom Tracking, where you decide what else to record about your own accounts and captains. It is not saved with the rest of the page, and it has guides of its own in the Custom Tracking section of Help.',
         ]),
       ],
       relatedLinks: [
@@ -1181,7 +1186,7 @@ const SETTINGS_TOPIC: HelpTopic = {
           'It is a blur, not a removal. The details are still on the page, so anybody who copies the text, or uses a screen reader, still gets them.',
         ]),
         guideSection('Turning it on', [
-          'It is off until you turn it on. Switch on Privacy Mode under Privacy in Settings; it is saved as soon as you do.',
+          'It is off until you turn it on. Switch on Privacy Mode under Privacy, on the Account tab of Settings; it is saved as soon as you do.',
           'While your settings are still loading, private details start out blurred, so they never flash up before the setting is known.',
         ]),
       ],
@@ -1200,7 +1205,7 @@ const SETTINGS_TOPIC: HelpTopic = {
         'The login inactivity timeout, and the warning before it runs out.',
       sections: [
         guideSection('How long you can be away', [
-          `Login inactivity timeout, under Security, is how long you can be idle before STO Info signs you out: ${SESSION_TIMEOUT_CHOICES}.`,
+          `Login inactivity timeout, under Security on the Account tab, is how long you can be idle before STO Info signs you out: ${SESSION_TIMEOUT_CHOICES}.`,
           'Anything you do on the site keeps your session going, so the countdown only runs while you are idle. You are warned shortly before it runs out.',
         ]),
         guideSection('When a change applies', [
@@ -1218,13 +1223,13 @@ const SETTINGS_TOPIC: HelpTopic = {
       summary: 'Which clock STO Info shows every date and time by.',
       sections: [
         guideSection('Show dates and times in', [
-          'Every date and time on STO Info is shown in one zone, which you choose under Dates and times. Left on “Automatically”, it follows whichever device you are using, which is what most people want.',
+          'Every date and time on STO Info is shown in one zone, which you choose under Dates and times, on the Account tab. Left on “Automatically”, it follows whichever device you are using, which is what most people want.',
           'Choose a zone if you would rather your dates stayed put when you travel. Each zone in the list shows its offset today, such as GMT+1.',
         ]),
         {
           heading: 'Roster exports keep their own zone',
           paragraphs: [
-            'The zone Star Trek Online roster exports are read in is a separate setting, under Fleet. Changing one never changes the other. The Fleet settings guide explains it.',
+            'The zone Star Trek Online roster exports are read in is a separate setting, on the Fleet tab. Changing one never changes the other. The Fleet settings guide explains it.',
           ],
           requiresFeature: 'FLEET',
         },
@@ -1232,42 +1237,47 @@ const SETTINGS_TOPIC: HelpTopic = {
       relatedLinks: [SETTINGS_LINK],
     },
     {
-      slug: 'fleet-settings',
-      title: 'Fleet settings',
-      summary: 'The Fleet panel of Settings, control by control.',
-      requiresFeature: 'FLEET',
+      slug: 'chat-settings',
+      title: 'Chat settings',
+      summary:
+        'The Chat tab of Settings: who sees you online, appearing offline, and typing.',
+      requiresFeature: 'CHAT',
       sections: [
-        guideSection('Read Fleet roster exports as', [
-          'Star Trek Online writes the times in a roster export using the clock of the computer it was exported from, and does not say which zone that was. When you import one, the zone chosen here is where the import page starts.',
-          '“My device’s zone”, the default, starts each import on the zone of the device you are importing on. Whatever you choose here, you can change it for a single import, and it is separate from the zone dates are shown in.',
-        ]),
-        {
-          heading: 'Who can see when I am online',
-          paragraphs: [
+        guideSection(
+          'Who can see when I am online',
+          [
             'Online means you have STO Info open, never whether you are in the game. You choose who may see it:',
           ],
-          points: [
+          [
             `${PRESENCE_LABEL['EVERYONE']} — anybody who can see your profile.`,
             `${PRESENCE_LABEL['FRIENDS']} — the default.`,
             `${PRESENCE_LABEL['FLEETS_AND_ARMADAS']} — your friends, and anybody sharing a Fleet with you or in a Fleet of the same Armada.`,
             'Whatever you choose, only people who can already see your profile are ever included, and never anybody you have blocked or who has blocked you.',
           ],
-          requiresFeature: 'CHAT',
-        },
-        {
-          heading: 'Appear offline',
-          paragraphs: [
-            'Hides you from everybody at once, whatever you chose above. Your choice above is remembered for when you switch this back off.',
-          ],
-          requiresFeature: 'CHAT',
-        },
-        {
-          heading: 'Show when I am typing',
-          paragraphs: [
-            'Off unless you turn it on, and it works both ways. With it on, people in a chat who also have it on see when you are writing, and you see when they are. With it off, you send no typing signal and see nobody else’s.',
-          ],
-          requiresFeature: 'CHAT',
-        },
+        ),
+        guideSection('Appear offline', [
+          'Hides you from everybody at once, whatever you chose above. Your choice above is remembered for when you switch this back off.',
+        ]),
+        guideSection('Show when I am typing', [
+          'Off unless you turn it on, and it works both ways. With it on, people in a chat who also have it on see when you are writing, and you see when they are. With it off, you send no typing signal and see nobody else’s.',
+        ]),
+        guideSection('Chat’s notices', [
+          'Whether you are told about mentions, replies and direct messages is on the Notifications tab, with every other kind of notice. What you are notified about explains them.',
+        ]),
+      ],
+      relatedLinks: [SETTINGS_LINK],
+    },
+    {
+      slug: 'fleet-settings',
+      title: 'Fleet settings',
+      summary: 'The Fleet tab of Settings, control by control.',
+      requiresFeature: 'FLEET',
+      sections: [
+        guideSection('Read Fleet roster exports as', [
+          'Star Trek Online writes the times in a roster export using the clock of the computer it was exported from, and does not say which zone that was. When you import one, the zone chosen here is where the import page starts.',
+          '“My device’s zone”, the default, starts each import on the zone of the device you are importing on. Whatever you choose here, you can change it for a single import, and it is separate from the zone dates are shown in.',
+          'The cog beside the help on a roster import comes straight here.',
+        ]),
       ],
       relatedLinks: [SETTINGS_LINK],
     },
@@ -1281,7 +1291,7 @@ const SETTINGS_TOPIC: HelpTopic = {
         guideSection('Where notices arrive', [
           'Notices arrive in STO Info only, under Notifications, never by email. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
           'Notifications shows five at a time, newest first. Each can be marked read or unread, or deleted, and Delete all read clears every one you have read; a deleted notice is gone from your inbox for good, though it changes nothing it told you about.',
-          'Each switch under Notifications stops that kind of notice as soon as it is switched off. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
+          'Each switch on the Notifications tab of Settings stops that kind of notice as soon as it is switched off; the cog beside the Notifications heading goes there. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
         ]),
         {
           heading: 'Mentions, replies and direct messages',

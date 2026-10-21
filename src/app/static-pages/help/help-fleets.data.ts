@@ -415,7 +415,7 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
     ],
     whereToFindIt: [
       'Open your Dashboard, choose Manage STO Accounts, open an account, then one of its Characters. The Fleet panel on the Character’s page shows “Currently” and, once something has ended, “Previously”.',
-      'Anything waiting for your answer is at the top of the panel, under “Awaiting your answer”, with the date to answer by. A new question also sends you a notice under Notifications, unless you have switched off “Roster association proposals” in Settings.',
+      'Anything waiting for your answer is at the top of the panel, under “Awaiting your answer”, with the date to answer by. A new question also sends you a notice under Notifications, unless you have switched off “Roster association proposals” on the Notifications tab of Settings, which the cog beside “Awaiting your answer” goes to.',
     ],
     how: {
       'How to record a Character’s Fleet': {
@@ -866,7 +866,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       ],
       'How reminders work': [
         'Under Remind me on the event’s page, tick 15 minutes before, An hour before or A day before, in any combination, and choose Save reminders. They cover every occurrence, arrive under Notifications, and you are also told when one is moved or cancelled.',
-        'Untick them all and choose Stop reminding me to end them. The Event reminders switch in Settings stops every reminder at once.',
+        'Untick them all and choose Stop reminding me to end them. The Event reminders switch on the Notifications tab of Settings stops every reminder at once; the cog beside Save reminders goes to it.',
       ],
       'How attendance is recorded': [
         'Once an occurrence has started, the event managers can mark each person under Who came as Came or Did not come: anybody who answered, and any member who did not. Each is recorded as the Character they answered with, if any, and a second record corrects the first.',
@@ -925,7 +925,7 @@ const FLEET_COMMUNICATION_GUIDES: HelpGuide[] = [
       ],
       'How online and writing work': [
         'Online means having STO Info open, never being in the game. A friend who is online has a dot beside their name under Direct messages, and Online on their profile.',
-        '“Who can see when I am online”, “Appear offline” and “Show when I am typing” are under Fleet in Settings; the Fleet settings guide explains each.',
+        '“Who can see when I am online”, “Appear offline” and “Show when I am typing” are on the Chat tab of Settings, which the cog beside Chat’s heading goes to; the chat settings guide explains each.',
       ],
       'How blocks affect chat': [
         'A block reaches into chat both ways, and neither of you is told. Each other’s messages show as “Message from a member you can’t see”. You cannot mention or reply to each other, neither sees the other online or writing, and a direct conversation between you closes, its history hidden.',
@@ -1153,7 +1153,7 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
         'Choose the file under “The export, as the game wrote it”, check “The clock it was taken on”, and choose Check this export. You are told how it would be read, and the file is thrown away, so check it as often as you like. “Ready to import” means every row was read and the filename checks out; “Not ready to import” shows what has to be settled first.',
       ],
       'How to choose the clock': [
-        'The file writes every time in the clock of the computer it was exported on, and never says which. The choice starts on the zone picked in Settings under “Read Fleet roster exports as”, or on your device’s zone when that is left on “My device’s zone”. Change it here if this export was taken somewhere else.',
+        'The file writes every time in the clock of the computer it was exported on, and never says which. The choice starts on the zone picked on the Fleet tab of Settings under “Read Fleet roster exports as”, which the cog beside this page’s help goes to, or on your device’s zone when that is left on “My device’s zone”. Change it here if this export was taken somewhere else.',
         'A wrong zone does not fail: it quietly moves every date by a few hours. That is why the first rows show each date twice, as the file says it and as it was read, in UTC. Check they agree.',
         'An export taken in the hour the clocks go back names two moments, and you are asked which. A time in the hour they skip going forward is refused, which usually means the zone is wrong.',
         'If the export’s time, or any date in it, comes out more than ten minutes later than now, the check warns you, because that usually means the zone is wrong. Check the zone; if it is right, tick “The timezone is right; import it anyway” to import it.',

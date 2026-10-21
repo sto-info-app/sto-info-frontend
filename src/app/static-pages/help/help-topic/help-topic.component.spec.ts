@@ -265,10 +265,18 @@ describe('HelpTopicComponent (FC-048)', () => {
     expect(fixture.nativeElement.textContent).toContain(
       'Fleet Community is switched off at the moment.',
     );
+    // The chat guide is noted too, for chat being off.
     expect(component.guideNotes.filter(note => note !== null)).toHaveLength(
-      component.guides.filter(guide => guide.requiresFeature === 'FLEET')
-        .length,
+      component.guides.filter(
+        guide =>
+          guide.requiresFeature === 'FLEET' || guide.requiresFeature === 'CHAT',
+      ).length,
     );
+    expect(
+      component.guideNotes[
+        component.guides.findIndex(guide => guide.slug === 'chat-settings')
+      ],
+    ).toBe('Fleet chat is switched off at the moment.');
   });
 
   // The whole section says so once; its chat guide adds nothing more.

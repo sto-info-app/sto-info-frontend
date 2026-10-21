@@ -448,7 +448,7 @@ describe('HelpGuideComponent', () => {
       );
       // Chat's parts are noted only when chat alone is off.
       expect(notes()).toEqual([component.switchedOff]);
-      expect(pageText()).toContain('Show when I am typing');
+      expect(pageText()).toContain('Read Fleet roster exports as');
       expect(navigateSpy).not.toHaveBeenCalled();
     });
 
@@ -463,24 +463,36 @@ describe('HelpGuideComponent', () => {
     });
 
     it('should note the parts about chat while chat alone is off', () => {
-      createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+      createComponent(
+        'what-you-are-notified-about',
+        STORYTIME_AVAILABILITY_ENABLED,
+        [],
+        { CHAT: 'DISABLED' },
+      );
+
+      expect(component.switchedOff).toBeNull();
+      expect(
+        component.sectionNotes.map(note =>
+          note?.startsWith('Fleet chat is switched off at the moment'),
+        ),
+      ).toEqual([undefined, true, undefined, undefined, undefined]);
+      expect(pageText()).toContain('Mentions, replies and direct messages');
+    });
+
+    it('should show a chat guide while chat is off, saying so once', () => {
+      createComponent('chat-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
         CHAT: 'DISABLED',
       });
 
-      expect(component.switchedOff).toBeNull();
-      expect(component.sectionNotes[0]).toBeNull();
-      expect(
-        component.sectionNotes
-          .slice(1)
-          .every(note =>
-            note?.startsWith('Fleet chat is switched off at the moment'),
-          ),
-      ).toBe(true);
+      expect(component.switchedOff).toContain(
+        'Fleet chat is switched off at the moment',
+      );
+      expect(notes()).toEqual([component.switchedOff]);
       expect(pageText()).toContain('Show when I am typing');
     });
 
     it('should show every part, unnoted, while chat is on', () => {
-      createComponent('fleet-settings');
+      createComponent('chat-settings');
 
       expect(pageText()).toContain('Who can see when I am online');
       expect(pageText()).toContain('Show when I am typing');
