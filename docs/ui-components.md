@@ -603,6 +603,7 @@ place `.lcars-number-highlight` gives up its sunflower.
 | `<app-endeavour-rank-badge>` (3) | `totalNodes`, `size` (`'default' \| 'small'`) | Zero-padded four-digit rank readout. `small` rescales through host CSS variables rather than a second stylesheet. |
 | `<app-smart-chart>` (1) | `data: ChartDataItem[]`, `threshold` (5), `mode` (`'pie' \| 'donut' \| 'bar' \| 'auto'`) | Signal inputs. Switches between an SVG pie/donut and a bar chart on the number of data points; every segment path, bar width and colour class is computed once in a `computed`. Falls back to `<app-lcars-information-message>` when there is no data. |
 | `<app-help-link>` | `slug`, `label` (both required) | A help button, on its own line, to one Help guide (FC-049, FC-050), drawn as an LCARS numbered panel button (13 October 2026): a 44px bar with a 35px rounded cap, a question mark two pixels shy of the bar at each end where the panel's number would stand, and the words on a pill. Always `$lcars-help-link`, thelcars.com's Classic lilac, which nothing else on the site uses, so it reads as "help" wherever it appears. The cap and the mark are `aria-hidden`, so the link is named by its words alone. Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
+| `<app-settings-link>` | `target: SettingsLinkTarget` (required) | A cog to the settings for the page it is on: `/dashboard/settings?tab=…`, with `#setting-…` when it leads to one setting. Icon only, in the help links' lilac, named by `aria-label` and `title`; it turns an eighth on hover and focus. Shown only while signed in, as many of its pages are public. Targets come from `SETTINGS_LINKS` in `settings-links.constants.ts`, beside the tab names (`SETTINGS_TABS`) and the setting anchors (`SETTINGS_ANCHORS`) the Settings page uses, so a cog and the page cannot disagree. Goes beside a heading inside a global `.page-heading-row` (flex, wrapping), or in a collapsible section's bar as `sectionActions`. |
 
 ### Feature locks
 
@@ -891,9 +892,24 @@ does not exist. Dialogs carry none: a Material dialog stays open over a
 `routerLink` navigation, since it closes only on the browser's back and forward.
 
 **STO Info settings** (FC-049) has a guide for the Settings page and one for
-each of its panels. A help link under each of the page's headings leads to
-that panel's guide. The guides quote the form's own labels; `help.testing.ts`
-lists them, and the specs for the page and for the Help data both check them.
+each of its parts, `chat-settings` among them. A help link under each of the
+page's section headings leads to that part's guide. The guides quote the
+form's own labels; `help.testing.ts` lists them, and the specs for the page and
+for the Help data both check them. They also say which tab each setting is on
+and which cogs lead to it, so a setting moved between tabs means a change to
+its guides.
+
+**The Settings page** is in tabs, the shared LCARS strip with roving focus
+(`nextTabIndex`): Account (Privacy, Galactic Personnel Registry, Security,
+Dates and times), Chat (while chat is on), Fleet and Notifications (while Fleet
+Community is on), and Custom Tracking. `?tab=` names the tab, and a tab not
+shown opens Account. Panels are `[hidden]` rather than removed, so every
+control keeps its form binding. `#setting-…` names a setting: once the page,
+the features and the profile are in, it opens the section holding it, scrolls
+to it, focuses its control and marks it with `settings-marked` for two seconds.
+The registry switch is the profile's, not a setting: it is read with
+`DashboardService.getUser()` and saved through `updatePersonalDetails` with the
+personal details as last read, in its own queue.
 
 **Videos.** A guide with a `video` (its YouTube identifier and title) shows it
 under its summary through `<app-help-video>`. Every Fleet guide but Roster
