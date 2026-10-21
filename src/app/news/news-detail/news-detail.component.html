@@ -3,60 +3,99 @@
 }
 
 <div id="news-detail-container">
-  <div
-    id="news-detail-main-column"
-    class="col">
-    @if (errorMessage) {
-      <app-lcars-error-message
-        title="Transmission failed"
-        [message]="errorMessage"></app-lcars-error-message>
-    }
+  @if (errorMessage) {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="errorMessage"></app-lcars-error-message>
+  }
 
-    @if (notFound) {
-      <h1>Post not found</h1>
-      <p>This post may have been removed or is not yet published.</p>
-    }
-
-    @if (post) {
-      <h1>{{ post.title }}</h1>
-
-      <div class="news-meta">
-        <span class="news-category">
-          <i
-            class="fas {{ categoryIcons[post.category] }} news-category-icon"
-            aria-hidden="true"></i>
-          {{ categoryLabels[post.category] }}
-        </span>
-        @if (post.publishedAt) {
-          <time class="news-date">
-            <i
-              class="fas fa-calendar-day news-date-icon"
-              aria-hidden="true"></i>
-            {{ post.publishedAt | appDate: 'longDate' }}
-          </time>
-        }
-      </div>
-
-      <article class="news-article">
-        <div
-          class="news-body"
-          [innerHTML]="post.body | markdown"></div>
-      </article>
-    }
-  </div>
-
-  <div
-    id="news-detail-side-column"
-    class="col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
+  @if (notFound) {
+    <h1>Post not found</h1>
+    <p>This post may have been removed or is not yet published.</p>
+    <div class="news-nav">
       <a
         [routerLink]="newsListLink"
-        class="full-width-btn-link"
+        class="lcars-btn lcars-btn-auto news-nav__back"
         >Back to News</a
       >
     </div>
-  </div>
+  }
+
+  @if (post) {
+    <h1>{{ post.title }}</h1>
+
+    <div class="news-meta">
+      <span class="news-category">
+        <i
+          class="fas {{ categoryIcons[post.category] }} news-category-icon"
+          aria-hidden="true"></i>
+        {{ categoryLabels[post.category] }}
+      </span>
+      @if (post.publishedAt) {
+        <time class="news-date">
+          <i
+            class="fas fa-calendar-day news-date-icon"
+            aria-hidden="true"></i>
+          {{ post.publishedAt | appDate: 'longDate' }}
+        </time>
+      }
+    </div>
+
+    <article class="news-article">
+      <div
+        class="news-body"
+        [innerHTML]="post.body | markdown"></div>
+    </article>
+
+    <!--
+      The posts either side of this one in the news, older to the left and
+      newer to the right, with the way back to the list between them. A side
+      with no post stays empty, so the others keep their places.
+    -->
+    <nav
+      class="news-nav"
+      aria-label="Other posts">
+      <div class="news-nav__side news-nav__side--previous">
+        @if (post.previous; as previous) {
+          <a
+            [routerLink]="postLink(previous.slug)"
+            class="lcars-btn lcars-btn-auto news-nav__link"
+            [attr.aria-label]="'Previous post: ' + previous.title">
+            <i
+              class="fas fa-chevron-left"
+              aria-hidden="true"></i>
+            Previous
+          </a>
+          <span
+            class="news-nav__title"
+            aria-hidden="true"
+            >{{ previous.title }}</span
+          >
+        }
+      </div>
+      <a
+        [routerLink]="newsListLink"
+        class="lcars-btn lcars-btn-auto news-nav__back"
+        >Back to News</a
+      >
+      <div class="news-nav__side news-nav__side--next">
+        @if (post.next; as next) {
+          <a
+            [routerLink]="postLink(next.slug)"
+            class="lcars-btn lcars-btn-auto news-nav__link"
+            [attr.aria-label]="'Next post: ' + next.title">
+            Next
+            <i
+              class="fas fa-chevron-right"
+              aria-hidden="true"></i>
+          </a>
+          <span
+            class="news-nav__title"
+            aria-hidden="true"
+            >{{ next.title }}</span
+          >
+        }
+      </div>
+    </nav>
+  }
 </div>

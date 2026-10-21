@@ -23,6 +23,21 @@ export interface NewsPost {
   updatedAt: string;
 }
 
+/** Enough of a neighbouring post to link to it by name. */
+export interface NewsNeighbour {
+  slug: string;
+  title: string;
+}
+
+/**
+ * A published post as the public reads it, with the posts either side of it
+ * in the site's news: previous is the older, next the newer.
+ */
+export interface PublishedNewsPost extends NewsPost {
+  previous: NewsNeighbour | null;
+  next: NewsNeighbour | null;
+}
+
 export interface PaginatedNews {
   items: NewsPost[];
   total: number;

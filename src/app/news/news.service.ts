@@ -7,6 +7,7 @@ import {
   NewsPost,
   NewsQuery,
   PaginatedNews,
+  PublishedNewsPost,
   UpdateNewsPostRequest,
 } from 'src/app/models/news.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -34,13 +35,14 @@ export class NewsService {
   }
 
   /**
-   * Fetches a single published post by its slug.
+   * Fetches a single published post by its slug, with the posts either side
+   * of it.
    *
    * @param slug - The post slug.
-   * @returns An observable of the post.
+   * @returns An observable of the post and its neighbours.
    */
-  getNewsBySlug(slug: string): Observable<NewsPost> {
-    return this._http.get<NewsPost>(`${API_URLS.NEWS}/${slug}`);
+  getNewsBySlug(slug: string): Observable<PublishedNewsPost> {
+    return this._http.get<PublishedNewsPost>(`${API_URLS.NEWS}/${slug}`);
   }
 
   // ----- Admin -----

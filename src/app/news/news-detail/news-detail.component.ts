@@ -3,10 +3,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   NgZone,
   OnInit,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -21,7 +23,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import {
   NEWS_CATEGORY_LABELS,
   NewsCategory,
-  NewsPost,
+  PublishedNewsPost,
 } from 'src/app/models/news.models';
 import { NewsService } from '../news.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -30,7 +32,7 @@ const LOAD_TIMEOUT_MS = 12000;
 
 /**
  * Public detail view for a single published news post, rendering its Markdown
- * body.
+ * body, with the way to the posts either side of it at its foot.
  */
 @Component({
   selector: 'app-news-detail',
@@ -54,6 +56,7 @@ export class NewsDetailComponent implements OnInit {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _destroyRef = inject(DestroyRef);
 
   categoryLabels = NEWS_CATEGORY_LABELS;
 
@@ -64,21 +67,27 @@ export class NewsDetailComponent implements OnInit {
     [NewsCategory.GENERAL]: 'fa-newspaper',
   };
 
-  post: NewsPost | null = null;
+  post: PublishedNewsPost | null = null;
   isLoading = false;
   notFound = false;
   errorMessage = '';
 
   /**
-   * Loads the post identified by the `slug` route parameter.
+   * Loads the post identified by the `slug` route parameter, and loads again
+   * whenever it changes: following Previous or Next leads to another post on
+   * the same route, which keeps this component rather than making a new one.
    */
   ngOnInit(): void {
-    const slug = this._route.snapshot.paramMap.get('slug');
-    if (!slug) {
-      this.notFound = true;
-      return;
-    }
-    this.loadPost(slug);
+    this._route.paramMap
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(params => {
+        const slug = params.get('slug');
+        this.post = null;
+        this.notFound = !slug;
+        if (slug) {
+          this.loadPost(slug);
+        }
+      });
   }
 
   /**
@@ -142,7 +151,7 @@ export class NewsDetailComponent implements OnInit {
    *
    * @param post - The loaded post.
    */
-  private applyPostMeta(post: NewsPost): void {
+  private applyPostMeta(post: PublishedNewsPost): void {
     this._pageTitleService.setTitle(post.title);
     const ogImageUrl = `${SEO_SITE_URL}og/news/${post.slug}.png`;
     this._seoService.setPageMeta(
@@ -159,5 +168,15 @@ export class NewsDetailComponent implements OnInit {
    */
   get newsListLink(): string {
     return this._routingService.getLink(APP_ROUTES.NEWS);
+  }
+
+  /**
+   * Link to another post's page.
+   *
+   * @param slug - The post's slug.
+   * @returns The post's route link.
+   */
+  postLink(slug: string): string {
+    return this._routingService.getLink(`${APP_ROUTES.NEWS}/${slug}`);
   }
 }

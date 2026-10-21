@@ -1,8 +1,17 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter } from '@angular/router';
-import { NEVER, of, throwError } from 'rxjs';
-import { NewsCategory, NewsStatus } from 'src/app/models/news.models';
+import {
+  ActivatedRoute,
+  ParamMap,
+  convertToParamMap,
+  provideRouter,
+} from '@angular/router';
+import { BehaviorSubject, NEVER, of, throwError } from 'rxjs';
+import {
+  NewsCategory,
+  NewsStatus,
+  PublishedNewsPost,
+} from 'src/app/models/news.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -19,6 +28,7 @@ describe('NewsDetailComponent', () => {
   let serviceSpy: jest.Mocked<Pick<NewsService, 'getNewsBySlug'>>;
   let routingServiceSpy: jest.Mocked<Pick<RoutingService, 'getLink'>>;
   let slug: string | null;
+  let paramMap$: BehaviorSubject<ParamMap>;
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -28,7 +38,9 @@ describe('NewsDetailComponent', () => {
     jest.useRealTimers();
   });
 
-  const buildPost = () => ({
+  const buildPost = (
+    overrides: Partial<PublishedNewsPost> = {},
+  ): PublishedNewsPost => ({
     id: '1',
     slug: 'my-slug',
     title: 'Title',
@@ -40,7 +52,16 @@ describe('NewsDetailComponent', () => {
     authorId: null,
     createdAt: '',
     updatedAt: '',
+    previous: null,
+    next: null,
+    ...overrides,
   });
+
+  const routeStub = () => {
+    paramMap$ = new BehaviorSubject(convertToParamMap(slug ? { slug } : {}));
+
+    return { paramMap: paramMap$.asObservable() };
+  };
 
   const configure = async () => {
     serviceSpy = {
@@ -60,10 +81,7 @@ describe('NewsDetailComponent', () => {
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: SeoService, useValue: seoStub },
         { provide: PageTitleService, useValue: pageTitleStub },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => slug } } },
-        },
+        { provide: ActivatedRoute, useValue: routeStub() },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(NewsDetailComponent);
@@ -88,10 +106,11 @@ describe('NewsDetailComponent', () => {
     slug = 'my-slug';
     await configure();
     serviceSpy.getNewsBySlug.mockReturnValueOnce(
-      of({
-        ...buildPost(),
-        body: 'Watch https://youtu.be/UG0aHIOLbV4\n\n<script>alert(1)</script>',
-      }),
+      of(
+        buildPost({
+          body: 'Watch https://youtu.be/UG0aHIOLbV4\n\n<script>alert(1)</script>',
+        }),
+      ),
     );
 
     fixture.detectChanges();
@@ -105,11 +124,94 @@ describe('NewsDetailComponent', () => {
     expect(body.textContent).toContain('<script>alert(1)</script>');
   });
 
+  // Previous is the older post, on the left, and Next the newer, on the
+  // right, each named beneath its pill, with Back to News between them.
+  it('leads to the posts either side, older first, with their titles', async () => {
+    slug = 'my-slug';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(
+      of(
+        buildPost({
+          previous: { slug: 'older', title: 'The older post' },
+          next: { slug: 'newer', title: 'The newer post' },
+        }),
+      ),
+    );
+
+    fixture.detectChanges();
+
+    const nav: HTMLElement = fixture.nativeElement.querySelector('.news-nav');
+    const links = Array.from(nav.querySelectorAll('a')).map(link => ({
+      href: link.getAttribute('href'),
+      text: link.textContent?.trim(),
+      label: link.getAttribute('aria-label'),
+    }));
+
+    expect(links).toEqual([
+      {
+        href: '/news/older',
+        text: 'Previous',
+        label: 'Previous post: The older post',
+      },
+      { href: '/news', text: 'Back to News', label: null },
+      { href: '/news/newer', text: 'Next', label: 'Next post: The newer post' },
+    ]);
+    expect(
+      Array.from(nav.querySelectorAll('.news-nav__title')).map(title =>
+        title.textContent?.trim(),
+      ),
+    ).toEqual(['The older post', 'The newer post']);
+  });
+
+  it('leaves a side empty when there is no post that way', async () => {
+    slug = 'my-slug';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(
+      of(buildPost({ next: { slug: 'newer', title: 'The newer post' } })),
+    );
+
+    fixture.detectChanges();
+
+    const nav: HTMLElement = fixture.nativeElement.querySelector('.news-nav');
+
+    expect(
+      nav.querySelector('.news-nav__side--previous')?.children,
+    ).toHaveLength(0);
+    expect(nav.querySelector('.news-nav__side--next a')).not.toBeNull();
+    expect(
+      Array.from(nav.querySelectorAll('a')).map(link =>
+        link.textContent?.trim(),
+      ),
+    ).toEqual(['Back to News', 'Next']);
+  });
+
+  // Following Previous or Next changes the slug on the same route, which
+  // keeps this component, so it has to notice and load the other post.
+  it('loads the other post when the slug changes', async () => {
+    slug = 'my-slug';
+    await configure();
+    fixture.detectChanges();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(
+      of(buildPost({ slug: 'older', title: 'The older post' })),
+    );
+
+    paramMap$.next(convertToParamMap({ slug: 'older' }));
+    fixture.detectChanges();
+
+    expect(serviceSpy.getNewsBySlug).toHaveBeenLastCalledWith('older');
+    expect(component.post?.title).toBe('The older post');
+    expect(pageTitleStub.setTitle).toHaveBeenLastCalledWith('The older post');
+  });
+
   it('flags not found when there is no slug', async () => {
     slug = null;
     await configure();
     fixture.detectChanges();
     expect(component.notFound).toBe(true);
+    expect(serviceSpy.getNewsBySlug).not.toHaveBeenCalled();
+    expect(
+      fixture.nativeElement.querySelector('.news-nav a')?.textContent?.trim(),
+    ).toBe('Back to News');
   });
 
   it('flags not found on a 404 response', async () => {
@@ -127,10 +229,7 @@ describe('NewsDetailComponent', () => {
         { provide: NewsService, useValue: serviceSpy },
         { provide: SeoService, useValue: seoStub },
         { provide: PageTitleService, useValue: pageTitleStub },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => slug } } },
-        },
+        { provide: ActivatedRoute, useValue: routeStub() },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(NewsDetailComponent);
@@ -171,10 +270,7 @@ describe('NewsDetailComponent', () => {
         { provide: RoutingService, useValue: routingServiceSpy },
         { provide: SeoService, useValue: seoStub },
         { provide: PageTitleService, useValue: pageTitleStub },
-        {
-          provide: ActivatedRoute,
-          useValue: { snapshot: { paramMap: { get: () => slug } } },
-        },
+        { provide: ActivatedRoute, useValue: routeStub() },
       ],
     }).compileComponents();
     fixture = TestBed.createComponent(NewsDetailComponent);
