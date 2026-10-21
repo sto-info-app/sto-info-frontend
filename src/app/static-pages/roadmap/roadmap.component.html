@@ -1,28 +1,33 @@
 <div id="roadmap-container">
   <div
     id="roadmap-main-column"
-    class="col">
+    class="col"
+  >
     <h1>STO Info Roadmap</h1>
     <p>
-      This roadmap tracks what has shipped and what is coming next for STO
-      Info. It is based on published project updates and will continue to
-      evolve as new releases are deployed.
+      This roadmap tracks what has shipped and what is coming next for STO Info.
+      It is based on published project updates and will continue to evolve as
+      new releases are deployed.
     </p>
 
     <!--
       Each section is its own anchor, so the side column's links land on it.
       The host carries the id rather than a wrapper, so the sections stay
-      siblings and take successive colours.
+      siblings and take successive colours. A list section with nothing in it
+      is not drawn at all.
     -->
-    @for (section of sectionMeta; track section.key) {
+    @for (section of sections; track section.key) {
       <app-collapsible-section
         class="roadmap-section"
         [id]="section.anchorId"
-        [heading]="section.title">
-        @if (section.key === 'complete') {
+        [heading]="section.title"
+      >
+        @if (section.key === "complete") {
           @for (item of complete; track item.title) {
             <article class="roadmap-item">
-              <h3>{{ item.title }}</h3>
+              <h3>
+                {{ item.title }}
+              </h3>
               <ul class="lcars-list">
                 @for (detail of item.details; track detail) {
                   <li>{{ detail }}</li>
@@ -32,25 +37,10 @@
           }
         }
 
-        @if (section.key === 'inProgress') {
+        <!-- The other sections are plain lists. -->
+        @if (section.key !== "complete") {
           <ul class="lcars-list">
-            @for (item of inProgress; track item) {
-              <li>{{ item }}</li>
-            }
-          </ul>
-        }
-
-        @if (section.key === 'planned') {
-          <ul class="lcars-list">
-            @for (item of planned; track item) {
-              <li>{{ item }}</li>
-            }
-          </ul>
-        }
-
-        @if (section.key === 'futureIdeas') {
-          <ul class="lcars-list">
-            @for (item of futureIdeas; track item) {
+            @for (item of itemsOf(section.key); track item) {
               <li>{{ item }}</li>
             }
           </ul>
@@ -61,17 +51,18 @@
 
   <div
     id="roadmap-side-column"
-    class="col">
+    class="col"
+  >
     <app-collapsible-section
       heading="Navigation"
-      barClass="small-lcars-bar-gap">
+      barClass="small-lcars-bar-gap"
+    >
       <div class="buttons">
-        @for (section of sectionMeta; track section.key) {
+        @for (section of sections; track section.key) {
           <a
-            [href]="getRouteLink(appRoutes.ROADMAP) + '#' + section.anchorId"
+            [href]='getRouteLink(appRoutes.ROADMAP) + "#" + section.anchorId'
             class="full-width-btn-link"
-            >{{ section.title }}</a
-          >
+          >{{ section.title }}</a>
         }
       </div>
     </app-collapsible-section>
