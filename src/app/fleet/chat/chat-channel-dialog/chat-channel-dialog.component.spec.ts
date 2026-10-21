@@ -88,9 +88,7 @@ describe('ChatChannelDialogComponent', () => {
   it('changes a channel, starting from what it is', () => {
     const element = open(CHANNEL);
 
-    expect(element.querySelector('h2')?.textContent).toContain(
-      'Change Officers',
-    );
+    expect(element.querySelector('h2')?.textContent).toContain('Edit Officers');
     expect(field<HTMLInputElement>(element, 'chat-channel-name').value).toBe(
       'Officers',
     );

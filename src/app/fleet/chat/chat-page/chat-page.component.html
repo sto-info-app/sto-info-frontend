@@ -88,7 +88,7 @@
           The list is a slim column beside the open place, as in a chat
           app: each part is a group under a heading in the next colour of the
           list's rotation, its places plain rows beneath. A channel's
-          export, change and archive wait behind its ⋮ so a long list stays
+          export, edit and archive wait behind its ⋮ so a long list stays
           quiet, and adding a channel is the + on its group's heading.
         -->
         @for (scope of scopes(); track scope.path) {
@@ -172,14 +172,14 @@
                         <button
                           type="button"
                           class="chat-page__manage-button"
-                          [attr.aria-label]="'Change ' + channel.name"
+                          [attr.aria-label]="'Edit ' + channel.name"
                           (click)="
                             closeActions(); changeChannel(scope, channel)
                           ">
                           <i
-                            class="fas fa-user-pen"
+                            class="fas fa-pen"
                             aria-hidden="true"></i>
-                          Change
+                          Edit
                         </button>
                         <button
                           type="button"

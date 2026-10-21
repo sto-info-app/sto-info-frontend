@@ -563,7 +563,7 @@ describe('ChatPageComponent', () => {
       expect(general.getAttribute('aria-expanded')).toBe('false');
       expect(texts(element, '#chat-actions-officers button')).toEqual([
         'Export',
-        'Change',
+        'Edit',
         'Archive',
       ]);
 
@@ -583,7 +583,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       dialogResults = [undefined];
-      action(element, 'Officers', 'Change Officers').click();
+      action(element, 'Officers', 'Edit Officers').click();
       harness.detectChanges();
 
       expect(element.querySelector('.chat-page__manage')).toBeNull();
@@ -613,7 +613,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       dialogResults = [undefined];
-      action(element, 'Officers', 'Change Officers').click();
+      action(element, 'Officers', 'Edit Officers').click();
 
       expect(chat.update).not.toHaveBeenCalled();
     });
@@ -622,7 +622,7 @@ describe('ChatPageComponent', () => {
       const element = await open('/chat');
 
       dialogResults = [{ name: 'Officers', readRole: 'OFFICER' }];
-      action(element, 'Officers', 'Change Officers').click();
+      action(element, 'Officers', 'Edit Officers').click();
       await settle();
       expect(chat.update).toHaveBeenCalledWith(FLEET.target, 'officers', {
         name: 'Officers',
@@ -635,7 +635,7 @@ describe('ChatPageComponent', () => {
         })),
       );
       dialogResults = [{ name: 'General', readRole: 'MEMBER' }];
-      action(element, 'Officers', 'Change Officers').click();
+      action(element, 'Officers', 'Edit Officers').click();
       await settle();
       expect(texts(element, 'app-lcars-error-message')[0]).toContain(
         'Channel not saved',
@@ -643,7 +643,7 @@ describe('ChatPageComponent', () => {
 
       chat.update.mockReturnValue(throwError(() => ({})));
       dialogResults = [{ name: 'General', readRole: 'MEMBER' }];
-      action(element, 'Officers', 'Change Officers').click();
+      action(element, 'Officers', 'Edit Officers').click();
       await settle();
       expect(element.querySelectorAll('app-lcars-error-message')).toHaveLength(
         1,

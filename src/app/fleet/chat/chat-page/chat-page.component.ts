@@ -215,7 +215,7 @@ export class ChatPageComponent {
   readonly transcripts = signal<ChatTranscript[]>([]);
   readonly transcriptError = signal<string | null>(null);
 
-  /** The channel whose export, change and archive are shown, if any. */
+  /** The channel whose export, edit and archive are shown, if any. */
   readonly actionsOpenFor = signal<string | null>(null);
 
   /**

@@ -3,7 +3,7 @@
   (submit)="$event.preventDefault(); save()">
   <h2 mat-dialog-title>
     {{
-      data.channel === null ? 'Add a channel' : 'Change ' + data.channel.name
+      data.channel === null ? 'Add a channel' : 'Edit ' + data.channel.name
     }}
     <span class="chat-channel-dialog__scope">{{ data.scopeName }}</span>
   </h2>
