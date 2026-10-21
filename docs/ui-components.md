@@ -1548,10 +1548,17 @@ Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC
   - From and To, in the device's time, defaulting to the last day and bounded to the last seven
     days (ten minutes' grace, for a clock a little behind the server's);
   - a purpose of 10 to 500 characters.
-  - "Your transcripts" then lists what they asked for in the last day, with its status, range and
-    message count, and Download while it is ready and within its day. The download is fetched with
-    the reader's token and saved as `chat-<channel>-<date>.txt`.
-  - An in-app notice says when one is ready. Refresh reads the list again; the page does not poll.
+  - Asking opens `/chat/transcripts`, where `ChatTranscriptsComponent` lists what they asked for in
+    the last day in the pane a conversation takes: a `fleet-community-table` row each (channel and
+    scope, range, status, message count), with Download while it is ready and within its day, and
+    labelled lines on a phone. The download is fetched with the reader's token and saved as
+    `chat-<channel>-<date>.txt`. A failed one says "There was an issue generating the transcript.
+    Try again later.", since nothing was kept and a site admin's retry ends with the hour.
+  - The list keeps one link there, "Your transcripts", with a count of those ready to download. They
+    are read with the list, and again each time they are opened.
+  - An in-app notice, linking `/chat/transcripts`, says when one is ready. Refresh reads them again;
+    the page does not poll. A request the server refuses is said above the list, headed "Transcript
+    not asked for".
 
 **One place** (`ChatConversationComponent`):
 
