@@ -84,10 +84,10 @@
       <div class="header-left">
         @if (character.rank?.iconUrl) {
           <img
-            [src]="character.rank!.iconUrl"
+            [src]="character.rank.iconUrl"
             class="rank-icon"
-            [alt]="character.rank?.title || 'Rank icon'"
-            [title]="character.rank?.title || 'Rank icon'" />
+            [alt]="character.rank.title || 'Rank icon'"
+            [title]="character.rank.title || 'Rank icon'" />
         }
         <h1>{{ character.handle }}</h1>
       </div>
@@ -299,7 +299,7 @@
               -->
               <app-character-overview-summary
                 [characterId]="character.id"
-                [characterLevel]="character.level ?? null"
+                [characterLevel]="character.level"
                 [generalFaction]="character.generalFaction?.name ?? null"
                 (openTab)="selectTab($event)" />
 
