@@ -117,6 +117,7 @@ export const API_URLS = {
   FILE_SCANNING_ADMIN_REJECTIONS: apiUrl + '/admin/file-scanning/rejections',
   FILE_SCANNING_ADMIN_ASSETS: apiUrl + '/admin/file-scanning/assets',
   SECURITY_LOG_ADMIN: apiUrl + '/admin/security-log',
+  SITE_STATISTICS_ADMIN: apiUrl + '/admin/site-statistics',
   // Private image delivery (FC-040).
   IMAGE_ESTATE_ADMIN: apiUrl + '/admin/image-estate',
   RESCAN_CAMPAIGNS_ADMIN: apiUrl + '/admin/rescan-campaigns',

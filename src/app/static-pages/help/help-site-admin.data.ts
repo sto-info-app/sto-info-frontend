@@ -16,8 +16,9 @@ const SECURITY_LOG_LINK: HelpGuideLink = {
 /**
  * The guides to running the site, for its administrators (FC-050): reports and
  * holds, members and permissions, disputes, roster erasure, the Security Log,
- * picture scanning, the feature switches (FC-045) and the site's own content
- * (13 October 2026). Each follows the same six parts as the Fleet guides.
+ * Site Statistics (FC-053), picture scanning, the feature switches (FC-045)
+ * and the site's own content (13 October 2026). Each follows the same six
+ * parts as the Fleet guides.
  */
 const SITE_ADMIN_GUIDES: HelpGuide[] = [
   sixPartGuide({
@@ -324,6 +325,63 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     relatedLinks: [SECURITY_LOG_LINK, ADMIN_LINK],
   }),
   sixPartGuide({
+    slug: 'site-admin-site-statistics',
+    title: 'Site Statistics',
+    summary:
+      'How many members there are and how many are active, sign-ups, what Storytime has published, how Fleet Communities and chat are growing, and what is waiting on you.',
+    whatItIsFor: [
+      'Site Statistics is one page of the site’s numbers: members and how many of them are active, sign-ups, Storytime content published, Fleet Communities, Fleets and Armadas with their members, chat, applications and events, STO accounts and Characters recorded, news published, and the reports still waiting on a site administrator.',
+      'Every figure is a count as of the moment the page was opened, and none names anybody. The page is for seeing how the site is doing, not for finding a member; Manage Members is for that.',
+    ],
+    whoCanUseIt: ['Site administrators only.'],
+    whereToFindIt: [
+      'Choose Admin in the side bar. Site Statistics is under Operations. Opening it is not recorded in the Security Log, since nothing on it is about anybody.',
+    ],
+    how: {
+      'How to read it': {
+        paragraphs: [
+          'Four tiles lead: Members, the open accounts; Active in 30 days; Joined in 30 days; and Open reports, member and chat reports together. “As of” under the heading says when the numbers were read; open the page again for fresh ones.',
+          'Beneath them are two charts of the last twelve weeks, each week named by the Monday it starts on, and then a section of panels for each group. A panel with four numbers counts over four windows:',
+        ],
+        points: [
+          'Today — since 00:00 UTC today, whatever your own time zone.',
+          '7 days and 30 days — the last seven or thirty days, up to now.',
+          'All time — ever, or for content, how many are live now.',
+          'A panel with one number is a total as of now, such as Open accounts or Spotlights live.',
+        ],
+      },
+      'How a member counts as active': [
+        'A member is active in a window if they were seen on the site in it: signed in, or already signed in and using the site. The site notes a member as seen at sign-in and then at most once an hour while they use it, so somebody who stays signed in for weeks still counts.',
+        'Members who were last seen before the site began noting this, in v1.5.1, count by their last sign-in instead until they next visit. A disabled account never counts as active, and a closed one is left out of every count but Sign-ups and Closed.',
+        'Members last seen, by week counts each open account once, in the latest week it was seen. The nearest weeks hold everyone still visiting; the earlier ones hold those who have drifted away. It is not how many were active in each week.',
+      ],
+      'How the panels count': {
+        paragraphs: [
+          'The line under a number says what is and is not counted. In short:',
+        ],
+        points: [
+          'Sign-ups count every account registered, since-closed ones included, so the figure stands for who joined rather than who stayed. Open accounts, Email verified, Disabled and the roles count the accounts open now; Closed counts those awaiting their final deletion, after which they are counted nowhere.',
+          'Stories, Chapters and Arcs count by the day each was first published, among those published and not removed; All time is how many are live. Comments count every comment made, whether or not it still shows. Spotlights live is how many are published now.',
+          'Communities, Fleets and Armadas registered count by registration, leaving out deleted ones; the active panels count those not suspended or closed. Fleet members counts each member once, however many Communities, Fleets or Armadas they hold approved access to. Chat messages count every message sent, removed ones included; Applications by when they were submitted; Events as created, cancelled ones included.',
+          'STO accounts and Characters count those recorded and not deleted. News posts count the site’s own published posts, not a Fleet’s. Open member reports and Open chat reports are the two queues under Community.',
+        ],
+      },
+    },
+    whoCanSeeIt: [
+      'Site administrators alone. Nothing on the page is kept: it is read fresh each time, from the records the site already holds.',
+    ],
+    whenSomethingGoesWrong: [
+      '“The statistics could not be read.” means the numbers did not load. Open the page again to retry.',
+      'A chart with no bars says the last twelve weeks hold nothing to count. A panel that seems low for Active members just after v1.5.1 is expected: members count by their last sign-in until they next visit.',
+      'A number that looks wrong cannot be edited here. The figures are counts of the site’s own records, so the record to look at is the one being counted: the member in Manage Members, the post in Manage News, or the Community on its own pages.',
+    ],
+    relatedLinks: [
+      { label: 'Site Statistics', route: APP_ROUTES.ADMIN_SITE_STATISTICS },
+      { label: 'Manage Members', route: APP_ROUTES.ADMIN_USERS },
+      ADMIN_LINK,
+    ],
+  }),
+  sixPartGuide({
     slug: 'site-admin-scanning',
     title: 'Scan Diagnostics',
     summary:
@@ -522,7 +580,7 @@ export const SITE_ADMIN_TOPIC: HelpTopic = {
   id: 'site-admin',
   title: 'Running the site',
   intro:
-    'For site administrators: deciding reports, keeping evidence, looking after accounts and permissions, settling disputes over who runs a Community, erasing somebody from rosters, reading the Security Log, checking pictures, switching features on and off, and speaking to members as the site.',
+    'For site administrators: deciding reports, keeping evidence, looking after accounts and permissions, settling disputes over who runs a Community, erasing somebody from rosters, reading the Security Log and the site’s numbers, checking pictures, switching features on and off, and speaking to members as the site.',
   requiresAdmin: true,
   guides: SITE_ADMIN_GUIDES,
 };

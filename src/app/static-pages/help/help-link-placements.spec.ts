@@ -321,6 +321,11 @@ const PLACEMENTS: readonly [string, string, string][] = [
     'site-admin-scanning',
     'Help with Scan Diagnostics',
   ],
+  [
+    'admin/site-statistics/site-statistics.component.html',
+    'site-admin-site-statistics',
+    'Help with Site Statistics',
+  ],
   // The Admin page's one link, on its publication pause (FC-042); the page
   // itself is a set of ways into others, each with a link of its own.
   [

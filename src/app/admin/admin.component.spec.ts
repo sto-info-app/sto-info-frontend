@@ -104,6 +104,18 @@ describe('AdminComponent', () => {
     expect(component.getRouteLink('admin/news')).toBe('/admin/news');
   });
 
+  // The site's numbers sit under Operations with the Security Log (FC-053).
+  it('offers Site Statistics under Operations', () => {
+    fixture.detectChanges();
+
+    const card = (fixture.nativeElement as HTMLElement).querySelector(
+      '.admin-landing__card--site-statistics',
+    );
+
+    expect(card?.textContent).toContain('Site Statistics');
+    expect(hrefs()).toContain(`/${APP_ROUTES.ADMIN_SITE_STATISTICS}`);
+  });
+
   // A site administrator reaches any Community's dispute page, and this is
   // the way in to a hidden one (FC-050).
   it.each([
