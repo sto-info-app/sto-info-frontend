@@ -68,8 +68,6 @@ export interface AccountCardVm {
   id: string;
   /** The account handle shown in the card header. */
   handle: string;
-  /** Draws a copy button after the handle in the header (#1090). */
-  copyHandle?: boolean;
   /** Router link for the card and its header. */
   link: string | string[];
   /** Platform and launcher theme classes, space-separated. */

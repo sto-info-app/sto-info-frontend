@@ -11,16 +11,6 @@
           class="fas fa-badge-check lifetime-icon"
           title="Lifetime Subscription"></i>
       }
-      @if (vm.copyHandle) {
-        <button
-          type="button"
-          class="copy-icon copy-icon--header"
-          [title]="copyTitleOf('Handle')"
-          [attr.aria-label]="copyTitleOf('Handle')"
-          (click)="copy('Handle', vm.handle, $event)">
-          <i [class]="copyIconOf('Handle')"></i>
-        </button>
-      }
     </div>
     <a
       [routerLink]="vm.link"

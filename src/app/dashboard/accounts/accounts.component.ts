@@ -466,7 +466,6 @@ export class AccountsComponent implements OnInit, OnDestroy {
       card: {
         id: account.id,
         handle: account.handle,
-        copyHandle: true,
         link: accountLink,
         themeClass: [
           platformClass,
@@ -541,6 +540,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
         text: account.username,
         label: 'Username',
         private: true,
+        copyable: true,
       });
     }
 

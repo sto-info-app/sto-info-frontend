@@ -120,11 +120,17 @@ describe('AccountCardComponent', () => {
       expect(copyButtons()).toHaveLength(0);
     });
 
-    it('names a button by what it copies, beside the handle and the detail', () => {
+    it('names a button by what it copies, after each copyable detail', () => {
       render(
         buildVm({
-          copyHandle: true,
           details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              private: true,
+              copyable: true,
+            },
             {
               icon: 'fas fa-envelope',
               text: 'a@b.c',
@@ -140,12 +146,17 @@ describe('AccountCardComponent', () => {
       const buttons = copyButtons();
 
       expect(buttons.map(button => button.title)).toEqual([
-        'Copy handle',
+        'Copy username',
         'Copy email',
       ]);
-      expect(buttons[0].closest('.header-handle')).not.toBeNull();
-      expect(buttons[1].closest('.account-detail-row')).not.toBeNull();
-      // Outside the value, so Privacy Mode's blur never covers it.
+      expect(
+        buttons.map(button => button.closest('.account-detail-row')),
+      ).not.toContain(null);
+      // The header offers nothing to copy; outside the value, so Privacy
+      // Mode's blur never covers a button.
+      expect(
+        fixture.nativeElement.querySelector('.header-handle button'),
+      ).toBeNull();
       expect(buttons[1].closest('.account-detail-value')).toBeNull();
       expect(buttons.map(icon)).toEqual(['fa-copy', 'fa-copy']);
     });
@@ -153,8 +164,13 @@ describe('AccountCardComponent', () => {
     it('copies the value, shows a tick for a moment and says so, without opening the account', async () => {
       render(
         buildVm({
-          copyHandle: true,
           details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              copyable: true,
+            },
             {
               icon: 'fas fa-envelope',
               text: 'a@b.c',
@@ -175,18 +191,18 @@ describe('AccountCardComponent', () => {
       await flush();
       fixture.detectChanges();
 
-      expect(writeText).toHaveBeenCalledWith('SteveX#1234');
+      expect(writeText).toHaveBeenCalledWith('stevex');
       expect(stopPropagation).toHaveBeenCalled();
       expect(handle.title).toBe('Copied');
       expect(icon(handle)).toBe('fa-check');
-      expect(announcement()).toBe('Handle copied');
+      expect(announcement()).toBe('Username copied');
       // The other button is left as it was.
       expect(email.title).toBe('Copy email');
 
       jest.advanceTimersByTime(COPY_FEEDBACK_MS);
       fixture.detectChanges();
 
-      expect(handle.title).toBe('Copy handle');
+      expect(handle.title).toBe('Copy username');
       expect(icon(handle)).toBe('fa-copy');
     });
 
@@ -214,7 +230,18 @@ describe('AccountCardComponent', () => {
 
     it('says when the clipboard refuses, and keeps the copy icon', async () => {
       writeText.mockRejectedValue(new Error('denied'));
-      render(buildVm({ copyHandle: true }));
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              copyable: true,
+            },
+          ],
+        }),
+      );
       const [handle] = copyButtons();
 
       handle.click();
@@ -223,12 +250,12 @@ describe('AccountCardComponent', () => {
 
       expect(handle.title).toBe('Could not copy');
       expect(icon(handle)).toBe('fa-copy');
-      expect(announcement()).toBe('Handle could not be copied');
+      expect(announcement()).toBe('Username could not be copied');
 
       jest.advanceTimersByTime(COPY_FEEDBACK_MS);
       fixture.detectChanges();
 
-      expect(handle.title).toBe('Copy handle');
+      expect(handle.title).toBe('Copy username');
     });
   });
 

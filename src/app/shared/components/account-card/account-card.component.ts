@@ -25,8 +25,8 @@ export type CopyOutcome = 'copied' | 'failed';
  * both render identically; callers vary only the `vm` they build — in
  * particular `actions`, which is empty for read-only contexts.
  *
- * A value worth copying — the handle, and a detail flagged `copyable` — gets
- * a copy button beside it. The button's icon turns to a tick for a moment
+ * A detail worth copying — the username and the email, which the owner's
+ * list flags `copyable` — gets a copy button after its value. The button's icon turns to a tick for a moment
  * once the value is on the clipboard, and a visually hidden live region says
  * so for a screen reader; if the clipboard refuses, the tooltip says the
  * copy could not be made (#1090).

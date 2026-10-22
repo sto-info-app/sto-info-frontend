@@ -158,7 +158,7 @@ $steam-dark: color.adjust(vars.$platform-steam, $lightness: -18%);
   }
 }
 
-// A copy button beside the handle or a detail: a bare icon that answers to the
+// A copy button after a detail's value: a bare icon that answers to the
 // pointer as the stacked actions do, and shows a tick for a moment once it has
 // copied (#1090). Where the value is blurred by Privacy Mode the button sits
 // outside the blur, so it stays legible.
@@ -190,17 +190,6 @@ $steam-dark: color.adjust(vars.$platform-steam, $lightness: -18%);
   &:focus-visible {
     outline: 2px solid vars.$lcars-sunflower;
     outline-offset: 2px;
-  }
-
-  // On the header's solid colour the icon reads in black like the handle.
-  &--header {
-    @include mixins.lcars-icon-button(vars.$a11y-black, vars.$a11y-black);
-
-    opacity: 0.7;
-
-    &:hover {
-      opacity: 1;
-    }
   }
 }
 
@@ -454,12 +443,6 @@ $steam-dark: color.adjust(vars.$platform-steam, $lightness: -18%);
 }
 
 @media (width <= 768px) {
-  // The header is a sliver on a phone and the handle is what it is for, so
-  // its copy button gives way; the email's, in the body, has room to stay.
-  .copy-icon--header {
-    display: none;
-  }
-
   .account-card-body {
     flex-wrap: wrap;
   }
