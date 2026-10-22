@@ -90,14 +90,6 @@
     color: vars.$lcars-black;
   }
 
-  // The publication pause and the feature switches, beneath the Operations
-  // cards.
-  &__operations {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-  }
-
   &__summary {
     margin: 0;
     padding: 0.6rem 1rem 0.75rem;

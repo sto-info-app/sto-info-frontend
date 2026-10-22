@@ -326,8 +326,14 @@ const PLACEMENTS: readonly [string, string, string][] = [
     'site-admin-site-statistics',
     'Help with Site Statistics',
   ],
-  // The Admin page's one link, on its publication pause (FC-042); the page
-  // itself is a set of ways into others, each with a link of its own.
+  // Site Settings (FC-054) links to the features guide; its Publication panel
+  // keeps a link of its own to the scanning guide, where the pause is
+  // explained (FC-042).
+  [
+    'admin/site-settings/site-settings.component.html',
+    'site-admin-features',
+    'Help with Site Settings',
+  ],
   [
     'admin/publication-pause/publication-pause.component.html',
     'site-admin-scanning',

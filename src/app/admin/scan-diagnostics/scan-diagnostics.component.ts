@@ -436,6 +436,7 @@ export class ScanDiagnosticsComponent implements OnInit {
   private readonly _failedJobs = viewChild(FailedJobsPanelComponent);
 
   readonly adminLink = '/' + APP_ROUTES.ADMIN;
+  readonly siteSettingsLink = '/' + APP_ROUTES.ADMIN_SITE_SETTINGS;
   readonly errorMessage = SCAN_DIAGNOSTICS_ERROR;
   readonly windowLabels = SCAN_WINDOW_LABELS;
   readonly activityRows = SCAN_ACTIVITY_ROWS;

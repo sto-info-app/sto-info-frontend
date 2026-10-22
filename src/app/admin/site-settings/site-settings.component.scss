@@ -1,0 +1,17 @@
+// Two settings to a row, stacking on a phone. Publication is the grid's
+// first child and takes the rotation's first colour; the feature switches'
+// host draws nothing of its own, so its panels sit here as further children,
+// each naming the next colour itself.
+.site-settings__panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin: 0.5rem 0 1.5rem;
+  align-items: start;
+}
+
+@media (width <= 768px) {
+  .site-settings__panels {
+    grid-template-columns: 1fr;
+  }
+}

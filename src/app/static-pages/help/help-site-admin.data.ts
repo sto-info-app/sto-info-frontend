@@ -394,7 +394,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     whoCanUseIt: ['Site administrators only.'],
     whereToFindIt: [
       'Choose Admin in the side bar. Scan Diagnostics is under Operations, and an alert’s notification links straight to it. The page reads its figures when you open it, and Refresh reads them again, failed jobs included, back at every queue’s first page; it never refreshes by itself.',
-      'Pause publication is on the Admin page itself, under Operations.',
+      'Pause publication is on Site Settings, under Operations on the Admin page.',
     ],
     how: {
       'How to read the scanner’s health': [
@@ -427,8 +427,8 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
         'Every retry and discard asks for a Reason.',
       ],
       'How to pause publication': [
-        'Pause publication, on the Admin page under Operations, holds back everything the scanner clears: uploads are still accepted and scanned, but nothing is published until publication resumes; then everything held publishes. Use it when something is being published that should not be, while you find out why.',
-        'Pause publication and Resume publication each ask for a Reason. While publication is paused, the Admin page and Scan Diagnostics say since when, by whom and how many uploads are waiting, and every site administrator is told if it stays paused for more than an hour.',
+        'Pause publication, on Site Settings under Operations, holds back everything the scanner clears: uploads are still accepted and scanned, but nothing is published until publication resumes; then everything held publishes. Use it when something is being published that should not be, while you find out why.',
+        'Pause publication and Resume publication each ask for a Reason. While publication is paused, Site Settings and Scan Diagnostics say since when, by whom and how many uploads are waiting, and every site administrator is told if it stays paused for more than an hour.',
         'If the job queues can’t be reached, the switch still changes: the page says so, a pause reaches the queues as soon as they answer, and nothing is published meanwhile.',
         'Scan Diagnostics also counts, under Publication, withdrawn pictures still to be deleted from Cloudflare, with how long the oldest has waited.',
       ],
@@ -496,12 +496,12 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     ],
     whoCanUseIt: ['Site administrators only.'],
     whereToFindIt: [
-      'Choose Admin in the side bar. Features is under Operations, below Publication.',
+      'Choose Admin in the side bar. Site Settings is under Operations; each feature has a panel of its own there, after Publication.',
     ],
     how: {
       'How to switch a feature': [
-        'Each feature shows whether it is On or Off, when its switch was last changed, and by whom.',
-        'Press Switch on or Switch off beside it. You are asked for a Reason, and nothing changes until you give one and confirm.',
+        'Each feature’s panel shows whether it is On or Off, when its switch was last changed, and by whom.',
+        'Press Switch on or Switch off in its panel. You are asked for a Reason, and nothing changes until you give one and confirm. What it came to, or why it could not be done, is said in that panel.',
         'Every server applies the change within ten seconds. Pages already open in a browser, your own included, show it once they are reloaded.',
       ],
       'How to read what the environment sets': [
@@ -518,7 +518,11 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       '“The feature switches could not be read.” means the site could not be reached. Try again.',
       '“… switch is missing from the database.” means the setting was never created there; tell whoever runs the servers.',
     ],
-    relatedLinks: [ADMIN_LINK, SECURITY_LOG_LINK],
+    relatedLinks: [
+      { label: 'Site Settings', route: APP_ROUTES.ADMIN_SITE_SETTINGS },
+      ADMIN_LINK,
+      SECURITY_LOG_LINK,
+    ],
   }),
   sixPartGuide({
     slug: 'site-admin-site-content',

@@ -8,8 +8,6 @@ import { AccessControlService } from 'src/app/shared/services/access-control.ser
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 import { AdminComponent } from './admin.component';
 import { ModerationHoldAdminService } from './moderation-admin/moderation-hold-admin.service';
-import { FeatureSwitchesAdminService } from './feature-switches/feature-switches-admin.service';
-import { PublicationPauseAdminService } from './publication-pause/publication-pause-admin.service';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
@@ -46,26 +44,6 @@ describe('AdminComponent', () => {
         { provide: AccessControlService, useValue: accessControlService },
         { provide: StorytimeService, useValue: storytimeService },
         { provide: ModerationHoldAdminService, useValue: holds },
-        // The publication pause's own spec covers it (FC-042).
-        {
-          provide: PublicationPauseAdminService,
-          useValue: {
-            read: () =>
-              of({
-                paused: false,
-                pausedAt: null,
-                pausedByUserId: null,
-                pausedByUsername: null,
-                queuePaused: false,
-                held: 0,
-              }),
-          },
-        },
-        // The feature switches' own spec covers them (FC-045).
-        {
-          provide: FeatureSwitchesAdminService,
-          useValue: { list: () => of([]) },
-        },
         { provide: AuthService, useValue: { getUserId: () => 'admin-1' } },
       ],
     }).compileComponents();
@@ -139,29 +117,18 @@ describe('AdminComponent', () => {
     expect(link?.textContent).toContain(label);
   });
 
-  // The kill switch for publication sits under Operations, with the scanner
-  // it holds back.
-  it('offers the publication pause under Operations (FC-042)', () => {
+  // The publication pause and the feature switches have a page of their own
+  // since FC-054, reached by a card like every other.
+  it('offers Site Settings under Operations, and no longer draws its panels here', () => {
     fixture.detectChanges();
 
     const element = fixture.nativeElement as HTMLElement;
+    const card = element.querySelector('.admin-landing__card--site-settings');
 
-    expect(element.querySelector('app-publication-pause')).not.toBeNull();
-    expect(element.textContent).toContain('Publication is running.');
-    expect(element.textContent).toContain('Pause publication');
-  });
-
-  // No feature switch needs SQL, and they sit beside the publication pause.
-  it('offers the feature switches under Operations, after the publication pause (FC-045)', () => {
-    fixture.detectChanges();
-
-    const element = fixture.nativeElement as HTMLElement;
-    const pause = element.querySelector('app-publication-pause')!;
-    const switches = element.querySelector('app-feature-switches');
-
-    expect(switches).not.toBeNull();
-    expect(pause.nextElementSibling).toBe(switches);
-    expect(element.textContent).toContain('Features');
+    expect(card?.textContent).toContain('Site Settings');
+    expect(hrefs()).toContain(`/${APP_ROUTES.ADMIN_SITE_SETTINGS}`);
+    expect(element.querySelector('app-publication-pause')).toBeNull();
+    expect(element.querySelector('app-feature-switches')).toBeNull();
   });
 
   // The same cards the Storytime landing page offers. Everything else on this

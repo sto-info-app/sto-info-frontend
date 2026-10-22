@@ -10,8 +10,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
 import { ModerationHoldAdminService } from 'src/app/admin/moderation-admin/moderation-hold-admin.service';
-import { FeatureSwitchesComponent } from 'src/app/admin/feature-switches/feature-switches.component';
-import { PublicationPauseComponent } from 'src/app/admin/publication-pause/publication-pause.component';
 import {
   STORYTIME_ADMIN_LINKS,
   StorytimeAdminLink,
@@ -38,21 +36,16 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
  * given out one at a time by permission, so they are filtered against what this
  * administrator actually holds rather than shown to every administrator.
  *
- * Under Operations sits the publication pause (FC-042): a switch rather than a
- * way into a page, so it is a control of its own rather than a card. So are
- * the feature switches beside it (FC-045).
+ * The publication pause (FC-042) and the feature switches (FC-045) used to
+ * sit beneath the Operations cards as controls of their own; since FC-054 they
+ * have a page, Site Settings, and a card here like every other.
  */
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.scss'],
   standalone: true,
-  imports: [
-    RouterModule,
-    CollapsibleSectionComponent,
-    PublicationPauseComponent,
-    FeatureSwitchesComponent,
-  ],
+  imports: [RouterModule, CollapsibleSectionComponent],
 })
 export class AdminComponent implements OnInit {
   private readonly _routingService = inject(RoutingService);

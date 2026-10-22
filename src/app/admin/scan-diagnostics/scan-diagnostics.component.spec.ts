@@ -561,10 +561,10 @@ describe('ScanDiagnosticsComponent', () => {
       expect(page().textContent).toContain('Publication is running.');
       expect(
         page()
-          .querySelector('a[href="/admin"]')
+          .querySelector('a[href="/admin/site-settings"]')
           ?.textContent?.replace(/\s+/g, ' ')
           .trim(),
-      ).toBe('Pause or resume publication on the Admin page');
+      ).toBe('Pause or resume publication on the Site Settings page');
     });
   });
 

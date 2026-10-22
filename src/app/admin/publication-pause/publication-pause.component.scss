@@ -1,12 +1,9 @@
 @use 'lcars-variables' as vars;
 
-// The publication pause (FC-042), under Operations on the Admin page: an LCARS
-// panel in the colour the Operations panels give it, and red while publication
-// is paused, because then uploads are waiting on somebody.
+// The publication pause (FC-042), on the Site Settings page (FC-054): an LCARS
+// panel in the colour the page's grid gives it, and red while publication is
+// paused, because then uploads are waiting on somebody.
 .publication-pause {
-  max-width: 42rem;
-  margin: 0 0 1.5rem;
-
   p {
     max-width: none;
   }

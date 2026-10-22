@@ -1,107 +1,109 @@
 @let current = state();
-<app-lcars-panel
-  class="feature-switches"
-  heading="Features">
-  <app-help-link
-    slug="site-admin-features"
-    label="Help with switching features" />
-  <p>
-    A feature switched off disappears for everybody, as though it did not exist;
-    nothing it holds is deleted. Uploads are scanned and published whatever
-    these say.
-  </p>
 
-  @if (message(); as done) {
-    <p class="feature-switches__message">
-      <output>{{ done }}</output>
-    </p>
-  }
-  @if (failure(); as problem) {
-    <p
-      class="feature-switches__failure"
-      role="alert">
-      {{ problem }}
-    </p>
-  }
-
-  @switch (current.kind) {
-    @case ('LOADING') {
+@switch (current.kind) {
+  @case ('LOADING') {
+    <app-lcars-panel
+      class="feature-switches__panel"
+      heading="Features"
+      [accent]="accentOf(0)">
       <p>Reading the feature switches…</p>
-    }
-    @case ('ERROR') {
+    </app-lcars-panel>
+  }
+  @case ('ERROR') {
+    <app-lcars-panel
+      class="feature-switches__panel"
+      heading="Features"
+      [accent]="accentOf(0)">
       <p class="feature-switches__failure">
         The feature switches could not be read.
       </p>
+      <!--
+        A change can come back after the list was lost: what it came to is
+        still said, here, since there is no panel of the feature's own.
+      -->
+      @if (message(); as done) {
+        <p class="feature-switches__message">
+          <output>{{ done.text }}</output>
+        </p>
+      }
       <button
         type="button"
         class="lcars-btn lcars-btn-auto"
         (click)="load()">
         Try again
       </button>
-    }
+    </app-lcars-panel>
   }
+}
 
-  @if (current.kind === 'READY') {
-    <ul class="feature-switches__list">
-      @for (entry of current.switches; track entry.feature) {
-        <li
-          class="feature-switches__feature"
-          [class.feature-switches__feature--on]="entry.isEnabled"
-          [attr.aria-labelledby]="'feature-switch-' + entry.feature">
-          <h4
-            [id]="'feature-switch-' + entry.feature"
-            class="feature-switches__name">
-            {{ entry.label }}
-          </h4>
-          <p class="feature-switches__state">
-            <strong>{{ entry.isEnabled ? 'On' : 'Off' }}</strong>
-          </p>
-          <dl class="feature-switches__details">
-            <div>
-              <dt>Last changed</dt>
-              <dd>
-                {{
-                  entry.changedAt
-                    ? (entry.changedAt | appDate: 'medium')
-                    : 'Never'
-                }}
-              </dd>
-            </div>
-            <div>
-              <dt>By</dt>
-              <dd>{{ changedBy(entry) }}</dd>
-            </div>
-          </dl>
-          @if (entry.subFlags.length > 0) {
-            <p class="feature-switches__flags-heading">
-              Set by the environment
-            </p>
-            <ul class="feature-switches__flags">
-              @for (flag of entry.subFlags; track flag.key) {
-                <li>
-                  {{ flag.label }}:
-                  <span
-                    class="feature-switches__flag"
-                    [class.feature-switches__flag--off]="!flag.isEnabled">
-                    {{ flag.isEnabled ? 'allowed' : 'not allowed' }}
-                  </span>
-                </li>
-              }
-            </ul>
+<!-- One panel a feature, each in the next colour of the palette. -->
+@if (current.kind === 'READY') {
+  @for (entry of current.switches; track entry.feature; let i = $index) {
+    <app-lcars-panel
+      class="feature-switches__panel"
+      [class.feature-switches__panel--on]="entry.isEnabled"
+      [heading]="entry.label"
+      [accent]="accentOf(i)"
+      [attr.data-feature]="entry.feature">
+      <p class="feature-switches__state">
+        <strong>{{ entry.isEnabled ? 'On' : 'Off' }}</strong>
+      </p>
+      <dl class="feature-switches__details">
+        <div>
+          <dt>Last changed</dt>
+          <dd>
+            {{
+              entry.changedAt ? (entry.changedAt | appDate: 'medium') : 'Never'
+            }}
+          </dd>
+        </div>
+        <div>
+          <dt>By</dt>
+          <dd>{{ changedBy(entry) }}</dd>
+        </div>
+      </dl>
+      @if (entry.subFlags.length > 0) {
+        <p class="feature-switches__flags-heading">Set by the environment</p>
+        <ul class="feature-switches__flags">
+          @for (flag of entry.subFlags; track flag.key) {
+            <li>
+              {{ flag.label }}:
+              <span
+                class="feature-switches__flag"
+                [class.feature-switches__flag--off]="!flag.isEnabled">
+                {{ flag.isEnabled ? 'allowed' : 'not allowed' }}
+              </span>
+            </li>
           }
-          <button
-            type="button"
-            class="lcars-btn lcars-btn-auto"
-            [class.red]="entry.isEnabled"
-            [class.green]="!entry.isEnabled"
-            [attr.aria-label]="
-              'Switch ' + entry.label + (entry.isEnabled ? ' off' : ' on')
-            "
-            (click)="toggle(entry)">
-            {{ entry.isEnabled ? 'Switch off' : 'Switch on' }}
-          </button>
-        </li>
+        </ul>
       }
-    </ul>
+      @if (message(); as done) {
+        @if (done.feature === entry.feature) {
+          <p class="feature-switches__message">
+            <output>{{ done.text }}</output>
+          </p>
+        }
+      }
+      @if (failure(); as problem) {
+        @if (problem.feature === entry.feature) {
+          <p
+            class="feature-switches__failure"
+            role="alert">
+            {{ problem.text }}
+          </p>
+        }
+      }
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto"
+        [class.red]="entry.isEnabled"
+        [class.green]="!entry.isEnabled"
+        [attr.aria-label]="
+          'Switch ' + entry.label + (entry.isEnabled ? ' off' : ' on')
+        "
+        (click)="toggle(entry)">
+        {{ entry.isEnabled ? 'Switch off' : 'Switch on' }}
+      </button>
+    </app-lcars-panel>
   }
-</app-lcars-panel>
+}

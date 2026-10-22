@@ -215,6 +215,7 @@ export const APP_ROUTES = {
   ADMIN_SCAN_DIAGNOSTICS: ROOT_ROUTES.ADMIN + '/scan-diagnostics',
   ADMIN_SECURITY_LOG: ROOT_ROUTES.ADMIN + '/security-log',
   ADMIN_SITE_STATISTICS: ROOT_ROUTES.ADMIN + '/site-statistics',
+  ADMIN_SITE_SETTINGS: ROOT_ROUTES.ADMIN + '/site-settings',
 
   // Storytime
   STORYTIME: ROOT_ROUTES.STORYTIME,
@@ -428,6 +429,7 @@ export const APP_ROUTE_TITLES = {
   ADMIN_SCAN_DIAGNOSTICS: 'Scan Diagnostics',
   ADMIN_SECURITY_LOG: 'Security Log',
   ADMIN_SITE_STATISTICS: 'Site Statistics',
+  ADMIN_SITE_SETTINGS: 'Site Settings',
 
   // Storytime
   STORYTIME: 'Storytime',

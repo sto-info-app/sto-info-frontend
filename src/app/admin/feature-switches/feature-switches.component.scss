@@ -1,14 +1,18 @@
 @use 'lcars-variables' as vars;
 
-// The site features' master switches (FC-045), under Operations on the Admin
-// page beside the publication pause: an LCARS panel in the colour the
-// Operations panels give it. Each feature's own spine is green while it is on.
-.feature-switches {
-  max-width: 42rem;
-  margin: 0 0 1.5rem;
+// The site features' master switches (FC-045), on the Site Settings page
+// (FC-054): one LCARS panel a feature, each in the next colour of the palette
+// after the Publication panel's. The host draws nothing, so the panels sit in
+// the page's grid as though the page had drawn them.
+:host {
+  display: contents;
+}
 
-  p {
-    max-width: none;
+.feature-switches {
+  &__panel {
+    p {
+      max-width: none;
+    }
   }
 
   &__message {
@@ -19,35 +23,8 @@
     color: vars.$lcars-grey-light;
   }
 
-  &__list {
-    display: grid;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  &__feature {
-    padding: 0 0 0 0.75rem;
-    border-left: 4px solid vars.$lcars-grey-light;
-
-    &--on {
-      border-left-color: vars.$lcars-green;
-    }
-  }
-
-  &__name {
-    margin: 0;
-    font-family: vars.$font-antonio;
-    font-size: 1rem;
-    font-weight: normal;
-    letter-spacing: 0.05em;
-    text-transform: uppercase;
-    color: var(--lcars-accent, #{vars.$lcars-sunflower});
-  }
-
   &__state {
-    margin: 0.25rem 0;
+    margin: 0 0 0.5rem;
   }
 
   &__details {
@@ -60,7 +37,7 @@
       font-family: vars.$font-antonio;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      color: var(--lcars-accent, #{vars.$lcars-sunflower});
+      color: var(--lcars-panel-accent, #{vars.$lcars-sunflower});
     }
 
     dd {
@@ -74,7 +51,7 @@
     font-family: vars.$font-antonio;
     letter-spacing: 0.05em;
     text-transform: uppercase;
-    color: var(--lcars-accent, #{vars.$lcars-sunflower});
+    color: var(--lcars-panel-accent, #{vars.$lcars-sunflower});
   }
 
   &__flags {

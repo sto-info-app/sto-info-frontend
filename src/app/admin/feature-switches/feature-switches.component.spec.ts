@@ -94,7 +94,7 @@ describe('switchOutcome (FC-045)', () => {
   });
 });
 
-describe('FeatureSwitchesComponent (FC-045)', () => {
+describe('FeatureSwitchesComponent (FC-045, FC-054)', () => {
   let fixture: ComponentFixture<FeatureSwitchesComponent>;
   let switches: { list: jest.Mock; set: jest.Mock };
   let dialog: { open: jest.Mock };
@@ -121,7 +121,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     TestBed.overrideProvider(MatDialog, { useValue: dialog });
   });
 
-  /** Shows the panel. */
+  /** Shows the panels. */
   const show = async () => {
     fixture = TestBed.createComponent(FeatureSwitchesComponent);
     fixture.autoDetectChanges();
@@ -133,32 +133,34 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     element().querySelector<HTMLButtonElement>(`button[aria-label="${name}"]`);
   const feature = (key: string) =>
     element().querySelector<HTMLElement>(
-      `li[aria-labelledby="feature-switch-${key}"]`,
+      `app-lcars-panel[data-feature="${key}"]`,
     )!;
   const words = (node: HTMLElement) =>
     node.textContent?.replace(/\s+/g, ' ').trim() ?? '';
 
-  it('explains the switches and links to their help', async () => {
+  // Each feature is a panel of its own, named by the feature, in the next
+  // colour of the palette after the Publication panel's (FC-054).
+  it('draws each feature as its own panel, in turn through the palette', async () => {
     await show();
 
-    expect(text()).toContain(
-      'A feature switched off disappears for everybody, as though it did ' +
-        'not exist; nothing it holds is deleted.',
-    );
+    const panels = [...element().querySelectorAll('app-lcars-panel')];
+
     expect(
-      element().querySelector('a[href="/help/site-admin-features"]'),
-    ).not.toBeNull();
+      panels.map(panel => panel.querySelector('h3')?.textContent?.trim()),
+    ).toEqual(['Fleet Communities', 'Storytime']);
+    expect(panels.map(panel => panel.className)).toEqual([
+      expect.stringContaining('accent-perano'),
+      expect.stringContaining('accent-orange'),
+    ]);
+    expect(fixture.componentInstance.accentOf(7)).toBe('sunflower');
   });
 
-  it('lists each feature with whether it is on, and who last changed it', async () => {
+  it('shows each feature with whether it is on, and who last changed it', async () => {
     await show();
 
     const fleet = feature('FLEET_COMMUNITIES');
     const storytime = feature('STORYTIME');
 
-    expect(fleet.querySelector('h4')?.textContent?.trim()).toBe(
-      'Fleet Communities',
-    );
     expect(words(fleet.querySelector('.feature-switches__state')!)).toBe('Off');
     expect([...fleet.querySelectorAll('dd')].map(each => words(each))).toEqual([
       'Never',
@@ -170,8 +172,8 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     expect(
       [...storytime.querySelectorAll('dd')].map(each => words(each)),
     ).toEqual(['Oct 6, 2026, 9:00:00 AM', 'Quark']);
-    expect(storytime.classList).toContain('feature-switches__feature--on');
-    expect(fleet.classList).not.toContain('feature-switches__feature--on');
+    expect(storytime.classList).toContain('feature-switches__panel--on');
+    expect(fleet.classList).not.toContain('feature-switches__panel--on');
   });
 
   it('shows the environment’s flags, read-only, and none for a feature without', async () => {
@@ -192,7 +194,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     expect(words(feature('STORYTIME'))).not.toContain('Set by the environment');
   });
 
-  it('switches a feature on with a reason, and shows it as the server has it', async () => {
+  it('switches a feature on with a reason, and says so in its own panel', async () => {
     await show();
 
     const control = button('Switch Fleet Communities on')!;
@@ -218,9 +220,10 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
       true,
       'Accepted for release',
     );
-    expect(element().querySelector('output')?.textContent).toContain(
-      'Fleet Communities switched on.',
-    );
+    expect(
+      feature('FLEET_COMMUNITIES').querySelector('output')?.textContent,
+    ).toContain('Fleet Communities switched on.');
+    expect(feature('STORYTIME').querySelector('output')).toBeNull();
     expect(button('Switch Fleet Communities off')).not.toBeNull();
     // The other switch is left as it was.
     expect(button('Switch Storytime off')).not.toBeNull();
@@ -256,7 +259,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     expect(element().querySelector('output')).toBeNull();
   });
 
-  it('shows the server’s reason when it refuses, and reads the switches again', async () => {
+  it('shows the server’s reason in the feature’s panel when it refuses, and reads the switches again', async () => {
     switches.set.mockReturnValue(
       throwError(
         () =>
@@ -271,9 +274,10 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     button('Switch Fleet Communities on')!.click();
     await fixture.whenStable();
 
-    expect(element().querySelector('[role="alert"]')?.textContent).toContain(
-      'Fleet Communities is already switched on.',
-    );
+    expect(
+      feature('FLEET_COMMUNITIES').querySelector('[role="alert"]')?.textContent,
+    ).toContain('Fleet Communities is already switched on.');
+    expect(feature('STORYTIME').querySelector('[role="alert"]')).toBeNull();
     expect(switches.list).toHaveBeenCalledTimes(2);
   });
 
@@ -294,6 +298,7 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     await show();
 
     expect(text()).toContain('The feature switches could not be read.');
+    expect(element().querySelector('h3')?.textContent?.trim()).toBe('Features');
 
     switches.list.mockReturnValue(of([FLEET_OFF]));
     [...element().querySelectorAll('button')]
@@ -305,9 +310,9 @@ describe('FeatureSwitchesComponent (FC-045)', () => {
     expect(text()).not.toContain('could not be read');
   });
 
-  // The answer can arrive after the panel has lost its list, when reading it
-  // again failed meanwhile: the outcome is still said, and nothing is shown
-  // as though it had been read.
+  // The answer can arrive after the panels have lost their list, when
+  // reading it again failed meanwhile: the outcome is still said, in the one
+  // panel left, and nothing is shown as though it had been read.
   it('says what a change came to even when the switches could not be read meanwhile', async () => {
     const answer = new Subject<FeatureSwitchState>();
 

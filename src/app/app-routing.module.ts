@@ -500,6 +500,15 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_SITE_SETTINGS,
+    loadComponent: () =>
+      import('./admin/site-settings/site-settings.component').then(
+        m => m.SiteSettingsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SITE_SETTINGS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_USERS,
     loadComponent: () =>
       import('./admin/moderation-admin/user-admin-list.component').then(

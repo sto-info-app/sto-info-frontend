@@ -18,13 +18,15 @@ import {
 } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { FeatureSwitchState } from 'src/app/models/feature-switches.models';
 import { ADMIN_REASON_MAX_LENGTH } from 'src/app/models/moderation.models';
-import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import {
+  LcarsPanelAccent,
+  LcarsPanelComponent,
+} from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 import { FeatureSwitchesAdminService } from './feature-switches-admin.service';
-import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
-/** What the panel is showing. */
+/** What the panels are showing. */
 export type FeatureSwitchesState =
   | { readonly kind: 'LOADING' }
   | { readonly kind: 'ERROR' }
@@ -33,8 +35,30 @@ export type FeatureSwitchesState =
       readonly switches: readonly FeatureSwitchState[];
     };
 
+/** A line said in one feature's panel: what a change came to, or why not. */
+export interface FeatureSwitchNotice {
+  readonly feature: string;
+  readonly text: string;
+}
+
 /** What to say when a change fails and the server gave no reason. */
 export const FEATURE_SWITCH_ERROR = 'That could not be done. Please try again.';
+
+/**
+ * The palette, in the order the page's rotation gives it. The Publication
+ * panel stands first on the Site Settings page and takes the first colour,
+ * so the features start from the second.
+ */
+const ROTATION: readonly LcarsPanelAccent[] = [
+  'sunflower',
+  'perano',
+  'orange',
+  'sky',
+  'gold',
+  'bluey',
+  'tangerine',
+  'cool',
+];
 
 /**
  * Who last changed a switch, in words.
@@ -98,19 +122,25 @@ export function switchOutcome(entry: FeatureSwitchState): string {
 }
 
 /**
- * The site features' master switches, on the Admin page (FC-045).
+ * The site features' master switches, on the Site Settings page (FC-045,
+ * moved there by FC-054).
  *
  * Fleet Communities, Storytime and Custom Tracking are each switched here
  * rather than with SQL; each change asks for a reason, kept in the Security
  * Log; and the capability flags beneath each, which the environment sets,
  * are shown but cannot be changed.
+ *
+ * Each feature is an LCARS panel of its own, and the host draws nothing
+ * itself, so the panels sit in the page's grid beside the Publication panel
+ * as though the page had drawn them. What a change came to, or why it could
+ * not be made, is said in the panel of the feature it concerns.
  */
 @Component({
   selector: 'app-feature-switches',
   templateUrl: './feature-switches.component.html',
   styleUrls: ['./feature-switches.component.scss'],
   standalone: true,
-  imports: [AppDatePipe, HelpLinkComponent, LcarsPanelComponent],
+  imports: [AppDatePipe, LcarsPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FeatureSwitchesComponent implements OnInit {
@@ -119,8 +149,8 @@ export class FeatureSwitchesComponent implements OnInit {
   private readonly _destroyRef = inject(DestroyRef);
 
   readonly state = signal<FeatureSwitchesState>({ kind: 'LOADING' });
-  readonly message = signal<string | null>(null);
-  readonly failure = signal<string | null>(null);
+  readonly message = signal<FeatureSwitchNotice | null>(null);
+  readonly failure = signal<FeatureSwitchNotice | null>(null);
 
   readonly changedBy = changedByOf;
 
@@ -129,6 +159,17 @@ export class FeatureSwitchesComponent implements OnInit {
    */
   ngOnInit(): void {
     this.load();
+  }
+
+  /**
+   * The colour of a feature's panel: the next of the palette after the
+   * Publication panel's, round again past its end.
+   *
+   * @param index - The feature's place among the switches.
+   * @returns The colour.
+   */
+  accentOf(index: number): LcarsPanelAccent {
+    return ROTATION[(index + 1) % ROTATION.length];
   }
 
   /**
@@ -202,7 +243,10 @@ export class FeatureSwitchesComponent implements OnInit {
             });
           }
 
-          this.message.set(switchOutcome(changed));
+          this.message.set({
+            feature: changed.feature,
+            text: switchOutcome(changed),
+          });
         },
         error: (error: unknown) => {
           const said =
@@ -210,9 +254,10 @@ export class FeatureSwitchesComponent implements OnInit {
               ? (error.error as { message?: unknown } | null)?.message
               : undefined;
 
-          this.failure.set(
-            typeof said === 'string' ? said : FEATURE_SWITCH_ERROR,
-          );
+          this.failure.set({
+            feature: entry.feature,
+            text: typeof said === 'string' ? said : FEATURE_SWITCH_ERROR,
+          });
           this.load();
         },
       });

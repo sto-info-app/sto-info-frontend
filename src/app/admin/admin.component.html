@@ -130,6 +130,15 @@
           </p>
         </a>
       </li>
+      <li class="admin-landing__card--site-settings">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SITE_SETTINGS)">
+          <span class="admin-landing__name">Site Settings</span>
+          <p class="admin-landing__summary">
+            Pause or resume publication, and switch Fleet Communities,
+            Storytime and Custom Tracking on or off, each with a reason.
+          </p>
+        </a>
+      </li>
       <li class="admin-landing__card--security-log">
         <a [routerLink]="getRouteLink(appRoutes.ADMIN_SECURITY_LOG)">
           <span class="admin-landing__name">Security Log</span>
@@ -149,11 +158,6 @@
         </a>
       </li>
     </ul>
-    <!-- The two Operations panels take successive colours of their own. -->
-    <div class="admin-landing__operations lcars-rotate">
-      <app-publication-pause></app-publication-pause>
-      <app-feature-switches></app-feature-switches>
-    </div>
   </app-collapsible-section>
 
   <!--

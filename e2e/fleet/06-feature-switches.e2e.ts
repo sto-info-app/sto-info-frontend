@@ -23,29 +23,29 @@ import {
  */
 
 /**
- * The Features panel on the Admin page.
+ * The settings grid on the Site Settings page (FC-054), which holds the
+ * Publication panel and one panel a feature.
  *
  * @param page - The page.
  * @returns It.
  */
-const panel = (page: Page): Locator =>
-  page.getByRole('region', { name: 'Features' });
+const panel = (page: Page): Locator => page.locator('.site-settings__panels');
 
 /**
- * One feature in the panel.
+ * One feature's panel.
  *
  * @param page - The page.
  * @param label - Its name.
  * @returns It.
  */
 const feature = (page: Page, label: string): Locator =>
-  panel(page).getByRole('listitem', { name: label, exact: true });
+  panel(page).getByRole('region', { name: label, exact: true });
 
 /**
  * Switches a feature from the panel, giving a reason, and waits for the
  * panel to say it is done.
  *
- * @param page - The site admin's page, on the Admin page.
+ * @param page - The site admin's page, on Site Settings.
  * @param label - The feature's name.
  * @param to - Which way.
  * @param reason - Why.
@@ -68,7 +68,7 @@ async function flip(
     .getByRole('button', { name: `Switch ${to}`, exact: true })
     .click();
   await expect(dialog).toHaveCount(0);
-  await expect(panel(page).getByRole('status')).toContainText(
+  await expect(feature(page, label).getByRole('status')).toContainText(
     `${label} switched ${to}.`,
   );
   await expect(
@@ -106,10 +106,10 @@ test.describe.serial('Feature switches on the Admin page (FC-045)', () => {
 
     const page = await as('admin');
 
-    await page.goto('/admin');
+    await page.goto('/admin/site-settings');
     await expect(panel(page)).toBeVisible();
     await expect(
-      panel(page).getByRole('link', { name: 'Help with switching features' }),
+      page.getByRole('link', { name: 'Help with Site Settings' }),
     ).toHaveAttribute('href', '/help/site-admin-features');
 
     for (const label of ['Fleet Communities', 'Storytime', 'Custom Tracking']) {
@@ -143,7 +143,7 @@ test.describe.serial('Feature switches on the Admin page (FC-045)', () => {
     const stranger = await anonymous();
 
     await expect(await fleetTopic(stranger)).toHaveCount(1);
-    await admin.goto('/admin');
+    await admin.goto('/admin/site-settings');
 
     try {
       await flip(admin, 'Fleet Communities', 'off', why('switch Fleet off'));
@@ -190,7 +190,7 @@ test.describe.serial('Feature switches on the Admin page (FC-045)', () => {
   }) => {
     const admin = await as('admin');
 
-    await admin.goto('/admin');
+    await admin.goto('/admin/site-settings');
 
     const state = feature(admin, 'Storytime').locator(
       '.feature-switches__state',
@@ -214,7 +214,7 @@ test.describe.serial('Feature switches on the Admin page (FC-045)', () => {
   }) => {
     const admin = await as('admin');
 
-    await admin.goto('/admin');
+    await admin.goto('/admin/site-settings');
     await expect(
       feature(admin, 'Fleet Communities').locator('.feature-switches__state'),
     ).toHaveText('On');
@@ -236,9 +236,9 @@ test.describe.serial('Feature switches on the Admin page (FC-045)', () => {
       await dialog
         .getByRole('button', { name: 'Switch off', exact: true })
         .click();
-      await expect(panel(admin).getByRole('alert')).toContainText(
-        'Fleet Communities is already switched off.',
-      );
+      await expect(
+        feature(admin, 'Fleet Communities').getByRole('alert'),
+      ).toContainText('Fleet Communities is already switched off.');
       await expect(
         feature(admin, 'Fleet Communities').locator('.feature-switches__state'),
       ).toHaveText('Off');
