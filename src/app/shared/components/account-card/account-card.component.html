@@ -11,6 +11,16 @@
           class="fas fa-badge-check lifetime-icon"
           title="Lifetime Subscription"></i>
       }
+      @if (vm.copyHandle) {
+        <button
+          type="button"
+          class="copy-icon copy-icon--header"
+          [title]="copyTitleOf('Handle')"
+          [attr.aria-label]="copyTitleOf('Handle')"
+          (click)="copy('Handle', vm.handle, $event)">
+          <i [class]="copyIconOf('Handle')"></i>
+        </button>
+      }
     </div>
     <a
       [routerLink]="vm.link"
@@ -61,6 +71,20 @@
               }
               {{ detail.text }}
             </span>
+            <!--
+              Outside the value, so it is neither blurred by Privacy Mode nor
+              clamped with long text; it still copies the real value.
+            -->
+            @if (detail.copyable) {
+              <button
+                type="button"
+                class="copy-icon"
+                [title]="copyTitleOf(copyNameOf(detail))"
+                [attr.aria-label]="copyTitleOf(copyNameOf(detail))"
+                (click)="copy(copyNameOf(detail), detail.text, $event)">
+                <i [class]="copyIconOf(copyNameOf(detail))"></i>
+              </button>
+            }
           </span>
         }
       </div>
@@ -106,4 +130,11 @@
       </div>
     }
   </div>
+
+  <!-- Says what a copy came to, for a screen reader; the icon says it to the eye. -->
+  <span
+    class="sr-only"
+    aria-live="polite">
+    {{ announcement() }}
+  </span>
 </div>

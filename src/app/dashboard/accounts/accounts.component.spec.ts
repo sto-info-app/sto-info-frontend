@@ -183,6 +183,31 @@ describe('AccountsComponent', () => {
     ]);
   });
 
+  // The handle and the email are what somebody types elsewhere, so each
+  // carries a copy button; the notes do not (#1090).
+  it('should offer to copy the handle and the email, and nothing else', () => {
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        {
+          ...mockAccount,
+          email: 'captain@example.com',
+          notes: 'Primary account.',
+        } as StoAccount,
+      ]),
+    );
+
+    component.ngOnInit();
+
+    const card = component.accountVms()[0].card;
+    expect(card.copyHandle).toBe(true);
+    expect(
+      card.details.map(detail => [detail.label, !!detail.copyable]),
+    ).toEqual([
+      ['Email', true],
+      ['Notes', false],
+    ]);
+  });
+
   it('should label an unresolved launcher generically', () => {
     stoAccountServiceSpy.getAccounts.mockReturnValue(
       of([{ ...mockAccount, launcherId: 'missing' } as StoAccount]),

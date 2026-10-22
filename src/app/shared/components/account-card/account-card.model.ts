@@ -21,6 +21,12 @@ export interface AccountCardDetail {
   variant?: 'primary' | 'secondary' | 'muted';
   /** Whether this detail is obscured while Privacy Mode is enabled. */
   private?: boolean;
+  /**
+   * Draws a copy button after the value, which puts the value on the
+   * clipboard; the button is named by the label (#1090). Still offered while
+   * Privacy Mode blurs the value, since copying shows nothing on screen.
+   */
+  copyable?: boolean;
 }
 
 /**
@@ -62,6 +68,8 @@ export interface AccountCardVm {
   id: string;
   /** The account handle shown in the card header. */
   handle: string;
+  /** Draws a copy button after the handle in the header (#1090). */
+  copyHandle?: boolean;
   /** Router link for the card and its header. */
   link: string | string[];
   /** Platform and launcher theme classes, space-separated. */

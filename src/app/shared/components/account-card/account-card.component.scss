@@ -158,6 +158,52 @@ $steam-dark: color.adjust(vars.$platform-steam, $lightness: -18%);
   }
 }
 
+// A copy button beside the handle or a detail: a bare icon that answers to the
+// pointer as the stacked actions do, and shows a tick for a moment once it has
+// copied (#1090). Where the value is blurred by Privacy Mode the button sits
+// outside the blur, so it stays legible.
+// The theme's `button` is a 200px LCARS pill; every one of its measures is
+// undone here so the control is the icon alone.
+.copy-icon {
+  @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  width: auto;
+  height: auto;
+  margin: 0 0 0 0.3rem;
+  padding: 0 0.15rem;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.8rem;
+  line-height: 1;
+  text-align: left;
+
+  &:hover,
+  &:focus,
+  &:active {
+    filter: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sunflower;
+    outline-offset: 2px;
+  }
+
+  // On the header's solid colour the icon reads in black like the handle.
+  &--header {
+    @include mixins.lcars-icon-button(vars.$a11y-black, vars.$a11y-black);
+
+    opacity: 0.7;
+
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
 // ── Header: platform icon | handle + lifetime | launcher icon ─────────────────
 
 .account-card-header {
@@ -289,7 +335,12 @@ $steam-dark: color.adjust(vars.$platform-steam, $lightness: -18%);
   }
 }
 
+// A row lays its value and any copy button side by side; the labelled grid
+// variant above dissolves the row into its grid instead.
 .account-detail-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.3rem;
   min-width: 0;
   font-size: 0.85rem;
   color: vars.$lcars-perano;
@@ -403,6 +454,12 @@ $steam-dark: color.adjust(vars.$platform-steam, $lightness: -18%);
 }
 
 @media (width <= 768px) {
+  // The header is a sliver on a phone and the handle is what it is for, so
+  // its copy button gives way; the email's, in the body, has room to stay.
+  .copy-icon--header {
+    display: none;
+  }
+
   .account-card-body {
     flex-wrap: wrap;
   }
