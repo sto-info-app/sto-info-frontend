@@ -10,10 +10,10 @@ import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link
  * pause (FC-042) and the features' master switches (FC-045), moved here from
  * the Admin page, where they used to sit beneath the Operations cards.
  *
- * Every setting is an LCARS panel of its own, two to a row and stacking on a
- * phone: Publication first, then one panel a feature. The grid rotates the
- * palette across them, Publication taking the first colour and the features
- * the rest in turn, and Publication turns red while it is paused.
+ * Every setting is an LCARS panel of its own, one to a row: Publication
+ * first, then one panel a feature. The grid rotates the palette across them,
+ * Publication taking the first colour and the features the rest in turn, and
+ * Publication turns red while it is paused.
  */
 @Component({
   selector: 'app-site-settings',
