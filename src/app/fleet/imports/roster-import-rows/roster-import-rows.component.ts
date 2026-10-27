@@ -276,8 +276,6 @@ export class RosterImportRowsComponent {
    * @returns The caption.
    */
   caption(): string {
-    const column = this.columns.find(entry => entry.sort === this.sort());
-
     if (
       this.sort() === RosterImportRowSort.LINE &&
       this.direction() === RosterImportRowDirection.ASC
@@ -290,7 +288,7 @@ export class RosterImportRowsComponent {
         ? 'descending'
         : 'ascending';
 
-    return `The export’s rows, by ${column?.label.toLowerCase() ?? 'line'}, ${way}`;
+    return `The export’s rows, by ${this.columnOf(this.sort()).label.toLowerCase()}, ${way}`;
   }
 
   /**
@@ -301,11 +299,7 @@ export class RosterImportRowsComponent {
    * @param sort - The column.
    */
   onSort(sort: RosterImportRowSort): void {
-    // Only the heading of a drawn column calls this.
-    const column = this.columns.find(
-      entry => entry.sort === sort,
-    ) as RosterImportRowColumn;
-    let direction = column.firstDirection;
+    let direction = this.columnOf(sort).firstDirection;
 
     if (this.sort() === sort) {
       direction =
@@ -318,6 +312,19 @@ export class RosterImportRowsComponent {
     this.page.set(1);
     this.sort.set(sort);
     this.direction.set(direction);
+  }
+
+  /**
+   * The column that orders the rows by a sort. Every sort is a drawn column's,
+   * and only a drawn column's heading sorts.
+   *
+   * @param sort - The sort.
+   * @returns Its column.
+   */
+  private columnOf(sort: RosterImportRowSort): RosterImportRowColumn {
+    return this.columns.find(
+      entry => entry.sort === sort,
+    ) as RosterImportRowColumn;
   }
 
   /**

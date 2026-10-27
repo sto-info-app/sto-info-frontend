@@ -564,6 +564,23 @@ describe('RosterImportRowsComponent', () => {
       );
     });
 
+    it('turns line order round on a press of Line, the order it starts in', () => {
+      render();
+      tick(0);
+
+      heading('Line').click();
+      fixture.detectChanges();
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        { ...FIRST_PAGE, sort: 'LINE', direction: 'DESC' },
+      );
+      expect(sortOf('Line')).toBe('descending');
+      expect(text()).toContain('The export’s rows, by line, descending');
+    });
+
     it('goes back to the first page on a change of order', () => {
       imports.rows.mockReturnValue(of(page([row(2)], { total: 120, page: 1 })));
       render();
