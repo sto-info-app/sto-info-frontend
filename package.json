@@ -53,16 +53,16 @@
   },
   "dependencies": {
     "@angular/animations": "^22.2.3",
-    "@angular/cdk": "^22.2.3",
+    "@angular/cdk": "^22.2.4",
     "@angular/common": "^22.2.3",
     "@angular/compiler": "^22.2.3",
     "@angular/core": "^22.2.3",
     "@angular/forms": "^22.2.3",
-    "@angular/material": "^22.2.3",
+    "@angular/material": "^22.2.4",
     "@angular/platform-browser": "^22.2.3",
     "@angular/router": "^22.2.3",
     "@auth0/angular-jwt": "^5.2.0",
-    "@sentry/angular": "^11.8.0",
+    "@sentry/angular": "^11.9.0",
     "js-base64": "^3.9.4",
     "logrocket": "^12.4.0",
     "ngx-image-cropper": "^9.1.7",
@@ -71,8 +71,8 @@
     "zone.js": "^0.16.3"
   },
   "devDependencies": {
-    "@angular/build": "^22.2.3",
-    "@angular/cli": "^22.2.3",
+    "@angular/build": "^22.2.4",
+    "@angular/cli": "^22.2.4",
     "@angular/compiler-cli": "^22.2.3",
     "@axe-core/playwright": "^4.14.0",
     "@eslint/js": "^10.0.1",
@@ -104,7 +104,7 @@
     "stylelint": "^17.16.0",
     "stylelint-config-standard-scss": "^17.0.0",
     "typescript": "~6.0.3",
-    "typescript-eslint": "^8.71.2",
+    "typescript-eslint": "^8.72.0",
     "wawoff2": "^2.0.1"
   },
   "projects": {
