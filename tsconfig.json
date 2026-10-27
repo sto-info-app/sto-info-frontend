@@ -2,7 +2,6 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": "./",
     "outDir": "./dist/out-tsc",
     "forceConsistentCasingInFileNames": true,
     "strict": true,
@@ -21,7 +20,9 @@
     "useDefineForClassFields": false,
     "resolveJsonModule": true,
     "skipLibCheck": true,
-    "ignoreDeprecations": "6.0"
+    "paths": {
+      "src/*": ["./src/*"]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
