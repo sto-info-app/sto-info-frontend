@@ -22,7 +22,10 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
 import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
 import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
-import { ChatService } from 'src/app/fleet/chat/chat.service';
+import {
+  FRIEND_CHAT_FAILED,
+  FriendChatService,
+} from 'src/app/community/friend-chat.service';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CommunityService } from '../../community.service';
@@ -122,7 +125,7 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _presence = inject(ChatPresenceService);
-  private readonly _chat = inject(ChatService);
+  private readonly _friendChat = inject(FriendChatService);
   private readonly _fleetConfiguration = inject(FleetConfigurationService);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -402,17 +405,14 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
   openChat(friend: Friend): void {
     this.isLoading = true;
     this.errorMessage = '';
-    this._chat
-      .open({ friendshipId: friend.id })
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._friendChat
+      .open(friend.id)
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
-        next: conversation => {
-          this.isLoading = false;
-          void this._router.navigate(['/chat', 'direct', conversation.id]);
-        },
+        next: () => (this.isLoading = false),
         error: () => {
           this.isLoading = false;
-          this.errorMessage = 'The conversation could not be opened.';
+          this.errorMessage = FRIEND_CHAT_FAILED;
         },
       });
   }

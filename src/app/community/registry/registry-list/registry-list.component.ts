@@ -12,7 +12,10 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Observable, Subscription, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
-import { ChatService } from 'src/app/fleet/chat/chat.service';
+import {
+  FRIEND_CHAT_FAILED,
+  FriendChatService,
+} from 'src/app/community/friend-chat.service';
 import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
@@ -126,7 +129,7 @@ export class RegistryListComponent
 {
   private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _fleetConfiguration = inject(FleetConfigurationService);
-  private readonly _chat = inject(ChatService);
+  private readonly _friendChat = inject(FriendChatService);
   private readonly _presence = inject(ChatPresenceService);
   private readonly _destroyRef = inject(DestroyRef);
 
@@ -363,17 +366,14 @@ export class RegistryListComponent
 
     this.isActing = true;
     this.actionError = '';
-    this._chat
-      .open({ friendshipId })
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._friendChat
+      .open(friendshipId)
+      .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
-        next: conversation => {
-          this.isActing = false;
-          void this._router.navigate(['/chat', 'direct', conversation.id]);
-        },
+        next: () => (this.isActing = false),
         error: () => {
           this.isActing = false;
-          this.actionError = 'The conversation could not be opened.';
+          this.actionError = FRIEND_CHAT_FAILED;
         },
       });
   }
