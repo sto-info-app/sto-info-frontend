@@ -192,10 +192,10 @@ describe('MemberCardComponent', () => {
     it('should mark a member who is online with a dot beside the name', () => {
       render(buildVm({ online: true }));
 
-      const dot = find('.member-card__identity .member-card__online');
+      const dot = find('.member-card__identity svg.member-card__online');
 
       expect(dot?.getAttribute('aria-label')).toBe('Online');
-      expect(dot?.getAttribute('title')).toBe('Online');
+      expect(dot?.querySelector('title')?.textContent).toBe('Online');
     });
 
     it('should show no dot for a member who is not online to the viewer', () => {

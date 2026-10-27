@@ -35,13 +35,15 @@
   }
 
   // Online now: a green dot, rimmed in black so it reads on a green block.
+  // The circle's rim is drawn inside the box: a radius of 4.5 and a stroke of
+  // 1 meet the edge of the 10-unit view.
   &__online {
     flex: 0 0 auto;
     width: 0.7rem;
     height: 0.7rem;
-    border: 1px solid vars.$lcars-black;
-    border-radius: 50%;
-    background: vars.$lcars-green;
+    fill: vars.$lcars-green;
+    stroke: vars.$lcars-black;
+    stroke-width: 1;
   }
 
   // Only a member whose record can still be opened gets the hover cue.

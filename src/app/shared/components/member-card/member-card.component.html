@@ -25,11 +25,17 @@
 
       <!-- Online now, as far as the viewer may know (FC-034). -->
       @if (vm.online) {
-        <span
+        <svg
           class="member-card__online"
+          viewBox="0 0 10 10"
           role="img"
-          aria-label="Online"
-          title="Online"></span>
+          aria-label="Online">
+          <title>Online</title>
+          <circle
+            cx="5"
+            cy="5"
+            r="4.5" />
+        </svg>
       }
     </span>
 
