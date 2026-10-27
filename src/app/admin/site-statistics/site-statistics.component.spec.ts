@@ -247,6 +247,29 @@ describe('SiteStatisticsComponent (FC-053)', () => {
     expect(component.errorMessage()).toBe('The statistics could not be read.');
     expect(page().querySelector('app-lcars-error-message')).not.toBeNull();
     expect(page().querySelector('.site-statistics__hero')).toBeNull();
+    expect(component.heroTiles()).toEqual([]);
+    expect(component.registrationsByWeek()).toEqual([]);
+    expect(component.lastSeenByWeek()).toEqual([]);
+    expect(component.sections()).toEqual([]);
+  });
+
+  it('names a role it has no name for as the server wrote it', () => {
+    service.read.mockReturnValue(
+      of({
+        ...STATISTICS,
+        users: {
+          ...STATISTICS.users,
+          byRole: [{ role: 'MODERATOR', count: 1 }],
+        },
+      }),
+    );
+    fixture.detectChanges();
+
+    expect(
+      page()
+        .querySelector('[data-card="role-moderator"] h3')
+        ?.textContent?.trim(),
+    ).toBe('MODERATOR');
   });
 
   it('carries the Help link and the admin side navigation', () => {

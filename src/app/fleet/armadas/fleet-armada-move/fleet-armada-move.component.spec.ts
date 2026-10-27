@@ -4,7 +4,12 @@ import { provideRouter } from '@angular/router';
 
 import { of, throwError } from 'rxjs';
 
-import { armadaRef, armadaRequest } from 'src/app/fleet/armadas/armada.testing';
+import {
+  HIDDEN_ARMADA_FLEET,
+  armadaFleet,
+  armadaRef,
+  armadaRequest,
+} from 'src/app/fleet/armadas/armada.testing';
 import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
 import {
   chooseFrom,
@@ -167,6 +172,42 @@ describe('FleetArmadaMoveComponent (FC-057)', () => {
       'Asking to move it is for the Fleet’s managers.',
     );
     expect(find('form')).toBeNull();
+  });
+
+  it('names and links the Fleet a Gamma sits under', () => {
+    render(
+      fleetView({
+        placement: placement({
+          position: ArmadaPosition.GAMMA,
+          parent: armadaFleet('First Fleet'),
+        }),
+      }),
+    );
+
+    expect(pageText(fixture)).toContain(
+      'In Sol Armada as Gamma under First Fleet',
+    );
+    expect(
+      find(
+        'a[href="/fleets/communities/united-federation-alliance/fleets/pc/first-fleet"]',
+      )?.textContent,
+    ).toBe('First Fleet');
+  });
+
+  it('says a Gamma sits under a Fleet the reader cannot see, unlinked', () => {
+    render(
+      fleetView({
+        placement: placement({
+          position: ArmadaPosition.GAMMA,
+          parent: HIDDEN_ARMADA_FLEET,
+        }),
+      }),
+    );
+
+    expect(pageText(fixture)).toContain(
+      'as Gamma under A Fleet you cannot see',
+    );
+    expect(find('a[href*="/fleets/pc/"]')).toBeNull();
   });
 
   it('offers the other Armadas, and asks to move with a message', () => {

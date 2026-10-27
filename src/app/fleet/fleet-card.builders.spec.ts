@@ -375,6 +375,22 @@ describe('fleet-card.builders', () => {
       });
     });
 
+    it('says a position it does not know as the server wrote it', () => {
+      const vm = buildFleetCardVm(
+        fleetCard({
+          armada: {
+            id: 'armada-1',
+            name: 'Sol Armada',
+            slug: 'sol-armada',
+            position: 'DELTA',
+          },
+        }),
+        formatInstant,
+      );
+
+      expect(vm.armada?.position).toBe('DELTA');
+    });
+
     it('draws no line for a Fleet in no Armada', () => {
       expect(buildFleetCardVm(fleetCard(), formatInstant).armada).toBeNull();
     });

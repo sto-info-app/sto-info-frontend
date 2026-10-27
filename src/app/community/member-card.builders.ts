@@ -265,17 +265,17 @@ function buildFriendSiteDetails(
 }
 
 /**
- * Formats a card date, matching the `date: 'longDate'` pipe used across the
- * rest of the app.
+ * Formats a card date, as the `date` pipe does across the rest of the app.
  *
  * @param value - The ISO date to format.
  * @param timezone - The zone to render in; the browser's when absent.
+ * @param format - The month in full, or shortened.
  * @returns The formatted date.
  */
 function formatMemberDate(
   value: string,
-  timezone?: string,
-  format: MemberDateFormat = REGISTRY_DATE_FORMAT,
+  timezone: string | undefined,
+  format: MemberDateFormat,
 ): string {
   return formatDate(value, format, 'en-US', timezone);
 }

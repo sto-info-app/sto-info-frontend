@@ -600,6 +600,17 @@ describe('RegistryListComponent', () => {
       expect(component.isActing).toBe(false);
     });
 
+    it('should open nothing for a friend with no friendship to open it by', async () => {
+      await setup();
+      chatEnabled = true;
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS, null);
+
+      component.onMemberCardAction(profile, 'chat');
+
+      expect(chatSpy.open).not.toHaveBeenCalled();
+      expect(component.isActing).toBe(false);
+    });
+
     it('should say so when the conversation cannot be opened', async () => {
       await setup();
       chatEnabled = true;

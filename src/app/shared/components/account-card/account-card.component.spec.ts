@@ -228,6 +228,53 @@ describe('AccountCardComponent', () => {
       expect(announcement()).toBe('Email copied');
     });
 
+    it('names a detail with no label of its own by its value', async () => {
+      render(
+        buildVm({
+          details: [
+            { icon: 'fas fa-hashtag', text: 'ABC-123', copyable: true },
+          ],
+        }),
+      );
+      const [button] = copyButtons();
+
+      expect(button.title).toBe('Copy abc-123');
+
+      button.click();
+      await flush();
+      fixture.detectChanges();
+
+      expect(writeText).toHaveBeenCalledWith('ABC-123');
+      expect(announcement()).toBe('ABC-123 copied');
+    });
+
+    it('says the copy failed in a browser with no clipboard', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        configurable: true,
+      });
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              copyable: true,
+            },
+          ],
+        }),
+      );
+      const [handle] = copyButtons();
+
+      handle.click();
+      await flush();
+      fixture.detectChanges();
+
+      expect(handle.title).toBe('Could not copy');
+      expect(announcement()).toBe('Username could not be copied');
+    });
+
     it('says when the clipboard refuses, and keeps the copy icon', async () => {
       writeText.mockRejectedValue(new Error('denied'));
       render(
