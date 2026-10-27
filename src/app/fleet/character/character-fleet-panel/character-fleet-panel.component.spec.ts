@@ -107,6 +107,7 @@ function card(): StoFleetCard {
     name: 'Starfleet Command',
     slug: 'starfleet-command',
     exactGameName: 'Starfleet Command',
+    armada: null,
     communityId: 'community-1',
     communityName: 'United Federation Alliance',
     communitySlug: 'united-federation-alliance',

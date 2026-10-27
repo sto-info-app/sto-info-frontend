@@ -42,6 +42,7 @@ function fleetCard(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     emblemImageAlt: null,
     emblemImageUrls: null,
     exactGameName: 'Starfleet Command',
+    armada: null,
     communityId: 'community-1',
     communityName: 'United Federation Alliance',
     communitySlug: 'united-federation-alliance',

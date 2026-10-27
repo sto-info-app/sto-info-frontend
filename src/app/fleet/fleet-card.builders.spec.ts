@@ -65,6 +65,7 @@ function fleetCard(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     communityId: 'community-1',
     communityName: 'United Federation Alliance',
     communitySlug: 'united-federation-alliance',
+    armada: null,
     platformId: 'platform-1',
     platformName: 'PC',
     platformSegment: 'pc',
@@ -328,6 +329,59 @@ describe('fleet-card.builders', () => {
       );
 
       expect(vm.meta).toEqual(['3 other records answer to this name on Xbox']);
+    });
+  });
+
+  // FC-056: where a listed Fleet sits, under its Community.
+  describe('the Armada line', () => {
+    it('names and links the Armada, saying the position in words', () => {
+      const vm = buildFleetCardVm(
+        fleetCard({
+          armada: {
+            id: 'armada-1',
+            name: 'Sol Armada',
+            slug: 'sol-armada',
+            position: 'GAMMA',
+          },
+        }),
+        formatInstant,
+      );
+
+      expect(vm.armada).toEqual({
+        name: 'Sol Armada',
+        link: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'armadas',
+          'pc',
+          'sol-armada',
+        ],
+        position: 'Gamma',
+      });
+    });
+
+    it('draws no line for a Fleet in no Armada', () => {
+      expect(buildFleetCardVm(fleetCard(), formatInstant).armada).toBeNull();
+    });
+
+    it('draws no line for a Fleet with no Community to address the Armada under', () => {
+      expect(
+        buildFleetCardVm(
+          fleetCard({
+            communityId: null,
+            communityName: null,
+            communitySlug: null,
+            armada: {
+              id: 'armada-1',
+              name: 'Sol Armada',
+              slug: 'sol-armada',
+              position: 'BETA',
+            },
+          }),
+          formatInstant,
+        ).armada,
+      ).toBeNull();
     });
   });
 

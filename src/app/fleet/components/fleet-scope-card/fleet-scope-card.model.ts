@@ -67,6 +67,21 @@ export interface FleetScopeCardEmblem {
 }
 
 /**
+ * The Armada line on a Fleet card (FC-056): the Armada's name, where it
+ * opens, and the Fleet's position in it, as the reader says it.
+ */
+export interface FleetScopeCardArmada {
+  /** The Armada's exact name. */
+  name: string;
+
+  /** Where the Armada opens, or null to show its name alone. */
+  link: string[] | null;
+
+  /** Alpha, Beta or Gamma. */
+  position: string;
+}
+
+/**
  * Presentation model for a Fleet, Community or Armada card.
  *
  * The directory, a Community's own page and the Armada listings all build one
@@ -115,6 +130,12 @@ export interface FleetScopeCardVm {
    * shows its name alone.
    */
   communityLink?: string[] | null;
+
+  /**
+   * The Armada a Fleet sits in and where, under the Community line; null
+   * for a Fleet in none, and for any card that is not a Fleet's.
+   */
+  armada?: FleetScopeCardArmada | null;
 
   /** The platform, or null for a Community, which spans all of them. */
   platform: string | null;

@@ -37,6 +37,7 @@ function card(overrides: Partial<StoFleetCard> = {}): StoFleetCard {
     emblemImageAlt: null,
     emblemImageUrls: null,
     exactGameName: 'Starfleet Command',
+    armada: null,
     communityId: null,
     communityName: null,
     communitySlug: null,

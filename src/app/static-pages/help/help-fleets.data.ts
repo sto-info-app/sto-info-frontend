@@ -167,7 +167,7 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
       ],
       'How to read a card': {
         paragraphs: [
-          'Each tab lists one kind of record, so a card does not say which it is. It starts with the name exactly as recorded, then the record’s emblem, or the “picture unavailable” mark where it has none, and then what tells two records of one name apart, each labelled: Platform, Status, Roster and Community. A Community card has no Platform or Community line, and shows its description beneath instead; an Armada card adds what it is known as. The eye at the card’s right opens the record.',
+          'Each tab lists one kind of record, so a card does not say which it is. It starts with the name exactly as recorded, then the record’s emblem, or the “picture unavailable” mark where it has none, and then what tells two records of one name apart, each labelled: Platform, Status, Roster and Community, and for a Fleet in an Armada, the Armada, linked, with the Fleet’s place in it: Alpha, Beta or Gamma. A Community card has no Platform or Community line, and shows its description beneath instead; an Armada card adds what it is known as. The eye at the card’s right opens the record.',
           'Roster says “Never imported”, or “Imported” and the date of the latest export; on a console it says that the game provides no roster export there. Status says how a record stands:',
         ],
         points: [

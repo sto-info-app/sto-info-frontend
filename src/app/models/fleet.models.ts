@@ -173,11 +173,28 @@ export interface InGameScopeCard extends FleetDirectoryCard {
 }
 
 /**
+ * The Armada a listed Fleet sits in, and where (FC-056). The Armada is in
+ * the Fleet's own Community and on its platform, so its page is addressed
+ * from the card's Community and platform segments with the slug here.
+ */
+export interface FleetCardArmada {
+  id: string;
+  /** Its name, exactly as the game has it. */
+  name: string;
+  slug: string;
+  /** Where the Fleet sits in it: ALPHA, BETA or GAMMA. */
+  position: string;
+}
+
+/**
  * One Fleet in the directory.
  */
 export interface StoFleetCard extends InGameScopeCard {
   recruitmentState: FleetRecruitmentState;
   allegianceFactionId: string | null;
+
+  /** The Armada it sits in and where, or null for a Fleet in none. */
+  armada: FleetCardArmada | null;
 
   /**
    * Whether the game provides a fleet roster export on the Fleet's platform.

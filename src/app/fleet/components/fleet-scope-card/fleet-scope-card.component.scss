@@ -108,7 +108,7 @@ a.fleet-scope-card__link:focus-visible {
   display: flex;
   flex: 1;
   gap: 1.25rem;
-  align-items: center;
+  align-items: flex-start;
   overflow: hidden;
   padding: 1rem 1.25rem;
   background: vars.$lcars-black;
@@ -177,8 +177,17 @@ a.fleet-scope-card__link:focus-visible {
   flex-direction: column;
   gap: 0.5rem;
   align-self: stretch;
-  justify-content: center;
+  justify-content: flex-start;
   min-width: 0;
+}
+
+// What the record is on the left, whose it is on the right: the names there
+// are somebody's free choice and may be long, so that column is the wider.
+// One column on a phone.
+.fleet-scope-card__columns {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 0.6rem 1.5rem;
 }
 
 // Square, because an emblem is a badge rather than a portrait: the circular
@@ -197,16 +206,37 @@ a.fleet-scope-card__link:focus-visible {
 // Label over value, as on the admin member cards: across the card where it is
 // wide, two to a row where it is not.
 .fleet-scope-card__details {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(9rem, 100%), 1fr));
-  gap: 0.6rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  min-width: 0;
   margin: 0;
 }
 
-// A Community's name is somebody's free choice and may be long, so it has the
-// row to itself rather than wrapping in a column of its own.
-.fleet-scope-card__detail--wide {
-  grid-column: 1 / -1;
+// The Armada's name and the Fleet's position in it, side by side (FC-056).
+.fleet-scope-card__armada {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.6rem;
+  align-items: baseline;
+}
+
+// The position as a label: the card's colour for its text and its border,
+// on a dark grey ground, so it reads as a tag beside the name rather than as
+// more of the name. Square-cornered on purpose, where every panel and pill
+// around it is rounded, so it stands apart as a label.
+.fleet-scope-card__position {
+  display: inline-block;
+  padding: 1px 0.5rem;
+  border: 1px solid var(--lcars-panel-accent, #{vars.$lcars-sunflower});
+  border-radius: 0;
+  background: vars.$lcars-grey-dark;
+  font-family: vars.$font-antonio;
+  font-size: 0.75rem;
+  line-height: 1.4;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--lcars-panel-accent, #{vars.$lcars-sunflower});
 }
 
 .fleet-scope-card__detail {
@@ -244,4 +274,36 @@ a.fleet-scope-card__link:focus-visible {
   gap: 0.5rem;
   margin-top: auto;
   padding-top: 0.5rem;
+}
+
+// On a phone the body has no room for three things abreast: the emblem and
+// the controls share the top row, and the details run beneath them at the
+// body's full width, in one column.
+@media (width <= 768px) {
+  .fleet-scope-card__body {
+    flex-wrap: wrap;
+  }
+
+  .fleet-scope-card__mark {
+    order: 1;
+  }
+
+  .fleet-scope-card__controls {
+    order: 2;
+    flex-direction: row;
+    align-self: center;
+    margin: 0 0 0 auto;
+    padding: 0.4rem 0.6rem;
+    border-left: 0;
+    border-radius: 6px;
+  }
+
+  .fleet-scope-card__main {
+    order: 3;
+    flex: 1 1 100%;
+  }
+
+  .fleet-scope-card__columns {
+    grid-template-columns: 1fr;
+  }
 }

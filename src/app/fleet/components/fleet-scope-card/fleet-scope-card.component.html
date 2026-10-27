@@ -77,60 +77,96 @@
     </div>
 
     <div class="fleet-scope-card__main">
-      <dl class="fleet-scope-card__details">
-        @if (vm.platform) {
-          <div class="fleet-scope-card__detail">
-            <dt>Platform</dt>
-            <dd>
-              @if (platformIcon) {
-                <i
-                  [ngClass]="platformIcon"
-                  aria-hidden="true"></i>
-              }
-              {{ vm.platform }}
-            </dd>
-          </div>
+      <!--
+        Two columns of details: what the record is, then whose it is. The
+        names on the right are somebody's free choice and may be long, so
+        their column is the wider.
+      -->
+      <div class="fleet-scope-card__columns">
+        <dl class="fleet-scope-card__details">
+          @if (vm.platform) {
+            <div class="fleet-scope-card__detail">
+              <dt>Platform</dt>
+              <dd>
+                @if (platformIcon) {
+                  <i
+                    [ngClass]="platformIcon"
+                    aria-hidden="true"></i>
+                }
+                {{ vm.platform }}
+              </dd>
+            </div>
+          }
+          @if (vm.status) {
+            <div class="fleet-scope-card__detail">
+              <dt>Status</dt>
+              <dd
+                class="fleet-scope-card__status"
+                [ngClass]="'fleet-scope-card__status--' + vm.status.modifier">
+                @if (statusIconOf(vm.status.modifier); as statusIcon) {
+                  <i
+                    [ngClass]="statusIcon"
+                    aria-hidden="true"></i>
+                }
+                {{ vm.status.label }}
+              </dd>
+            </div>
+          }
+          @if (vm.roster) {
+            <div class="fleet-scope-card__detail">
+              <dt>Roster</dt>
+              <dd class="fleet-scope-card__roster">{{ vm.roster }}</dd>
+            </div>
+          }
+        </dl>
+
+        @if (vm.communityName || vm.armada || vm.details?.length) {
+          <dl
+            class="fleet-scope-card__details fleet-scope-card__details--names">
+            @if (vm.communityName) {
+              <div class="fleet-scope-card__detail">
+                <dt>Community</dt>
+                <dd class="fleet-scope-card__community">
+                  @if (vm.communityLink) {
+                    <a [routerLink]="vm.communityLink">{{
+                      vm.communityName
+                    }}</a>
+                  } @else {
+                    {{ vm.communityName }}
+                  }
+                </dd>
+              </div>
+            }
+            <!--
+              Which Armada a Fleet sits in and where (FC-056), under the
+              Community it belongs to, since one follows from the other.
+            -->
+            @if (vm.armada; as armada) {
+              <div class="fleet-scope-card__detail">
+                <dt>Armada</dt>
+                <dd class="fleet-scope-card__armada">
+                  @if (armada.link) {
+                    <a [routerLink]="armada.link">
+                      <app-fleet-exact-name [name]="armada.name" />
+                    </a>
+                  } @else {
+                    <app-fleet-exact-name [name]="armada.name" />
+                  }
+                  <span class="fleet-scope-card__position">{{
+                    armada.position
+                  }}</span>
+                </dd>
+              </div>
+            }
+            @for (detail of vm.details ?? []; track detail.label) {
+              <div class="fleet-scope-card__detail">
+                <dt>{{ detail.label }}</dt>
+                <dd>{{ detail.value }}</dd>
+              </div>
+            }
+          </dl>
         }
-        @if (vm.status) {
-          <div class="fleet-scope-card__detail">
-            <dt>Status</dt>
-            <dd
-              class="fleet-scope-card__status"
-              [ngClass]="'fleet-scope-card__status--' + vm.status.modifier">
-              @if (statusIconOf(vm.status.modifier); as statusIcon) {
-                <i
-                  [ngClass]="statusIcon"
-                  aria-hidden="true"></i>
-              }
-              {{ vm.status.label }}
-            </dd>
-          </div>
-        }
-        @if (vm.roster) {
-          <div class="fleet-scope-card__detail">
-            <dt>Roster</dt>
-            <dd class="fleet-scope-card__roster">{{ vm.roster }}</dd>
-          </div>
-        }
-        @if (vm.communityName) {
-          <div class="fleet-scope-card__detail fleet-scope-card__detail--wide">
-            <dt>Community</dt>
-            <dd class="fleet-scope-card__community">
-              @if (vm.communityLink) {
-                <a [routerLink]="vm.communityLink">{{ vm.communityName }}</a>
-              } @else {
-                {{ vm.communityName }}
-              }
-            </dd>
-          </div>
-        }
-        @for (detail of vm.details ?? []; track detail.label) {
-          <div class="fleet-scope-card__detail">
-            <dt>{{ detail.label }}</dt>
-            <dd>{{ detail.value }}</dd>
-          </div>
-        }
-      </dl>
+      </div>
 
       @for (line of vm.meta; track $index) {
         <p class="fleet-scope-card__meta">{{ line }}</p>

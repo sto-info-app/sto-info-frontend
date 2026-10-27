@@ -1,3 +1,5 @@
+import { ARMADA_POSITION_LABELS } from 'src/app/fleet/armadas/armada.constants';
+import { ArmadaPosition } from 'src/app/models/fleet-armada.models';
 import {
   FLEET_SCOPE_ARMADA,
   FLEET_SCOPE_COMMUNITY,
@@ -7,6 +9,7 @@ import {
   FleetScopeCardDetail,
   FleetScopeCardEmblem,
   FleetScopeCardStatus,
+  FleetScopeCardArmada,
   FleetScopeCardVm,
 } from 'src/app/fleet/components/fleet-scope-card/fleet-scope-card.model';
 import {
@@ -254,6 +257,7 @@ export function buildFleetCardVm(
     name: card.exactGameName,
     communityName: card.communityName,
     communityLink: communityLinkOf(communitySlug),
+    armada: fleetCardArmadaOf(card),
     platform: card.platformName,
     link:
       communitySlug === null
@@ -264,6 +268,34 @@ export function buildFleetCardVm(
     roster: fleetFreshnessOf(card, formatInstant, FLEET_FRESHNESS_VALUE),
     meta: [duplicateLine(card)].filter((line): line is string => line !== null),
     actions: [],
+  };
+}
+
+/**
+ * The Armada line of a Fleet card (FC-056): the Armada named and linked, in
+ * the Fleet's own Community and on its platform, with the Fleet's position
+ * said as a reader says it.
+ *
+ * @param card - The Fleet as the server sent it.
+ * @returns The line, or null for a Fleet in no Armada.
+ */
+export function fleetCardArmadaOf(
+  card: StoFleetCard,
+): FleetScopeCardArmada | null {
+  if (!card.armada || card.communitySlug === null) {
+    return null;
+  }
+
+  return {
+    name: card.armada.name,
+    link: FLEET_LINKS.armada(
+      card.communitySlug,
+      card.platformSegment,
+      card.armada.slug,
+    ),
+    position:
+      ARMADA_POSITION_LABELS[card.armada.position as ArmadaPosition] ??
+      card.armada.position,
   };
 }
 

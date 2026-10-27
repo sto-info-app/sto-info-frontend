@@ -82,6 +82,63 @@ describe('FleetScopeCardComponent', () => {
   const buttons = (): HTMLButtonElement[] =>
     Array.from(fixture.nativeElement.querySelectorAll('button'));
 
+  // FC-056: the Armada line under Community, with the position in words.
+  describe('the Armada line', () => {
+    it('draws the Armada as a link, with the position, under the Community', () => {
+      render(
+        buildVm({
+          armada: {
+            name: 'Sol Armada',
+            link: [
+              '/fleets',
+              'communities',
+              'ufa',
+              'armadas',
+              'pc',
+              'sol-armada',
+            ],
+            position: 'Beta',
+          },
+        }),
+      );
+
+      const row = find('.fleet-scope-card__armada');
+      const terms = Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('dt'),
+      ).map(term => term.textContent?.trim());
+
+      expect(row?.querySelector('a')?.getAttribute('href')).toBe(
+        '/fleets/communities/ufa/armadas/pc/sol-armada',
+      );
+      expect(row?.textContent).toContain('Sol Armada');
+      expect(
+        row?.querySelector('.fleet-scope-card__position')?.textContent?.trim(),
+      ).toBe('Beta');
+      expect(terms.indexOf('Armada')).toBeGreaterThan(
+        terms.indexOf('Community'),
+      );
+    });
+
+    it('names an Armada alone when it has nowhere to open', () => {
+      render(
+        buildVm({
+          armada: { name: 'Sol Armada', link: null, position: 'Alpha' },
+        }),
+      );
+
+      const row = find('.fleet-scope-card__armada');
+
+      expect(row?.querySelector('a')).toBeNull();
+      expect(row?.textContent).toContain('Sol Armada');
+    });
+
+    it('draws no Armada line for a Fleet in none', () => {
+      render(buildVm({ armada: null }));
+
+      expect(find('.fleet-scope-card__armada')).toBeNull();
+    });
+  });
+
   // What the card is for: two Communities may each register a Fleet called
   // Starfleet Command, and a reader has to be able to pick the right one.
   it('shows everything that tells two registrations of one name apart', () => {
