@@ -161,6 +161,7 @@ describe('ChatEmojiButtonComponent', () => {
     fixture.detectChanges();
 
     expect(toggle().getAttribute('aria-expanded')).toBe('true');
+    expect(panel()?.tagName).toBe('FIELDSET');
     expect(panel()?.getAttribute('aria-label')).toBe('Emoji');
     expect(note()).toBe('Loading emoji…');
 

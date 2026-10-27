@@ -12,10 +12,9 @@
 </button>
 
 @if (isOpen()) {
-  <div
+  <fieldset
     id="chat-emoji-panel"
     class="chat-emoji__panel"
-    role="group"
     aria-label="Emoji">
     @if (failed()) {
       <p class="chat-emoji__note">
@@ -27,5 +26,5 @@
     <div
       #slot
       class="chat-emoji__picker"></div>
-  </div>
+  </fieldset>
 }
