@@ -146,11 +146,10 @@ repository out, then the backend beside it at that ref. It stops before it
 installs anything if any of these secrets is missing: `AWS_ACCESS_KEY_ID`,
 `AWS_SECRET_ACCESS_KEY`, `AWS_SECRET_NAME`, `AWS_REGION`,
 `DATASEED_USER_EMAIL`, `DATASEED_USER_USERNAME`, `DATASEED_USER_FIRSTNAME`,
-`DATASEED_USER_LASTNAME`, `DATASEED_USER_PASSWORD`, and
-`FONT_AWESOME_KIT_ID`. The kit id goes into the frontend's environment
-file. Icon-only controls, such as a section's Expand button or a
-voyage's Read link, take their size from the Font Awesome glyph, so
-without the kit they have no box and Playwright reports them hidden. The
+`DATASEED_USER_LASTNAME`, and `DATASEED_USER_PASSWORD`. Font Awesome is
+bundled with the app, so icon-only controls, such as a section's Expand
+button or a voyage's Read link, get their glyph-sized box without a kit
+id. The
 backend repository is public, so its checkout needs no token. The named
 AWS secret must contain `dbPassword` and `jwtSecret`. `sendGridApiKey`
 may be left out: SES sends the mail, and SendGrid is only the fallback.

@@ -41,22 +41,19 @@ Supporting docs:
 
 ### Prerequisites
 
-- Node.js version compatible with [package.json](../package.json) engines (currently Node 24, support for Node 25 types)
+- Node.js `24.22.1` or a later 24.x, as pinned in [.nvmrc](../.nvmrc) and the [package.json](../package.json) engine range (`>=24.22.1 <25`). 24.22.1 is the October 2026 security release that stops trusting the compromised eMudhra intermediate certificates.
 - npm
 
 ### Toolchain compatibility notes
 
-**TypeScript 6.0 with Angular 21**
+**TypeScript 6.0 with Angular 22**
 
-This project uses TypeScript 6.0.x. Angular 21's build tooling (`@angular/build`) declares a peer dependency of `typescript@">=5.9 <6.0"` — a conservative bound that predates TypeScript 6 testing on the Angular 21 release line. Angular 21 is functionally compatible with TypeScript 6.0 in practice.
+This project uses TypeScript `~6.0.3`. Angular 22's compiler (`@angular/compiler-cli`) declares a peer range of `>=6.0 <6.1`, so this is the supported pairing.
 
-Three accommodations are in place:
-
-- **[.npmrc](../.npmrc)** — `legacy-peer-deps=true` allows `npm install` to proceed despite the declared peer dep upper bound. Without this, `npm ci` / `npm install` fail with `ERESOLVE`.
-- **[tsconfig.json](../tsconfig.json)** — `"ignoreDeprecations": "6.0"` silences `TS5101`, which TypeScript 6 emits for the `baseUrl` compiler option (deprecated in favour of `paths`-based resolution; removed in TypeScript 7.0).
-- **[tsconfig.json](../tsconfig.json)** — `"skipLibCheck": true` suppresses `TS1540` from `logrocket`'s bundled type definitions, which use the `declare module Foo { }` syntax that TypeScript 6 now rejects in favour of `declare namespace Foo { }`.
-
-These accommodations can be removed once Angular adds official TypeScript 6 support (expected in Angular 22).
+- **TypeScript 7 is not used yet.** It no longer ships the JavaScript compiler API that Angular's compiler, `typescript-eslint` (peer `<6.1.0`) and `ts-jest` (peer `<7`) load. `.github/dependabot.yml` ignores TypeScript majors until they support it; see [security.md](security.md) for the check commands.
+- **The code is ready for it.** `tsconfig.json` sets no `baseUrl` and no `ignoreDeprecations` (both go away in TypeScript 7). The `src/*` import alias is an explicit `paths` entry (`"src/*": ["./src/*"]`), mirrored for Jest by `moduleNameMapper`, and `tsconfig.e2e.json` uses `node16` module resolution. `npx -p typescript@7.0.2 tsc -p tsconfig.spec.json --noEmit` passes.
+- **[.npmrc](../.npmrc)**: `legacy-peer-deps=true` remains set, and CI installs the same way, so keep it when regenerating the lockfile.
+- **[tsconfig.json](../tsconfig.json)**: `"skipLibCheck": true` suppresses `TS1540` from `logrocket`'s bundled type definitions, which use the `declare module Foo { }` syntax that TypeScript 6 rejects in favour of `declare namespace Foo { }`.
 
 ### Install and run
 
@@ -136,16 +133,20 @@ Most routes require a working backend.
 
 ### Font Awesome icons
 
-This project uses **Font Awesome icons loaded via CDN** using standard HTML `<i>` tags.
+This project uses **Font Awesome Pro icons from a self-hosted copy of the kit** using standard HTML `<i>` tags.
 
 Key details:
 
-- Icons are loaded via **Font Awesome Kit** CDN script in `src/index.html`
-- Kit URL: `https://kit.fontawesome.com/5812c6b103.js`
-- **No npm packages required** - icons are globally available in the browser
-- **No authentication needed** - locally or in CI/CD
+- The kit's stylesheet is committed as `vendor/font-awesome/kit.css` and bundled through `angular.json` `styles`, so icons render with the first paint and there is no third-party script
+- The kit is **subsetted**: only the icons chosen in the kit settings on fontawesome.com exist, with their fonts inlined in the stylesheet. An icon that is not in the kit renders invisible
+- **No npm packages or authentication required** - locally or in CI/CD
 - Icons are used via standard HTML `<i>` tags: `<i class="fas fa-icon-name"></i>`
-- The kit is **domain-restricted** to startrekonline.info and its development domain for security
+
+**Adding or removing icons:** change the kit on fontawesome.com, then refresh the copy and commit it:
+
+```sh
+FONT_AWESOME_KIT_ID=<kit id> npm run fa:update
+```
 
 **Using icons:**
 
@@ -163,15 +164,7 @@ Key details:
 <i class="fas fa-external-link ext-link"></i>
 ```
 
-**Benefits of this approach:**
-
-- ✅ No npm authentication required
-- ✅ Dependabot PRs can run full CI checks
-- ✅ Simpler development setup
-- ✅ Domain-restricted security
-- ✅ Automatic updates when kit is updated
-
-> Note: Icons are loaded asynchronously. Font Awesome automatically replaces `<i>` tags with SVG elements at runtime.
+**Why self-hosted:** the kit script fetched this stylesheet at runtime and injected it after load, which forced a full-page layout and shifted text when the glyphs arrived (both flagged by the Lighthouse audit). The bundled copy avoids both; the trade-off is that kit changes need `npm run fa:update` and a commit.
 
 ## Configuration and environment variables
 

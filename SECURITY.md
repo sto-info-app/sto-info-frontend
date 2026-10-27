@@ -39,17 +39,20 @@ Automated security testing is performed on every pull request and on a regular s
 
 ## Known Dependency Advisory Follow-up
 
-The production audit gate (`npm audit --audit-level=high --omit=dev`) passes with **zero advisories at any severity** (last verified 2026-10-06). The full dependency audit (`npm audit`) reports one development-only advisory with no fixed release anywhere, `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm); see `docs/security.md` for why it cannot be pinned or overridden away.
+The production audit gate (`npm audit --audit-level=high --omit=dev`) passes with **zero advisories at any severity** (last verified 2026-10-27), and so does the full dependency audit (`npm audit`). The last remaining development advisory, a `zod@3` denial of service (GHSA-mrhx-c7xc-m3w5) inside Lighthouse CI's pinned Lighthouse 12, went with the move from `@lhci/cli` to `lighthouse@13` on 2026-10-27. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is no longer reported, although `braces@3.0.3` is still installed; see `docs/security.md`.
 
 Active overrides are intentionally limited to advisories that still require forced transitive versions, all of them in the development tree:
 
-- `@puppeteer/browsers` for GHSA-jmr9-qjv8-65gv (`extract-zip`, no fixed release — the override removes it from the tree).
 - `argparse` for GHSA-hp3w-g68c-fv3c (`sprintf-js`, no fixed release — the override removes it from the tree).
-- `basic-ftp` for GHSA-c475-qrg2-pj4r.
 - `compression` for GHSA-vc2v-76pw-4v95.
 - `qs` for GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx and GHSA-4mjr-xmp4-gh2g.
-- `tmp` for GHSA-ph9p-34f9-6g65 and GHSA-52f5-9888-hmc6.
-- `uuid` for GHSA-w5hq-g745-h8pq.
+- `vite` for the `launch-editor` and Vite dev-server advisories in `8.3.0 - 8.3.2` (GHSA-587h-7wmj-h5pm and others), because `@angular/build` pins `vite@8.3.0` exactly.
+
+The `@puppeteer/browsers`, `basic-ftp`, `tmp` and `uuid` overrides existed only for `@lhci/cli` and were removed with it on 2026-10-27.
+
+### Runtime and CA trust (2026-10-27)
+
+In October 2026 the private keys of eight eMudhra (emSign) intermediate certificates were confirmed compromised, and Node.js shipped security releases that distrust them. The frontend is a static site, so the runtime exposure is in the build and tooling, which run on Node: development, CI and the Render build all moved to **Node.js `24.22.1`** (`.nvmrc`, the engine range and every workflow), and the SonarQube scan action to `v8.4.0`. Font Awesome is now bundled from a committed stylesheet (`vendor/font-awesome/kit.css`) rather than loaded from `kit.fontawesome.com` at runtime, which removes one third-party script from every page.
 
 The current override inventory, rationale, and removal criteria are documented in `docs/security.md`.
 
