@@ -9,13 +9,14 @@ This is the day-2 guide for debugging and operating the system.
 - Run coverage: `npm run test:cov`
 - Run lint: `npm run lint`
 - Production build (Render-like): `npm run build:render`
-- Run Lighthouse CI profile: `npm run lint:lighthouse`
+- Run the Lighthouse audit: `npm run lint:lighthouse`
 
-## Lighthouse CI profile and triage
+## Lighthouse audit and triage
 
-The Lighthouse CI profile is tuned to keep CI stable while still surfacing actionable regressions.
+The Lighthouse audit (`scripts/lighthouse-audit.mjs`, configured in `lighthouse.config.json`) is tuned to keep CI stable while still surfacing actionable regressions.
 
 - The four category scores (`performance`, `accessibility`, `best-practices`, `seo`) remain `error` level and can fail CI.
+- Any other audit Lighthouse scores must reach 0.9 on the median of three runs, or it fails CI.
 - Some noisy audits are warning-only so they do not fail PRs, but are still visible during review.
 - A few audits remain `off` because they are currently high-noise for this project footprint.
 
@@ -26,8 +27,9 @@ Audit-mode behavior:
 
 If Lighthouse fails unexpectedly:
 
-- Check `reports/lighthouse` and locate the latest `.report.json` files.
+- Check `reports/lighthouse/assertion-results.json` for the failing assertions, then open the matching `.report.html` (the median run is flagged `isRepresentativeRun` in `manifest.json`).
 - Identify whether the failure is category score related or a single audit assertion.
+- If the script stops because the config names an audit Lighthouse no longer reports, rename or remove that entry in `lighthouse.config.json`.
 - Prefer semantic/accessibility fixes first (headings, landmarks, labels) before relaxing assertions.
 
 ## Common incidents and how to debug them

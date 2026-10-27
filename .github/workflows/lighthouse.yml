@@ -16,7 +16,7 @@ on:
 permissions: {}
 
 env:
-  NODE_VERSION: 24.21.0
+  NODE_VERSION: 24.22.1
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
@@ -47,7 +47,8 @@ jobs:
               - 'stryker.config.json'
               - 'setup-jest.ts'
               - 'sonar-project.properties'
-              - '.lighthouserc.json'
+              - 'lighthouse.config.json'
+              - 'scripts/lighthouse-audit.mjs'
               - '.prettierrc'
 
   lighthouse:
@@ -121,8 +122,6 @@ jobs:
 
       - name: Run Lighthouse Audit
         run: npm run lint:lighthouse
-        env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
 
       - name: Summarize Lighthouse Results
         if: always()

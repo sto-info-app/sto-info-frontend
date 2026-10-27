@@ -370,6 +370,10 @@ a {
   text-decoration: underline;
 
   i.ext-link {
+    /* Reserve the icon's width before the Font Awesome kit loads, so the
+       surrounding text does not rewrap (and shift) when the glyph arrives. */
+    display: inline-block;
+    width: 1.25em;
     color: #fa4;
     font-size: small;
     vertical-align: top;

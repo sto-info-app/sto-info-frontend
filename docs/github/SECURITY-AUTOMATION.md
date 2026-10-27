@@ -30,6 +30,7 @@ SonarCloud performs deep code analysis, focusing on Security Hotspots and vulner
 - **Findings**: Results are linked from PR checks to the SonarCloud dashboard.
 - **Rules**: We enforce a set of security-specific rules (e.g., preventing hardcoded secrets) to catch common errors.
 - **Remediation**: Review the 'Vulnerabilities' tab in SonarCloud. High-risk issues must be fixed or marked as 'Safe' by a maintainer before the Quality Gate passes.
+- **Scanner**: `SonarSource/sonarqube-scan-action`, pinned by commit SHA in `lint-test.yml`. Raised to `v8.4.0` (SonarScanner CLI `8.3.0`) on 2026-10-27 following Sonar's eMudhra certificate advisory.
 
 ## npm audit
 
@@ -45,6 +46,14 @@ Current policy notes:
 
 - `npm audit --omit=dev` is the merge gate for application/runtime risk.
 - Full `npm audit` output is still reviewed, but dev-only toolchain findings are treated as non-blocking unless a safe, non-breaking remediation is available.
+
+## Dependabot
+
+- **Schedule**: Daily, for both npm and GitHub Actions.
+- **Grouping**: Minor and patch version updates are grouped into one PR per ecosystem; majors arrive individually so they can be assessed on their own.
+- **CI**: The full pipeline is skipped on Dependabot PRs, so a merged major has not been built or tested. Re-run the build and test suite after merging one.
+- **Ignored**: TypeScript major updates. TypeScript 7 drops the compiler API that ts-jest, typescript-eslint and the build tooling load, so a TypeScript 7 bump breaks the build. The rule comes out when those tools support it (see `docs/security.md`).
+- **Config**: [.github/dependabot.yml](../../.github/dependabot.yml)
 
 ## CodeQL Static Analysis
 

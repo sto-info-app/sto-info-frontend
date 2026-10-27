@@ -89,7 +89,7 @@ A Cloudflare Worker is used for testing to set `stoi_no_analytics=1`.
 
 ## Deployments and rollbacks (practical)
 
-- Render builds are reproducible as long as environment variables and Node version remain stable.
+- Render builds are reproducible as long as environment variables and Node version remain stable. Render takes the Node version from `.nvmrc` (currently `24.22.1`); a change to it applies on the next build, so redeploy after bumping it.
 - The frontend fails fast if required environment keys are missing.
 
 If a deployment breaks:

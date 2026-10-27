@@ -34,19 +34,21 @@ Property-based mutation testing measures the effectiveness of our unit tests by 
 - **Incremental Analysis**: Runs on every Pull Request to `development` or `production`. Only mutates files that have changed in the PR, providing fast quality feedback without the overhead of a full run.
 - **Reporting**: Full reports are available as workflow artifacts.
 
-## Lighthouse CI
+## Lighthouse
 
-We use [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci) to audit the application for performance, accessibility, best practices, and SEO.
+We run [Lighthouse](https://github.com/GoogleChrome/lighthouse) 13 directly from `scripts/lighthouse-audit.mjs` (configured in `lighthouse.config.json`) to audit the public pages for performance, accessibility, best practices, and SEO. It replaced Lighthouse CI, which pinned Lighthouse 12 and an unpatched dependency chain.
 
-- **Thresholds**: We enforce a minimum score of **0.9 (90%)** for all core categories (Performance, Accessibility, Best Practices, SEO) for desktop.
-- **Pages Audited**: Key public pages including Home, Login, Register, About, Privacy Policy, and Terms of Use.
+- **Thresholds** (desktop):
+  - Category minimums: **0.8** for Performance, **0.9** for Accessibility, Best Practices and SEO.
+  - Every other audit Lighthouse scores must reach **0.9**, unless `lighthouse.config.json` sets it to `warn`, `off` or its own threshold. The weighted performance metrics are left to the Performance category score.
+  - Assertions judge the **median** of three runs per page.
+- **Pages Audited**: the static public pages listed in `lighthouse.config.json` (Home, About and team pages, Contact, Resources, Roadmap, Credits, Privacy Policy, Terms of Use).
 - **Execution**:
   - On every Pull Request (Smart Skip applies if only non-code files change).
   - Weekly full audit on a schedule.
 - **Reports**:
   - **Dashboard Summary**: A high-level summary table is posted as a **PR Comment** and included in the **GitHub Job Summary**.
-  - **Local**: HTML reports are saved to `reports/lighthouse/` when running `npm run lighthouse`.
-  - **CI Storage**: Uploaded to temporary public storage (link provided in CI logs).
+  - **Local**: HTML and JSON reports, `manifest.json` and `assertion-results.json` are saved to `reports/lighthouse/`.
   - **Artifacts**: Full reports available as GitHub Action artifacts for 30 days.
 
 ## CI Summary System (High Visibility)

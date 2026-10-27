@@ -16,75 +16,39 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key          | Forced version | Scope  | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------------- | -------------- | ------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `@puppeteer/browsers` | `3.2.3`        | Global | `@lhci/cli` → `lighthouse@12.6.1` → `puppeteer-core@24.43.1` → `@puppeteer/browsers@2.13.2` → `extract-zip` (GHSA-jmr9-qjv8-65gv, unvalidated symlink path traversal). **`extract-zip` has no patched release** — every published version is affected. `@puppeteer/browsers@3.x` drops `extract-zip` entirely in favour of `modern-tar`, so the override removes the package from the tree rather than pinning it. See the note below.                                                                                       |
-| `argparse`            | `^2.0.1`       | Global | `sprintf-js` (GHSA-hp3w-g68c-fv3c, unbounded precision DoS) has **no patched release**. Its only consumer is `argparse@1`, reached twice: `@lhci/cli` → `@lhci/utils` → `js-yaml@3`, and `jest-preset-angular` → `ts-jest` → `@jest/transform` → `babel-plugin-istanbul` → `@istanbuljs/load-nyc-config@1.1.0` → `js-yaml@3`. `argparse@2` dropped `sprintf-js`, and `js-yaml@3` only loads `argparse` from its `bin/js-yaml.js` CLI, which nothing here runs — `lib/` never requires it. Dev tree only. See the note below. |
-| `basic-ftp`           | `^6.2.2`       | Global | `@lhci/cli` → `proxy-agent@6.5.0` → `pac-proxy-agent@7.2.0` → `get-uri@6.0.5` → `basic-ftp@^5.0.2` (GHSA-c475-qrg2-pj4r, quadratic-time `Client.list()` parser; fixed in `6.2.1`). Even `get-uri@8.0.1` (latest) still asks for `^5.3.1`. The only breaking change in `basic-ftp@6.0.0` is that separate transfer hosts are refused by default (FTP bounce hardening); `get-uri` uses `access`, `lastMod`, `list`, `downloadTo` and `close`, none of which is affected. Dev tree only.                                       |
-| `compression`         | `1.8.2`        | Global | `serve@14.2.6` (the static server behind `lhci collect`) exact-pins `compression@1.8.1` (GHSA-vc2v-76pw-4v95, memory leak on premature response close; fixed in `1.8.2`). `@lhci/cli` asks for the same package. Patch-level pin only. Dev tree only.                                                                                                                                                                                                                                                                        |
-| `qs`                  | `6.16.0`       | Global | `@lhci/cli` → `express@4.22.3` / `body-parser` → `qs@6.15.3` (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g). The vulnerable range is `2.2.5 - 6.15.3`; `6.16.0` is the first release patched against all three. Also covers `typed-rest-client@2.3.1`, which `@stryker-mutator/core@10.0.0` still pins (`typed-rest-client@3` has moved to `qs@^6.16.0` on its own).                                                                                                                                        |
-| `tmp`                 | `0.2.7`        | Global | `@lhci/cli` (via `inquirer` / `external-editor`) resolves `tmp@<=0.2.5` (GHSA-ph9p-34f9-6g65 and GHSA-52f5-9888-hmc6). Override keeps the tree on the patched release.                                                                                                                                                                                                                                                                                                                                                       |
-| `uuid`                | `14.0.2`       | Global | `@lhci/cli` uses `uuid@^8.3.1`, in the vulnerable `<11.1.1` range (GHSA-w5hq-g745-h8pq); override standardizes the tree on the patched major release.                                                                                                                                                                                                                                                                                                                                                                        |
+| Override key  | Forced version | Scope  | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ------------- | -------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `argparse`    | `^2.0.1`       | Global | `sprintf-js` (GHSA-hp3w-g68c-fv3c, unbounded precision DoS) has **no patched release**. Its only consumer is `argparse@1`, reached through `jest-preset-angular` → `ts-jest` → `@jest/transform` → `babel-plugin-istanbul` → `@istanbuljs/load-nyc-config@1.1.0` → `js-yaml@3`. `argparse@2` dropped `sprintf-js`, and `js-yaml@3` only loads `argparse` from its `bin/js-yaml.js` CLI, which nothing here runs — `lib/` never requires it. Dev tree only. See the note below. |
+| `compression` | `1.8.2`        | Global | `serve@14.2.6` (the static server behind `scripts/lighthouse-audit.mjs`) exact-pins `compression@1.8.1` (GHSA-vc2v-76pw-4v95, memory leak on premature response close; fixed in `1.8.2`). Patch-level pin only. Dev tree only.                                                                                                                                                                                                                                                 |
+| `qs`          | `6.17.0`       | Global | `typed-rest-client@2.3.1`, which `@stryker-mutator/core@10.1.1` still pins, exact-pins `qs@6.15.1` (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g; vulnerable range `2.2.5 - 6.15.3`). `typed-rest-client@3` has moved to `qs@^6.16.0` on its own. Dev tree only.                                                                                                                                                                                              |
+| `vite`        | `8.3.5`        | Global | `@angular/build@22.2.4` exact-pins `vite@8.3.0`, inside the `8.3.0 - 8.3.2` range of the `launch-editor` advisories (GHSA-587h-7wmj-h5pm and others) and several Vite dev-server advisories. Patch-level pin only; the dev server and build both run on it.                                                                                                                                                                                                                    |
 
-### `@puppeteer/browsers` — why a major bump instead of a version pin
+### Overrides removed with Lighthouse CI (2026-10-27)
 
-`extract-zip` is flagged at **high** severity with no fix available in any
-release, so a pin cannot help. The three ways out were:
-
-1. Override `lighthouse` to `13.4.1` — rejected. `@lhci/cli@0.15.1` exact-pins
-   `lighthouse@12.6.1` and drives it programmatically; a major jump risks the
-   Lighthouse CI job for a dev-only advisory.
-2. Override `puppeteer-core` to `25.x` — rejected for the same reason, one level
-   lower.
-3. **Override `@puppeteer/browsers` to `3.2.x`** — chosen. It is the only package
-   in the chain that actually depends on `extract-zip`, and version 3 replaced it
-   with `modern-tar`. Pinned at `3.2.1` on 2026-09-03 and raised to `3.2.3`,
-   the current release, on 2026-10-06.
-
-Compatibility was checked rather than assumed. Every symbol
-`puppeteer-core@24.43.1` imports from the package (`Browser`,
-`ChromeReleaseChannel`, `TimeoutError`, `computeExecutablePath`,
-`computeSystemExecutablePath`, `createProfile`, `detectBrowserPlatform`,
-`getInstalledBrowsers`, `launch`, `resolveBuildId`, `uninstall`, and the CDP /
-WebDriver endpoint regexes) is exported by `3.2.x`, and a real
-`lhci collect` run against the production bundle completes successfully (last
-run 2026-10-06, which also exercised the `compression@1.8.2` and
-`basic-ftp@6.2.2` overrides sitting in the same chain):
-
-```sh
-npm run build:prod
-npx lhci collect --url=http://localhost:4201/ --numberOfRuns=1 --startServerCommand="serve -s dist/sto-info-frontend/browser -p 4201" --startServerReadyPattern="Accepting connections at"
-```
-
-**When it can be removed**: when `@lhci/cli` ships a `lighthouse` release whose
-`puppeteer-core` already resolves `@puppeteer/browsers@>=3`. Check with:
-
-```sh
-npm view @lhci/cli@latest dependencies.lighthouse
-npm ls extract-zip
-```
-
-Re-checked 2026-10-06: `@lhci/cli@0.15.1` is still the latest release and still
-pins `lighthouse@12.6.1`, so every `@lhci/cli`-rooted override above (including
-`tmp` and `uuid`) is still load-bearing.
+`@lhci/cli@0.15.1` exact-pinned `lighthouse@12.6.1`, whose
+`puppeteer-core@24` → `chromium-bidi@14` chain carries `zod@3`
+(GHSA-mrhx-c7xc-m3w5, no `zod@3` fix). `@lhci/cli` had no release since June
+2025, so it was replaced by `scripts/lighthouse-audit.mjs` driving
+`lighthouse@13` directly. That removed the whole chain, and with it the
+`@puppeteer/browsers`, `basic-ftp`, `tmp` and `uuid` overrides, which existed
+only for it: `puppeteer-core@25` already depends on `@puppeteer/browsers@3`
+(so `extract-zip` stays out of the tree), and `jest-junit` resolves a patched
+`uuid@14` without help.
 
 ### `argparse` — removing `sprintf-js` rather than pinning it
 
-`sprintf-js` is flagged at **moderate** severity and, like `extract-zip`, has no
-fixed release (`<=1.1.3` is every version ever published). The audit's own
-suggestion is a downgrade of `@lhci/cli` to `0.13.0`, which is not a fix. The
-override instead moves the one consumer, `js-yaml@3`, onto `argparse@2`, which
-does not use `sprintf-js` at all. That is safe because `js-yaml@3` only
-`require`s `argparse` inside `bin/js-yaml.js`, its command-line tool; the
-library entry point that `@lhci/utils` and `@istanbuljs/load-nyc-config`
-actually import never touches it.
+`sprintf-js` is flagged at **moderate** severity and has no fixed release
+(`<=1.1.3` is every version ever published). The override moves the one
+consumer, `js-yaml@3`, onto `argparse@2`, which does not use `sprintf-js` at
+all. That is safe because `js-yaml@3` only `require`s `argparse` inside
+`bin/js-yaml.js`, its command-line tool; the library entry point that
+`@istanbuljs/load-nyc-config` actually imports never touches it.
 
 **When it can be removed**: when `@istanbuljs/load-nyc-config` publishes a
-release on `js-yaml@4` _and_ `@lhci/utils` drops `js-yaml@3`. Check with:
+release on `js-yaml@4`. Check with:
 
 ```sh
 npm view @istanbuljs/load-nyc-config@latest dependencies.js-yaml
-npm view @lhci/utils@latest dependencies.js-yaml
 npm ls sprintf-js
 ```
 
@@ -98,8 +62,9 @@ newest `braces` ever published and the advisory covers `<=3.0.3`, so there is
 nothing to pin to and nothing to override; the audit's only suggestion is a
 downgrade to `stylelint@7.7.0`. `braces` is reached only through Stylelint's
 file globbing of the project's own `src/**/*.scss` patterns, never from
-untrusted input, and `npm audit --omit=dev` does not see it. This is the one
-advisory `npm audit` is expected to report.
+untrusted input, and `npm audit --omit=dev` does not see it. As of 2026-10-27
+`npm audit` no longer reports it although `braces@3.0.3` is still installed, so
+re-check before deleting this note.
 
 **When it can be remediated**: when `braces` publishes a fix or `micromatch`
 drops it. Check with:
@@ -114,17 +79,25 @@ npm ls braces
 These are not `overrides` entries, but they are the reason `npm outdated` shows a
 newer `latest` that this project deliberately does not take.
 
-### `typescript` stays on `~6.0.3` (re-checked 2026-10-06)
+### `typescript` stays on `~6.0.3` (re-checked 2026-10-27)
 
-`typescript@7.0.2` is published, but `@angular/compiler-cli@22.2.1` declares
-`peerDependencies.typescript` as `>=6.0 <6.1`. Angular's compiler is built
-against a specific TypeScript minor, so this is a hard gate, not a caution.
+`typescript@7.0.2` is published, but it no longer ships the JavaScript compiler
+API (only `unstable/*` entry points), and the tools that load that API all gate
+on 6.x: `@angular/compiler-cli@22.2.3` and `typescript-eslint@8.72.1` declare
+`>=6.0 <6.1` / `<6.1.0`, and `ts-jest@29.4.15` `<7`. Dependabot ignores
+TypeScript majors for that reason (`.github/dependabot.yml`).
 
-**When it can be retried**: when an Angular release declares a `typescript@7`
-peer range. Check with:
+The code itself is ready: `tsc -p tsconfig.spec.json --noEmit` passes on
+`typescript@7.0.2`, and the tsconfigs no longer need `ignoreDeprecations`
+(`baseUrl` is gone; `src/*` is an explicit `paths` alias).
+
+**When it can be retried**: when Angular, `typescript-eslint` and `ts-jest`
+all declare a `typescript@7` peer range. Check with:
 
 ```sh
 npm view @angular/compiler-cli@latest peerDependencies.typescript
+npm view typescript-eslint@latest peerDependencies.typescript
+npm view ts-jest@latest peerDependencies.typescript
 ```
 
 ### Unused dependencies removed (2026-09-03)

@@ -87,11 +87,6 @@ replacedContent = replaceAll(
 );
 replacedContent = replaceAll(
   replacedContent,
-  '__fontAwesomeKitId__',
-  process.env.FONT_AWESOME_KIT_ID || '',
-);
-replacedContent = replaceAll(
-  replacedContent,
   '__cookieYesUrl__',
   process.env.COOKIE_YES_URL || '',
 );
