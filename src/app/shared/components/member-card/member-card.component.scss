@@ -6,130 +6,224 @@
   height: 100%;
 }
 
-// An LCARS panel card: the spine and the
-// heading block in the listing's rotation colour, the body washed with it.
-// Fills the grid track so every card in a row is the same height, and the
-// actions row below can bottom-align across them.
+// An LCARS panel card in the shape of an account card: the spine and the
+// heading block in the listing's rotation colour, the body washed with it, and
+// a strip of actions across the foot.
 .member-card {
   @include mixins.lcars-accent-panel-card(vars.$lcars-perano);
 
   height: 100%;
 
-  // The username on the block. Not upper-cased, unlike other panels' names: a
-  // username is exact, and its case is part of it.
   &__heading {
     @include mixins.lcars-accent-panel-card-heading;
+  }
 
-    justify-content: center;
+  // The name and, while the member is online, the dot beside it, taking the
+  // block's width up to the pill.
+  &__identity {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  &__link {
+    min-width: 0;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  // Online now: a green dot, rimmed in black so it reads on a green block.
+  &__online {
+    flex: 0 0 auto;
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 1px solid vars.$lcars-black;
+    border-radius: 50%;
+    background: vars.$lcars-green;
   }
 
   // Only a member whose record can still be opened gets the hover cue.
-  a.member-card__heading:hover .member-card__name,
-  a.member-card__heading:focus-visible .member-card__name {
+  a.member-card__link:hover .member-card__name,
+  a.member-card__link:focus-visible .member-card__name {
     text-decoration: underline;
   }
 
-  a.member-card__heading:focus-visible {
+  a.member-card__link:focus-visible {
     outline: 2px solid vars.$a11y-white;
-    outline-offset: -4px;
+    outline-offset: 2px;
   }
 
+  // The username on the block. Not upper-cased, unlike other panels' names: a
+  // username is exact, and its case is part of it.
   &__name {
-    min-width: 0;
     font-family: vars.$font-antonio;
     font-size: 1.2rem;
     line-height: 1.2;
     color: vars.$lcars-black;
-    text-align: center;
     overflow-wrap: anywhere;
   }
 
-  &__body {
-    @include mixins.lcars-panel-card-body;
-
-    display: flex;
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-    text-align: center;
-  }
-
-  // Always rendered, badge or not, so the rows below it line up from card to
-  // card instead of shifting up on members with no relationship.
-  &__badge-slot {
-    display: flex;
-    align-items: center;
-    min-height: 1.5rem;
-  }
-
-  // The relationship pill. Its colours carry meaning, which is why the card's
-  // own colour does not: that is only its place in the listing's rotation.
+  // The relationship pill, at the end of the block where an account card
+  // carries its Captain count. On a dark ground with its meaning in the text's
+  // colour, because the block is a different colour on every card.
   &__badge {
+    flex: 0 0 auto;
     padding: 0.1rem 0.7rem;
     border-radius: 999px;
     font-weight: 700;
     font-size: 0.75rem;
-    text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: vars.$a11y-black;
-    background: vars.$lcars-perano;
+    text-transform: uppercase;
+    white-space: nowrap;
+    color: vars.$lcars-white;
+    background: vars.$black-a55;
 
     &--friend {
-      background: vars.$lcars-green;
+      color: vars.$lcars-green;
     }
 
     &--pending {
-      background: vars.$lcars-gold;
-    }
-
-    &--online {
-      background: vars.$lcars-sky;
+      color: vars.$lcars-gold;
     }
   }
 
-  &__stats {
+  // The avatar, the details and the control column, side by side as an
+  // account card lays its endeavour badge, details and actions.
+  &__body {
+    display: grid;
+    flex: 1;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+
+  // The avatar at the top of its column, level with the first detail.
+  &__mark {
     display: flex;
-    gap: 1.25rem;
-    margin: 0.25rem 0 0;
+    align-items: flex-start;
+    padding: 0.75rem 0 0.75rem 1rem;
+  }
+
+  // Two columns of details: the member's time here, and what they have in
+  // the game.
+  &__columns {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.35rem 1.5rem;
+    align-items: start;
+    padding: 0.75rem 1rem;
+  }
+
+  // Label beside value in a two-column grid, so every value lines up however
+  // long its label is, in the colours an account card's details take.
+  &__details {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: 0.35rem 0.9rem;
+    align-items: baseline;
+    margin: 0;
+  }
+
+  &__detail {
+    display: contents;
 
     dt {
-      font-size: 0.75rem;
-      text-transform: uppercase;
+      font-size: 0.7rem;
       letter-spacing: 0.05em;
-      opacity: 0.75;
+      text-transform: uppercase;
+      white-space: nowrap;
+      opacity: 0.7;
+      color: vars.$a11y-white;
 
-      // Separates the label from the count beside it, matching the detail
-      // grids on the registry's other pages.
+      // Separates the label from the value in the next column, as the
+      // account card's labels do.
       &::after {
         content: ':';
       }
     }
 
-    // The counts take the card's colour, so they read as belonging to it.
     dd {
+      min-width: 0;
       margin: 0;
-      font-weight: 900;
-      font-size: 1.1rem;
-      color: var(--lcars-panel-accent);
+      font-size: 0.85rem;
+      color: vars.$lcars-perano;
+      overflow-wrap: anywhere;
     }
   }
 
-  &__meta {
-    margin: 0;
-    font-size: 0.8rem;
-    opacity: 0.75;
+  &__controls {
+    @include mixins.lcars-panel-card-controls;
   }
 
+  // The chevron that opens the record, centred down the column.
+  &__view {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5rem;
+    font-size: 1.4rem;
+    color: vars.$white-a50;
+    text-decoration: none;
+
+    &:hover,
+    &:focus-visible {
+      color: var(--lcars-panel-accent);
+    }
+
+    &:focus-visible {
+      outline: 2px solid vars.$a11y-white;
+      outline-offset: 2px;
+    }
+  }
+
+  // The actions in a strip across the foot, darkened rather than coloured as
+  // an Admiralty panel's reward strip is, since the ground behind it is a
+  // different colour on every card.
   &__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    justify-content: center;
+    justify-content: flex-end;
+    padding: 0.5rem 1rem;
+    border-top: 1px solid vars.$white-a10;
+    background: vars.$black-a25;
 
-    // Sits against the bottom of the card so the buttons line up across the
-    // row however much meta each member has.
-    margin-top: auto;
-    padding-top: 0.6rem;
+    // The site's buttons carry a margin beneath them for standing in a form;
+    // in the strip the gap does that, so the strip is padded the same above
+    // and below.
+    button {
+      margin: 0;
+    }
+  }
+
+  // A phone has no room for the avatar, the details and the chevron abreast,
+  // so the body wraps as a Fleet card's does: the avatar and the chevron on
+  // the first row, the details across the full width beneath.
+  @media (width <= 768px) {
+    &__body {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    &__mark {
+      order: 1;
+      padding: 0.75rem;
+    }
+
+    &__controls {
+      order: 2;
+      margin: 0 0.75rem 0 auto;
+      padding: 0.4rem 0.6rem;
+      border-left: 0;
+      border-radius: 6px;
+    }
+
+    &__columns {
+      order: 3;
+      flex: 1 1 100%;
+      grid-template-columns: 1fr;
+      padding: 0 0.75rem 0.75rem;
+    }
   }
 }

@@ -2,9 +2,11 @@ import {
   MEMBER_CARD_ACCEPT_REQUEST,
   MEMBER_CARD_ADD_FRIEND,
   MEMBER_CARD_BLOCK,
+  MEMBER_CARD_CHAT,
   MEMBER_CARD_UNFRIEND,
   buildFriendMemberCard,
   buildRegistryMemberCard,
+  withPresence,
 } from './member-card.builders';
 import {
   CommunityMember,
@@ -85,12 +87,13 @@ describe('memberCardBuilders', () => {
           username: 'captain.picard',
           imageUrl: 'https://cdn.example.com/pic/square100',
           link: ['/community/registry/profiles', 'captain.picard'],
-          stats: [
-            { label: 'Accounts', value: 2 },
-            { label: 'Captains', value: 11 },
-          ],
         }),
       );
+      expect(card.gameDetails).toEqual([
+        { label: 'Accounts', value: '2' },
+        { label: 'Captains', value: '11' },
+        { label: 'Playing since', value: 'March 4, 2015' },
+      ]);
     });
 
     it('should leave the username raw for routerLink to encode', () => {
@@ -105,10 +108,9 @@ describe('memberCardBuilders', () => {
     it('should show when the member joined, was last seen and started playing', () => {
       const card = buildRegistryMemberCard(buildProfileSummary(), false);
 
-      expect(card.meta).toEqual([
-        'Joined January 14, 2026',
-        'Last seen August 1, 2026',
-        'Playing since March 4, 2015',
+      expect(card.siteDetails).toEqual([
+        { label: 'Joined', value: 'January 14, 2026' },
+        { label: 'Last seen', value: 'August 1, 2026' },
       ]);
     });
 
@@ -118,9 +120,8 @@ describe('memberCardBuilders', () => {
         false,
       );
 
-      expect(card.meta).toEqual([
-        'Joined January 14, 2026',
-        'Playing since March 4, 2015',
+      expect(card.siteDetails).toEqual([
+        { label: 'Joined', value: 'January 14, 2026' },
       ]);
     });
 
@@ -130,9 +131,9 @@ describe('memberCardBuilders', () => {
         false,
       );
 
-      expect(card.meta).toEqual([
-        'Joined January 14, 2026',
-        'Last seen August 1, 2026',
+      expect(card.gameDetails.map(detail => detail.label)).toEqual([
+        'Accounts',
+        'Captains',
       ]);
     });
 
@@ -143,12 +144,6 @@ describe('memberCardBuilders', () => {
         expect(card.badge).toBeNull();
       });
 
-      it('should not reserve the badge row for an anonymous visitor', () => {
-        const card = buildRegistryMemberCard(buildProfileSummary(), false);
-
-        expect(card.reserveBadgeSlot).toBe(false);
-      });
-
       it('should show no badge when there is no relationship', () => {
         const card = buildRegistryMemberCard(
           withRelationship(RelationshipStatus.NONE),
@@ -156,15 +151,6 @@ describe('memberCardBuilders', () => {
         );
 
         expect(card.badge).toBeNull();
-      });
-
-      it('should still reserve the badge row so signed-in cards stay aligned', () => {
-        const card = buildRegistryMemberCard(
-          withRelationship(RelationshipStatus.NONE),
-          true,
-        );
-
-        expect(card.reserveBadgeSlot).toBe(true);
       });
 
       it('should flag a friend', () => {
@@ -305,6 +291,74 @@ describe('memberCardBuilders', () => {
     });
   });
 
+  // FC-033: chat with a friend from their card, while chat is switched on.
+  describe('chat', () => {
+    it('should offer Chat first to a friend when chat is on', () => {
+      const card = buildRegistryMemberCard(
+        withRelationship(RelationshipStatus.FRIENDS),
+        true,
+        undefined,
+        true,
+      );
+
+      expect(card.actions.map(action => action.key)).toEqual([
+        MEMBER_CARD_CHAT,
+        MEMBER_CARD_UNFRIEND,
+        MEMBER_CARD_BLOCK,
+      ]);
+      expect(card.actions[0]).toEqual({
+        key: MEMBER_CARD_CHAT,
+        label: 'Chat',
+        colourClass: '',
+        ariaLabel: 'Chat with captain.picard',
+      });
+    });
+
+    it('should offer no Chat while chat is off, or to anybody but a friend', () => {
+      const friend = buildRegistryMemberCard(
+        withRelationship(RelationshipStatus.FRIENDS),
+        true,
+      );
+      const stranger = buildRegistryMemberCard(
+        withRelationship(RelationshipStatus.NONE),
+        true,
+        undefined,
+        true,
+      );
+
+      expect(friend.actions.map(action => action.key)).toEqual([
+        MEMBER_CARD_UNFRIEND,
+        MEMBER_CARD_BLOCK,
+      ]);
+      expect(stranger.actions.map(action => action.key)).toEqual([
+        MEMBER_CARD_ADD_FRIEND,
+        MEMBER_CARD_BLOCK,
+      ]);
+    });
+
+    it('should offer Chat before Unfriend on the friends list when chat is on', () => {
+      expect(
+        buildFriendMemberCard(buildFriend(), undefined, true).actions.map(
+          action => action.key,
+        ),
+      ).toEqual([MEMBER_CARD_CHAT, MEMBER_CARD_UNFRIEND]);
+      expect(
+        buildFriendMemberCard(buildFriend()).actions.map(action => action.key),
+      ).toEqual([MEMBER_CARD_UNFRIEND]);
+    });
+  });
+
+  // FC-034: the dot beside the name, from the presence last read.
+  describe('withPresence', () => {
+    it('should mark a card online when its member is, and not otherwise', () => {
+      const card = buildRegistryMemberCard(buildProfileSummary(), false);
+
+      expect(card.online).toBe(false);
+      expect(withPresence(card, new Set(['captain.picard'])).online).toBe(true);
+      expect(withPresence(card, new Set(['somebody.else'])).online).toBe(false);
+    });
+  });
+
   describe('buildFriendMemberCard', () => {
     it('should track the friendship, not the member, so unfriending has an id', () => {
       const card = buildFriendMemberCard(buildFriend());
@@ -320,38 +374,40 @@ describe('memberCardBuilders', () => {
           username: 'captain.picard',
           imageUrl: 'https://cdn.example.com/pic/square100',
           link: ['/community/registry/profiles', 'captain.picard'],
-          stats: [
-            { label: 'Accounts', value: 2 },
-            { label: 'Captains', value: 11 },
-          ],
         }),
       );
+      // Shorter dates than the registry's: the list sits beside a side bar.
+      expect(card.gameDetails).toEqual([
+        { label: 'Accounts', value: '2' },
+        { label: 'Captains', value: '11' },
+        { label: 'Playing since', value: 'Mar 4, 2015' },
+      ]);
     });
 
     // Every card in the list is a friend, so the pill would be noise.
-    it('should carry no relationship badge, nor a row reserved for one', () => {
+    it('should carry no relationship badge', () => {
       const card = buildFriendMemberCard(buildFriend());
 
       expect(card.badge).toBeNull();
-      expect(card.reserveBadgeSlot).toBe(false);
     });
 
     it('should add when the friendship began', () => {
       const card = buildFriendMemberCard(buildFriend());
 
-      expect(card.meta).toEqual([
-        'Joined January 14, 2026',
-        'Last seen August 1, 2026',
-        'Playing since March 4, 2015',
-        'Friends since August 2, 2026',
+      expect(card.siteDetails).toEqual([
+        { label: 'Joined', value: 'Jan 14, 2026' },
+        { label: 'Last seen', value: 'Aug 1, 2026' },
+        { label: 'Friends since', value: 'Aug 2, 2026' },
       ]);
     });
 
     it('should omit the friends-since line when the date is missing', () => {
       const card = buildFriendMemberCard(buildFriend({ friendsSince: null }));
 
-      expect(card.meta).not.toContain(expect.stringContaining('Friends since'));
-      expect(card.meta).toHaveLength(3);
+      expect(card.siteDetails.map(detail => detail.label)).not.toContain(
+        'Friends since',
+      );
+      expect(card.siteDetails).toHaveLength(2);
     });
 
     it('should not link a friend who has made their record private', () => {

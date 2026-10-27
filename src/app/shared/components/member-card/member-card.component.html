@@ -1,69 +1,112 @@
 <!--
-  An LCARS panel card (13 October 2026): the member's username in a block of
-  the listing's rotation colour, and their avatar, counts and actions beneath.
+  An LCARS panel card in the shape of an account card (27 October 2026): the
+  username on a block of the listing's rotation colour, a green dot beside
+  it while the member is online, and the relationship pill at the block's
+  end; then the avatar, the details set out label beside value, and the
+  chevron that opens the record down the right; and the actions in a strip
+  across the foot, as an Admiralty panel carries its reward.
 -->
 <div class="member-card">
-  @if (vm.link) {
-    <a
-      class="member-card__heading"
-      [routerLink]="vm.link">
-      <ng-container [ngTemplateOutlet]="name"></ng-container>
-    </a>
-  } @else {
-    <div
-      class="member-card__heading"
-      [title]="vm.unlinkedTitle">
-      <ng-container [ngTemplateOutlet]="name"></ng-container>
-    </div>
-  }
+  <div
+    class="member-card__heading"
+    [attr.title]="vm.link ? null : vm.unlinkedTitle">
+    <span class="member-card__identity">
+      @if (vm.link) {
+        <a
+          class="member-card__link"
+          [routerLink]="vm.link">
+          <ng-container [ngTemplateOutlet]="name"></ng-container>
+        </a>
+      } @else {
+        <span class="member-card__link">
+          <ng-container [ngTemplateOutlet]="name"></ng-container>
+        </span>
+      }
 
-  <div class="member-card__body">
-    <app-entity-avatar
-      [src]="vm.imageUrl"
-      [alt]="vm.username"
-      [size]="100"></app-entity-avatar>
+      <!-- Online now, as far as the viewer may know (FC-034). -->
+      @if (vm.online) {
+        <span
+          class="member-card__online"
+          role="img"
+          aria-label="Online"
+          title="Online"></span>
+      }
+    </span>
 
-    @if (vm.reserveBadgeSlot) {
-      <span class="member-card__badge-slot">
-        @if (vm.badge) {
-          <span
-            class="member-card__badge"
-            [ngClass]="'member-card__badge--' + vm.badge.modifier">
-            {{ vm.badge.label }}
-          </span>
-        }
+    @if (vm.badge) {
+      <span
+        class="member-card__badge"
+        [ngClass]="'member-card__badge--' + vm.badge.modifier">
+        {{ vm.badge.label }}
       </span>
     }
+  </div>
 
-    @if (vm.stats.length > 0) {
-      <dl class="member-card__stats">
-        @for (stat of vm.stats; track stat.label) {
-          <dt>{{ stat.label }}</dt>
-          <dd>{{ stat.value }}</dd>
-        }
-      </dl>
-    }
+  <div class="member-card__body">
+    <div class="member-card__mark">
+      <app-entity-avatar
+        shape="square"
+        [src]="vm.imageUrl"
+        [alt]="vm.username"
+        [size]="100"></app-entity-avatar>
+    </div>
 
-    @for (line of vm.meta; track $index) {
-      <p class="member-card__meta">{{ line }}</p>
-    }
-
-    @if (vm.actions.length > 0) {
-      <div class="member-card__actions">
-        @for (cardAction of vm.actions; track cardAction.key) {
-          <button
-            type="button"
-            class="lcars-btn"
-            [ngClass]="cardAction.colourClass"
-            [disabled]="isActing"
-            [attr.aria-label]="cardAction.ariaLabel"
-            (click)="action.emit(cardAction.key)">
-            {{ cardAction.label }}
-          </button>
+    <!--
+      Two columns of details: what the member has done here, then what they
+      have in the game.
+    -->
+    @if (vm.siteDetails.length > 0 || vm.gameDetails.length > 0) {
+      <div class="member-card__columns">
+        @for (column of [vm.siteDetails, vm.gameDetails]; track $index) {
+          @if (column.length > 0) {
+            <dl class="member-card__details">
+              @for (detail of column; track detail.label) {
+                <div class="member-card__detail">
+                  <dt>{{ detail.label }}</dt>
+                  <dd>{{ detail.value }}</dd>
+                </div>
+              }
+            </dl>
+          }
         }
       </div>
     }
+
+    <!--
+      The narrow column an account card carries down its right, here with the
+      one control that opens the record. Omitted for a private record, which
+      cannot be opened.
+    -->
+    @if (vm.link) {
+      <div class="member-card__controls">
+        <a
+          class="member-card__view"
+          [routerLink]="vm.link"
+          [title]="viewLabel"
+          [attr.aria-label]="viewLabel"
+          ><i
+            class="fa-solid fa-chevron-right"
+            aria-hidden="true"></i
+        ></a>
+      </div>
+    }
   </div>
+
+  @if (vm.actions.length > 0) {
+    <div class="member-card__actions">
+      @for (cardAction of vm.actions; track cardAction.key) {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto"
+          [ngClass]="cardAction.colourClass"
+          [disabled]="isActing"
+          [attr.aria-label]="cardAction.ariaLabel"
+          (click)="action.emit(cardAction.key)">
+          {{ cardAction.label }}
+        </button>
+      }
+    </div>
+  }
 </div>
 
 <!--

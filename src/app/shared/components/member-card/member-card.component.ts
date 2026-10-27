@@ -26,4 +26,9 @@ export class MemberCardComponent {
 
   /** Emits the `key` of the action button the viewer activated. */
   @Output() readonly action = new EventEmitter<string>();
+
+  /** What the chevron down the right does, for its title and its label. */
+  get viewLabel(): string {
+    return `View ${this.vm.username}`;
+  }
 }

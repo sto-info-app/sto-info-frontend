@@ -2,6 +2,7 @@ import { formatDate } from '@angular/common';
 import {
   MemberCardAction,
   MemberCardBadge,
+  MemberCardDetail,
   MemberCardVm,
 } from 'src/app/shared/components/member-card/member-card.model';
 import {
@@ -13,7 +14,21 @@ import { RegistryProfileSummary } from './models/registry.models';
 import { buildRegistryProfileLink } from './registry/registry-card.builders';
 
 /** Action keys emitted by the member cards on the community pages. */
+/** How a card writes its dates: the month in full, or shortened. */
+type MemberDateFormat = 'longDate' | 'mediumDate';
+
+/** The registry has the width for "February 24, 2026". */
+const REGISTRY_DATE_FORMAT: MemberDateFormat = 'longDate';
+
+/**
+ * The friends list sits beside a side bar that takes a third of the page, so
+ * its dates are shortened to "Feb 24, 2026" rather than wrap to a second
+ * line.
+ */
+const FRIEND_DATE_FORMAT: MemberDateFormat = 'mediumDate';
+
 export const MEMBER_CARD_ADD_FRIEND = 'add-friend';
+export const MEMBER_CARD_CHAT = 'chat';
 export const MEMBER_CARD_ACCEPT_REQUEST = 'accept-request';
 export const MEMBER_CARD_UNFRIEND = 'unfriend';
 export const MEMBER_CARD_BLOCK = 'block';
@@ -64,6 +79,7 @@ export function buildRegistryMemberCard(
   profile: RegistryProfileSummary,
   canAct: boolean,
   timezone?: string,
+  chatOffered = false,
 ): MemberCardVm {
   const status = profile.relationship?.status ?? null;
 
@@ -74,13 +90,14 @@ export function buildRegistryMemberCard(
       buildRegistryProfileLink(profile.username),
     ),
     badge: status ? (RELATIONSHIP_BADGES[status] ?? null) : null,
-    // Reserved whenever the viewer has relationships at all, so the rows below
-    // line up across cards that do and do not carry a badge. Dropped entirely
-    // for an anonymous visitor, where no card can ever have one and the
-    // reserved row would just be a gap.
-    reserveBadgeSlot: status !== null,
-    meta: buildActivityMeta(profile, timezone),
-    actions: buildRegistryActions(profile.username, status, canAct),
+    siteDetails: buildSiteDetails(profile, timezone),
+    gameDetails: buildGameDetails(profile),
+    actions: buildRegistryActions(
+      profile.username,
+      status,
+      canAct,
+      chatOffered,
+    ),
   };
 }
 
@@ -98,6 +115,7 @@ export function buildRegistryMemberCard(
 export function buildFriendMemberCard(
   friend: Friend,
   timezone?: string,
+  chatOffered = false,
 ): MemberCardVm {
   const member = friend.member;
 
@@ -110,33 +128,28 @@ export function buildFriendMemberCard(
       member.publiclyVisible ? buildRegistryProfileLink(member.username) : null,
     ),
     badge: null,
-    reserveBadgeSlot: false,
-    meta: buildFriendMeta(friend, timezone),
-    actions: [buildUnfriendAction(member.username)],
+    // The friends list sits beside a side bar, where a long date wraps.
+    siteDetails: buildFriendSiteDetails(friend, timezone),
+    gameDetails: buildGameDetails(member, FRIEND_DATE_FORMAT),
+    actions: [
+      ...(chatOffered ? [buildChatAction(member.username)] : []),
+      buildUnfriendAction(member.username),
+    ],
   };
 }
 
-/** The badge a friend who is online wears (FC-034). */
-export const MEMBER_CARD_ONLINE_BADGE = { label: 'Online', modifier: 'online' };
-
 /**
- * Marks a friend's card with whether they are online (FC-034).
+ * Marks a member's card with whether they are online (FC-034).
  *
  * @param card - The card.
  * @param online - Who is online, by username.
- * @returns The card, with the Online badge or without.
+ * @returns The card, marked online or not.
  */
 export function withPresence(
   card: MemberCardVm,
   online: ReadonlySet<string>,
 ): MemberCardVm {
-  const isOnline = online.has(card.username);
-
-  return {
-    ...card,
-    badge: isOnline ? MEMBER_CARD_ONLINE_BADGE : null,
-    reserveBadgeSlot: isOnline,
-  };
+  return { ...card, online: online.has(card.username) };
 }
 
 /**
@@ -151,18 +164,47 @@ function buildMemberCardBase(
   id: string,
   member: MemberCardSource,
   link: string[] | null,
-): Omit<MemberCardVm, 'badge' | 'reserveBadgeSlot' | 'meta' | 'actions'> {
+): Omit<MemberCardVm, 'badge' | 'siteDetails' | 'gameDetails' | 'actions'> {
   return {
     id,
     username: member.username,
     imageUrl: member.profilePicture100,
     link,
     unlinkedTitle: 'This officer has made their record private.',
-    stats: [
-      { label: 'Accounts', value: member.publicAccountCount },
-      { label: 'Captains', value: member.publicCharacterCount },
-    ],
+    // Until presence is read: see `withPresence`.
+    online: false,
   };
+}
+
+/**
+ * What the member has in the game: their public accounts and Captains
+ * counted, and how long they have played.
+ *
+ * @param member - The member.
+ * @returns The game column.
+ */
+function buildGameDetails(
+  member: MemberCardSource,
+  format: MemberDateFormat = REGISTRY_DATE_FORMAT,
+): MemberCardDetail[] {
+  const details = [
+    { label: 'Accounts', value: String(member.publicAccountCount) },
+    { label: 'Captains', value: String(member.publicCharacterCount) },
+  ];
+
+  // Playing since is a day the member typed, stored as midnight UTC. Rendering
+  // it in another zone would move it to the day before, so it keeps the
+  // browser's zone rather than the reader's chosen one — the two agree for
+  // everybody at or east of UTC, and neither is right for a value that should
+  // not have a time at all.
+  if (member.playingSince) {
+    details.push({
+      label: 'Playing since',
+      value: formatMemberDate(member.playingSince, undefined, format),
+    });
+  }
+
+  return details;
 }
 
 /**
@@ -171,47 +213,55 @@ function buildMemberCardBase(
  *
  * @param member - The member the card represents.
  * @param timezone - The zone to render instants in; the browser's when absent.
- * @returns The meta lines.
+ * @returns The dated details.
  */
-function buildActivityMeta(
+function buildSiteDetails(
   member: MemberCardSource,
   timezone?: string,
-): string[] {
-  const meta = [`Joined ${formatMemberDate(member.joinedAt, timezone)}`];
+  format: MemberDateFormat = REGISTRY_DATE_FORMAT,
+): MemberCardDetail[] {
+  const details = [
+    {
+      label: 'Joined',
+      value: formatMemberDate(member.joinedAt, timezone, format),
+    },
+  ];
 
   if (member.lastActiveAt) {
-    meta.push(`Last seen ${formatMemberDate(member.lastActiveAt, timezone)}`);
+    details.push({
+      label: 'Last seen',
+      value: formatMemberDate(member.lastActiveAt, timezone, format),
+    });
   }
 
-  // Playing since is a day the member typed, stored as midnight UTC. Rendering
-  // it in another zone would move it to the day before, so it keeps the
-  // browser's zone rather than the reader's chosen one — the two agree for
-  // everybody at or east of UTC, and neither is right for a value that should
-  // not have a time at all.
-  if (member.playingSince) {
-    meta.push(`Playing since ${formatMemberDate(member.playingSince)}`);
-  }
-
-  return meta;
+  return details;
 }
 
 /**
- * Builds the meta lines for a friend, adding when the friendship began.
+ * Builds the dated details for a friend, adding when the friendship began.
  *
  * @param friend - The accepted friendship.
  * @param timezone - The zone to render instants in; the browser's when absent.
- * @returns The meta lines.
+ * @returns The dated details.
  */
-function buildFriendMeta(friend: Friend, timezone?: string): string[] {
-  const meta = buildActivityMeta(friend.member, timezone);
+function buildFriendSiteDetails(
+  friend: Friend,
+  timezone?: string,
+): MemberCardDetail[] {
+  const details = buildSiteDetails(friend.member, timezone, FRIEND_DATE_FORMAT);
 
   if (friend.friendsSince) {
-    meta.push(
-      `Friends since ${formatMemberDate(friend.friendsSince, timezone)}`,
-    );
+    details.push({
+      label: 'Friends since',
+      value: formatMemberDate(
+        friend.friendsSince,
+        timezone,
+        FRIEND_DATE_FORMAT,
+      ),
+    });
   }
 
-  return meta;
+  return details;
 }
 
 /**
@@ -222,8 +272,12 @@ function buildFriendMeta(friend: Friend, timezone?: string): string[] {
  * @param timezone - The zone to render in; the browser's when absent.
  * @returns The formatted date.
  */
-function formatMemberDate(value: string, timezone?: string): string {
-  return formatDate(value, 'longDate', 'en-US', timezone);
+function formatMemberDate(
+  value: string,
+  timezone?: string,
+  format: MemberDateFormat = REGISTRY_DATE_FORMAT,
+): string {
+  return formatDate(value, format, 'en-US', timezone);
 }
 
 /**
@@ -242,6 +296,7 @@ function buildRegistryActions(
   username: string,
   status: RelationshipStatus | null,
   canAct: boolean,
+  chatOffered: boolean,
 ): MemberCardAction[] {
   if (!canAct) {
     return [];
@@ -249,7 +304,11 @@ function buildRegistryActions(
 
   switch (status) {
     case RelationshipStatus.FRIENDS:
-      return [buildUnfriendAction(username), buildBlockAction(username)];
+      return [
+        ...(chatOffered ? [buildChatAction(username)] : []),
+        buildUnfriendAction(username),
+        buildBlockAction(username),
+      ];
 
     case RelationshipStatus.REQUEST_RECEIVED:
       return [
@@ -285,6 +344,21 @@ function buildRegistryActions(
  * @param username - The member the button acts on.
  * @returns The action.
  */
+/**
+ * Opens chat with a friend (FC-033), offered only while chat is switched on.
+ *
+ * @param username - The friend.
+ * @returns The action, in the card's own colour: it changes nothing.
+ */
+function buildChatAction(username: string): MemberCardAction {
+  return {
+    key: MEMBER_CARD_CHAT,
+    label: 'Chat',
+    colourClass: '',
+    ariaLabel: `Chat with ${username}`,
+  };
+}
+
 function buildUnfriendAction(username: string): MemberCardAction {
   return {
     key: MEMBER_CARD_UNFRIEND,

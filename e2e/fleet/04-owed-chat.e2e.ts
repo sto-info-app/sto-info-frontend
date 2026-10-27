@@ -180,7 +180,7 @@ function presenceOf(page: Page, name: string): [string, Locator, Locator][] {
 
   return [
     ['/chat', chat, chat.getByText('(online)', { exact: true })],
-    ['/community/friends', card, card.getByText('Online', { exact: true })],
+    ['/community/friends', card, card.getByRole('img', { name: 'Online' })],
     [
       `/community/registry/profiles/${name}`,
       profile,

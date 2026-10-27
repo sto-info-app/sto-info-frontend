@@ -3,11 +3,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   NgZone,
   OnDestroy,
   OnInit,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, Subscription, take } from 'rxjs';
@@ -20,10 +22,13 @@ import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loadi
 import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
 import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
 import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import { ChatService } from 'src/app/fleet/chat/chat.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CommunityService } from '../../community.service';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import {
+  MEMBER_CARD_CHAT,
   MEMBER_CARD_UNFRIEND,
   buildFriendMemberCard,
   withPresence,
@@ -112,9 +117,18 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _presence = inject(ChatPresenceService);
+  private readonly _chat = inject(ChatService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
+  private readonly _destroyRef = inject(DestroyRef);
 
   /** The friends shown who are online, read again each minute (FC-034). */
   private _presenceWatch: Subscription | null = null;
+
+  /** Who of the friends shown is online, as the last reading had it. */
+  private _online: ReadonlySet<string> = new Set();
+
+  /** Whether chat is switched on, for the Chat button on each card (FC-033). */
+  isChatOffered = false;
 
   tab: FriendsTab = 'friends';
   isLoading = false;
@@ -145,6 +159,17 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
    * the viewer navigates with the back button.
    */
   ngOnInit(): void {
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(features => {
+        this.isChatOffered = features.chatEnabled;
+        this.buildFriendCards();
+      });
+
     this._route.queryParamMap
       .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe(params => {
@@ -236,18 +261,29 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
       result => {
         this.friends = result?.items ?? [];
         this.total = result?.total ?? 0;
-        this.friendVms = this.friends.map(friend => ({
-          id: friend.id,
-          friend,
-          card: buildFriendMemberCard(
-            friend,
-            this._userSettingsService.displayTimezone(),
-          ),
-        }));
+        this.buildFriendCards();
         this.watchPresence();
       },
       'Something went wrong loading your friends.',
     );
+  }
+
+  /**
+   * Builds a card for each friend listed, marked online as last read.
+   */
+  private buildFriendCards(): void {
+    this.friendVms = this.friends.map(friend => ({
+      id: friend.id,
+      friend,
+      card: withPresence(
+        buildFriendMemberCard(
+          friend,
+          this._userSettingsService.displayTimezone(),
+          this.isChatOffered,
+        ),
+        this._online,
+      ),
+    }));
   }
 
   /**
@@ -266,6 +302,7 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
       .watch(this.friends.map(friend => friend.member.username))
       .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe(online => {
+        this._online = online;
         this.friendVms = this.friendVms.map(vm => ({
           ...vm,
           card: withPresence(vm.card, online),
@@ -332,7 +369,33 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
   onMemberCardAction(friend: Friend, actionKey: string): void {
     if (actionKey === MEMBER_CARD_UNFRIEND) {
       this.removeFriend(friend);
+    } else if (actionKey === MEMBER_CARD_CHAT) {
+      this.openChat(friend);
     }
+  }
+
+  /**
+   * Opens chat with a friend (FC-033), by the friendship, and goes to the
+   * conversation.
+   *
+   * @param friend - The friend.
+   */
+  openChat(friend: Friend): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this._chat
+      .open({ friendshipId: friend.id })
+      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: conversation => {
+          this.isLoading = false;
+          void this._router.navigate(['/chat', 'direct', conversation.id]);
+        },
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage = 'The conversation could not be opened.';
+        },
+      });
   }
 
   /**

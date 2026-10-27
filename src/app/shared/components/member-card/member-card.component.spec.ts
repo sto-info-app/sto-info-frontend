@@ -17,12 +17,12 @@ function buildVm(overrides: Partial<MemberCardVm> = {}): MemberCardVm {
     link: ['/community/registry/profiles', 'captain.picard'],
     unlinkedTitle: 'This officer has made their record private.',
     badge: null,
-    reserveBadgeSlot: false,
-    stats: [
-      { label: 'Accounts', value: 2 },
-      { label: 'Captains', value: 11 },
+    online: false,
+    siteDetails: [{ label: 'Joined', value: 'January 14, 2026' }],
+    gameDetails: [
+      { label: 'Accounts', value: '2' },
+      { label: 'Captains', value: '11' },
     ],
-    meta: ['Joined January 14, 2026'],
     actions: [],
     ...overrides,
   };
@@ -54,6 +54,16 @@ describe('MemberCardComponent', () => {
   }
 
   /**
+   * Finds one element in the card.
+   *
+   * @param selector - What to find.
+   * @returns The element, or null.
+   */
+  function find<T extends Element>(selector: string): T | null {
+    return (fixture.nativeElement as HTMLElement).querySelector<T>(selector);
+  }
+
+  /**
    * The text of every action button on the card.
    *
    * @returns The button labels.
@@ -69,19 +79,15 @@ describe('MemberCardComponent', () => {
       render(buildVm());
 
       expect(fixture.nativeElement.textContent).toContain('captain.picard');
-      expect(
-        fixture.nativeElement.querySelector('app-entity-avatar'),
-      ).toBeTruthy();
+      expect(find('app-entity-avatar')).toBeTruthy();
     });
 
     it('should link a member whose record can be opened', () => {
       render(buildVm());
 
-      const link = fixture.nativeElement.querySelector(
-        'a.member-card__heading',
-      );
-      expect(link).toBeTruthy();
-      expect(link.getAttribute('href')).toBe(
+      const link = find<HTMLAnchorElement>('a.member-card__link');
+
+      expect(link?.getAttribute('href')).toBe(
         '/community/registry/profiles/captain.picard',
       );
     });
@@ -89,108 +95,130 @@ describe('MemberCardComponent', () => {
     it('should carry the username alone on the heading block', () => {
       render(buildVm());
 
-      const heading = fixture.nativeElement.querySelector(
-        '.member-card__heading',
+      expect(find('.member-card__heading')?.textContent?.trim()).toBe(
+        'captain.picard',
       );
-      expect(heading.textContent.trim()).toBe('captain.picard');
-      expect(heading.querySelector('app-entity-avatar')).toBeNull();
-      expect(
-        fixture.nativeElement.querySelector(
-          '.member-card__body app-entity-avatar',
-        ),
-      ).toBeTruthy();
+      expect(find('.member-card__heading app-entity-avatar')).toBeNull();
+      expect(find('.member-card__body app-entity-avatar')).toBeTruthy();
     });
 
     it('should not link a member whose record has gone private', () => {
       render(buildVm({ link: null }));
 
-      expect(fixture.nativeElement.querySelector('a')).toBeNull();
+      expect(find('a')).toBeNull();
       expect(fixture.nativeElement.textContent).toContain('captain.picard');
     });
 
     it('should explain why a private record cannot be opened', () => {
       render(buildVm({ link: null }));
 
-      expect(
-        fixture.nativeElement
-          .querySelector('.member-card__heading')
-          .getAttribute('title'),
-      ).toBe('This officer has made their record private.');
+      expect(find('.member-card__heading')?.getAttribute('title')).toBe(
+        'This officer has made their record private.',
+      );
+    });
+
+    it('should carry no such explanation on a record that opens', () => {
+      render(buildVm());
+
+      expect(find('.member-card__heading')?.getAttribute('title')).toBeNull();
     });
   });
 
+  // The shape of an account card (27 October 2026): the avatar square at the
+  // left, the details beside it, and the chevron that opens the record down
+  // the right.
   describe('body', () => {
-    it('should render each stat as a label and value', () => {
+    it('should set the avatar square beside the details', () => {
       render(buildVm());
 
-      const labels = [
-        ...fixture.nativeElement.querySelectorAll('.member-card__stats dt'),
-      ].map((label: HTMLElement) => label.textContent?.trim());
-      const values = [
-        ...fixture.nativeElement.querySelectorAll('.member-card__stats dd'),
-      ].map((value: HTMLElement) => value.textContent?.trim());
-
-      expect(labels).toEqual(['Accounts', 'Captains']);
-      expect(values).toEqual(['2', '11']);
+      expect(find('.member-card__mark .entity-avatar--square')).toBeTruthy();
     });
 
-    it('should omit the stats row when there is nothing to count', () => {
-      render(buildVm({ stats: [] }));
+    it('should render each detail as a label and value, the site’s column first', () => {
+      render(buildVm());
 
-      expect(
-        fixture.nativeElement.querySelector('.member-card__stats'),
-      ).toBeNull();
-    });
-
-    it('should render a line per meta entry', () => {
-      render(
-        buildVm({
-          meta: ['Joined January 14, 2026', 'Last seen August 1, 2026'],
-        }),
+      const columns = [
+        ...fixture.nativeElement.querySelectorAll('.member-card__details'),
+      ].map((column: HTMLElement) =>
+        [...column.querySelectorAll('dt, dd')].map(cell =>
+          cell.textContent?.trim(),
+        ),
       );
 
-      const meta = [
-        ...fixture.nativeElement.querySelectorAll('.member-card__meta'),
-      ].map((line: HTMLElement) => line.textContent?.trim());
-
-      expect(meta).toEqual([
-        'Joined January 14, 2026',
-        'Last seen August 1, 2026',
+      expect(columns).toEqual([
+        ['Joined', 'January 14, 2026'],
+        ['Accounts', '2', 'Captains', '11'],
       ]);
+    });
+
+    it('should draw only the column that has something to say', () => {
+      render(buildVm({ siteDetails: [] }));
+
+      expect(
+        fixture.nativeElement.querySelectorAll('.member-card__details'),
+      ).toHaveLength(1);
+    });
+
+    it('should omit the details when there is nothing to say', () => {
+      render(buildVm({ siteDetails: [], gameDetails: [] }));
+
+      expect(find('.member-card__columns')).toBeNull();
+    });
+
+    it('should open the record from the chevron, named for its reader', () => {
+      render(buildVm());
+
+      const view = find<HTMLAnchorElement>('.member-card__view');
+
+      expect(view?.getAttribute('href')).toBe(
+        '/community/registry/profiles/captain.picard',
+      );
+      expect(view?.getAttribute('aria-label')).toBe('View captain.picard');
+      expect(view?.getAttribute('title')).toBe('View captain.picard');
+      expect(view?.querySelector('i')?.className).toBe(
+        'fa-solid fa-chevron-right',
+      );
+    });
+
+    it('should offer no chevron for a record that cannot be opened', () => {
+      render(buildVm({ link: null }));
+
+      expect(find('.member-card__controls')).toBeNull();
+    });
+  });
+
+  // FC-034: a green dot beside the name while the member is online.
+  describe('presence', () => {
+    it('should mark a member who is online with a dot beside the name', () => {
+      render(buildVm({ online: true }));
+
+      const dot = find('.member-card__identity .member-card__online');
+
+      expect(dot?.getAttribute('aria-label')).toBe('Online');
+      expect(dot?.getAttribute('title')).toBe('Online');
+    });
+
+    it('should show no dot for a member who is not online to the viewer', () => {
+      render(buildVm());
+
+      expect(find('.member-card__online')).toBeNull();
     });
   });
 
   describe('badge', () => {
-    it('should render the badge it was given', () => {
-      render(
-        buildVm({
-          reserveBadgeSlot: true,
-          badge: { label: 'Friend', modifier: 'friend' },
-        }),
-      );
+    it('should render the badge at the end of the heading block', () => {
+      render(buildVm({ badge: { label: 'Friend', modifier: 'friend' } }));
 
-      const badge = fixture.nativeElement.querySelector('.member-card__badge');
-      expect(badge.textContent.trim()).toBe('Friend');
-      expect(badge.className).toContain('member-card__badge--friend');
+      const badge = find('.member-card__heading .member-card__badge');
+
+      expect(badge?.textContent?.trim()).toBe('Friend');
+      expect(badge?.className).toContain('member-card__badge--friend');
     });
 
-    it('should reserve the row when asked, so cards stay aligned', () => {
-      render(buildVm({ reserveBadgeSlot: true }));
-
-      expect(
-        fixture.nativeElement.querySelector('.member-card__badge-slot'),
-      ).toBeTruthy();
-      expect(
-        fixture.nativeElement.querySelector('.member-card__badge'),
-      ).toBeNull();
-    });
-
-    it('should drop the row entirely when no card can carry a badge', () => {
+    it('should render no badge when there is nothing to say', () => {
       render(buildVm());
 
-      expect(
-        fixture.nativeElement.querySelector('.member-card__badge-slot'),
-      ).toBeNull();
+      expect(find('.member-card__badge')).toBeNull();
     });
   });
 
@@ -208,19 +236,20 @@ describe('MemberCardComponent', () => {
       ariaLabel: 'Block captain.picard',
     };
 
-    it('should render no actions row when there is nothing to offer', () => {
+    it('should render no actions strip when there is nothing to offer', () => {
       render(buildVm());
 
-      expect(
-        fixture.nativeElement.querySelector('.member-card__actions'),
-      ).toBeNull();
+      expect(find('.member-card__actions')).toBeNull();
       expect(actionLabels()).toEqual([]);
     });
 
-    it('should render a button per action, in order', () => {
+    it('should render a button per action, in order, in a strip under the body', () => {
       render(buildVm({ actions: [unfriend, block] }));
 
       expect(actionLabels()).toEqual(['Unfriend', 'Block']);
+      expect(find('.member-card__body')?.nextElementSibling?.className).toBe(
+        'member-card__actions',
+      );
     });
 
     it('should colour each button as its action asks', () => {

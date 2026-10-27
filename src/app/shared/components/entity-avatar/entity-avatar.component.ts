@@ -8,6 +8,9 @@ import {
 /** The avatar sizes this component renders. */
 export type EntityAvatarSize = 100 | 300;
 
+/** Round, as a profile picture is shown, or square, as a listing's image is. */
+export type EntityAvatarShape = 'round' | 'square';
+
 /**
  * Renders a profile picture with a size-matched placeholder fallback.
  *
@@ -40,6 +43,8 @@ export class EntityAvatarComponent {
 
   /** Which placeholder variant to fall back to. */
   @Input() size: EntityAvatarSize = 100;
+
+  @Input() shape: EntityAvatarShape = 'round';
 
   /** Set once the supplied image has failed to load. */
   hasFailed = false;

@@ -1208,13 +1208,12 @@ button.lcars-btn-auto {
   padding: 1rem 0;
 }
 
-// Responsive card grid (registry members and friends).
+// The registry's members and the friends list: one card a row, in the shape
+// of the account listing, so a card has the width its details and actions
+// need.
 .member-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
-
-  // Every card fills its track, so a row of cards is uniform height whatever
-  // mix of badges, meta lines and actions each one carries.
+  grid-template-columns: 1fr;
   align-items: stretch;
   gap: 1rem;
   margin: 0;

@@ -1253,6 +1253,7 @@ const SETTINGS_TOPIC: HelpTopic = {
             `${PRESENCE_LABEL['FRIENDS']} — the default.`,
             `${PRESENCE_LABEL['FLEETS_AND_ARMADAS']} — your friends, and anybody sharing a Fleet with you or in a Fleet of the same Armada.`,
             'Whatever you choose, only people who can already see your profile are ever included, and never anybody you have blocked or who has blocked you.',
+            'Whoever may see it finds a green dot beside your username on the Profiles and Friends cards, “(online)” beside you in Chat, and “Online” on your profile.',
           ],
         ),
         guideSection('Appear offline', [

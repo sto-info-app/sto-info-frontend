@@ -105,8 +105,14 @@ describe('calendar date rendering', () => {
         'Pacific/Auckland',
       );
 
-      expect(card.meta).toContain('Playing since March 4, 2015');
-      expect(card.meta).toContain('Friends since January 2, 2020');
+      expect(card.gameDetails).toContainEqual({
+        label: 'Playing since',
+        value: 'Mar 4, 2015',
+      });
+      expect(card.siteDetails).toContainEqual({
+        label: 'Friends since',
+        value: 'Jan 2, 2020',
+      });
     });
   });
 });
