@@ -127,9 +127,94 @@
             }
           </select>
         </div>
+        <div class="lcars-input-container">
+          <label for="contribution-group">Group by</label>
+          <select
+            #group
+            id="contribution-group"
+            (change)="onGroupBy(group.value)">
+            <option
+              value="character"
+              [selected]="groupBy() === 'character'">
+              Character
+            </option>
+            <option
+              value="account"
+              [selected]="groupBy() === 'account'">
+              Account
+            </option>
+          </select>
+        </div>
       </div>
 
-      @if (members.length === 0) {
+      @if (groupBy() === 'account') {
+        <!-- The same rises summed by account handle (FC-058). -->
+        @if (shown.accounts; as accounts) {
+          @if (accounts.length === 0) {
+            <p class="fleet-community-empty">
+              Nobody’s contribution rose or reset in that interval.
+            </p>
+          } @else {
+            <table class="fleet-community-table">
+              <caption>
+                Each account’s rises in that interval, summed over its
+                characters, largest first
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Account</th>
+                  <th
+                    scope="col"
+                    class="fleet-community-table__number">
+                    Characters
+                  </th>
+                  <th
+                    scope="col"
+                    class="fleet-community-table__number">
+                    Rise
+                  </th>
+                  <th
+                    scope="col"
+                    class="fleet-community-table__number">
+                    Resets
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (account of accounts; track account.accountHandle) {
+                  <tr>
+                    <td data-label="Account">
+                      {{ account.accountHandle }}
+                      @if (account.acrossGap > 0) {
+                        <span class="fleet-report-note">
+                          {{ account.acrossGap }}
+                          {{ account.acrossGap === 1 ? 'rise' : 'rises' }}
+                          across a gap: in no interval’s total
+                        </span>
+                      }
+                    </td>
+                    <td
+                      data-label="Characters"
+                      class="fleet-community-table__number">
+                      {{ account.characters }}
+                    </td>
+                    <td
+                      data-label="Rise"
+                      class="fleet-community-table__number">
+                      {{ account.delta | reportFigure: cohort }}
+                    </td>
+                    <td
+                      data-label="Resets"
+                      class="fleet-community-table__number">
+                      {{ account.resets }}
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        }
+      } @else if (members.length === 0) {
         <p class="fleet-community-empty">
           Nobody’s contribution rose or reset in that interval.
         </p>

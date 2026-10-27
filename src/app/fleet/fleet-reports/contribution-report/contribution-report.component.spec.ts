@@ -8,6 +8,7 @@ import {
   textOf,
 } from 'src/app/fleet/fleet-reports/fleet-report.testing';
 import {
+  ContributionAccount,
   ContributionInterval,
   ContributionMember,
   FleetContributionReport,
@@ -68,6 +69,15 @@ const RESET: ContributionMember = {
   acrossGap: false,
 };
 
+/** Kell's account, with a second character whose total reset (FC-058). */
+const KELL_ACCOUNT: ContributionAccount = {
+  accountHandle: '@fixture003',
+  characters: 2,
+  delta: '1000',
+  resets: 1,
+  acrossGap: 1,
+};
+
 describe('ContributionReportComponent', () => {
   let fixture: ComponentFixture<ContributionReportComponent>;
 
@@ -85,6 +95,7 @@ describe('ContributionReportComponent', () => {
       intervals: [interval(1, 15), interval(15, 29, { partial: true })],
       at: exportOn(29),
       members: [KELL, RESET],
+      accounts: [KELL_ACCOUNT],
       ...overrides,
     };
 
@@ -105,6 +116,21 @@ describe('ContributionReportComponent', () => {
   /** The detail interval's control. */
   const select = (): HTMLSelectElement | null =>
     (fixture.nativeElement as HTMLElement).querySelector('#contribution-at');
+
+  /** The grouping control. */
+  const grouping = (): HTMLSelectElement | null =>
+    (fixture.nativeElement as HTMLElement).querySelector('#contribution-group');
+
+  /**
+   * Groups the detail as the reader does.
+   *
+   * @param by - Character or account.
+   */
+  function group(by: string): void {
+    (grouping() as HTMLSelectElement).value = by;
+    grouping()?.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+  }
 
   it('lists each interval’s rise, and how many members it rests on', () => {
     render();
@@ -196,6 +222,44 @@ describe('ContributionReportComponent', () => {
     expect(asked).toEqual(['import-15']);
   });
 
+  // FC-058: a player's characters are each listed on their own, so the
+  // reader can have them summed by handle instead.
+  it('sums each account’s rises over its characters when grouped by account', () => {
+    render();
+    group('account');
+
+    expect(cellsOf(tables()[1])).toEqual([
+      [
+        '@fixture003 1 rise across a gap: in no interval’s total',
+        '2',
+        '1,000',
+        '1',
+      ],
+    ]);
+    expect(text()).toContain('summed over its characters');
+    expect(text()).not.toContain('Kell Marr');
+    expect(select()).not.toBeNull();
+  });
+
+  it('lists the characters again when grouped by character', () => {
+    render();
+    group('account');
+    group('character');
+
+    expect(text()).toContain('Kell Marr');
+    expect(text()).not.toContain('summed over its characters');
+  });
+
+  it('says so when no account’s contribution moved in the detail interval', () => {
+    render({ members: [], accounts: [] });
+    group('account');
+
+    expect(text()).toContain(
+      'Nobody’s contribution rose or reset in that interval.',
+    );
+    expect(tables()).toHaveLength(1);
+  });
+
   it('names nobody for an aggregate audience, and writes hidden figures as < 5', () => {
     render({
       ...reportHeader(FleetReport.CONTRIBUTION, FleetReportView.AGGREGATE),
@@ -209,6 +273,7 @@ describe('ContributionReportComponent', () => {
       ],
       at: null,
       members: null,
+      accounts: null,
     });
 
     expect(cellsOf(tables()[0])[0]).toEqual([
@@ -250,7 +315,7 @@ describe('ContributionReportComponent', () => {
   });
 
   it('says so when the span holds no interval', () => {
-    render({ intervals: [], at: null, members: null });
+    render({ intervals: [], at: null, members: null, accounts: null });
 
     expect(text()).toContain('There are not two exports in this span');
     expect(tables()).toEqual([]);

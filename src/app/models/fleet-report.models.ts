@@ -194,11 +194,30 @@ export interface ContributionMember {
   acrossGap: boolean;
 }
 
+/**
+ * One account's rises and resets in the detail interval, summed over its
+ * characters (FC-058).
+ */
+export interface ContributionAccount {
+  /** The handle, as the later export wrote it. */
+  accountHandle: string;
+  /** How many of its characters rose or reset. */
+  characters: number;
+  /** The sum of its characters' rises; '0' where every one reset. */
+  delta: string;
+  /** How many of its characters reset. */
+  resets: number;
+  /** How many of its rises are across a gap, counted in no interval's total. */
+  acrossGap: number;
+}
+
 /** Contribution, oldest interval first. */
 export interface FleetContributionReport extends FleetReportHeader {
   intervals: ContributionInterval[];
   at: RosterExportRef | null;
   members: ContributionMember[] | null;
+  /** The members summed by account handle, largest rise first. Full view only. */
+  accounts: ContributionAccount[] | null;
 }
 
 /** One report's audience now. */

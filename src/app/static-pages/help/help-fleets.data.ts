@@ -1314,14 +1314,14 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
       'How to choose the span': [
         'A roster report says which revision of the history it stands on and how many exports it covers. It speaks only for those exports, never for the days between them. Choose From and To, then Show, to narrow it; Every export goes back to the whole history.',
         'Attendance, Recruitment and Holdings cover the last twelve months unless you choose otherwise, and The last twelve months puts that back.',
-        'Where you are shown a report in full, Tenure and Contribution also list members, for the export you choose under “Members at” or the interval under “Rises between”.',
+        'Where you are shown a report in full, Tenure and Contribution also list members, for the export you choose under “Members at” or the interval under “Rises between”. Contribution’s list is grouped under “Group by”: by Character, a row each, or by Account, where each handle’s row sums the rises of every one of its characters in that interval, and says how many of them rose or reset.',
       ],
       'How to read contribution figures': [
         'An export gives each member one running total, so a report can say how far it rose between two exports, never how it was spread over the days between. A fall is a reset, and somebody who left and came back starts from a new baseline.',
         'Each interval says how many members its total rests on: Known, Reset, New and Unknown. A rise says how far a total went up, not what was given or how often.',
       ],
       'How to download a report': [
-        'Choose Download CSV beside the span. The file holds the tables as you are shown them, over the span you chose, after a few lines naming the report, the Fleet and the span. Every time in it is in UTC, and a figure your view hides is written “< 5”.',
+        'Choose Download CSV beside the span. The file holds the tables as you are shown them, over the span you chose, after a few lines naming the report, the Fleet and the span; Contribution’s holds both the member and the account tables. Every time in it is in UTC, and a figure your view hides is written “< 5”.',
         'A cell a spreadsheet might run as a formula starts with an apostrophe, so every @handle carries one. It is text, not a calculation.',
       ],
       'How to choose who sees each report': [

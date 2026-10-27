@@ -5,6 +5,7 @@ import {
   inject,
   input,
   output,
+  signal,
 } from '@angular/core';
 
 import { reportChartOf } from 'src/app/fleet/fleet-reports/report-chart.utils';
@@ -24,6 +25,9 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
  * for one interval, each member's rise, largest first, then each reset.
  * The chart draws each interval's total.
  */
+/** How the detail is grouped: a row a character, or a row an account handle. */
+export type ContributionGrouping = 'character' | 'account';
+
 @Component({
   selector: 'app-contribution-report',
   templateUrl: './contribution-report.component.html',
@@ -48,6 +52,12 @@ export class ContributionReportComponent {
   /** Asks for the rises in another interval, by the import ending it. */
   readonly atChange = output<string>();
 
+  /**
+   * Whether the detail lists each character, or sums them by account handle
+   * (FC-058). The reader's choice alone: both lists come with the report.
+   */
+  readonly groupBy = signal<ContributionGrouping>('character');
+
   /** Each interval's total rise, oldest first. */
   readonly chart = computed(() =>
     reportChartOf(
@@ -61,4 +71,13 @@ export class ContributionReportComponent {
 
   /** The intervals a reader can list the rises in, newest first. */
   readonly choices = computed(() => [...this.report().intervals].reverse());
+
+  /**
+   * Takes the reader's grouping.
+   *
+   * @param value - The select's value.
+   */
+  onGroupBy(value: string): void {
+    this.groupBy.set(value === 'account' ? 'account' : 'character');
+  }
 }
