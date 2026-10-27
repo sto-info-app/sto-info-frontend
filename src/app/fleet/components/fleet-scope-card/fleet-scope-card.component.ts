@@ -38,6 +38,13 @@ const STATUS_ICONS: Readonly<Record<string, string>> = {
 };
 
 /**
+ * The icon beside the roster line: the members the roster lists, as the site
+ * counts its own members with. In the kit, checked against the running app
+ * (27 October 2026).
+ */
+export const ROSTER_ICON = 'fa-solid fa-users';
+
+/**
  * A Community, Fleet or Armada as it appears in a listing.
  *
  * Purely presentational, in the same way the account, captain and member cards
@@ -96,6 +103,9 @@ export class FleetScopeCardComponent {
   get viewLabel(): string {
     return `View ${FLEET_SCOPE_LABELS[this._vm.scope]}`;
   }
+
+  /** The icon beside the roster line, the same whatever the line says. */
+  readonly rosterIcon = ROSTER_ICON;
 
   /** The platform's icon, or null where it has none or there is no platform. */
   get platformIcon(): string | null {

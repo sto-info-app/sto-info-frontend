@@ -17,6 +17,7 @@ import {
   buildArmadaCardVm,
   buildCommunityCardVm,
   buildFleetCardVm,
+  fleetFreshnessOf,
 } from './fleet-card.builders';
 
 /** Stands in for the reader's timezone, which the page supplies. */
@@ -279,9 +280,9 @@ describe('fleet-card.builders', () => {
       expect(vm.roster).toBe('Never imported');
     });
 
-    // The card and the Fleet's own page give the same reason in the same
-    // words, rather than the card calling a console Fleet neglected.
-    it('should say the game provides no roster export on a console, as the page does', () => {
+    // The card gives the reason rather than calling a console Fleet
+    // neglected, in a few words, since its Platform line names the console.
+    it('should say a console roster is unavailable within the game', () => {
       const vm = buildFleetCardVm(
         fleetCard({
           platformName: 'Xbox',
@@ -290,8 +291,7 @@ describe('fleet-card.builders', () => {
         formatInstant,
       );
 
-      expect(vm.roster).toBe(rosterUnavailableOn('Xbox'));
-      expect(vm.roster).toBe('The game provides no roster export on Xbox');
+      expect(vm.roster).toBe('Unavailable within the game');
     });
 
     it('should give the platform’s reason even over a date recorded before', () => {
@@ -304,9 +304,23 @@ describe('fleet-card.builders', () => {
         formatInstant,
       );
 
-      expect(vm.roster).toBe(
-        'The game provides no roster export on PlayStation',
+      expect(vm.roster).toBe('Unavailable within the game');
+    });
+
+    // A duplicate warning is a sentence on its own, with no Platform line
+    // above it, so there the reason still names the console, as the Fleet's
+    // page does.
+    it('should name the console in a warning’s sentence, as the page does', () => {
+      const freshness = fleetFreshnessOf(
+        fleetCard({
+          platformName: 'Xbox',
+          platformProvidesRosterExport: false,
+        }),
+        formatInstant,
       );
+
+      expect(freshness).toBe(rosterUnavailableOn('Xbox'));
+      expect(freshness).toBe('The game provides no roster export on Xbox');
     });
 
     it('should say nothing about duplicates when the name is unique', () => {

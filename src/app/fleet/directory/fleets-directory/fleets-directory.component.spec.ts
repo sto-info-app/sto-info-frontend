@@ -348,8 +348,8 @@ describe('FleetsDirectoryComponent', () => {
       );
     });
 
-    // The card says what the Fleet's page says, not that nobody has bothered.
-    it('says the game provides no roster export on a console Fleet’s card', () => {
+    // The card says why there is no date, not that nobody has bothered.
+    it('says a console Fleet’s roster is unavailable within the game', () => {
       directory.listFleets.mockReturnValue(
         of(
           page([
@@ -365,7 +365,7 @@ describe('FleetsDirectoryComponent', () => {
 
       const text = fixture.nativeElement.textContent as string;
 
-      expect(text).toContain('The game provides no roster export on Xbox');
+      expect(text).toContain('Unavailable within the game');
       expect(text).not.toContain('No roster has ever been imported');
     });
 

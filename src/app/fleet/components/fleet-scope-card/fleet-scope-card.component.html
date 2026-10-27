@@ -115,7 +115,12 @@
           @if (vm.roster) {
             <div class="fleet-scope-card__detail">
               <dt>Roster</dt>
-              <dd class="fleet-scope-card__roster">{{ vm.roster }}</dd>
+              <dd class="fleet-scope-card__roster">
+                <i
+                  [ngClass]="rosterIcon"
+                  aria-hidden="true"></i>
+                {{ vm.roster }}
+              </dd>
             </div>
           }
         </dl>

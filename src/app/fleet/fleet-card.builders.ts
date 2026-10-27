@@ -186,35 +186,44 @@ export type FleetFreshnessFacts = Pick<
   'platformName' | 'platformProvidesRosterExport' | 'lastEffectiveImportAt'
 >;
 
-/** The words a Fleet's freshness is said in: never imported, or when. */
+/**
+ * The words a Fleet's freshness is said in: never imported, when, or why a
+ * console Fleet has no date to give.
+ */
 export interface FleetFreshnessWords {
   readonly never: string;
   readonly imported: (when: string) => string;
+  readonly unavailable: (platformName: string) => string;
 }
 
 /** A sentence of its own, as a duplicate warning says it. */
 export const FLEET_FRESHNESS_SENTENCE: FleetFreshnessWords = {
   never: 'No roster has ever been imported',
   imported: when => `Roster last imported ${when}`,
+  unavailable: rosterUnavailableOn,
 };
 
 /**
  * A value under a card's "Roster" label (13 October 2026), where the label
- * already says what it is about.
+ * already says what it is about, and the Platform line two above it already
+ * names the console, so the console's reason is given in four words.
  */
 export const FLEET_FRESHNESS_VALUE: FleetFreshnessWords = {
   never: 'Never imported',
   imported: when => `Imported ${when}`,
+  unavailable: () => 'Unavailable within the game',
 };
 
 /**
  * Says how fresh a Fleet's record is, on its card or in a duplicate warning.
  *
- * A console Fleet gets the reason rather than "never", in the words its own
- * page uses: the game gives it no roster export, so having no date is the
- * platform rather than neglect. The platform answers first even over a date,
- * as on the page, since a Fleet can carry one from before it moved platform.
- * Exported so the registration warnings say it the same way as the card.
+ * A console Fleet gets the reason rather than "never": the game gives it no
+ * roster export, so having no date is the platform rather than neglect. A
+ * warning says so in the words the Fleet's own page uses, naming the
+ * platform; a card says it in a few words under its label. The platform
+ * answers first even over a date, as on the page, since a Fleet can carry one
+ * from before it moved platform. Exported so the registration warnings decide
+ * it the same way as the card.
  *
  * @param card - The Fleet as the server sent it.
  * @param formatInstant - Writes a roster import date out for the reader.
@@ -227,7 +236,7 @@ export function fleetFreshnessOf(
   words: FleetFreshnessWords = FLEET_FRESHNESS_SENTENCE,
 ): string {
   if (!card.platformProvidesRosterExport) {
-    return rosterUnavailableOn(card.platformName);
+    return words.unavailable(card.platformName);
   }
 
   return card.lastEffectiveImportAt === null

@@ -172,9 +172,9 @@ describe('FleetScopeCardComponent', () => {
     ]);
   });
 
-  // The platform and the state each show an icon, and the card carries the
-  // account list's art for its platform (13 October 2026).
-  it('draws an icon beside the platform and the state', () => {
+  // The platform, the state and the roster each show an icon, and the card
+  // carries the account list's art for its platform (13 October 2026).
+  it('draws an icon beside the platform, the state and the roster', () => {
     render(buildVm());
 
     const icons = Array.from(
@@ -182,12 +182,17 @@ describe('FleetScopeCardComponent', () => {
       (icon: Element) => icon.className,
     );
 
-    expect(icons).toEqual(['fab fa-windows', 'fa-solid fa-user-plus']);
+    expect(icons).toEqual([
+      'fab fa-windows',
+      'fa-solid fa-user-plus',
+      'fa-solid fa-users',
+    ]);
     expect(find('.fleet-scope-card__backdrop')?.getAttribute('src')).toBe(
       '/assets/account-types/account_type_windows_default.jpg',
     );
   });
 
+  // The roster's icon stays whatever the line says, so only it is left.
   it('draws no icon for a platform or a state it has none for', () => {
     render(
       buildVm({
@@ -196,9 +201,12 @@ describe('FleetScopeCardComponent', () => {
       }),
     );
 
-    expect(
+    const icons = Array.from(
       fixture.nativeElement.querySelectorAll('.fleet-scope-card__detail dd i'),
-    ).toHaveLength(0);
+      (icon: Element) => icon.className,
+    );
+
+    expect(icons).toEqual(['fa-solid fa-users']);
     expect(find('.fleet-scope-card__backdrop')?.getAttribute('src')).toBe(
       '/assets/account-types/account_type_default.jpg',
     );
