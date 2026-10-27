@@ -30,7 +30,10 @@ import { RosterImportService } from 'src/app/fleet/imports/roster-import.service
 import {
   RosterImportDetail,
   RosterImportRow,
+  RosterImportRowDirection,
   RosterImportRowPage,
+  RosterImportRowsQuery,
+  RosterImportRowSort,
 } from 'src/app/models/fleet-import.models';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -46,6 +49,62 @@ export const ROSTER_IMPORT_ROWS_ERROR =
 /** What to say when rows could not be changed for a reason not given. */
 export const ROSTER_IMPORT_ROWS_FAILED =
   'Those rows could not be changed. Please try again.';
+
+/** A column of the rows table a reader can sort by, in the order drawn. */
+export interface RosterImportRowColumn {
+  readonly sort: RosterImportRowSort;
+  readonly label: string;
+  /** The way a first press sorts: the end a reader looks for first. */
+  readonly firstDirection: RosterImportRowDirection;
+  /** Whether the column holds a number, and so is drawn right-aligned. */
+  readonly numeric: boolean;
+}
+
+/** The rows table's columns, in the order they are drawn (FC-055). */
+export const ROSTER_IMPORT_ROW_COLUMNS: readonly RosterImportRowColumn[] = [
+  {
+    sort: RosterImportRowSort.LINE,
+    label: 'Line',
+    firstDirection: RosterImportRowDirection.ASC,
+    numeric: true,
+  },
+  {
+    sort: RosterImportRowSort.NAME,
+    label: 'Character',
+    firstDirection: RosterImportRowDirection.ASC,
+    numeric: false,
+  },
+  {
+    sort: RosterImportRowSort.RANK,
+    label: 'Rank',
+    firstDirection: RosterImportRowDirection.ASC,
+    numeric: false,
+  },
+  {
+    sort: RosterImportRowSort.LEVEL,
+    label: 'Level',
+    firstDirection: RosterImportRowDirection.DESC,
+    numeric: true,
+  },
+  {
+    sort: RosterImportRowSort.CONTRIBUTION,
+    label: 'Contribution',
+    firstDirection: RosterImportRowDirection.DESC,
+    numeric: true,
+  },
+  {
+    sort: RosterImportRowSort.JOINED,
+    label: 'Joined',
+    firstDirection: RosterImportRowDirection.ASC,
+    numeric: false,
+  },
+  {
+    sort: RosterImportRowSort.LAST_ACTIVE,
+    label: 'Last Active',
+    firstDirection: RosterImportRowDirection.DESC,
+    numeric: false,
+  },
+];
 
 /** What the list is showing. */
 export type RosterImportRowsState =
@@ -63,6 +122,12 @@ export type RosterImportRowsState =
  * server refuses a request naming any row already as asked, so excluding is
  * offered only when every row ticked counts, and putting back only when
  * every one is excluded.
+ *
+ * The rows can be found by part of a Character name or handle, narrowed to
+ * a rank, and ordered by any column heading, across the whole import
+ * (FC-055). A change of order or filter goes back to the first page and
+ * clears the ticks, as turning the page does. The order and filters live
+ * here while the panel is open, not in the address.
  */
 @Component({
   selector: 'app-roster-import-rows',
@@ -85,6 +150,7 @@ export class RosterImportRowsComponent {
 
   readonly errorMessage = ROSTER_IMPORT_ROWS_ERROR;
   readonly reasonLimit = ROSTER_IMPORT_REASON_LIMIT;
+  readonly columns = ROSTER_IMPORT_ROW_COLUMNS;
 
   /** The Community holding the Fleet. */
   readonly communityId = input.required<string>();
@@ -102,6 +168,33 @@ export class RosterImportRowsComponent {
   /** The page shown, from 1. */
   readonly page = signal(1);
 
+  /** The column the rows are ordered by, and which way (FC-055). */
+  readonly sort = signal<RosterImportRowSort>(RosterImportRowSort.LINE);
+  readonly direction = signal<RosterImportRowDirection>(
+    RosterImportRowDirection.ASC,
+  );
+
+  /** Part of a Character name or handle the rows are narrowed to, or empty. */
+  readonly search = signal('');
+
+  /** The rank label the rows are narrowed to, or empty for every rank. */
+  readonly rank = signal('');
+
+  /** What is asked of the server: the page, in the order, within the filters. */
+  readonly query = computed((): RosterImportRowsQuery => ({
+    page: this.page(),
+    pageSize: ROSTER_IMPORT_ROWS_PAGE_SIZE,
+    sort: this.sort(),
+    direction: this.direction(),
+    ...(this.search() ? { search: this.search() } : {}),
+    ...(this.rank() ? { rank: this.rank() } : {}),
+  }));
+
+  /** Whether the rows are narrowed by a search or a rank. */
+  readonly filtered = computed(
+    () => this.search() !== '' || this.rank() !== '',
+  );
+
   /** The lines ticked on it. */
   readonly ticked = signal<ReadonlySet<number>>(new Set());
 
@@ -117,18 +210,12 @@ export class RosterImportRowsComponent {
   /** What the last change came to, if it was recorded. */
   readonly notice = signal<string | null>(null);
 
-  /** The page of rows, read again whenever it changes or is asked for. */
+  /** The page of rows, read again whenever what is asked changes or is asked for. */
   readonly state = toSignal(
-    combineLatest([toObservable(this.page), this._reload$]).pipe(
-      switchMap(([page]) =>
+    combineLatest([toObservable(this.query), this._reload$]).pipe(
+      switchMap(([query]) =>
         this._importService
-          .rows(
-            this.communityId(),
-            this.fleetId(),
-            this.importId(),
-            page,
-            ROSTER_IMPORT_ROWS_PAGE_SIZE,
-          )
+          .rows(this.communityId(), this.fleetId(), this.importId(), query)
           .pipe(
             map((rows): RosterImportRowsState => ({ kind: 'READY', rows })),
             catchError(() => of<RosterImportRowsState>({ kind: 'ERROR' })),
@@ -166,6 +253,86 @@ export class RosterImportRowsComponent {
   readonly canReinstate = computed(
     () => this._ready() && this.tickedRows().every(row => row.excluded),
   );
+
+  /**
+   * How a column is sorted now, for a screen reader.
+   *
+   * @param sort - The column.
+   * @returns Its `aria-sort`.
+   */
+  ariaSort(sort: RosterImportRowSort): 'ascending' | 'descending' | 'none' {
+    if (this.sort() !== sort) {
+      return 'none';
+    }
+
+    return this.direction() === RosterImportRowDirection.DESC
+      ? 'descending'
+      : 'ascending';
+  }
+
+  /**
+   * What the table's caption says of the order.
+   *
+   * @returns The caption.
+   */
+  caption(): string {
+    const column = this.columns.find(entry => entry.sort === this.sort());
+
+    if (
+      this.sort() === RosterImportRowSort.LINE &&
+      this.direction() === RosterImportRowDirection.ASC
+    ) {
+      return 'The export’s rows, in the order it listed them';
+    }
+
+    const way =
+      this.direction() === RosterImportRowDirection.DESC
+        ? 'descending'
+        : 'ascending';
+
+    return `The export’s rows, by ${column?.label.toLowerCase() ?? 'line'}, ${way}`;
+  }
+
+  /**
+   * Orders the rows by a column: the column's first way on a first press,
+   * the other way on a second. Back to the first page, with the ticks
+   * cleared.
+   *
+   * @param sort - The column.
+   */
+  onSort(sort: RosterImportRowSort): void {
+    // Only the heading of a drawn column calls this.
+    const column = this.columns.find(
+      entry => entry.sort === sort,
+    ) as RosterImportRowColumn;
+    let direction = column.firstDirection;
+
+    if (this.sort() === sort) {
+      direction =
+        this.direction() === RosterImportRowDirection.DESC
+          ? RosterImportRowDirection.ASC
+          : RosterImportRowDirection.DESC;
+    }
+
+    this.ticked.set(new Set());
+    this.page.set(1);
+    this.sort.set(sort);
+    this.direction.set(direction);
+  }
+
+  /**
+   * Finds rows by part of a name or handle, and narrows them to a rank, from
+   * the first page with the ticks cleared.
+   *
+   * @param search - Part of a Character name or handle, or empty.
+   * @param rank - A rank label, or empty for every rank.
+   */
+  onFilter(search: string, rank: string): void {
+    this.ticked.set(new Set());
+    this.page.set(1);
+    this.search.set(search.trim());
+    this.rank.set(rank);
+  }
 
   /**
    * Whether every row on a page is ticked.

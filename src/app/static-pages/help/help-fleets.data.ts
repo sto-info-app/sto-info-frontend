@@ -1249,7 +1249,7 @@ const FLEET_ROSTER_GUIDES: HelpGuide[] = [
           'Take it out — the import stays on record and counts for nothing. Put it back undoes it.',
           'Mark it partial — nobody missing from the export is taken to have left. Mark it complete undoes it.',
           'Read it again — for an export read on the wrong clock. Choose the right one, and every date is read again from what the file said.',
-          'Exclude ticked, under Rows — each member a wrong row names becomes unknown at that export, not gone. Put back ticked restores them.',
+          'Exclude ticked, under Rows — each member a wrong row names becomes unknown at that export, not gone. Put back ticked restores them. The rows can be found by part of a Character name or handle, narrowed to a rank, and ordered by any column heading; a change of order or filter clears the ticks.',
         ],
       },
       'How to settle conflicting exports': [

@@ -1,3 +1,5 @@
+import { RosterRankCount } from './fleet-roster.models';
+
 /**
  * What a roster export turns out to be, before anything is imported from it.
  *
@@ -360,9 +362,54 @@ export interface RosterImportRow {
   excluded: boolean;
 }
 
-/** A page of an import's rows, in line order. */
+/** How one import's rows are ordered (FC-055). Every ordering ends on line. */
+export enum RosterImportRowSort {
+  /** The line the export listed the row on. The default. */
+  LINE = 'LINE',
+  /** Character name, A–Z. */
+  NAME = 'NAME',
+  /** Account handle, A–Z. */
+  HANDLE = 'HANDLE',
+  /** Rank tier, highest first, then rank label; unplaced labels last. */
+  RANK = 'RANK',
+  LEVEL = 'LEVEL',
+  /** The Join Date the export reported. Rows with none come last. */
+  JOINED = 'JOINED',
+  CONTRIBUTION = 'CONTRIBUTION',
+  /** Last Active. Rows with none come last. */
+  LAST_ACTIVE = 'LAST_ACTIVE',
+}
+
+/** Which way an ordering of an import's rows runs. */
+export enum RosterImportRowDirection {
+  ASC = 'ASC',
+  DESC = 'DESC',
+}
+
+/** What a reader asks of an import's rows (FC-055). */
+export interface RosterImportRowsQuery {
+  page: number;
+  pageSize: number;
+  sort?: RosterImportRowSort;
+  direction?: RosterImportRowDirection;
+  /** Part of a Character name or account handle. */
+  search?: string;
+  /** A rank label, exactly. */
+  rank?: string;
+}
+
+/**
+ * A page of an import's rows, in the order and within the filters asked for;
+ * in line order when nothing was asked.
+ */
 export interface RosterImportRowPage {
   items: RosterImportRow[];
+  /**
+   * Each rank label the import's rows hold, with how many hold it, across
+   * the whole import whatever the filters (FC-055).
+   */
+  ranks: RosterRankCount[];
+  /** How many rows match, across every page. */
   total: number;
   page: number;
   pageSize: number;

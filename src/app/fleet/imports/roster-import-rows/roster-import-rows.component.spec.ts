@@ -15,6 +15,14 @@ import {
   RosterImportRowPage,
 } from 'src/app/models/fleet-import.models';
 
+/** What the panel asks for before anything is sorted or filtered. */
+const FIRST_PAGE = {
+  page: 1,
+  pageSize: 50,
+  sort: 'LINE',
+  direction: 'ASC',
+};
+
 import {
   ROSTER_IMPORT_ROWS_ERROR,
   ROSTER_IMPORT_ROWS_FAILED,
@@ -57,7 +65,17 @@ function page(
   items: RosterImportRow[],
   overrides: Partial<RosterImportRowPage> = {},
 ): RosterImportRowPage {
-  return { items, total: items.length, page: 1, pageSize: 50, ...overrides };
+  return {
+    items,
+    ranks: [
+      { label: 'Captain', tier: 1, members: 2 },
+      { label: 'Member', tier: null, members: 1 },
+    ],
+    total: items.length,
+    page: 1,
+    pageSize: 50,
+    ...overrides,
+  };
 }
 
 describe('RosterImportRowsComponent', () => {
@@ -168,8 +186,7 @@ describe('RosterImportRowsComponent', () => {
       'community-1',
       'fleet-1',
       'import-1',
-      1,
-      50,
+      FIRST_PAGE,
     );
     expect(text()).toContain('Reading the rows…');
     expect(fixture.componentInstance.tickedRows()).toEqual([]);
@@ -436,8 +453,7 @@ describe('RosterImportRowsComponent', () => {
         'community-1',
         'fleet-1',
         'import-1',
-        2,
-        50,
+        { ...FIRST_PAGE, page: 2 },
       );
       expect(fixture.componentInstance.ticked().size).toBe(0);
 
@@ -456,8 +472,7 @@ describe('RosterImportRowsComponent', () => {
         'community-1',
         'fleet-1',
         'import-1',
-        2,
-        50,
+        { ...FIRST_PAGE, page: 2 },
       );
     });
 
@@ -468,6 +483,183 @@ describe('RosterImportRowsComponent', () => {
       expect(
         fixture.componentInstance.totalPages(page([], { pageSize: 0 })),
       ).toBe(0);
+    });
+  });
+
+  // FC-055: found and ordered across the whole import, from the server.
+  describe('sorting', () => {
+    /** The column headings' buttons, in order. */
+    const headings = (): HTMLButtonElement[] =>
+      Array.from(
+        (
+          fixture.nativeElement as HTMLElement
+        ).querySelectorAll<HTMLButtonElement>(
+          'thead button.fleet-community-table__sort',
+        ),
+      );
+    const heading = (label: string): HTMLButtonElement =>
+      headings().find(
+        candidate => textOf(candidate).trim() === label,
+      ) as HTMLButtonElement;
+    const sortOf = (label: string): string | null =>
+      heading(label).closest('th')?.getAttribute('aria-sort') ?? null;
+
+    it('draws every column as a heading that sorts, line order first', () => {
+      render();
+
+      expect(headings().map(each => textOf(each).trim())).toEqual([
+        'Line',
+        'Character',
+        'Rank',
+        'Level',
+        'Contribution',
+        'Joined',
+        'Last Active',
+      ]);
+      expect(sortOf('Line')).toBe('ascending');
+      expect(sortOf('Level')).toBe('none');
+      expect(text()).toContain(
+        'The export’s rows, in the order it listed them',
+      );
+    });
+
+    it('orders by a column the way a reader looks first, and the other way on a second press', () => {
+      render();
+      tick(0);
+
+      heading('Level').click();
+      fixture.detectChanges();
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        { ...FIRST_PAGE, sort: 'LEVEL', direction: 'DESC' },
+      );
+      expect(sortOf('Level')).toBe('descending');
+      expect(sortOf('Line')).toBe('none');
+      expect(text()).toContain('The export’s rows, by level, descending');
+      // A change of order clears the ticks, as a page turned does.
+      expect(fixture.componentInstance.ticked().size).toBe(0);
+
+      heading('Level').click();
+      fixture.detectChanges();
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        { ...FIRST_PAGE, sort: 'LEVEL', direction: 'ASC' },
+      );
+      expect(sortOf('Level')).toBe('ascending');
+
+      heading('Character').click();
+      fixture.detectChanges();
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        { ...FIRST_PAGE, sort: 'NAME', direction: 'ASC' },
+      );
+    });
+
+    it('goes back to the first page on a change of order', () => {
+      imports.rows.mockReturnValue(of(page([row(2)], { total: 120, page: 1 })));
+      render();
+      imports.rows.mockReturnValue(
+        of(page([row(52)], { total: 120, page: 2 })),
+      );
+      button('Later rows').click();
+      fixture.detectChanges();
+
+      heading('Rank').click();
+      fixture.detectChanges();
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        { ...FIRST_PAGE, sort: 'RANK', direction: 'ASC' },
+      );
+    });
+  });
+
+  describe('finding', () => {
+    /**
+     * Finds rows through the form.
+     *
+     * @param search - What to type.
+     * @param rank - The rank to choose, or empty.
+     */
+    function findRows(search: string, rank = ''): void {
+      const searchField = find('#import-rows-search') as HTMLInputElement;
+      const rankField = find('#import-rows-rank') as HTMLSelectElement;
+
+      searchField.value = search;
+      rankField.value = rank;
+      button('Find').click();
+      fixture.detectChanges();
+    }
+
+    it('offers each rank the import holds, with how many rows hold it', () => {
+      render();
+
+      const options = Array.from(
+        (find('#import-rows-rank') as HTMLSelectElement).options,
+      ).map(option => [option.value, textOf(option).trim()]);
+
+      expect(options).toEqual([
+        ['', 'Every rank'],
+        ['Captain', 'Captain (2)'],
+        ['Member', 'Member (1)'],
+      ]);
+    });
+
+    it('narrows the rows to part of a name or handle and a rank, clearing the ticks', () => {
+      render();
+      tick(0);
+      findRows('  reen ', 'Member');
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        { ...FIRST_PAGE, search: 'reen', rank: 'Member' },
+      );
+      expect(fixture.componentInstance.ticked().size).toBe(0);
+      expect((find('#import-rows-search') as HTMLInputElement).value).toBe(
+        'reen',
+      );
+    });
+
+    it('says when nothing matches, keeping the form to try again', () => {
+      render();
+      imports.rows.mockReturnValue(of(page([])));
+      findRows('nobody');
+
+      expect(text()).toContain('No row of this import matches that.');
+      expect(find('#import-rows-search')).not.toBeNull();
+      expect(find('table')).toBeNull();
+
+      imports.rows.mockReturnValue(of(page([row(2)])));
+      findRows('');
+
+      expect(imports.rows).toHaveBeenLastCalledWith(
+        'community-1',
+        'fleet-1',
+        'import-1',
+        FIRST_PAGE,
+      );
+      expect(find('table')).not.toBeNull();
+    });
+
+    it('offers no form when the import has no rows at all', () => {
+      imports.rows.mockReturnValue(of(page([])));
+      render();
+
+      expect(find('#import-rows-search')).toBeNull();
+      expect(text()).toContain('None of this import’s rows is in force.');
     });
   });
 

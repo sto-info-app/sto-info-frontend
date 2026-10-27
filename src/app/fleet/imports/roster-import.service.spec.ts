@@ -12,7 +12,9 @@ import {
   RosterImportDetail,
   RosterImportPage,
   RosterImportPreview,
+  RosterImportRowDirection,
   RosterImportRowPage,
+  RosterImportRowSort,
   RosterImportSummary,
   RosterImportUploadResult,
 } from 'src/app/models/fleet-import.models';
@@ -450,6 +452,7 @@ describe('RosterImportService', () => {
     it('asks for a page of an import’s rows', () => {
       const rows: RosterImportRowPage = {
         items: [],
+        ranks: [],
         total: 0,
         page: 3,
         pageSize: 50,
@@ -457,7 +460,7 @@ describe('RosterImportService', () => {
       let answered: RosterImportRowPage | undefined;
 
       service
-        .rows(communityId, fleetId, 'import-2', 3, 50)
+        .rows(communityId, fleetId, 'import-2', { page: 3, pageSize: 50 })
         .subscribe(result => (answered = result));
 
       const request = httpMock.expectOne(
@@ -467,10 +470,38 @@ describe('RosterImportService', () => {
       expect(request.request.method).toBe('GET');
       expect(request.request.params.get('page')).toBe('3');
       expect(request.request.params.get('pageSize')).toBe('50');
+      expect(request.request.params.keys().sort()).toEqual([
+        'page',
+        'pageSize',
+      ]);
       expect(request.request.headers.get('Authorization')).toBe('Bearer token');
       request.flush(rows);
 
       expect(answered).toEqual(rows);
+    });
+
+    // FC-055: the order and filters go over only when asked.
+    it('asks for the rows in an order and within filters', () => {
+      service
+        .rows(communityId, fleetId, 'import-2', {
+          page: 1,
+          pageSize: 50,
+          sort: RosterImportRowSort.LEVEL,
+          direction: RosterImportRowDirection.DESC,
+          search: 'reen',
+          rank: 'Member',
+        })
+        .subscribe();
+
+      const request = httpMock.expectOne(
+        candidate => candidate.url === rowsUrl,
+      );
+
+      expect(request.request.params.get('sort')).toBe('LEVEL');
+      expect(request.request.params.get('direction')).toBe('DESC');
+      expect(request.request.params.get('search')).toBe('reen');
+      expect(request.request.params.get('rank')).toBe('Member');
+      request.flush({ items: [], ranks: [], total: 0, page: 1, pageSize: 50 });
     });
 
     it('asks for nothing when there is no token to ask with', () => {
@@ -479,7 +510,7 @@ describe('RosterImportService', () => {
       let failure: Error | undefined;
 
       service
-        .rows(communityId, fleetId, 'import-2', 1, 50)
+        .rows(communityId, fleetId, 'import-2', { page: 1, pageSize: 50 })
         .subscribe({ error: (error: Error) => (failure = error) });
 
       expect(failure?.message).toBe('No token found');

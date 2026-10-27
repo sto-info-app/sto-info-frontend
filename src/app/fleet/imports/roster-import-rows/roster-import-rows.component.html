@@ -5,7 +5,7 @@
   <p class="fleet-report-notice">
     Excluding a row leaves its member unknown at this export, not gone. Tick
     rows on this page, give a reason, then exclude them or put them back.
-    Turning the page clears the ticks.
+    Turning the page, or changing the order or the filters, clears the ticks.
   </p>
 
   @if (notice(); as recorded) {
@@ -38,14 +38,67 @@
   @if (current.kind === 'READY') {
     @let rows = current.rows;
 
+    <!--
+      Finding and narrowing the rows (FC-055), as the roster page offers. The
+      ranks are the whole import's, whatever is shown, so a rank stays on
+      offer while another is chosen.
+    -->
+    @if (rows.items.length > 0 || filtered()) {
+      <form
+        class="fleet-community-filter-row lcars-rotate"
+        role="search"
+        aria-label="Find in the rows"
+        (submit)="
+          $event.preventDefault(); onFilter(searchField.value, rankField.value)
+        ">
+        <div class="lcars-input-container">
+          <label for="import-rows-search">Character or handle</label>
+          <input
+            #searchField
+            id="import-rows-search"
+            type="search"
+            maxlength="50"
+            autocomplete="off"
+            [value]="search()" />
+        </div>
+
+        <div class="lcars-input-container lcars-field--short">
+          <label for="import-rows-rank">Rank</label>
+          <select
+            #rankField
+            id="import-rows-rank"
+            [value]="rank()">
+            <option value="">Every rank</option>
+            @for (entry of rows.ranks; track entry.label) {
+              <option
+                [value]="entry.label"
+                [selected]="entry.label === rank()">
+                {{ entry.label }} ({{ entry.members }})
+              </option>
+            }
+          </select>
+        </div>
+
+        <button
+          type="submit"
+          class="lcars-btn lcars-btn-auto">
+          Find
+        </button>
+      </form>
+    }
+
     @if (rows.items.length === 0) {
       <p class="fleet-community-empty">
-        None of this import’s rows is in force.
+        @if (filtered()) {
+          No row of this import matches that.
+        } @else {
+          None of this import’s rows is in force.
+        }
       </p>
     } @else {
       <table class="fleet-community-table">
         <caption>
-          The export’s rows, in the order it listed them
+          {{ caption() }}
         </caption>
         <thead>
           <tr>
@@ -59,25 +112,19 @@
                   (change)="onTickAll(rows, $any($event.target).checked)" />
               </th>
             }
-            <th
-              scope="col"
-              class="fleet-community-table__number">
-              Line
-            </th>
-            <th scope="col">Character</th>
-            <th scope="col">Rank</th>
-            <th
-              scope="col"
-              class="fleet-community-table__number">
-              Level
-            </th>
-            <th
-              scope="col"
-              class="fleet-community-table__number">
-              Contribution
-            </th>
-            <th scope="col">Joined</th>
-            <th scope="col">Last Active</th>
+            @for (column of columns; track column.sort) {
+              <th
+                scope="col"
+                [attr.aria-sort]="ariaSort(column.sort)"
+                [class.fleet-community-table__number]="column.numeric">
+                <button
+                  type="button"
+                  class="fleet-community-table__sort"
+                  (click)="onSort(column.sort)">
+                  {{ column.label }}
+                </button>
+              </th>
+            }
           </tr>
         </thead>
         <tbody>

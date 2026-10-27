@@ -11,6 +11,7 @@ import {
   RosterImportPage,
   RosterImportPreview,
   RosterImportRowPage,
+  RosterImportRowsQuery,
   RosterImportSummary,
   RosterImportUploadResult,
 } from 'src/app/models/fleet-import.models';
@@ -347,8 +348,7 @@ export class RosterImportService {
     communityId: string,
     fleetId: string,
     importId: string,
-    page: number,
-    pageSize: number,
+    query: RosterImportRowsQuery,
   ): Observable<RosterImportRowPage> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
@@ -356,14 +356,27 @@ export class RosterImportService {
       return throwError(() => new Error('No token found'));
     }
 
+    // Only what was asked goes over: the server defaults the rest (FC-055).
+    let params = new HttpParams()
+      .set('page', String(query.page))
+      .set('pageSize', String(query.pageSize));
+
+    if (query.sort) {
+      params = params.set('sort', query.sort);
+    }
+    if (query.direction) {
+      params = params.set('direction', query.direction);
+    }
+    if (query.search) {
+      params = params.set('search', query.search);
+    }
+    if (query.rank) {
+      params = params.set('rank', query.rank);
+    }
+
     return this._http.get<RosterImportRowPage>(
       `${this.importsUrl(communityId, fleetId)}/${importId}/rows`,
-      {
-        ...httpOptions,
-        params: new HttpParams()
-          .set('page', String(page))
-          .set('pageSize', String(pageSize)),
-      },
+      { ...httpOptions, params },
     );
   }
 
