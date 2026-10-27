@@ -28,7 +28,6 @@ describe('AppComponent', () => {
     googleAnalyticsLoaded: boolean;
     openRefreshSessionDialog(): void;
     loadCookieYesScript(): void;
-    loadFontAwesomeKit(): void;
     consentGiven(): void;
     sendPageView(url: string | undefined): void;
     loadGoogleAnalyticsWithTrackingDisabled(): void;
@@ -382,72 +381,18 @@ describe('AppComponent', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should not load Font Awesome Kit script in ngOnInit if lighthouse-audit env', () => {
+  it('should not start app state polling in ngOnInit if lighthouse-audit env', () => {
     const originalEnvName = environment.env_name;
     (environment as { env_name: string }).env_name = 'lighthouse-audit';
 
-    const loadFontAwesomeKitSpy = jest.spyOn(
-      component as unknown as { loadFontAwesomeKit: () => void },
-      'loadFontAwesomeKit',
-    );
-
-    component.ngOnInit();
-
-    expect(loadFontAwesomeKitSpy).not.toHaveBeenCalled();
-
-    (environment as { env_name: string }).env_name = originalEnvName;
-  });
-
-  it('should not load Font Awesome Kit script if fontAwesomeKitId is missing', () => {
-    const originalFontAwesomeKitId = environment.fontAwesomeKitId;
-
     try {
-      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId =
-        undefined;
+      component.ngOnInit();
 
-      const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
-
-      (component as unknown as AppComponentInternals).loadFontAwesomeKit();
-
-      expect(warnSpy).toHaveBeenCalledWith(
-        'Font Awesome Kit ID not set in environment',
-      );
-      expect(mockScriptLoaderService.loadScript).not.toHaveBeenCalled();
+      expect(
+        mockNotificationService.startAppStatePolling,
+      ).not.toHaveBeenCalled();
     } finally {
-      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId =
-        originalFontAwesomeKitId;
-    }
-  });
-
-  it('should log an error if the Font Awesome Kit script fails to load', () => {
-    const originalFontAwesomeKitId = environment.fontAwesomeKitId;
-
-    try {
-      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId = 'TEST';
-
-      mockScriptLoadFailure();
-      const errorSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
-
-      (component as unknown as AppComponentInternals).loadFontAwesomeKit();
-
-      expect(mockScriptLoaderService.loadScript).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'font-awesome-kit',
-          src: 'https://kit.fontawesome.com/TEST.js',
-          async: false,
-          attributes: {
-            crossorigin: 'anonymous',
-          },
-        }),
-      );
-      expect(errorSpy).toHaveBeenCalledWith(
-        'Failed to load Font Awesome Kit script',
-      );
-    } finally {
-      (environment as { fontAwesomeKitId?: string }).fontAwesomeKitId =
-        originalFontAwesomeKitId;
+      (environment as { env_name: string }).env_name = originalEnvName;
     }
   });
 

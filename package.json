@@ -17,6 +17,7 @@
     "start": "ng serve",
     "generate-env": "node src/environments/inject-env-vars.js",
     "generate-version": "node scripts/generate-version.mjs",
+    "fa:update": "node scripts/update-font-awesome.mjs",
     "generate-content": "node scripts/generate-content.mjs",
     "build": "ng build",
     "build:dev": "ng build --configuration development",
