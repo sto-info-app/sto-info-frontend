@@ -162,7 +162,14 @@
           <tbody>
             @for (request of data.page.items; track request.id) {
               <tr>
-                <td data-label="Fleet">{{ fleetName(request.fleet) }}</td>
+                <td data-label="Fleet">
+                  {{ fleetName(request.fleet) }}
+                  @if (request.movingFrom; as from) {
+                    <span class="fleet-report-note"
+                      >Moving from {{ from.name }}</span
+                    >
+                  }
+                </td>
                 <td data-label="Asked by">{{ request.requestedBy ?? '—' }}</td>
                 <td data-label="Message">{{ request.message ?? '—' }}</td>
                 <td data-label="Asked">

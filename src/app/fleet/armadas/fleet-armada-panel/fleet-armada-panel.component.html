@@ -34,6 +34,28 @@
           since {{ placement.since | appDate: 'mediumDate' }}.
         </p>
 
+        <!--
+          A move asked for from its Settings page (FC-057): the Fleet stays
+          here until the other Armada's managers approve it.
+        -->
+        @if (view.openRequest; as open) {
+          <p>
+            Its managers have asked to move it to
+            <a [routerLink]="armadaLink(open.armada)">{{ open.armada.name }}</a
+            >. It stays here while the request waits, until
+            {{ open.expiresAt | appDate: 'medium' }}.
+          </p>
+          @if (view.mayRequest) {
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto red"
+              [disabled]="busy()"
+              (click)="onWithdraw(open.id)">
+              Withdraw the request
+            </button>
+          }
+        }
+
         @if (view.mayRequest) {
           @if (placement.gammaCount > 0) {
             <p class="fleet-community-field-hint">

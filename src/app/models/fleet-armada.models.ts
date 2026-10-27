@@ -129,6 +129,11 @@ export interface ArmadaRequest {
   readonly answeredBy: string | null;
   /** Why it was rejected. */
   readonly reason: string | null;
+  /**
+   * The Armada the Fleet sits in while this request is open, which it leaves
+   * on approval (FC-057); null for a Fleet in none, and once answered.
+   */
+  readonly movingFrom: ArmadaRef | null;
 }
 
 /** A page of an Armada's requests. */

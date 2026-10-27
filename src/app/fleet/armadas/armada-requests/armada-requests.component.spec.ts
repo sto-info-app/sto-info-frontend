@@ -5,15 +5,16 @@ import { convertToParamMap, Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
 
 import {
+  ArmadaRouteStubs,
+  HIDDEN_ARMADA_FLEET,
   armadaBeta,
   armadaFleet,
   armadaNode,
+  armadaRef,
   armadaRequest,
   armadaRoute,
-  ArmadaRouteStubs,
   armadaStructure,
   armadaView,
-  HIDDEN_ARMADA_FLEET,
 } from 'src/app/fleet/armadas/armada.testing';
 import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
 import {
@@ -151,6 +152,26 @@ describe('ArmadaRequestsComponent', () => {
   });
 
   describe('the list', () => {
+    // FC-057: a request from a Fleet in another Armada is a move.
+    it('names the Armada a moving Fleet would leave', async () => {
+      service.requests.mockReturnValue(
+        of({
+          items: [
+            armadaRequest({
+              movingFrom: armadaRef({ id: 'armada-2', name: 'Vega Armada' }),
+            }),
+          ],
+          total: 1,
+          page: 1,
+          pageSize: 20,
+        }),
+      );
+
+      await render();
+
+      expect(pageText(fixture)).toContain('Moving from Vega Armada');
+    });
+
     it('shows the open requests by default', async () => {
       await render();
 

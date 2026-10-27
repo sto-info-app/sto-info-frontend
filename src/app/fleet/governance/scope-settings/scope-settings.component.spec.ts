@@ -1,3 +1,4 @@
+import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { convertToParamMap, Router } from '@angular/router';
@@ -132,6 +133,7 @@ describe('ScopeSettingsComponent', () => {
   let route: GovernanceRouteStubs;
   let registration: { updateCommunity: jest.Mock; updateFleet: jest.Mock };
   let lookup: { getGeneralFactions: jest.Mock };
+  let armadas: { fleetView: jest.Mock };
   let navigate: jest.SpyInstance;
 
   /**
@@ -162,6 +164,8 @@ describe('ScopeSettingsComponent', () => {
         ...route.providers,
         { provide: FleetRegistrationService, useValue: registration },
         { provide: CharacterLookupService, useValue: lookup },
+        // The Armada panel's own spec covers it (FC-057).
+        { provide: FleetArmadaService, useValue: armadas },
       ],
     }).compileComponents();
 
@@ -217,6 +221,18 @@ describe('ScopeSettingsComponent', () => {
         of({ ...communityFor(OWNER).community, ...changes }),
       ),
       updateFleet: jest.fn(() => of(fleetFor(FLEET_OWNER).fleet)),
+    };
+    armadas = {
+      fleetView: jest.fn(() =>
+        of({
+          placement: null,
+          mayRequest: false,
+          openRequest: null,
+          lastAnswered: null,
+          choices: [],
+          cannotRequestBecause: null,
+        }),
+      ),
     };
     lookup = {
       getGeneralFactions: jest.fn(() =>
@@ -676,5 +692,29 @@ describe('ScopeSettingsComponent', () => {
     await render({ ...OWNER, onArmada: true });
 
     expect(pageText(fixture)).toContain(SCOPE_SETTINGS_NOT_PERMITTED);
+  });
+  // FC-057: a Fleet's Settings page carries its Armada panel; a Community's
+  // does not.
+  describe('the Armada panel', () => {
+    it('offers it for a Fleet, reading the Fleet’s Armada', async () => {
+      await render(FLEET_OWNER);
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-fleet-armada-move',
+        ),
+      ).not.toBeNull();
+      expect(armadas.fleetView).toHaveBeenCalled();
+    });
+
+    it('offers none for a Community', async () => {
+      await render();
+
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-fleet-armada-move',
+        ),
+      ).toBeNull();
+    });
   });
 });

@@ -217,6 +217,17 @@
             </button>
           </div>
         </form>
+
+        <!-- Moving the Fleet to another Armada (FC-057). -->
+        @if (data.kind === 'FLEET') {
+          <app-fleet-armada-move
+            [communityId]="data.communityId"
+            [fleetId]="data.fleet.id"
+            [fleetName]="data.fleet.exactGameName"
+            [communitySlug]="data.communitySlug"
+            [platformSegment]="data.fleet.platformSegment"
+            [fleetSlug]="data.fleet.slug" />
+        }
       }
     }
   </app-fleet-page-shell>

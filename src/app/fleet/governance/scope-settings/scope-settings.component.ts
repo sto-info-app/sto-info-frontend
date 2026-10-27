@@ -1,3 +1,4 @@
+import { FleetArmadaMoveComponent } from 'src/app/fleet/armadas/fleet-armada-move/fleet-armada-move.component';
 import { AsyncPipe } from '@angular/common';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
 import {
@@ -215,6 +216,10 @@ export interface FleetRenamedNote {
  * A Fleet's recruitment state is not here: its recruitment settings keep a
  * version of every change (FC-021), and the page links there. Nor is its
  * platform, which is half of its address and cannot change.
+ *
+ * Beneath a Fleet's form sits its Armada panel (FC-057), where the Owner
+ * asks to move it to another Armada of the Community; the Fleet stays where
+ * it is until that Armada's managers approve.
  */
 @Component({
   selector: 'app-scope-settings',
@@ -224,6 +229,7 @@ export interface FleetRenamedNote {
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     AsyncPipe,
+    FleetArmadaMoveComponent,
     FleetBackLinkComponent,
     FleetExactNameComponent,
     FleetPageShellComponent,

@@ -311,6 +311,33 @@ describe('FleetArmadaPanelComponent', () => {
   });
 
   describe('an open request', () => {
+    // FC-057: a move asked for from Settings shows here, beside the place
+    // the Fleet keeps meanwhile.
+    it('shows a move asked for alongside the placement, and withdraws it', () => {
+      render(
+        fleetView({
+          mayRequest: true,
+          placement: placement(),
+          openRequest: armadaRequest({
+            armada: armadaRef({ id: 'armada-2', name: 'Vega Armada' }),
+          }),
+        }),
+      );
+
+      expect(pageText(fixture)).toContain('In Sol Armada as Beta');
+      expect(pageText(fixture)).toContain(
+        'Its managers have asked to move it to Vega Armada.',
+      );
+
+      pressButton(fixture, 'Withdraw the request');
+
+      expect(service.withdraw).toHaveBeenCalledWith(
+        'community-1',
+        'fleet-1',
+        'request-1',
+      );
+    });
+
     it('says when it lapses, and withdraws it', () => {
       render(fleetView({ mayRequest: true, openRequest: armadaRequest() }));
 

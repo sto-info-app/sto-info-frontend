@@ -149,6 +149,7 @@ export function armadaRequest(
     answeredAt: null,
     answeredBy: null,
     reason: null,
+    movingFrom: null,
     ...overrides,
   };
 }

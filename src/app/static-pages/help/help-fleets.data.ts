@@ -264,7 +264,7 @@ const FLEET_BASICS_GUIDES: HelpGuide[] = [
         'Every picture is checked before it is used, and the page shows what it had until the check ends with Available or Rejected.',
       ],
       'How to change a record afterwards': [
-        'The Owner changes a Community’s name, web address, description, how people join, who can see it and the zone its dates are shown in on its Settings page, the first choice under Manage. A Fleet’s Settings page, under its Manage tab, changes its name, web address, allegiance and who can see it. Renaming makes a new web address from the new name, and the old address still leads to the record.',
+        'The Owner changes a Community’s name, web address, description, how people join, who can see it and the zone its dates are shown in on its Settings page, the first choice under Manage. A Fleet’s Settings page, under its Manage tab, changes its name, web address, allegiance and who can see it, and under Armada asks to move the Fleet to another Armada. Renaming makes a new web address from the new name, and the old address still leads to the record.',
         'A Fleet’s platform never changes: one recorded on the wrong platform has to be closed and registered again. When you rename a Windows Fleet, record its old name under Former names, on its Investigate tab, so that roster exports made under the old name still match it.',
       ],
       'How to handle a name that is already taken': [
@@ -611,17 +611,18 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
       'How a Fleet asks to join': {
         paragraphs: [
           'On the Fleet’s page, under Armada, choose the Armada, add a “Message (optional)” if you like, and press “Ask to join”. A Fleet has one open request at a time, “Withdraw the request” takes it back, and a request unanswered after 14 days lapses.',
+          'A Fleet already in an Armada moves from its Settings page, under its Manage tab: under Armada, choose where to go under “Move to” and press “Ask to move”. The Fleet stays where it is while the request waits; when the other Armada’s managers approve it, it leaves its old Armada and takes its new place in one step, and the old Armada’s history says where it went. A rejected, withdrawn or lapsed request changes nothing. The Fleet’s own page shows the open request beside its place meanwhile.',
           'Only Armadas the Fleet could join are offered:',
         ],
         points: [
           'Same Community — an Armada takes only its own Community’s Fleets. A Fleet recorded with no Community cannot join one.',
           'Same platform.',
           'Same allegiance — an Armada is Federation or Klingon, and the Fleet must match it exactly.',
-          'One at a time — a Fleet sits in at most one Armada.',
+          'One at a time — a Fleet sits in at most one Armada, and has at most one request open, so a move is asked for while it stays where it is.',
         ],
       },
       'How requests are answered': [
-        'On the Armada’s Requests tab, “Approve…” asks for a “Position”: Alpha, Beta, or Gamma under a Beta you choose, from those with room. “Reject…” asks for a reason, which the requesting Fleet is shown.',
+        'On the Armada’s Requests tab, “Approve…” asks for a “Position”: Alpha, Beta, or Gamma under a Beta you choose, from those with room. “Reject…” asks for a reason, which the requesting Fleet is shown. A request from a Fleet in another Armada says “Moving from” that Armada; approving it moves the Fleet in one step, unless it has Gammas under it, which an Armada manager there has to move or take out first.',
         'Whoever asked is told in STO Info of an approval, a rejection with its reason, or a lapse. An answered request never changes, and a Fleet turned down can ask again.',
       ],
       'How to move, remove or leave': {
