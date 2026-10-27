@@ -468,6 +468,25 @@ describe('FriendsPageComponent', () => {
       );
     });
 
+    // The pagination sits beneath a page of cards, each a row of its own.
+    it('should scroll back to the top of the friends on a page turn', async () => {
+      await setup();
+      queryParams.next(convertToParamMap({}));
+      fixture.detectChanges();
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      component.turnPage(2);
+
+      expect(communityServiceSpy.getFriends).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 2 }),
+      );
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      expect(
+        fixture.nativeElement.querySelector('#crew-manifest'),
+      ).not.toBeNull();
+    });
+
     it('should page through the friend list', async () => {
       await setup();
       communityServiceSpy.getFriends.mockReturnValue(
@@ -476,12 +495,12 @@ describe('FriendsPageComponent', () => {
       queryParams.next(convertToParamMap({}));
       fixture.detectChanges();
 
-      expect(component.totalPages).toBe(3);
+      expect(component.totalPages).toBe(6);
 
       component.loadPage(2);
 
       expect(communityServiceSpy.getFriends).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 2 }),
+        expect.objectContaining({ page: 2, pageSize: 5 }),
       );
     });
   });

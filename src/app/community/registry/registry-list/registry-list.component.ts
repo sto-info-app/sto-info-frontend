@@ -45,7 +45,12 @@ import { UserSettingsService } from 'src/app/dashboard/services/user-settings.se
 import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
 import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
-const PAGE_SIZE = 12;
+// Five a page: a card is a row of its own now, in the shape of an account
+// card, so a page of twelve ran well past the screen.
+const PAGE_SIZE = 5;
+
+/** The results section, which a page turn scrolls back to. */
+export const RESULTS_ID = 'personnel-records';
 
 /**
  * A listed member alongside the card built for them.
@@ -136,6 +141,9 @@ export class RegistryListComponent
 
   /** The cog beside the heading, to whether the reader is listed here. */
   readonly settingsLink = SETTINGS_LINKS.registry;
+
+  /** Where the results start, for a page turn to scroll back to. */
+  readonly resultsId = RESULTS_ID;
   private readonly _registryService = inject(RegistryService);
   private readonly _communityService = inject(CommunityService);
   private readonly _authService = inject(AuthService);
@@ -264,6 +272,17 @@ export class RegistryListComponent
           card: withPresence(vm.card, online),
         }));
       });
+  }
+
+  /**
+   * Turns to another page, and brings the top of the results back into
+   * view, since the pagination sits beneath a page of cards.
+   *
+   * @param page - The 1-based page number.
+   */
+  turnPage(page: number): void {
+    this.loadPage(page);
+    document.getElementById(RESULTS_ID)?.scrollIntoView({ block: 'start' });
   }
 
   /**

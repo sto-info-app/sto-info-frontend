@@ -356,11 +356,11 @@ describe('RegistryListComponent', () => {
     it('should round the page count up', async () => {
       await setup();
       registryServiceSpy.getProfiles.mockReturnValue(
-        of(buildProfilePage({ total: 25 })),
+        of(buildProfilePage({ total: 22 })),
       );
       fixture.detectChanges();
 
-      expect(component.totalPages).toBe(3);
+      expect(component.totalPages).toBe(5);
     });
 
     it('should request the page it was asked for', async () => {
@@ -370,8 +370,26 @@ describe('RegistryListComponent', () => {
       component.loadPage(4);
 
       expect(registryServiceSpy.getProfiles).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 4, pageSize: 12 }),
+        expect.objectContaining({ page: 4, pageSize: 5 }),
       );
+    });
+
+    // The pagination sits beneath a page of cards, each a row of its own.
+    it('should scroll back to the top of the results on a page turn', async () => {
+      await setup();
+      fixture.detectChanges();
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      component.turnPage(2);
+
+      expect(registryServiceSpy.getProfiles).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 2 }),
+      );
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      expect(
+        fixture.nativeElement.querySelector('#personnel-records'),
+      ).not.toBeNull();
     });
   });
 

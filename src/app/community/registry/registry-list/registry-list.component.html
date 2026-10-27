@@ -77,6 +77,7 @@
         listing this is, so the page does not carry the same heading twice.
       -->
       <app-collapsible-section
+        [id]="resultsId"
         heading="Personnel Records"
         [badge]="total > 0 ? total : null">
         <div class="registry-list-inner-content">
@@ -99,7 +100,7 @@
             <app-lcars-pagination
               [page]="page"
               [pageCount]="totalPages"
-              (turn)="loadPage(page + $event)" />
+              (turn)="turnPage(page + $event)" />
           }
         </div>
       </app-collapsible-section>

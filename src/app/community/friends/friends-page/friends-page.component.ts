@@ -46,7 +46,12 @@ import { buildRegistryProfileLink } from '../../registry/registry-card.builders'
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 
-const PAGE_SIZE = 12;
+// Five a page: a card is a row of its own now, in the shape of an account
+// card, so a page of twelve ran well past the screen.
+const PAGE_SIZE = 5;
+
+/** The friends section, which a page turn scrolls back to. */
+export const RESULTS_ID = 'crew-manifest';
 
 /**
  * A friend alongside the card built for them.
@@ -129,6 +134,9 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
 
   /** Whether chat is switched on, for the Chat button on each card (FC-033). */
   isChatOffered = false;
+
+  /** Where the friends start, for a page turn to scroll back to. */
+  readonly resultsId = RESULTS_ID;
 
   tab: FriendsTab = 'friends';
   isLoading = false;
@@ -227,6 +235,17 @@ export class FriendsPageComponent implements OnInit, OnDestroy {
   loadPage(page: number): void {
     this.page = page;
     this.load();
+  }
+
+  /**
+   * Turns to another page, and brings the top of the results back into
+   * view, since the pagination sits beneath a page of cards.
+   *
+   * @param page - The 1-based page number.
+   */
+  turnPage(page: number): void {
+    this.loadPage(page);
+    document.getElementById(RESULTS_ID)?.scrollIntoView({ block: 'start' });
   }
 
   // ----- Loading -----

@@ -68,6 +68,7 @@
         this is, so the page does not carry the same heading twice.
       -->
       <app-collapsible-section
+        [id]="resultsId"
         heading="Crew Manifest"
         [badge]="total > 0 ? total : null">
         <div class="friends-inner-content">
@@ -89,7 +90,7 @@
               <app-lcars-pagination
                 [page]="page"
                 [pageCount]="totalPages"
-                (turn)="loadPage(page + $event)" />
+                (turn)="turnPage(page + $event)" />
             }
           }
 
