@@ -142,11 +142,13 @@ Key details:
 - **No npm packages or authentication required** - locally or in CI/CD
 - Icons are used via standard HTML `<i>` tags: `<i class="fas fa-icon-name"></i>`
 
-**Adding or removing icons:** change the kit on fontawesome.com, then refresh the copy and commit it:
+**Adding or removing icons:** change the kit on fontawesome.com, then refresh the copy and commit it. The kit ID is `5812c6b103`; it is not secret, because the kit only serves requests from the site's origin, and no environment variable holds it any more:
 
 ```sh
-FONT_AWESOME_KIT_ID=<kit id> npm run fa:update
+FONT_AWESOME_KIT_ID=5812c6b103 npm run fa:update
 ```
+
+Before committing, compare the icon classes in the old and new copies. A refresh should add or remove only the icons you changed in the kit.
 
 **Using icons:**
 

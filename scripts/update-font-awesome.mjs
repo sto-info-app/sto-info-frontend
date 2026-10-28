@@ -10,7 +10,7 @@
 // Run this after adding or removing icons in the kit on fontawesome.com, then
 // commit the result:
 //
-//   FONT_AWESOME_KIT_ID=<kit id> npm run fa:update
+//   FONT_AWESOME_KIT_ID=5812c6b103 npm run fa:update
 //
 // The kit only serves requests from an allowed origin, hence the Origin header.
 
