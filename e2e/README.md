@@ -151,8 +151,8 @@ bundled with the app, so icon-only controls, such as a section's Expand
 button or a voyage's Read link, get their glyph-sized box without a kit
 id. The
 backend repository is public, so its checkout needs no token. The named
-AWS secret must contain `dbPassword` and `jwtSecret`. `sendGridApiKey`
-may be left out: SES sends the mail, and SendGrid is only the fallback.
+AWS secret must contain `dbPassword` and `jwtSecret`; the backend sends
+mail through SES and reads no other email key.
 The `dbPassword` is also the password of the disposable Postgres the job
 starts. Postgres 18 and Redis 7 are pulled from the Docker Library mirror
 on the AWS public registry. The job signs in to that registry with the same

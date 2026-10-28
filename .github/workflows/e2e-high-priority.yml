@@ -156,8 +156,7 @@ jobs:
               print("AWS secret is not JSON")
               sys.exit(1)
 
-          # SES sends the mail. SendGrid is only the fallback, so its key
-          # may be absent from a test secret.
+          # The backend reads only these two; it sends mail through SES.
           missing = [
               key
               for key in ("dbPassword", "jwtSecret")
