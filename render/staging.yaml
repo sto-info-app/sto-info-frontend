@@ -48,10 +48,7 @@ services:
       - key: MINS_BEFORE_LOGOUT_EXPIRY_TO_REFRESH_TOKEN
         value: '15'
 
-      # Account identifiers, set in the dashboard. Without the kit, icon-only
-      # controls have no box.
-      - key: FONT_AWESOME_KIT_ID
-        sync: false
+      # Account identifiers, set in the dashboard.
       - key: COOKIE_YES_URL
         sync: false
       - key: GA_MEASUREMENT_ID

@@ -41,9 +41,7 @@ services:
         sync: false
       - key: MINS_BEFORE_LOGOUT_EXPIRY_TO_REFRESH_TOKEN
         sync: false
-      # Account identifiers. Without the kit, icon-only controls have no box.
-      - key: FONT_AWESOME_KIT_ID
-        sync: false
+      # Account identifiers.
       - key: COOKIE_YES_URL
         sync: false
       - key: GA_MEASUREMENT_ID

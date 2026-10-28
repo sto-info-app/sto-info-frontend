@@ -57,6 +57,7 @@
               }
             ],
             "styles": [
+              "vendor/font-awesome/kit.css",
               "src/styles/font-faces.scss",
               "src/styles/angular-mat-base.scss",
               "src/styles/lcars-theme.scss",

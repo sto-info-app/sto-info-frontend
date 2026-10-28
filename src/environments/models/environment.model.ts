@@ -9,7 +9,6 @@ export interface Environment {
   allowDebugging: boolean;
   minsBeforeLogoutExpiryToShowWarning: number;
   minsBeforeLogoutExpiryToRefreshToken: number;
-  fontAwesomeKitId?: string;
   cookieYesUrl?: string;
   gaMeasurementId?: string;
   logRocketAppId?: string;

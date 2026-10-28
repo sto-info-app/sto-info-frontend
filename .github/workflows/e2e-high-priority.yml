@@ -20,7 +20,7 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  NODE_VERSION: 24.21.0
+  NODE_VERSION: 24.22.1
 
 jobs:
   e2e:
@@ -42,7 +42,6 @@ jobs:
           DATASEED_USER_FIRSTNAME: ${{ secrets.DATASEED_USER_FIRSTNAME }}
           DATASEED_USER_LASTNAME: ${{ secrets.DATASEED_USER_LASTNAME }}
           DATASEED_USER_PASSWORD: ${{ secrets.DATASEED_USER_PASSWORD }}
-          FONT_AWESOME_KIT_ID: ${{ secrets.FONT_AWESOME_KIT_ID }}
         run: |
           set -euo pipefail
           missing=0
@@ -55,8 +54,7 @@ jobs:
             DATASEED_USER_USERNAME \
             DATASEED_USER_FIRSTNAME \
             DATASEED_USER_LASTNAME \
-            DATASEED_USER_PASSWORD \
-            FONT_AWESOME_KIT_ID
+            DATASEED_USER_PASSWORD
           do
             if [ -z "${!name}" ]; then
               echo "Missing required secret: ${name}"
@@ -102,7 +100,7 @@ jobs:
           persist-credentials: false
 
       - name: Use Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -158,8 +156,7 @@ jobs:
               print("AWS secret is not JSON")
               sys.exit(1)
 
-          # SES sends the mail. SendGrid is only the fallback, so its key
-          # may be absent from a test secret.
+          # The backend reads only these two; it sends mail through SES.
           missing = [
               key
               for key in ("dbPassword", "jwtSecret")
@@ -333,8 +330,6 @@ jobs:
           exit 1
 
       - name: Write the frontend environment
-        env:
-          FONT_AWESOME_KIT_ID: ${{ secrets.FONT_AWESOME_KIT_ID }}
         run: |
           set -euo pipefail
           mkdir -p src/environments
@@ -353,15 +348,11 @@ jobs:
             allowDebugging: false,
             minsBeforeLogoutExpiryToShowWarning: 5,
             minsBeforeLogoutExpiryToRefreshToken: 2,
-            fontAwesomeKitId: '__fontAwesomeKitId__',
             cookieYesUrl: 'https://cdn-cookieyes.com/client_data/test/script.js',
             gaMeasurementId: 'G-XXXXXXX',
             logRocketAppId: 'test/appid',
           };
           EOF
-          # Icon-only controls take their size from the Font Awesome glyph.
-          # Without the kit they have no box, and Playwright reports them hidden.
-          sed -i "s|__fontAwesomeKitId__|${FONT_AWESOME_KIT_ID}|" src/environments/environment.ts
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
@@ -422,7 +413,7 @@ jobs:
 
       - name: Upload the report
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: playwright-high-priority
           retention-days: 7

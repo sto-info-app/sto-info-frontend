@@ -56,7 +56,7 @@ Where this is configured:
   Headers" section.
 - It is currently applied to `/*` on production and dev. On tribble it was not sent with
   `/favicon.ico` when checked on 20 October 2026.
-- Admin/owner: a single site admin.
+- It is managed from a single administrator account.
 
 ### Other security headers (frontend static site)
 
