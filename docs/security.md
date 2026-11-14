@@ -16,12 +16,30 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key  | Forced version | Scope  | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| ------------- | -------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `argparse`    | `^2.0.1`       | Global | `sprintf-js` (GHSA-hp3w-g68c-fv3c, unbounded precision DoS) has **no patched release**. Its only consumer is `argparse@1`, reached through `jest-preset-angular` → `ts-jest` → `@jest/transform` → `babel-plugin-istanbul` → `@istanbuljs/load-nyc-config@1.1.0` → `js-yaml@3`. `argparse@2` dropped `sprintf-js`, and `js-yaml@3` only loads `argparse` from its `bin/js-yaml.js` CLI, which nothing here runs — `lib/` never requires it. Dev tree only. See the note below. |
-| `compression` | `1.8.2`        | Global | `serve@14.2.6` (the static server behind `scripts/lighthouse-audit.mjs`) exact-pins `compression@1.8.1` (GHSA-vc2v-76pw-4v95, memory leak on premature response close; fixed in `1.8.2`). Patch-level pin only. Dev tree only.                                                                                                                                                                                                                                                 |
-| `qs`          | `6.17.0`       | Global | `typed-rest-client@2.3.1`, which `@stryker-mutator/core@10.1.1` still pins, exact-pins `qs@6.15.1` (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g; vulnerable range `2.2.5 - 6.15.3`). `typed-rest-client@3` has moved to `qs@^6.16.0` on its own. Dev tree only.                                                                                                                                                                                              |
-| `vite`        | `8.3.5`        | Global | `@angular/build@22.2.4` exact-pins `vite@8.3.0`, inside the `8.3.0 - 8.3.2` range of the `launch-editor` advisories (GHSA-587h-7wmj-h5pm and others) and several Vite dev-server advisories. Patch-level pin only; the dev server and build both run on it.                                                                                                                                                                                                                    |
+| Override key                | Forced version | Scope                    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| --------------------------- | -------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `glob@>=9.0.0 <14.0.2`      | `^14.0.6`      | Vulnerable versions only | GHSA-3g3m-2fjr-6pw4 (moderate; an aborted glob walk keeps traversing the filesystem) covers every `glob` from `9.0.0` to `14.0.1` and was not backported. `test-exclude@7.0.2` (under `babel-plugin-istanbul`) asks for `glob@^10`, and `@jest/reporters`, `jest-config` and `jest-runtime` `30.5.2` for `glob@^13`. Added 2026-11-13. Dev tree only.                                                                                                                                   |
+| `minimatch@>=7.0.0 <11.0.1` | `^11.0.8`      | Vulnerable versions only | GHSA-g3hv-75wg-m249 (moderate; denial of service through pattern-part amplification) covers `minimatch` `7.0.0` to `11.0.0` and was not backported to 9.x or 10.x. `eslint@10.14.0`, `@eslint/config-array`, `@typescript-eslint/typescript-estree@8.72.2`, `test-exclude` and `@stryker-mutator/core@10.1.1` all ask for `minimatch@^10`. `serve-handler` keeps its own `minimatch@3.1.5`, which is outside the advisory and outside the key's range. Added 2026-11-13. Dev tree only. |
+| `qs`                        | `6.17.1`       | Global                   | `typed-rest-client@2.3.1`, which `@stryker-mutator/core@10.1.1` still pins, exact-pins `qs@6.15.1` (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g, GHSA-6pq8-jhm2-2vcw; vulnerable up to `6.16.0`). `typed-rest-client@3` has moved to `qs@^6.16.0` on its own. Raised from `6.17.0` on 2026-11-13 to track the current release. Dev tree only.                                                                                                                         |
+
+The `glob` and `minimatch` keys carry a version range, so each applies only to
+copies inside its advisory. Once every consumer asks for a fixed release the
+key matches nothing and can be deleted. Both move a dependency across a major
+version from what its parent declared, so lint, the build, the full Jest suite
+with coverage and the fuzz suite were run against them on 2026-11-13.
+
+### Overrides removed on 2026-11-13
+
+- `argparse` (`^2.0.1`) existed to drop `sprintf-js` from the tree for
+  GHSA-hp3w-g68c-fv3c. GitHub withdrew that advisory on 2026-10-22. `js-yaml@3`
+  (under `@istanbuljs/load-nyc-config`) is back on the `argparse@1` it
+  declares, `sprintf-js@1.0.3` is installed again, and `npm audit` does not
+  report it.
+- `compression` (`1.8.2`): `serve@14.2.8` pins `compression@1.8.2` itself.
+- `vite` (`8.3.5`): `@angular/build@22.2.7` pins `vite@8.3.5` itself.
+
+Each was checked by deleting the entry, resolving the tree again and
+re-running `npm audit`.
 
 ### Overrides removed with Lighthouse CI (2026-10-27)
 
@@ -35,24 +53,23 @@ only for it: `puppeteer-core@25` already depends on `@puppeteer/browsers@3`
 (so `extract-zip` stays out of the tree), and `jest-junit` resolves a patched
 `uuid@14` without help.
 
-### `argparse` — removing `sprintf-js` rather than pinning it
+## Known advisory with no remediation
 
-`sprintf-js` is flagged at **moderate** severity and has no fixed release
-(`<=1.1.3` is every version ever published). The override moves the one
-consumer, `js-yaml@3`, onto `argparse@2`, which does not use `sprintf-js` at
-all. That is safe because `js-yaml@3` only `require`s `argparse` inside
-`bin/js-yaml.js`, its command-line tool; the library entry point that
-`@istanbuljs/load-nyc-config` actually imports never touches it.
+### `deepmerge` (GHSA-gcqx-w48m-w2h4) — dev tree only, no fixed release
 
-**When it can be removed**: when `@istanbuljs/load-nyc-config` publishes a
-release on `js-yaml@4`. Check with:
+`jest` → `jest-config@30.5.2` → `deepmerge@4.3.1` is flagged at **low**
+severity for prototype poisoning of the object `mergeObject()` returns. The
+advisory covers `4.2.0` to `4.3.1` and `4.3.1` is the newest release, so there
+is nothing to pin to. Jest uses it to merge its own configuration, never
+untrusted input, and `npm audit --omit=dev` does not see it. `npm audit`
+counts it five times, once per package on its path.
+
+**When it can be remediated**: when `deepmerge` publishes a fix. Check with:
 
 ```sh
-npm view @istanbuljs/load-nyc-config@latest dependencies.js-yaml
-npm ls sprintf-js
+npm view deepmerge@latest version
+npm ls deepmerge
 ```
-
-## Known advisory with no remediation
 
 ### `braces` (GHSA-vfj7-8cjw-p6xm) — dev tree only, no fixed release
 
@@ -63,8 +80,8 @@ nothing to pin to and nothing to override; the audit's only suggestion is a
 downgrade to `stylelint@7.7.0`. `braces` is reached only through Stylelint's
 file globbing of the project's own `src/**/*.scss` patterns, never from
 untrusted input, and `npm audit --omit=dev` does not see it. As of 2026-10-27
-`npm audit` no longer reports it although `braces@3.0.3` is still installed, so
-re-check before deleting this note.
+`npm audit` no longer reports it although `braces@3.0.3` is still installed
+(still true on 2026-11-13), so re-check before deleting this note.
 
 **When it can be remediated**: when `braces` publishes a fix or `micromatch`
 drops it. Check with:
@@ -79,11 +96,11 @@ npm ls braces
 These are not `overrides` entries, but they are the reason `npm outdated` shows a
 newer `latest` that this project deliberately does not take.
 
-### `typescript` stays on `~6.0.3` (re-checked 2026-10-27)
+### `typescript` stays on `~6.0.3` (re-checked 2026-11-13)
 
 `typescript@7.0.2` is published, but it no longer ships the JavaScript compiler
 API (only `unstable/*` entry points), and the tools that load that API all gate
-on 6.x: `@angular/compiler-cli@22.2.3` and `typescript-eslint@8.72.1` declare
+on 6.x: `@angular/compiler-cli@22.2.6` and `typescript-eslint@8.72.2` declare
 `>=6.0 <6.1` / `<6.1.0`, and `ts-jest@29.4.15` `<7`. Dependabot ignores
 TypeScript majors for that reason (`.github/dependabot.yml`).
 
@@ -183,6 +200,10 @@ unused and has been removed — see [Unused dependencies removed](#unused-depend
 
 The following overrides were removed because they are no longer required:
 
+- **2026-11-13**: `argparse`, `compression`, `vite` — the `sprintf-js` advisory behind `argparse` was withdrawn, and `serve@14.2.8` and `@angular/build@22.2.7` now pin the patched `compression` and `vite` themselves. See [Overrides removed on 2026-11-13](#overrides-removed-on-2026-11-13).
+
+- **2026-10-27**: `@puppeteer/browsers`, `basic-ftp`, `tmp`, `uuid` — removed with `@lhci/cli`. See [Overrides removed with Lighthouse CI](#overrides-removed-with-lighthouse-ci-2026-10-27).
+
 - **2026-09-03**: `@hono/node-server` — `@angular/cli@22.1.7` now pulls `@modelcontextprotocol/sdk@1.30.0`, which resolves `@hono/node-server@2.0.11` on its own. Verified by deleting the entry, reinstalling, and confirming `npm ls @hono/node-server` still reports `2.0.11` with `npm audit` at 0.
 
 - **2026-08-05**: `brace-expansion`, `esbuild`, `js-yaml` — Verified redundant by removing overrides, reinstalling, and re-running `npm audit` + `npm audit --omit=dev`. Both audits remain at 0 with these entries removed.
@@ -198,18 +219,18 @@ The following overrides were removed because they are no longer required:
 Use these commands to confirm overrides are applied:
 
 ```bash
-npm ls @puppeteer/browsers extract-zip argparse sprintf-js basic-ftp compression qs tmp uuid
+npm ls glob minimatch qs compression vite
 npm audit --omit=dev
 npm audit
 ```
 
-If `npm ls` shows versions outside the table above, the lockfile may be stale or dependency constraints changed. `npm ls extract-zip` and `npm ls sprintf-js` should both report `(empty)`.
+If `npm ls` shows versions outside the table above, the lockfile may be stale or dependency constraints changed. No `glob` should be below `14.0.2` and no `minimatch` between `7.0.0` and `11.0.0`; `compression` should be `1.8.2` or later and `vite` `8.3.5` or later without an override.
 
-Current expected audit state (last verified 2026-10-06):
+Current expected audit state (last verified 2026-11-13):
 
 - `npm audit --omit=dev`: `0 vulnerabilities`.
-- `npm audit`: `5 high`, all of them the single `braces` advisory reported once per package on its path (`braces`, `micromatch`, `fast-glob`, `globby`, `stylelint`). See [Known advisory with no remediation](#known-advisory-with-no-remediation).
-- The active overrides only cover dependencies that still need forced versions; removing any one of the seven is expected to reintroduce an advisory. This was re-confirmed on 2026-10-06 by removing each entry in turn and re-auditing.
+- `npm audit`: `5 low`, all of them the single `deepmerge` advisory reported once per package on its path (`deepmerge`, `jest-config`, `@jest/core`, `jest`, `jest-cli`). See [Known advisory with no remediation](#known-advisory-with-no-remediation).
+- The active overrides only cover dependencies that still need forced versions; removing any one of the three reintroduces an advisory. This was re-confirmed on 2026-11-13 by removing each entry in turn and re-auditing.
 
 ## Update process
 
