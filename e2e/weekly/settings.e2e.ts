@@ -31,7 +31,7 @@ test.use({ storageState: { cookies: [], origins: [] } });
  */
 async function changeSetting(
   page: Page,
-  change: () => Promise<void>,
+  change: () => Promise<unknown>,
 ): Promise<void> {
   const kept = page.waitForResponse(
     response =>
