@@ -39,16 +39,15 @@ Automated security testing is performed on every pull request and on a regular s
 
 ## Known Dependency Advisory Follow-up
 
-The production audit gate (`npm audit --audit-level=high --omit=dev`) passes with **zero advisories at any severity** (last verified 2026-10-27), and so does the full dependency audit (`npm audit`). The last remaining development advisory, a `zod@3` denial of service (GHSA-mrhx-c7xc-m3w5) inside Lighthouse CI's pinned Lighthouse 12, went with the move from `@lhci/cli` to `lighthouse@13` on 2026-10-27. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is no longer reported, although `braces@3.0.3` is still installed; see `docs/security.md`.
+The production audit gate (`npm audit --audit-level=high --omit=dev`) passes, and `npm audit --omit=dev` reports **zero advisories at any severity** (last verified 2026-11-13). The full audit (`npm audit`) reports one development-only advisory with no patched release: `deepmerge` (GHSA-gcqx-w48m-w2h4, low), reached through `jest` → `jest-config`. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is not reported, although `braces@3.0.3` is still installed. See `docs/security.md` for both.
 
 Active overrides are intentionally limited to advisories that still require forced transitive versions, all of them in the development tree:
 
-- `argparse` for GHSA-hp3w-g68c-fv3c (`sprintf-js`, no fixed release — the override removes it from the tree).
-- `compression` for GHSA-vc2v-76pw-4v95.
-- `qs` for GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx and GHSA-4mjr-xmp4-gh2g.
-- `vite` for the `launch-editor` and Vite dev-server advisories in `8.3.0 - 8.3.2` (GHSA-587h-7wmj-h5pm and others), because `@angular/build` pins `vite@8.3.0` exactly.
+- `glob` (versions `9.0.0` to `14.0.1` only) for GHSA-3g3m-2fjr-6pw4.
+- `minimatch` (versions `7.0.0` to `11.0.0` only) for GHSA-g3hv-75wg-m249.
+- `qs` for GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g and GHSA-6pq8-jhm2-2vcw.
 
-The `@puppeteer/browsers`, `basic-ftp`, `tmp` and `uuid` overrides existed only for `@lhci/cli` and were removed with it on 2026-10-27.
+The `argparse`, `compression` and `vite` overrides were removed on 2026-11-13: the `sprintf-js` advisory behind `argparse` (GHSA-hp3w-g68c-fv3c) was withdrawn, and `serve` and `@angular/build` now pin the patched `compression` and `vite` themselves. The `@puppeteer/browsers`, `basic-ftp`, `tmp` and `uuid` overrides existed only for `@lhci/cli` and were removed with it on 2026-10-27.
 
 ### Runtime and CA trust (2026-10-27)
 

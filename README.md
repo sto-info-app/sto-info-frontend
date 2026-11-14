@@ -60,9 +60,9 @@ This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `pa
 
 ### Runtime and dependency versions
 
-Development and CI use Node.js `24.22.1`, selected by `.nvmrc` and enforced by the `package.json` engine range (`>=24.22.1 <25`). The dependency lockfile is refreshed with the compatible Angular 22.2.3/22.2.4 releases and current compatible tooling versions.
+Development and CI use Node.js `24.22.1`, selected by `.nvmrc` and enforced by the `package.json` engine range (`>=24.22.1 <25`). The dependency lockfile is refreshed with the compatible Angular 22.2.6/22.2.7 releases and current compatible tooling versions.
 
-The `package.json` overrides are intentional security pins for transitive dependencies: `argparse` keeps `sprintf-js` out of the Jest tree, `compression` patches the `serve` static server used by the Lighthouse audit, `qs` patches Stryker’s `typed-rest-client`, and `vite` patches the version `@angular/build` pins. See `docs/security.md` for the advisories behind each.
+The `package.json` overrides are intentional security pins for transitive dependencies: `glob` and `minimatch` lift the vulnerable copies under Jest, ESLint and Stryker onto patched releases, and `qs` patches Stryker’s `typed-rest-client`. See `docs/security.md` for the advisories behind each.
 
 ## Development server
 

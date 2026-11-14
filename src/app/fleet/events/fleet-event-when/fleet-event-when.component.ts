@@ -23,8 +23,9 @@ import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
   template: `<span class="fleet-event-when">
     <time [attr.datetime]="startsAt()">{{
       startsAt() | appDate: 'EEE d MMM y, HH:mm'
+    }}</time>–<time [attr.datetime]="endsAt()">{{
+      endsAt() | appDate: 'HH:mm'
     }}</time
-    >–<time [attr.datetime]="endsAt()">{{ endsAt() | appDate: 'HH:mm' }}</time
     >&ngsp;<span class="fleet-event-when__zone">{{ zoneNote() }}</span>
   </span>`,
   styleUrls: ['./fleet-event-when.component.scss'],
