@@ -39,7 +39,7 @@ Automated security testing is performed on every pull request and on a regular s
 
 ## Known Dependency Advisory Follow-up
 
-The production audit gate (`npm audit --audit-level=high --omit=dev`) passes, and `npm audit --omit=dev` reports **zero advisories at any severity** (last verified 2026-11-13). The full audit (`npm audit`) reports one development-only advisory with no patched release: `deepmerge` (GHSA-gcqx-w48m-w2h4, low), reached through `jest` → `jest-config`. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is not reported, although `braces@3.0.3` is still installed. See `docs/security.md` for both.
+Both the production audit gate (`npm audit --audit-level=high --omit=dev`) and the full dependency audit (`npm audit`) report **zero advisories at any severity** (last verified 2026-11-22). The `deepmerge` advisory (GHSA-gcqx-w48m-w2h4), which Jest still brings in through `jest-config`, was withdrawn on 2026-11-16. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is not reported, although `braces@3.0.3` is still installed. See `docs/security.md` for both.
 
 Active overrides are intentionally limited to advisories that still require forced transitive versions, all of them in the development tree:
 
@@ -52,6 +52,10 @@ The `argparse`, `compression` and `vite` overrides were removed on 2026-11-13: t
 ### Runtime and CA trust (2026-10-27)
 
 In October 2026 the private keys of eight eMudhra (emSign) intermediate certificates were confirmed compromised, and Node.js shipped security releases that distrust them. The frontend is a static site, so the runtime exposure is in the build and tooling, which run on Node: development, CI and the Render build all moved to **Node.js `24.22.1`** (`.nvmrc`, the engine range and every workflow), and the SonarQube scan action to `v8.4.0`. Font Awesome is now bundled from a committed stylesheet (`vendor/font-awesome/kit.css`) rather than loaded from `kit.fontawesome.com` at runtime, which removes one third-party script from every page.
+
+### Node.js 24.22.3 (2026-11-22)
+
+Node.js 24.22.3, released on 2026-11-10, is a security release fixing nine high-severity TLS and HTTP/2 flaws, among them a remotely reachable TLS server crash (CVE-2026-126051) and TLS resumption or renegotiation changing the SNI (CVE-2026-123872). Development, CI and the Render build moved to **Node.js `24.22.3`** (`.nvmrc`, the engine range, every workflow and the setup-project action).
 
 The current override inventory, rationale, and removal criteria are documented in `docs/security.md`.
 

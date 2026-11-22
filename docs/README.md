@@ -41,7 +41,7 @@ Supporting docs:
 
 ### Prerequisites
 
-- Node.js `24.22.1` or a later 24.x, as pinned in [.nvmrc](../.nvmrc) and the [package.json](../package.json) engine range (`>=24.22.1 <25`). 24.22.1 is the October 2026 security release that stops trusting the compromised eMudhra intermediate certificates.
+- Node.js `24.22.3` or a later 24.x, as pinned in [.nvmrc](../.nvmrc) and the [package.json](../package.json) engine range (`>=24.22.3 <25`). 24.22.3 is the November 2026 security release.
 - npm
 
 ### Toolchain compatibility notes
