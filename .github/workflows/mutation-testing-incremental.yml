@@ -56,7 +56,9 @@ jobs:
     # wide-touching PR can approach a full run of this repo's ~220 mutatable
     # files, which the 90 minute budget here could not have absorbed. Sized to
     # let such a PR finish rather than be gated on nothing, while still acting
-    # as a backstop against a genuinely hung run.
+    # as a backstop against a genuinely hung run. A diff wider than
+    # MUTATION_MAX_FILES (set on the run step) goes to the full run instead:
+    # the Fleet PR's 315 files made 23,070 mutants, far beyond this budget.
     timeout-minutes: 240
     permissions:
       contents: read
@@ -127,7 +129,7 @@ jobs:
           git fetch origin "$PR_BASE_REF"
 
           # Compute and run incremental mutation testing (exits 0 when nothing to mutate)
-          BASE_REF="origin/$PR_BASE_REF" npm run test:mutation:incremental
+          BASE_REF="origin/$PR_BASE_REF" MUTATION_MAX_FILES=100 npm run test:mutation:incremental
 
       - name: Upload Mutation Report
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
