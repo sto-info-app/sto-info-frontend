@@ -30,7 +30,7 @@ SonarCloud performs deep code analysis, focusing on Security Hotspots and vulner
 - **Findings**: Results are linked from PR checks to the SonarCloud dashboard.
 - **Rules**: We enforce a set of security-specific rules (e.g., preventing hardcoded secrets) to catch common errors.
 - **Remediation**: Review the 'Vulnerabilities' tab in SonarCloud. High-risk issues must be fixed or marked as 'Safe' by a maintainer before the Quality Gate passes.
-- **Scanner**: `SonarSource/sonarqube-scan-action`, pinned by commit SHA in `lint-test.yml`. Raised to `v8.4.0` (SonarScanner CLI `8.3.0`) on 2026-10-27 following Sonar's eMudhra certificate advisory.
+- **Scanner**: `SonarSource/sonarqube-scan-action`, pinned by commit SHA in `lint-test.yml`. Currently `v8.5.0`, raised on 2026-11-22. It moved to `v8.4.0` (SonarScanner CLI `8.3.0`) on 2026-10-27 following Sonar's eMudhra certificate advisory.
 
 ## npm audit
 

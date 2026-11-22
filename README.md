@@ -49,7 +49,7 @@
 [![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend?branch=development&label=licence)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](CONTRIBUTORS.md)
 [![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
-[![Node](https://img.shields.io/badge/node-24.22.1-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
+[![Node](https://img.shields.io/badge/node-24.22.3-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Written language](https://img.shields.io/badge/written%20language-en--GB-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/README.md)
 
 ## Project overview
@@ -60,7 +60,7 @@ This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `pa
 
 ### Runtime and dependency versions
 
-Development and CI use Node.js `24.22.1`, selected by `.nvmrc` and enforced by the `package.json` engine range (`>=24.22.1 <25`). The dependency lockfile is refreshed with the compatible Angular 22.2.6/22.2.7 releases and current compatible tooling versions.
+Development and CI use Node.js `24.22.3`, selected by `.nvmrc` and enforced by the `package.json` engine range (`>=24.22.3 <25`). The dependency lockfile is refreshed with the compatible Angular 22.3.0 releases and current compatible tooling versions.
 
 The `package.json` overrides are intentional security pins for transitive dependencies: `glob` and `minimatch` lift the vulnerable copies under Jest, ESLint and Stryker onto patched releases, and `qs` patches Stryker’s `typed-rest-client`. See `docs/security.md` for the advisories behind each.
 

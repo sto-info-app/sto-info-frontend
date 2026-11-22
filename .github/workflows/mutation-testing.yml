@@ -9,12 +9,12 @@ on:
 permissions: {}
 
 env:
-  NODE_VERSION: 24.22.1
+  NODE_VERSION: 24.22.3
 
 jobs:
   stryker_full:
     name: Full Mutation Analysis
-    if: github.actor != 'dependabot[bot]'
+    if: github.event.pull_request.user.login != 'dependabot[bot]'
     runs-on: ubuntu-latest
     # This run has been creeping towards its budget for months (89m, 75m, 120m,
     # 121m, 118m) and was cancelled at the 180 minute mark on 2026-08-30. Full

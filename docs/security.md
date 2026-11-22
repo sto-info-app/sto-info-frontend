@@ -55,21 +55,12 @@ only for it: `puppeteer-core@25` already depends on `@puppeteer/browsers@3`
 
 ## Known advisory with no remediation
 
-### `deepmerge` (GHSA-gcqx-w48m-w2h4) — dev tree only, no fixed release
+### `deepmerge` (GHSA-gcqx-w48m-w2h4) — withdrawn 2026-11-16
 
-`jest` → `jest-config@30.5.2` → `deepmerge@4.3.1` is flagged at **low**
-severity for prototype poisoning of the object `mergeObject()` returns. The
-advisory covers `4.2.0` to `4.3.1` and `4.3.1` is the newest release, so there
-is nothing to pin to. Jest uses it to merge its own configuration, never
-untrusted input, and `npm audit --omit=dev` does not see it. `npm audit`
-counts it five times, once per package on its path.
-
-**When it can be remediated**: when `deepmerge` publishes a fix. Check with:
-
-```sh
-npm view deepmerge@latest version
-npm ls deepmerge
-```
+`jest` → `jest-config` → `deepmerge@4.3.1` was flagged at **low** severity
+for prototype poisoning of the object `mergeObject()` returns. GitHub withdrew
+the advisory on 2026-11-16, so `npm audit` no longer reports it. No fixed
+release was published: `4.3.1` is still the newest `deepmerge`.
 
 ### `braces` (GHSA-vfj7-8cjw-p6xm) — dev tree only, no fixed release
 
@@ -226,11 +217,11 @@ npm audit
 
 If `npm ls` shows versions outside the table above, the lockfile may be stale or dependency constraints changed. No `glob` should be below `14.0.2` and no `minimatch` between `7.0.0` and `11.0.0`; `compression` should be `1.8.2` or later and `vite` `8.3.5` or later without an override.
 
-Current expected audit state (last verified 2026-11-13):
+Current expected audit state (last verified 2026-11-22):
 
 - `npm audit --omit=dev`: `0 vulnerabilities`.
-- `npm audit`: `5 low`, all of them the single `deepmerge` advisory reported once per package on its path (`deepmerge`, `jest-config`, `@jest/core`, `jest`, `jest-cli`). See [Known advisory with no remediation](#known-advisory-with-no-remediation).
-- The active overrides only cover dependencies that still need forced versions; removing any one of the three reintroduces an advisory. This was re-confirmed on 2026-11-13 by removing each entry in turn and re-auditing.
+- `npm audit`: `0 vulnerabilities`. The `deepmerge` advisory it used to report was withdrawn on 2026-11-16; see [Known advisory with no remediation](#known-advisory-with-no-remediation).
+- The active overrides only cover dependencies that still need forced versions; removing any one of the three reintroduces an advisory. This was re-confirmed on 2026-11-22 by removing each entry in turn and re-auditing.
 
 ## Update process
 
