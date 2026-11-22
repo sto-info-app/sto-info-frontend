@@ -26,7 +26,12 @@
   &:hover,
   &:focus-visible {
     color: vars.$lcars-white;
-    transform: rotate(45deg);
+
+    // The cog turns only for those who have not asked for less motion; the
+    // colour change marks the hover either way.
+    @media (prefers-reduced-motion: no-preference) {
+      transform: rotate(45deg);
+    }
   }
 
   &:focus-visible {
