@@ -1,3 +1,5 @@
+/* stylelint-disable color-no-hex, function-disallowed-list -- the one file colours are defined in */
+
 // The single place any colour is written down.
 // Every other stylesheet names a colour from here — `color: vars.$lcars-ice`,
 // a tint as `vars.$white-a10` or `color.change(vars.$lcars-c46, $alpha: 0.2)` —

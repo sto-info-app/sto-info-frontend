@@ -30,13 +30,6 @@
       "rules": {
         "selector-class-pattern": null
       }
-    },
-    {
-      "files": ["src/styles/_lcars-variables.scss", "src/styles/angular-mat-base.scss"],
-      "rules": {
-        "color-no-hex": null,
-        "function-disallowed-list": null
-      }
     }
   ]
 }
