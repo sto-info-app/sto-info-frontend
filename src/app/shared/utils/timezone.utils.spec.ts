@@ -79,18 +79,48 @@ describe('timezone utils', () => {
      * An older runtime gets a short list rather than an empty control. A picker
      * with nothing in it is worse than one with only the obvious answers.
      */
-    it('falls back to UTC and the device zone without supportedValuesOf', () => {
+    describe('without supportedValuesOf', () => {
       const original = Intl.supportedValuesOf;
-      (Intl as { supportedValuesOf?: unknown }).supportedValuesOf = undefined;
+      const resolvedOptions = Intl.DateTimeFormat.prototype.resolvedOptions;
 
-      try {
+      /**
+       * Pins the device's zone, so the result does not depend on where the
+       * suite runs: CI runs in UTC, which the list already starts with.
+       *
+       * @param timeZone - The zone the device should report.
+       */
+      function deviceIn(timeZone: string): void {
+        jest
+          .spyOn(Intl.DateTimeFormat.prototype, 'resolvedOptions')
+          .mockImplementation(function (this: Intl.DateTimeFormat) {
+            return { ...resolvedOptions.call(this), timeZone };
+          });
+      }
+
+      beforeEach(() => {
+        (Intl as { supportedValuesOf?: unknown }).supportedValuesOf = undefined;
+      });
+
+      afterEach(() => {
+        (Intl as { supportedValuesOf?: unknown }).supportedValuesOf = original;
+        jest.restoreAllMocks();
+      });
+
+      it('falls back to UTC and the device zone', () => {
+        deviceIn('Europe/London');
+
+        expect(deviceTimezone()).toBe('Europe/London');
         expect(availableTimezones()).toEqual([
           FALLBACK_TIMEZONE,
-          deviceTimezone(),
+          'Europe/London',
         ]);
-      } finally {
-        (Intl as { supportedValuesOf?: unknown }).supportedValuesOf = original;
-      }
+      });
+
+      it('lists UTC once when the device is in UTC', () => {
+        deviceIn(FALLBACK_TIMEZONE);
+
+        expect(availableTimezones()).toEqual([FALLBACK_TIMEZONE]);
+      });
     });
   });
 
