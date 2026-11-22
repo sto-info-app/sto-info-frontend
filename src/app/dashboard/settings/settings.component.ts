@@ -221,6 +221,10 @@ export class SettingsComponent implements OnInit, OnDestroy {
   private readonly _sections = viewChildren(CollapsibleSectionComponent);
   private readonly _sectionElements = viewChildren(
     CollapsibleSectionComponent,
+    // Angular's JIT compiler needs a plain object literal here, so the
+    // mutant switch Stryker wraps around it fails every spec that loads this
+    // component before a single mutant runs.
+    // Stryker disable next-line ObjectLiteral
     { read: ElementRef<HTMLElement> },
   );
 
