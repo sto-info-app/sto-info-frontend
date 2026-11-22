@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
@@ -13,7 +13,9 @@ import {
   CustomTrackingImageShapeSpec,
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
-import { ImageCropperBaseComponent } from 'src/app/shared/base/image-cropper-base.component';
+import { DescribedImageCropperBaseComponent } from 'src/app/shared/base/described-image-cropper-base.component';
+import { AssetScanStatusComponent } from 'src/app/shared/components/asset-scan-status/asset-scan-status.component';
+import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
@@ -66,9 +68,11 @@ export interface CustomTrackingImageDialogData {
     MatDialogModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    AssetScanStatusComponent,
+    LcarsWarningMessageComponent,
   ],
 })
-export class CustomTrackingImageDialogComponent extends ImageCropperBaseComponent {
+export class CustomTrackingImageDialogComponent extends DescribedImageCropperBaseComponent {
   protected override readonly _dialogRef = inject(
     MatDialogRef<CustomTrackingImageDialogComponent>,
   );
@@ -82,15 +86,10 @@ export class CustomTrackingImageDialogComponent extends ImageCropperBaseComponen
   /** The ratio the crop is locked to, as the cropper wants it. */
   readonly aspectRatio = this.spec.aspectWidth / this.spec.aspectHeight;
 
-  /** What the picture shows, which travels with the upload. */
-  altText = this.data.currentAlt ?? '';
-
   /** The longest description the server accepts. */
   readonly altMaxLength = this.data.altMaxLength;
 
   private readonly _customTracking = inject(CustomTrackingService);
-  private readonly _ngZone = inject(NgZone);
-  private readonly _cdr = inject(ChangeDetectorRef);
 
   /**
    * Creates the dialog, taking its crop rules from the served shape.
@@ -98,14 +97,17 @@ export class CustomTrackingImageDialogComponent extends ImageCropperBaseComponen
   constructor() {
     super();
 
-    this.outputFormat = this.spec.outputFormat;
-    this.minimumCroppedWidth = this.spec.minimumWidth;
-    this.minimumCroppedHeight = this.spec.minimumHeight;
-    // The size a custom picture is delivered at is the size it must reach:
-    // one variant, so anything smaller would be enlarged everywhere it is
-    // shown rather than only in the largest rendering.
-    this.recommendedCroppedWidth = this.spec.minimumWidth;
-    this.recommendedCroppedHeight = this.spec.minimumHeight;
+    this.altText = this.data.currentAlt ?? '';
+    this.holdCropTo({
+      minimumWidth: this.spec.minimumWidth,
+      minimumHeight: this.spec.minimumHeight,
+      // The size a custom picture is delivered at is the size it must reach:
+      // one variant, so anything smaller would be enlarged everywhere it is
+      // shown rather than only in the largest rendering.
+      recommendedWidth: this.spec.minimumWidth,
+      recommendedHeight: this.spec.minimumHeight,
+      outputFormat: this.spec.outputFormat,
+    });
   }
 
   /** @returns The shape and size requirement, as the user is told it. */
@@ -122,65 +124,40 @@ export class CustomTrackingImageDialogComponent extends ImageCropperBaseComponen
   }
 
   /**
-   * Whether the upload button should do anything yet.
+   * Fetches the stored picture and closes with it.
    *
-   * @returns True when there is a crop and a description to send with it.
+   * The editor behind expects the answer the server holds, which does not
+   * exist until the scan clears: an image answer is a row, and the row is
+   * written at publication rather than at upload.
    */
-  get canUpload(): boolean {
-    return (
-      this.croppedImage !== '' &&
-      this.altText.trim().length > 0 &&
-      !this.isSubmitting
-    );
+  protected override closeWithPublished(): void {
+    this._customTracking
+      .findImage(this.data.fieldId, this.data.scope, this.data.targetId)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: (stored: CustomTrackingImageAnswer | null) =>
+          this._dialogRef.close(stored ?? true),
+        // The picture is published either way, so the editor is told to
+        // reload rather than told the upload failed.
+        error: () => this._dialogRef.close(true),
+      });
   }
 
   /**
-   * Sends the crop and its description, closing with the stored picture.
+   * Sends the crop and its description, and follows it until it is in use.
    */
   onUploadImageClick(): void {
-    if (!this.validateCroppedImage()) {
-      return;
-    }
-
-    const description = this.altText.trim();
-
-    if (!description) {
-      this.displayErrorMessage('Please describe what the image shows.');
-      return;
-    }
-
-    this.isSubmitting = true;
-
-    this._customTracking
-      .uploadImage(
-        this.data.fieldId,
-        this.data.scope,
-        this.data.targetId,
-        this.croppedImageBlob as Blob,
-        description,
-        this.fileName,
-      )
-      .pipe(observeInZone(this._ngZone, this._cdr))
-      .subscribe({
-        next: (stored: CustomTrackingImageAnswer) => {
-          this.isSubmitting = false;
-          // Closed with what the server stored rather than with `true`, so the
-          // editor behind shows the picture that actually landed instead of
-          // guessing at the address Cloudflare will serve it from.
-          this._dialogRef.close(stored);
-        },
-        error: (error: { status: number; error?: { message?: string } }) => {
-          this.isSubmitting = false;
-
-          const message = error.error?.message;
-
-          if (message) {
-            this.displayErrorMessage(message);
-            return;
-          }
-
-          this.handleHttpError(error);
-        },
-      });
+    this.uploadDescribed(
+      'Please describe what the image shows.',
+      (image, description) =>
+        this._customTracking.uploadImage(
+          this.data.fieldId,
+          this.data.scope,
+          this.data.targetId,
+          image,
+          description,
+          this.fileName,
+        ),
+    );
   }
 }

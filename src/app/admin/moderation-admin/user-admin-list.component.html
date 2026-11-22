@@ -7,6 +7,9 @@
   class="admin-layout">
   <div class="admin-content admin-main-column">
     <h1>Manage Members</h1>
+    <app-help-link
+      slug="site-admin-members-and-permissions"
+      label="Help with members" />
     <p class="admin-page-intro">
       Find an account and disable or restore it. Disabling signs the member out
       immediately, keeps them from signing in again and closes every open report
@@ -25,19 +28,15 @@
         [message]="successMessage"></app-lcars-success-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span class="title-with-badge">
-          Members
-          @if (total > 0) {
-            <span class="header-count-badge">{{ total }}</span>
-          }
-        </span>
-      </div>
-
-      <div class="admin-panel">
-        <div class="form-row compact">
-          <div class="lcars-select-container sunflower">
+    <app-collapsible-section
+      heading="Members"
+      barClass="small-lcars-bar-gap"
+      [badge]="total > 0 ? total : null">
+      <app-lcars-panel
+        heading="Filters"
+        [collapsible]="true">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="user-disabled-filter"
@@ -56,7 +55,7 @@
             </select>
           </div>
 
-          <div class="lcars-input-container bluey">
+          <div class="lcars-input-container">
             <label for="user-search-input">Search by email or username</label>
             <input
               id="user-search-input"
@@ -71,13 +70,13 @@
         <div class="admin-form-actions">
           <button
             type="button"
-            class="lcars-btn green"
+            class="lcars-btn"
             [disabled]="isLoading"
             (click)="applyFilters()">
             Apply
           </button>
         </div>
-      </div>
+      </app-lcars-panel>
 
       @if (!isLoading && users.length === 0) {
         <p class="records-empty">No members match this search.</p>
@@ -120,49 +119,49 @@
                 <div class="moderation-record-main">
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
-                      <span class="label">Role</span>
-                      <span
+                      <dt class="label">Role</dt>
+                      <dd
                         class="value member-role"
                         [ngClass]="'role-' + roleModifier(user)"
-                        >{{ roleLabel(user) }}</span
+                        >{{ roleLabel(user) }}</dd
                       >
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Email</span>
-                      <span
+                      <dt class="label">Email</dt>
+                      <dd
                         class="value member-email"
                         [class.privacy-blur]="privacyMode.isEnabled()"
-                        >{{ user.email }}</span
+                        >{{ user.email }}</dd
                       >
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Registered</span>
-                      <span class="value">
-                        {{ user.createdAt | date: dateTimeFormat }}
-                      </span>
+                      <dt class="label">Registered</dt>
+                      <dd class="value">
+                        {{ user.createdAt | appDate: dateTimeFormat }}
+                      </dd>
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Last signed in</span>
-                      <span class="value">
+                      <dt class="label">Last signed in</dt>
+                      <dd class="value">
                         {{
                           user.lastLoginAt
-                            ? (user.lastLoginAt | date: dateTimeFormat)
+                            ? (user.lastLoginAt | appDate: dateTimeFormat)
                             : 'Never'
                         }}
-                      </span>
+                      </dd>
                     </div>
                     @if (user.isAccountDisabled) {
                       <div class="admin-record-detail">
-                        <span class="label">Disabled</span>
-                        <span class="value">
-                          {{ user.disabledAt | date: dateTimeFormat }}
-                        </span>
+                        <dt class="label">Disabled</dt>
+                        <dd class="value">
+                          {{ user.disabledAt | appDate: dateTimeFormat }}
+                        </dd>
                       </div>
                       <div class="admin-record-detail">
-                        <span class="label">Reason</span>
-                        <span class="value">
+                        <dt class="label">Reason</dt>
+                        <dd class="value">
                           {{ user.disabledReason ?? 'None recorded' }}
-                        </span>
+                        </dd>
                       </div>
                     }
                   </dl>
@@ -172,7 +171,7 @@
                   @if (user.isAccountDisabled) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="enable(user)"
                       title="Restore this account"
                       aria-label="Restore this account"
@@ -194,7 +193,7 @@
           }
         </div>
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -203,17 +202,17 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
         >Reported officers</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_PERMISSIONS"
         >Manage permissions</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

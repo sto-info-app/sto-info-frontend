@@ -9,6 +9,7 @@ import {
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -21,6 +22,7 @@ import {
   UpdateBannerRequest,
 } from 'src/app/models/notification.models';
 import { NotificationService } from 'src/app/notifications/notification.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** Maximum number of characters allowed in a banner message. */
 export const BANNER_MESSAGE_MAX_LENGTH = 2000;
@@ -38,8 +40,10 @@ export const BANNER_MESSAGE_MAX_LENGTH = 2000;
     ReactiveFormsModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class BannerAdminFormComponent implements OnInit {

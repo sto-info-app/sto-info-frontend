@@ -13,7 +13,13 @@ import {
   CONTENT_RATING_LABELS,
   ContentRating,
 } from 'src/app/models/storytime.models';
+import { PRESENCE_OPTIONS } from 'src/app/dashboard/settings/settings.constants';
+import { FLEET_FEATURE_NAME } from 'src/app/fleet/constants/fleet-feature.constants';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  DEFAULT_SESSION_TIMEOUT_MINUTES,
+  SESSION_TIMEOUT_OPTIONS,
+} from 'src/app/shared/constants/session-timeout.constants';
 import {
   MARKDOWN_REFERENCE,
   MARKDOWN_REFERENCE_NOTES,
@@ -25,23 +31,17 @@ import {
   TAG_CATEGORY_LABELS,
 } from 'src/app/storytime/storytime.constants';
 
+import { FLEETS_TOPIC } from './help-fleets.data';
+import { guideSection } from './help-section';
+import { SITE_ADMIN_TOPIC } from './help-site-admin.data';
 import {
+  HelpFeature,
+  HelpFeatures,
   HelpGuide,
   HelpGuideLocation,
   HelpGuideSection,
   HelpTopic,
 } from './help.models';
-
-/** Builds a prose section with optional bullet points. */
-function guideSection(
-  heading: string,
-  paragraphs: string[],
-  points?: string[],
-): HelpGuideSection {
-  return points === undefined
-    ? { heading, paragraphs }
-    : { heading, paragraphs, points };
-}
 
 /**
  * The links several guides finish with.
@@ -216,7 +216,6 @@ const COMMUNITY_TOPIC: HelpTopic = {
   title: 'Community',
   intro:
     'The Galactic Personnel Registry is the public side of STO Info: the officers who have chosen to be listed, and the friends you keep there.',
-  requiresStorytime: false,
   guides: [
     {
       slug: 'the-galactic-personnel-registry',
@@ -264,7 +263,7 @@ const COMMUNITY_TOPIC: HelpTopic = {
         'Opting in, deciding what is shown account by account, and opting out again.',
       sections: [
         guideSection('Opt in from your profile', [
-          'Go to your profile, edit your personal details, and turn on “Show me in the Galactic Personnel Registry”. Your profile page tells you which way the switch is set at any time.',
+          'Go to your profile, edit your personal details, and turn on “Show me in the Galactic Personnel Registry”. The same switch is on the Account tab of Settings, saved as soon as you change it; the cog beside the registry on your profile, the registry itself and the Community page goes there. Your profile page tells you which way the switch is set at any time.',
           'Nothing about you appears anywhere in the registry until you do this.',
         ]),
         guideSection(
@@ -388,7 +387,6 @@ const CUSTOM_TRACKING_TOPIC: HelpTopic = {
   title: 'Custom Tracking',
   intro:
     'Custom Tracking lets you decide what STO Info records about your own accounts and captains. You write the fields once, and then fill them in for each account or captain you have.',
-  requiresStorytime: false,
   guides: [
     {
       slug: 'what-custom-tracking-is',
@@ -562,6 +560,8 @@ const CUSTOM_TRACKING_TOPIC: HelpTopic = {
         guideSection('Deleting, and the 180 days', [
           'Deleting a section, tab or field takes the answers recorded against it as well — across every account or captain, not only the one you happen to be looking at. The confirmation counts the tabs, fields and recorded answers that would go before you agree to it, because “delete this section” and “delete this section and sixty-three answers” are different decisions.',
           'Deleted definitions and answers are kept for 180 days and are then removed for good. None of it can be undone from the page itself, so if you delete something by mistake, ask us within that window.',
+          'Pictures are the exception. A picture recorded in a deleted field is taken down at once, so it cannot be put back.',
+          'Deleting an STO account or a captain does the same to what you recorded about it: the answers go 180 days later, and any pictures at once.',
         ]),
       ],
       relatedLinks: [
@@ -589,7 +589,7 @@ const STORYTIME_TOPIC: HelpTopic = {
   title: 'STO Storytime',
   intro:
     'Storytime is where the community writes and reads Star Trek Online fan fiction. These guides cover reading, writing and sharing.',
-  requiresStorytime: true,
+  requiresFeature: 'STORYTIME',
   guides: [
     {
       slug: 'what-is-storytime',
@@ -974,7 +974,7 @@ const STORYTIME_ADMIN_GUIDES: HelpGuide[] = [
         ],
         [
           'Claim — takes an open report so another moderator does not work the same one. It decides nothing.',
-          'Remove the content — takes the work away from readers and sends the creator your message. It needs that message first.',
+          'Remove the content — takes the work away from readers, sends the creator your message, and closes every open report about it as actioned. It needs that message first.',
           'Dismiss — closes the report without touching the content. Use it when the report is wrong, not when you are unsure.',
         ],
       ),
@@ -1080,8 +1080,258 @@ const STORYTIME_ADMIN_TOPIC: HelpTopic = {
   title: 'Running Storytime',
   intro:
     'For the people who moderate Storytime, choose what it features, and keep its tag list. Each guide covers one of those jobs, and you are shown the ones you have been given.',
-  requiresStorytime: true,
+  requiresFeature: 'STORYTIME',
   guides: STORYTIME_ADMIN_GUIDES,
+};
+
+/** Where the settings guides send a reader back to. */
+const SETTINGS_LINK = {
+  label: 'Your settings',
+  route: APP_ROUTES.STO_DASHBOARD_SETTINGS,
+};
+
+/**
+ * The inactivity timeout's choices, worded as the form words them, with the
+ * default marked. Derived, so the guide cannot offer a length the form does
+ * not.
+ */
+const SESSION_TIMEOUT_CHOICES: string = SESSION_TIMEOUT_OPTIONS.map(option =>
+  option.value === DEFAULT_SESSION_TIMEOUT_MINUTES
+    ? `${option.label} (the default)`
+    : option.label,
+).join(', ');
+
+/** Who may see you online, worded as the form words it. */
+const PRESENCE_LABEL: Readonly<Record<string, string>> = Object.fromEntries(
+  PRESENCE_OPTIONS.map(option => [option.value, option.label]),
+);
+
+/**
+ * The STO Info settings guides (FC-049).
+ *
+ * One guide for each part of the Settings page, in the order its tabs and
+ * sections show them, and one about the page itself. Each section's heading
+ * on the page links to its guide, and each guide links back.
+ *
+ * The labels are the form's own, and those the form draws from a list are
+ * drawn from the same list here. The guides about Fleet controls wait on
+ * Fleet Community, and their parts about chat wait on chat, the way the page
+ * itself only shows those controls while the features are on.
+ *
+ * Privacy Mode gets the most care. It blurs details on the reader's own
+ * screen and nothing else, and a reader who takes it for a visibility setting
+ * has either hidden nothing they meant to or worried about nothing.
+ */
+const SETTINGS_TOPIC: HelpTopic = {
+  id: 'settings',
+  title: 'STO Info settings',
+  intro:
+    'How STO Info behaves for you: what it blurs on your screen, how long you stay signed in, which clock it shows, and what it tells you about. None of it is about your Star Trek Online accounts.',
+  guides: [
+    {
+      slug: 'your-settings',
+      title: 'Your settings, and what they are not',
+      summary:
+        'Where Settings is, how saving works, and how it differs from the STO accounts you record.',
+      sections: [
+        guideSection('Where to find them', [
+          'Sign in, open your Dashboard and choose Settings. Everything on the page is about how STO Info behaves for you, and nobody else sees any of it.',
+          'The page has a tab for each part of the site: Account, Chat, Fleet, Notifications and Custom Tracking. Chat’s tab is there while chat is switched on, and Fleet’s and Notifications’ while Fleet Community is. The arrow keys move between the tabs.',
+          'Each section has a help link under its heading, leading to the guide for that section.',
+        ]),
+        guideSection('Going straight to a setting', [
+          'A cog beside a heading elsewhere on the site goes straight to the settings for that place: beside Chat’s heading, Notifications’ heading and every Fleet page’s heading, beside an event’s reminders, a roster import’s help and the roster proposals on a Character, and beside the Galactic Personnel Registry on the registry, the Community page, your own registry record and your Personnel Record.',
+          'It opens the right tab and, where it leads to one setting, scrolls to that setting, puts the keyboard on it and rings it for a moment. The cog is shown only while you are signed in.',
+        ]),
+        guideSection('Saving', [
+          'There is nothing to press. Each setting is saved the moment you change it, and a brief Saved note appears beside it. Change one at a time or several in a row; each is saved in turn.',
+          'If one cannot be saved, it is put back to what it was, and the page says so at its foot, naming the setting: “Unable to save Privacy Mode. It has been put back.” Change it again to retry.',
+        ]),
+        guideSection('Settings are not your STO accounts', [
+          'Your STO accounts are the Star Trek Online accounts you record on STO Info, each @handle with its captains, under Manage STO Accounts on your Dashboard. They describe you in the game.',
+          'Settings describe how this site behaves for you. None of them changes anything in Star Trek Online, on your STO accounts, or in what other people can see of them.',
+        ]),
+        guideSection('Custom Tracking', [
+          'The Custom Tracking tab leads to Configure Custom Tracking, where you decide what else to record about your own accounts and captains. It is not saved with the rest of the page, and it has guides of its own in the Custom Tracking section of Help.',
+        ]),
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        {
+          label: 'Your STO accounts',
+          route: APP_ROUTES.STO_DASHBOARD_ACCOUNTS,
+        },
+        CUSTOM_TRACKING_LINK,
+      ],
+    },
+    {
+      slug: 'privacy-mode',
+      title: 'Privacy Mode',
+      summary:
+        'Blurring private details on your own screen while you stream, share or record.',
+      sections: [
+        guideSection(
+          'What it blurs',
+          [
+            'Privacy Mode blurs private details on your own screen, for when you are broadcasting, sharing your screen or recording a video. While it is on, these are blurred:',
+          ],
+          [
+            'Your email address on your Personnel Record.',
+            'The username and email address you recorded against each of your STO accounts.',
+            'Members’ email addresses, on the pages site staff use to manage them.',
+          ],
+        ),
+        guideSection('What it does not do', [
+          'It changes nothing anybody else sees. It does not make your record private, take you out of the registry, or change who may see your accounts, captains or Custom Tracking. Those are decided by the visibility choices on each, and Privacy Mode leaves them as they were.',
+          'It is a blur, not a removal. The details are still on the page, so anybody who copies the text, or uses a screen reader, still gets them.',
+        ]),
+        guideSection('Turning it on', [
+          'It is off until you turn it on. Switch on Privacy Mode under Privacy, on the Account tab of Settings; it is saved as soon as you do.',
+          'While your settings are still loading, private details start out blurred, so they never flash up before the setting is known.',
+        ]),
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        {
+          label: 'Your Personnel Record',
+          route: APP_ROUTES.STO_DASHBOARD_PROFILE,
+        },
+      ],
+    },
+    {
+      slug: 'staying-signed-in',
+      title: 'Staying signed in',
+      summary:
+        'The login inactivity timeout, and the warning before it runs out.',
+      sections: [
+        guideSection('How long you can be away', [
+          `Login inactivity timeout, under Security on the Account tab, is how long you can be idle before STO Info signs you out: ${SESSION_TIMEOUT_CHOICES}.`,
+          'Anything you do on the site keeps your session going, so the countdown only runs while you are idle. You are warned shortly before it runs out.',
+        ]),
+        guideSection('When a change applies', [
+          'A new timeout applies as soon as you choose it, to the session you are in, rather than from your next sign-in.',
+        ]),
+        guideSection('On a shared computer', [
+          'Choose the shortest, and sign out when you finish. The timeout is a safety net, not a replacement for signing out.',
+        ]),
+      ],
+      relatedLinks: [SETTINGS_LINK],
+    },
+    {
+      slug: 'dates-and-times',
+      title: 'Dates and times',
+      summary: 'Which clock STO Info shows every date and time by.',
+      sections: [
+        guideSection('Show dates and times in', [
+          'Every date and time on STO Info is shown in one zone, which you choose under Dates and times, on the Account tab. Left on “Automatically”, it follows whichever device you are using, which is what most people want.',
+          'Choose a zone if you would rather your dates stayed put when you travel. Each zone in the list shows its offset today, such as GMT+1.',
+        ]),
+        {
+          heading: 'Roster exports keep their own zone',
+          paragraphs: [
+            'The zone Star Trek Online roster exports are read in is a separate setting, on the Fleet tab. Changing one never changes the other. The Fleet settings guide explains it.',
+          ],
+          requiresFeature: 'FLEET',
+        },
+      ],
+      relatedLinks: [SETTINGS_LINK],
+    },
+    {
+      slug: 'chat-settings',
+      title: 'Chat settings',
+      summary:
+        'The Chat tab of Settings: who sees you online, appearing offline, and typing.',
+      requiresFeature: 'CHAT',
+      sections: [
+        guideSection(
+          'Who can see when I am online',
+          [
+            'Online means you have STO Info open, never whether you are in the game. You choose who may see it:',
+          ],
+          [
+            `${PRESENCE_LABEL['EVERYONE']} — anybody who can see your profile.`,
+            `${PRESENCE_LABEL['FRIENDS']} — the default.`,
+            `${PRESENCE_LABEL['FLEETS_AND_ARMADAS']} — your friends, and anybody sharing a Fleet with you or in a Fleet of the same Armada.`,
+            'Whatever you choose, only people who can already see your profile are ever included, and never anybody you have blocked or who has blocked you.',
+            'Whoever may see it finds a green dot beside your username on the Profiles and Friends cards, “(online)” beside you in Chat, and “Online” on your profile.',
+          ],
+        ),
+        guideSection('Appear offline', [
+          'Hides you from everybody at once, whatever you chose above. Your choice above is remembered for when you switch this back off.',
+        ]),
+        guideSection('Show when I am typing', [
+          'Off unless you turn it on, and it works both ways. With it on, people in a chat who also have it on see when you are writing, and you see when they are. With it off, you send no typing signal and see nobody else’s.',
+        ]),
+        guideSection('Chat’s notices', [
+          'Whether you are told about mentions, replies and direct messages is on the Notifications tab, with every other kind of notice. What you are notified about explains them.',
+        ]),
+      ],
+      relatedLinks: [SETTINGS_LINK],
+    },
+    {
+      slug: 'fleet-settings',
+      title: 'Fleet settings',
+      summary: 'The Fleet tab of Settings, control by control.',
+      requiresFeature: 'FLEET',
+      sections: [
+        guideSection('Read Fleet roster exports as', [
+          'Star Trek Online writes the times in a roster export using the clock of the computer it was exported from, and does not say which zone that was. When you import one, the zone chosen here is where the import page starts.',
+          '“My device’s zone”, the default, starts each import on the zone of the device you are importing on. Whatever you choose here, you can change it for a single import, and it is separate from the zone dates are shown in.',
+          'The cog beside the help on a roster import comes straight here.',
+        ]),
+      ],
+      relatedLinks: [SETTINGS_LINK],
+    },
+    {
+      slug: 'what-you-are-notified-about',
+      title: 'What you are notified about',
+      summary:
+        'The notices STO Info sends you, switching each kind off, and the ones no switch stops.',
+      requiresFeature: 'FLEET',
+      sections: [
+        guideSection('Where notices arrive', [
+          'Notices arrive in STO Info only, under Notifications, never by email. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
+          'Notifications shows five at a time, newest first. Each can be marked read or unread, or deleted, and Delete all read clears every one you have read; a deleted notice is gone from your inbox for good, though it changes nothing it told you about.',
+          'Each switch on the Notifications tab of Settings stops that kind of notice as soon as it is switched off; the cog beside the Notifications heading goes there. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
+        ]),
+        {
+          heading: 'Mentions, replies and direct messages',
+          paragraphs: ['Three switches for chat, one for each kind of notice:'],
+          points: [
+            'Mentions — somebody names you in a chat message.',
+            'Replies — somebody answers a message of yours. If they also mention you, you get one notice, not two.',
+            'Direct messages — a friend writes to you. You are told once while you are away, and not again until you open the conversation.',
+          ],
+          requiresFeature: 'CHAT',
+        },
+        guideSection('Roster association proposals', [
+          'Somebody proposes that a character on an imported roster is yours. You always decide. Switching this off stops the notices, not the proposals, and a proposal left unanswered expires after 90 days.',
+        ]),
+        guideSection('Event reminders', [
+          'Only for events you have asked to be reminded about, at the time you chose. Asking for a reminder is done on the event itself; this switch stops them all, and with them the notices that an occurrence you are reminded of has moved or is cancelled, and that a place at it has come free for you.',
+        ]),
+        {
+          heading: 'Notices no switch stops',
+          paragraphs: [
+            'These are sent because somebody decided something about you or what you run, so they cannot be switched off:',
+          ],
+          points: [
+            'Your Fleet membership being suspended or reinstated.',
+            'A Community, Fleet or Armada you run being suspended or reinstated by a site administrator.',
+            'Ownership of a Community being offered to you, and a Community becoming yours.',
+            'An Armada taking, turning down or letting lapse a request from a Fleet you run, or taking that Fleet out.',
+            'A picture of yours being removed.',
+            'A transcript you asked for being ready.',
+            'Anything the site’s administrators send to everybody, or to you alone.',
+          ],
+        },
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        { label: 'Notifications', route: APP_ROUTES.NOTIFICATIONS },
+      ],
+    },
+  ],
 };
 
 /**
@@ -1089,50 +1339,250 @@ const STORYTIME_ADMIN_TOPIC: HelpTopic = {
  *
  * Community and Custom Tracking lead because they are always available, while
  * Storytime waits on its feature switch — a reader with Storytime switched off
- * should still open the help to something rather than to an apology. The
- * guides for running Storytime come last, because almost nobody is shown them.
+ * should still open the help to something rather than to an apology. The STO
+ * Info settings follow (FC-049), and the guides for running Storytime come
+ * last, because almost nobody is shown them. Fleets come second, once FC-050
+ * writes them.
  */
 export const HELP_TOPICS: HelpTopic[] = [
   COMMUNITY_TOPIC,
+  FLEETS_TOPIC,
   CUSTOM_TRACKING_TOPIC,
   STORYTIME_TOPIC,
+  SETTINGS_TOPIC,
   STORYTIME_ADMIN_TOPIC,
+  SITE_ADMIN_TOPIC,
 ];
+
+/** What each switch is called when a page says it is off. */
+export const HELP_FEATURE_NAMES: Readonly<Record<HelpFeature, string>> = {
+  STORYTIME: 'Storytime',
+  FLEET: FLEET_FEATURE_NAME,
+  CHAT: 'Fleet chat',
+};
+
+/**
+ * Whether a switch's help goes with it while it is off.
+ *
+ * Storytime's does: its route guard answers with the not-found page, and
+ * help naming it would advertise what the switch is there to hide. Fleet
+ * Community's and its chat's stay, each with a note saying the feature is
+ * off, so that their guides can still be found (FC-050).
+ */
+export const HELP_HIDDEN_WHEN_OFF: Readonly<Record<HelpFeature, boolean>> = {
+  STORYTIME: true,
+  FLEET: false,
+  CHAT: false,
+};
+
+/**
+ * Whether help about a feature may be offered.
+ *
+ * Read as "should this be offered", not "is it on": while the backend cannot
+ * be asked the help stays, since a reader with the feature in front of them
+ * and no idea why it will not open is exactly who help is for. Only the
+ * server saying a feature is off takes its help away, and only for a feature
+ * whose help goes with it (FC-050).
+ *
+ * @param feature The switch waited on, if any.
+ * @param features Where each switch stands.
+ * @returns True unless the feature is switched off and its help with it.
+ */
+export function isFeatureOffered(
+  feature: HelpFeature | undefined,
+  features: HelpFeatures,
+): boolean {
+  return (
+    feature === undefined ||
+    !HELP_HIDDEN_WHEN_OFF[feature] ||
+    features[feature] !== 'DISABLED'
+  );
+}
+
+/**
+ * The switch that is off for a page whose help stays while it is (FC-050).
+ *
+ * Only a switch the server says is off: one that could not be asked has said
+ * nothing, and a note claiming a feature is off when it may not be would send
+ * a reader away from something that works.
+ *
+ * @param features Where each switch stands.
+ * @param waitsOn The switches the page waits on, outermost first.
+ * @returns The first switch off, or null when none is.
+ */
+export function switchedOffFeature(
+  features: HelpFeatures,
+  ...waitsOn: (HelpFeature | undefined)[]
+): HelpFeature | null {
+  return (
+    waitsOn.find(
+      (feature): feature is HelpFeature =>
+        feature !== undefined &&
+        !HELP_HIDDEN_WHEN_OFF[feature] &&
+        features[feature] === 'DISABLED',
+    ) ?? null
+  );
+}
+
+/**
+ * What a page says about a switch that is off while its help stays (FC-050).
+ *
+ * @param feature The switch.
+ * @param part What the note stands above: a section of guides, one guide, or
+ *   a part of a guide.
+ * @returns The note.
+ */
+export function switchedOffNote(
+  feature: HelpFeature,
+  part: 'topic' | 'guide' | 'section',
+): string {
+  const name = HELP_FEATURE_NAMES[feature];
+
+  switch (part) {
+    case 'topic':
+      return (
+        `${name} is switched off at the moment. Its guides stay here so ` +
+        'they can still be found, but the pages they describe cannot be ' +
+        'opened until it is switched back on.'
+      );
+    case 'guide':
+      return (
+        `${name} is switched off at the moment. This guide stays here so ` +
+        'it can still be found, but the pages it describes cannot be ' +
+        'opened until it is switched back on.'
+      );
+    default:
+      return (
+        `${name} is switched off at the moment, so what this part ` +
+        'describes cannot be used until it is switched back on.'
+      );
+  }
+}
+
+/**
+ * Whether a visitor may be offered a topic at all: a topic for site
+ * administrators waits on the ADMIN role (FC-050).
+ *
+ * @param topic The topic.
+ * @param isAdmin Whether the visitor is a site administrator.
+ * @returns True when the topic may be offered.
+ */
+export function isTopicPermitted(topic: HelpTopic, isAdmin: boolean): boolean {
+  return !topic.requiresAdmin || isAdmin;
+}
 
 /**
  * The topics a visitor may be offered.
  *
- * Two filters, for two different reasons. Storytime’s guides wait on the
- * feature switch, because there is nothing to explain about a feature nobody
- * can reach. A guide with a permission on it waits on that permission because
- * it describes a page its reader would be turned away from, and help for a
- * door somebody cannot open is not help.
+ * Two filters, for two different reasons. Help about a switched-off feature
+ * whose help goes with it is not offered, because there is nothing to
+ * explain about a feature nobody can reach: a topic, or one guide in it, can
+ * wait on Storytime, Fleet Community or Fleet chat (FC-049), and only
+ * Storytime's help goes (FC-050). A guide with a permission on it waits on
+ * that permission because it describes a page its reader would be turned
+ * away from, and help for a door somebody cannot open is not help.
  *
- * The switch is read as "should this be offered", not "is it on": while the
- * backend cannot be asked the guides stay, since a reader with the feature in
- * front of them and no idea why it will not open is exactly who help is for.
+ * A topic for site administrators is offered only to them.
  *
  * A topic whose guides have all been filtered away is dropped rather than
  * shown as a heading with nothing under it.
  *
- * @param isStorytimeOffered Whether Storytime is being offered at all.
+ * @param features Where each switch stands.
  * @param permissions The permission codes the visitor holds.
+ * @param isAdmin Whether the visitor is a site administrator.
  * @returns The topics to show, each carrying only the guides on offer.
  */
 export function visibleHelpTopics(
-  isStorytimeOffered: boolean,
+  features: HelpFeatures,
   permissions: ReadonlySet<string>,
+  isAdmin = false,
 ): HelpTopic[] {
   return HELP_TOPICS.filter(
-    topic => isStorytimeOffered || !topic.requiresStorytime,
+    topic =>
+      isTopicPermitted(topic, isAdmin) &&
+      isFeatureOffered(topic.requiresFeature, features),
   )
     .map(topic => ({
       ...topic,
-      guides: topic.guides.filter(guide =>
-        isGuidePermitted(guide, permissions),
+      guides: topic.guides.filter(
+        guide =>
+          isGuidePermitted(guide, permissions) &&
+          isFeatureOffered(guide.requiresFeature, features),
       ),
     }))
     .filter(topic => topic.guides.length > 0);
+}
+
+/**
+ * The switch keeping a page from being read, if any.
+ *
+ * A page about a feature the server says is switched off says so rather than
+ * showing its guides. It is not a wrong address, and a visitor told their
+ * address is wrong will not come back when the feature returns. The topic's
+ * switch is asked first, then the guide's. Only a switch whose help goes with
+ * it blocks a page; the others' pages are shown with a note (FC-050).
+ *
+ * A switch the backend could not be asked about blocks nothing: transient
+ * unavailability must not hide useful help (plan section 5; FC-044).
+ * {@link unreachableFeature} notes it instead.
+ *
+ * @param features Where each switch stands.
+ * @param waitsOn The switches the page waits on, outermost first.
+ * @returns The first switch off, or null when none is.
+ */
+export function blockingFeature(
+  features: HelpFeatures,
+  ...waitsOn: (HelpFeature | undefined)[]
+): HelpFeature | null {
+  return (
+    waitsOn.find(
+      (feature): feature is HelpFeature =>
+        feature !== undefined &&
+        HELP_HIDDEN_WHEN_OFF[feature] &&
+        features[feature] === 'DISABLED',
+    ) ?? null
+  );
+}
+
+/**
+ * The first switch a page waits on that the backend could not be asked
+ * about, if any (FC-044).
+ *
+ * The page is read as usual, with the notice above it that the feature
+ * itself cannot be reached for the moment, so a reader whose feature will
+ * not open learns why without losing the help that explains it.
+ *
+ * @param features Where each switch stands.
+ * @param waitsOn The switches the page waits on, outermost first.
+ * @returns The first switch not answering, or null when all answered.
+ */
+export function unreachableFeature(
+  features: HelpFeatures,
+  ...waitsOn: (HelpFeature | undefined)[]
+): HelpFeature | null {
+  return (
+    waitsOn.find(
+      (feature): feature is HelpFeature =>
+        feature !== undefined && features[feature] === 'UNAVAILABLE',
+    ) ?? null
+  );
+}
+
+/**
+ * The parts of a guide a visitor may read: those about a feature that is
+ * switched off, and whose help goes with it, are left out (FC-049, FC-050).
+ *
+ * @param guide The guide.
+ * @param features Where each switch stands.
+ * @returns Its sections on offer, in order.
+ */
+export function visibleSections(
+  guide: HelpGuide,
+  features: HelpFeatures,
+): HelpGuideSection[] {
+  return guide.sections.filter(section =>
+    isFeatureOffered(section.requiresFeature, features),
+  );
 }
 
 /**
@@ -1149,6 +1599,16 @@ export function isGuidePermitted(
   permissions: ReadonlySet<string>,
 ): boolean {
   return !guide.requiresPermission || permissions.has(guide.requiresPermission);
+}
+
+/**
+ * Finds a section by its id, whatever the reader may see of it.
+ *
+ * @param id The section id taken from the route.
+ * @returns The section, or undefined when none has that id.
+ */
+export function findHelpTopic(id: string | null): HelpTopic | undefined {
+  return HELP_TOPICS.find(topic => topic.id === id);
 }
 
 /**

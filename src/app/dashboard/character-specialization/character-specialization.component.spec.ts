@@ -13,6 +13,7 @@ import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { CharacterSpecializationService } from 'src/app/dashboard/services/character-specialization.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CharacterSpecializationComponent } from './character-specialization.component';
+import { LCARS_COLOURS } from 'src/app/shared/constants/lcars-colours.constants';
 
 describe('CharacterSpecializationComponent', () => {
   let component: CharacterSpecializationComponent;
@@ -237,33 +238,6 @@ describe('CharacterSpecializationComponent', () => {
     expect(groups[1].items.map(i => i.specializationId)).toEqual(['spec2']);
   });
 
-  it('should toggle the briefing open and closed', () => {
-    expect(component.briefingCollapsed()).toBe(false);
-
-    component.toggleBriefing();
-    expect(component.briefingCollapsed()).toBe(true);
-
-    component.toggleBriefing();
-    expect(component.briefingCollapsed()).toBe(false);
-  });
-
-  it('should collapse and expand each specialization group independently', () => {
-    expect(component.isGroupCollapsed('primary')).toBe(false);
-    expect(component.isGroupCollapsed('secondary')).toBe(false);
-
-    component.toggleGroup('primary');
-    expect(component.isGroupCollapsed('primary')).toBe(true);
-    expect(component.isGroupCollapsed('secondary')).toBe(false);
-
-    component.toggleGroup('secondary');
-    expect(component.isGroupCollapsed('primary')).toBe(true);
-    expect(component.isGroupCollapsed('secondary')).toBe(true);
-
-    component.toggleGroup('primary');
-    expect(component.isGroupCollapsed('primary')).toBe(false);
-    expect(component.isGroupCollapsed('secondary')).toBe(true);
-  });
-
   it('should hide a collapsed group list but keep its heading bar', async () => {
     component.isLoading = false;
     component.progress.set([...mockProgress]);
@@ -277,16 +251,24 @@ describe('CharacterSpecializationComponent', () => {
       2,
     );
 
-    component.toggleGroup('primary');
+    const sections: HTMLElement[] = Array.from(
+      fixture.nativeElement.querySelectorAll('app-collapsible-section'),
+    );
+    const primary = sections.find(section =>
+      section.textContent?.includes('Primary Specializations'),
+    )!;
+
+    primary.querySelector<HTMLButtonElement>('.cta-icon')!.click();
     fixture.detectChanges();
 
-    // The heading bars both remain so the group can be expanded again
-    expect(fixture.nativeElement.querySelectorAll('.spec-list')).toHaveLength(
-      1,
-    );
-    expect(
-      fixture.nativeElement.textContent.includes('Primary Specializations'),
-    ).toBe(true);
+    // The list is hidden rather than removed, and the heading bar remains so
+    // the group can be opened again.
+    const list = primary.querySelector<HTMLElement>('.spec-list')!;
+    expect(list.closest('[hidden]')).not.toBeNull();
+    expect(primary.textContent).toContain('Primary Specializations');
+
+    // Folds are remembered, so the next test starts from an open page.
+    localStorage.clear();
   });
 
   it('should drop empty groups when a filter excludes every member', () => {
@@ -557,7 +539,7 @@ describe('CharacterSpecializationComponent', () => {
 
   it('should resolve accent colour and fall back when absent', () => {
     expect(component.accent(mockProgress[0])).toBe('#16a085');
-    expect(component.accent(mockProgress[1])).toBe('#fa0');
+    expect(component.accent(mockProgress[1])).toBe(LCARS_COLOURS.gold);
   });
 
   it('should track icon load failures and gate icon display', () => {

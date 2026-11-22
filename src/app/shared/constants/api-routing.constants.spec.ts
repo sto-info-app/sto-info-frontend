@@ -20,6 +20,14 @@ describe('api-routing.constants', () => {
     expect(API_URLS.HEALTH_READY).toBe('https://api.test/health/ready');
   });
 
+  it('should build the three Fleet directory URLs at the top level', () => {
+    expect(API_URLS.FLEET_COMMUNITIES).toBe(
+      'https://api.test/fleet-communities',
+    );
+    expect(API_URLS.FLEETS).toBe('https://api.test/fleets');
+    expect(API_URLS.ARMADAS).toBe('https://api.test/armadas');
+  });
+
   it('should build user and STO account URLs', () => {
     expect(API_URLS.USER).toBe('https://api.test/user');
     expect(API_URLS.CLOSE_ACCOUNT).toBe('https://api.test/user/close-account');

@@ -17,8 +17,8 @@
             novalidate>
             <div class="flexbox">
               <div class="col edit-personal-details-main-col">
-                <div class="form-container">
-                  <div class="lcars-input-container perano">
+                <div class="form-container lcars-rotate">
+                  <div class="lcars-input-container">
                     <label for="firstName">First Name</label>
                     <input
                       type="text"
@@ -48,7 +48,7 @@
                     }
                   </div>
 
-                  <div class="lcars-input-container bluey">
+                  <div class="lcars-input-container">
                     <label for="lastName">Last Name</label>
                     <input
                       type="text"
@@ -78,7 +78,7 @@
                     }
                   </div>
 
-                  <div class="lcars-input-container sunflower">
+                  <div class="lcars-input-container">
                     <label for="username">Username</label>
                     <input
                       type="text"
@@ -163,7 +163,7 @@
                     mat-dialog-actions>
                     <button
                       type="submit"
-                      class="lcars-btn submit-button sunflower"
+                      class="lcars-btn submit-button green"
                       mat-button
                       [disabled]="
                         !editPersonalDetailsForm.valid ||
@@ -175,7 +175,7 @@
                     </button>
                     <button
                       type="button"
-                      class="lcars-btn red"
+                      class="lcars-btn"
                       mat-button
                       (click)="onCloseClick()">
                       Close
@@ -201,7 +201,7 @@
         <div class="buttons">
           <button
             type="button"
-            class="sky"
+            class="lcars-btn"
             mat-button
             (click)="onCloseClick()">
             Close

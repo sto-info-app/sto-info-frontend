@@ -1,0 +1,12 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.ownership-offer {
+  &__done {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+}

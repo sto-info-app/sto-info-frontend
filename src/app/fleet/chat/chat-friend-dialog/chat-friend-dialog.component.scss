@@ -1,0 +1,137 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// Laid out as the shared search dialog is: a text bar for the title, an LCARS
+// field for the search, and the friends beneath, in a list that scrolls on its
+// own so the dialog keeps its height while somebody types.
+#chat-friend-dialog {
+  display: flex;
+  flex-direction: column;
+  width: min(30rem, 80vw);
+  box-sizing: border-box;
+  padding: 0.25rem 0.5rem 0.5rem;
+}
+
+.mat-mdc-dialog-title {
+  padding: 0;
+  margin-bottom: 0.75rem;
+
+  &::before {
+    display: none;
+  }
+}
+
+.mat-mdc-dialog-content {
+  padding: 0 0.25rem;
+  max-height: 62vh;
+}
+
+.mat-mdc-dialog-actions {
+  padding: 1rem 0.25rem 0.25rem;
+}
+
+.chat-friend-dialog__results {
+  min-height: 6rem;
+  margin-top: 1rem;
+}
+
+.chat-friend-dialog__friends {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// One plain row a friend, as the list of direct messages beside it: the
+// picture with the online dot on its corner, the name, and Message.
+.chat-friend-dialog__friend {
+  @include mixins.lcars-bare-button;
+
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.35rem 0.5rem;
+  border: 0;
+  border-radius: 0.5rem;
+  background: none;
+  color: vars.$lcars-white;
+  font: inherit;
+  text-align: left;
+  text-transform: none;
+  cursor: pointer;
+
+  &:hover:not(:disabled),
+  &:focus-visible {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$a11y-white;
+    outline-offset: 1px;
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.6;
+  }
+}
+
+.chat-friend-dialog__avatar {
+  position: relative;
+  flex: 0 0 2.5rem;
+  width: 2.5rem;
+
+  .chat-presence {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+  }
+}
+
+.chat-friend-dialog__name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat-friend-dialog__action {
+  flex: 0 0 auto;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-family: vars.$font-antonio;
+  font-size: 0.9rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+// The same dot as the list of direct messages (FC-034).
+.chat-presence {
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 2px solid vars.$lcars-grey-light;
+  border-radius: 50%;
+
+  &--online {
+    border-color: vars.$lcars-green;
+    background: vars.$lcars-green;
+  }
+}
+
+.chat-friend-dialog__note {
+  margin: 0.5rem 0 0;
+  color: vars.$lcars-grey-light;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+
+.chat-friend-dialog__error {
+  color: vars.$lcars-orange;
+}
+
+.chat-friend-dialog__more {
+  margin-top: 0.75rem;
+}

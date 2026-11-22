@@ -1,0 +1,134 @@
+@if (isSubmitting && !scanState) {
+  <app-loading-bar loadingText="Saving"></app-loading-bar>
+}
+@if (scanState) {
+  <app-asset-scan-status [state]="scanState"></app-asset-scan-status>
+}
+@if (scanTookTooLong) {
+  <app-lcars-warning-message
+    title="Still Checking"
+    message="The check is taking longer than usual. Your picture has not been lost: it will appear once the check finishes. You can close this and come back to it."></app-lcars-warning-message>
+}
+<div class="lcars-profile-pic-container">
+  <div class="lcars-profile-pic-inner-container">
+    <div class="lcars-text-bar">
+      <span>{{ heading }}</span>
+    </div>
+    @if (hasRecord) {
+      <div class="lcars-profile-pic-message">
+        <div
+          [class]="layout.row"
+          [class.has-image]="imageChangedEvent">
+          <div [class]="layout.main">
+            <input
+              type="file"
+              title="Select a new profile picture"
+              aria-label="Select a new profile picture"
+              (change)="onFileChangeEvent($event)"
+              accept="image/jpg, image/jpeg, image/png"
+              [disabled]="isSubmitting"
+              class="file-input" />
+            @if (imageChangedEvent) {
+              <image-cropper
+                [imageChangedEvent]="imageChangedEvent"
+                [maintainAspectRatio]="true"
+                [aspectRatio]="1 / 1"
+                [output]="'blob'"
+                format="png"
+                (imageCropped)="onImageCropped($event)"
+                (loadImageFailed)="loadImageFailed()"></image-cropper>
+            }
+          </div>
+          @if (imageChangedEvent) {
+            <div [class]="layout.side">
+              @if (errorMessage) {
+                <app-lcars-error-message
+                  title="Transmission Error"
+                  [message]="errorMessage"></app-lcars-error-message>
+              }
+              @if (croppedImage && !errorMessage) {
+                <div class="lcars-profile-pic-preview">
+                  <div class="lcars-text-bar">
+                    <span>Picture Preview</span>
+                  </div>
+                  <div class="cropped-image-container">
+                    <img
+                      [src]="croppedImage"
+                      id="cropped-image-preview"
+                      alt="Your cropped selection"
+                      title="Your cropped selection" />
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+        @if (!imageChangedEvent && errorMessage) {
+          <app-lcars-error-message
+            title="Transmission Error"
+            [message]="errorMessage"></app-lcars-error-message>
+        }
+        <div class="lcars-profile-pic-buttons">
+          @if (inActionRow) {
+            <div
+              class="buttons-container"
+              mat-dialog-actions>
+              <ng-container *ngTemplateOutlet="buttons" />
+            </div>
+          } @else {
+            <div class="buttons-container">
+              <ng-container *ngTemplateOutlet="buttons" />
+            </div>
+          }
+        </div>
+      </div>
+    }
+    @if (!hasRecord) {
+      <div class="lcars-profile-pic-message">
+        <app-lcars-error-message
+          title="Transmission Error"
+          [message]="unavailableMessage"></app-lcars-error-message>
+        <div class="buttons">
+          <button
+            type="button"
+            class="lcars-btn"
+            mat-button
+            mat-dialog-close
+            (click)="onCloseClick()">
+            Close
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<ng-template #buttons>
+  <button
+    type="submit"
+    class="lcars-btn submit-button green"
+    mat-button
+    [disabled]="!croppedImage || isSubmitting || errorMessage"
+    (click)="onUploadImageClick(); $event.preventDefault()">
+    Upload
+  </button>
+  @if (hasPhoto && !imageChangedEvent) {
+    <button
+      type="button"
+      class="lcars-btn red"
+      mat-button
+      [disabled]="isSubmitting"
+      (click)="onRemoveImageClick()">
+      Remove
+    </button>
+  }
+  <button
+    type="button"
+    class="lcars-btn"
+    mat-button
+    mat-dialog-close
+    [disabled]="isSubmitting"
+    (click)="onCloseClick()">
+    Close
+  </button>
+</ng-template>

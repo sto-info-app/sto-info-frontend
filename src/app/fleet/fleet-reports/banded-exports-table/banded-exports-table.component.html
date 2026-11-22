@@ -1,0 +1,54 @@
+@let cohortSize = cohort();
+@let labels = bandLabels();
+
+<table class="fleet-community-table">
+  <caption>
+    {{ caption() }}
+  </caption>
+  <thead>
+    <tr>
+      <th scope="col">Export</th>
+      <th
+        scope="col"
+        class="fleet-community-table__number">
+        Members
+      </th>
+      @for (band of bands(); track band) {
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          {{ labels[band] }}
+        </th>
+      }
+    </tr>
+  </thead>
+  <tbody>
+    @for (entry of exports(); track entry.export.importId) {
+      <tr>
+        <td data-label="Export">
+          {{ entry.export.exportedAt | appDate: 'medium' }}
+          @if (entry.partial) {
+            <span class="fleet-report-note">partial</span>
+          }
+        </td>
+        <td
+          data-label="Members"
+          class="fleet-community-table__number">
+          {{ entry.members | reportFigure: cohortSize }}
+        </td>
+        @for (band of bands(); track band) {
+          <td
+            class="fleet-community-table__number"
+            [attr.data-label]="labels[band]">
+            {{ entry.bands[band] | reportFigure: cohortSize }}
+            @if (entry.atLeast && entry.atLeast[band] !== 0) {
+              <span class="fleet-report-note">
+                {{ entry.atLeast[band] | reportFigure: cohortSize }} at least
+              </span>
+            }
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>

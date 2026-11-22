@@ -1,0 +1,371 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// The conversation fills whatever the page gives it: the chat page's pane is
+// one screen tall, and the log takes what the header and the message box
+// leave, scrolling inside itself.
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.chat-conversation {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-height: 0;
+  position: relative;
+}
+
+.chat-conversation__header {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+// The way back to the list only on a narrow screen, where the two are
+// stacked. Important, because `.lcars-btn` sets its display that way and
+// would otherwise show it beside the list on a wide one.
+.chat-conversation__back {
+  display: none !important;
+
+  @media (width < 720px) {
+    display: inline-flex !important;
+    gap: 0.4rem;
+    align-items: center;
+  }
+}
+
+.chat-conversation__title {
+  margin: 0;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-family: vars.$font-antonio;
+  overflow-wrap: anywhere;
+}
+
+.chat-conversation__subtitle {
+  display: block;
+  font-size: 0.6em;
+  color: vars.$lcars-grey-light;
+}
+
+// The reading pane: one box holding the log and, along its foot, whoever is
+// typing, so the message box can sit just beneath it.
+.chat-conversation__pane {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  min-height: 8rem;
+  overflow: hidden;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 0.5rem;
+  background: vars.$lcars-grey-bg;
+}
+
+.chat-conversation__log {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden auto;
+  padding: 0.5rem;
+
+  &:focus-visible {
+    outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
+    outline-offset: -2px;
+  }
+}
+
+.chat-conversation__edge {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 0.5rem;
+}
+
+.chat-conversation__edge-note {
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+.chat-conversation__messages {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-conversation__day {
+  margin: 0.75rem 0 0.25rem;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-family: vars.$font-antonio;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+}
+
+// The line under a new day: a thin rule rather than the theme's thick bar.
+.chat-conversation__day-rule {
+  height: 1px;
+  margin: 0.15rem 0 0;
+  border: 0;
+  border-radius: 0;
+  background-color: vars.$lcars-grey-border;
+}
+
+.chat-message {
+  position: relative;
+  padding: 0.15rem 0.5rem;
+  border-left: 3px solid transparent;
+  border-radius: 0.25rem;
+
+  &:not(.chat-message--grouped) {
+    margin-top: 0.35rem;
+  }
+
+  &:hover,
+  &:focus-within,
+  &:focus {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
+  }
+}
+
+.chat-message--mine {
+  border-left-color: var(--lcars-accent, #{vars.$lcars-sky});
+}
+
+.chat-message--pending {
+  opacity: 0.65;
+}
+
+.chat-message--failed {
+  opacity: 1;
+  border-left-color: vars.$lcars-red;
+}
+
+.chat-message__line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 0.5rem;
+  align-items: baseline;
+}
+
+.chat-message__time {
+  flex: 0 0 auto;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.chat-message__author {
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-weight: bold;
+}
+
+.chat-message__text {
+  flex: 1 1 12rem;
+  min-width: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.chat-message__text--deleted {
+  color: vars.$lcars-grey-light;
+  font-style: italic;
+}
+
+.chat-message__mention {
+  color: vars.$lcars-sunflower;
+  font-weight: bold;
+}
+
+.chat-message__reply-to {
+  @include mixins.lcars-bare-button;
+
+  display: flex;
+  gap: 0.4rem;
+  max-width: 100%;
+  margin: 0 0 0.1rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-white;
+  }
+}
+
+.chat-message__reply-author {
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+}
+
+.chat-message__reply-excerpt {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// Shown on hover or focus, so a long log stays quiet; always on a touch
+// screen, where there is no hover.
+// ---
+// Clipped to nothing rather than not displayed, so the buttons stay in the
+// Tab order: a keyboard reaches Reply, and the row's actions appear because
+// one of them has focus (FC-044, WCAG 2.1.1). Nothing else can focus a
+// message's insides, so with display: none they could never be reached.
+.chat-message__actions {
+  display: flex;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  gap: 0.5rem;
+  justify-content: flex-end;
+
+  .chat-message:hover &,
+  .chat-message:focus-within &,
+  &--shown {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+
+  @media (hover: none) {
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+    clip-path: none;
+    white-space: normal;
+  }
+}
+
+.chat-message__action {
+  @include mixins.lcars-bare-button;
+
+  padding: 0.1rem 0.4rem;
+  border: 1px solid vars.$lcars-grey-border;
+  border-radius: 0.75rem;
+  background: none;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: var(--lcars-accent, #{vars.$lcars-sky});
+  }
+}
+
+.chat-message__action--danger {
+  color: vars.$lcars-red;
+
+  &:hover,
+  &:focus-visible {
+    border-color: vars.$lcars-red;
+  }
+}
+
+.chat-message__failure {
+  color: vars.$lcars-red;
+  font-size: 0.8rem;
+}
+
+// Kept to one small line whether or not anybody is typing, so the log above
+// it never jumps.
+.chat-conversation__typing {
+  flex: 0 0 auto;
+  min-height: 1.3em;
+  margin: 0;
+  padding: 0 0.5rem 0.15rem;
+  color: vars.$lcars-grey-light;
+  font-size: 0.7rem;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.chat-conversation__unseen {
+  position: absolute;
+  right: 1rem;
+  bottom: 9rem;
+}
+
+.chat-conversation__read-only {
+  margin: 0;
+  color: vars.$lcars-grey-light;
+}
+
+.chat-composer {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.chat-composer__reply {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+// The box, with the emoji picker's face in its bottom right-hand corner and
+// the picker above it: both are placed against this.
+.chat-composer__field {
+  position: relative;
+}
+
+.chat-composer__input {
+  display: block;
+  width: 100%;
+  min-height: 3rem;
+  resize: vertical;
+
+  // Room on the right, so the text never runs under the face.
+  padding: 0.5rem 2.5rem 0.5rem 0.5rem;
+  border: 1px solid var(--lcars-accent, #{vars.$lcars-sky});
+  border-radius: 0.5rem;
+  background: vars.$lcars-black;
+  color: vars.$lcars-white;
+  font: inherit;
+
+  &:focus-visible {
+    outline: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
+  }
+}
+
+.chat-composer__footer {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.chat-composer__counter {
+  color: vars.$lcars-sunflower;
+  font-size: 0.85rem;
+}
+
+.chat-conversation__notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+
+  > :first-child {
+    flex: 1 1 16rem;
+  }
+}

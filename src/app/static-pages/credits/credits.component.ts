@@ -1,5 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
@@ -8,7 +9,7 @@ import { environment } from 'src/environments/environment';
   selector: 'app-credits',
   templateUrl: './credits.component.html',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CollapsibleSectionComponent],
 })
 export class CreditsComponent {
   appTitle = environment.appTitle;

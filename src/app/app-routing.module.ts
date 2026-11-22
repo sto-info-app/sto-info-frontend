@@ -104,6 +104,14 @@ export const routes: Routes = [
     data: { title: APP_ROUTE_TITLES.HELP },
   },
   {
+    path: APP_ROUTES.HELP_TOPIC,
+    loadComponent: () =>
+      import('./static-pages/help/help-topic/help-topic.component').then(
+        m => m.HelpTopicComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.HELP_TOPIC },
+  },
+  {
     path: APP_ROUTES.HELP_GUIDE,
     loadComponent: () =>
       import('./static-pages/help/help-guide/help-guide.component').then(
@@ -278,6 +286,18 @@ export const routes: Routes = [
   },
 
   // *****************************************
+  // * Fleet Community
+  // The page answers whether the feature is switched on, so it is not
+  // behind the readiness guard: a visitor who followed a link here is
+  // told why it is empty rather than being redirected away from it.
+  {
+    path: APP_ROUTES.FLEETS,
+    loadChildren: () =>
+      import('./fleet/fleet.routes').then(m => m.FLEET_ROUTES),
+    data: { title: APP_ROUTE_TITLES.FLEETS },
+  },
+
+  // *****************************************
   // * News
   {
     path: APP_ROUTES.NEWS,
@@ -307,6 +327,16 @@ export const routes: Routes = [
         m => m.NotificationsPageComponent,
       ),
     data: { title: APP_ROUTE_TITLES.NOTIFICATIONS, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+
+  // *****************************************
+  // * Chat (authenticated, FC-033)
+  {
+    path: APP_ROUTES.CHAT,
+    loadChildren: () =>
+      import('./fleet/chat/chat.routes').then(m => m.CHAT_ROUTES),
+    data: { title: APP_ROUTE_TITLES.CHAT, requiresApi: true },
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
 
@@ -404,6 +434,81 @@ export const routes: Routes = [
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.ADMIN_CHAT_REPORTS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/chat-report-admin-list.component').then(
+        m => m.ChatReportAdminListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_CHAT_REPORTS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_HOLDS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/moderation-hold-list.component').then(
+        m => m.ModerationHoldListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_HOLDS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_FLEET_INVESTIGATIONS,
+    loadComponent: () =>
+      import('./admin/moderation-admin/fleet-investigation-log.component').then(
+        m => m.FleetInvestigationLogComponent,
+      ),
+    data: {
+      title: APP_ROUTE_TITLES.ADMIN_FLEET_INVESTIGATIONS,
+      requiresApi: true,
+    },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_FLEET_DISPUTES,
+    loadComponent: () =>
+      import('./admin/moderation-admin/fleet-dispute-search.component').then(
+        m => m.FleetDisputeSearchComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_FLEET_DISPUTES, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_ROSTER_ERASURES,
+    loadComponent: () =>
+      import('./admin/moderation-admin/roster-erasure-list.component').then(
+        m => m.RosterErasureListComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_ROSTER_ERASURES, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_SECURITY_LOG,
+    loadComponent: () =>
+      import('./admin/security-log/security-log.component').then(
+        m => m.SecurityLogComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SECURITY_LOG, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_SITE_STATISTICS,
+    loadComponent: () =>
+      import('./admin/site-statistics/site-statistics.component').then(
+        m => m.SiteStatisticsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SITE_STATISTICS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_SITE_SETTINGS,
+    loadComponent: () =>
+      import('./admin/site-settings/site-settings.component').then(
+        m => m.SiteSettingsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SITE_SETTINGS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.ADMIN_USERS,
     loadComponent: () =>
       import('./admin/moderation-admin/user-admin-list.component').then(
@@ -419,6 +524,15 @@ export const routes: Routes = [
         m => m.PermissionAdminComponent,
       ),
     data: { title: APP_ROUTE_TITLES.ADMIN_PERMISSIONS, requiresApi: true },
+    canActivate: [AdminGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.ADMIN_SCAN_DIAGNOSTICS,
+    loadComponent: () =>
+      import('./admin/scan-diagnostics/scan-diagnostics.component').then(
+        m => m.ScanDiagnosticsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.ADMIN_SCAN_DIAGNOSTICS, requiresApi: true },
     canActivate: [AdminGuard, ApiRequiredGuard],
   },
 
@@ -535,6 +649,18 @@ export const routes: Routes = [
         m => m.CharacterManageComponent,
       ),
     data: { title: APP_ROUTE_TITLES.STO_CHARACTER_EDIT, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_FLEETS,
+    loadComponent: () =>
+      import('./dashboard/fleets/dashboard-fleets.component').then(
+        m => m.DashboardFleetsComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_FLEETS, requiresApi: true },
+    // Signed in, because what somebody follows is theirs. The feature
+    // switch is not a guard: a member who arrives while it is off is
+    // told so by the page, which is more use than a redirect.
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {

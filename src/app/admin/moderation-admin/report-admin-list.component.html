@@ -7,6 +7,9 @@
   class="admin-layout">
   <div class="admin-content admin-main-column">
     <h1>Reported Officers</h1>
+    <app-help-link
+      slug="site-admin-reports-and-holds"
+      label="Help with reports and holds" />
     <p class="admin-page-intro">
       Reports members have raised about other members, longest-waiting first.
       Neither the reporter nor the reported member is told what happens here.
@@ -24,19 +27,15 @@
         [message]="successMessage"></app-lcars-success-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span class="title-with-badge">
-          Moderation Queue
-          @if (openCount > 0) {
-            <span class="header-count-badge">{{ openCount }}</span>
-          }
-        </span>
-      </div>
-
-      <div class="admin-panel">
-        <div class="form-row compact">
-          <div class="lcars-select-container sunflower">
+    <app-collapsible-section
+      heading="Moderation Queue"
+      barClass="small-lcars-bar-gap"
+      [badge]="openCount > 0 ? openCount : null">
+      <app-lcars-panel
+        heading="Filters"
+        [collapsible]="true">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="report-status-filter"
@@ -53,7 +52,7 @@
             </select>
           </div>
 
-          <div class="lcars-input-container bluey">
+          <div class="lcars-input-container">
             <label for="report-search-input">Search by username</label>
             <input
               id="report-search-input"
@@ -67,13 +66,13 @@
         <div class="admin-form-actions">
           <button
             type="button"
-            class="lcars-btn green"
+            class="lcars-btn"
             [disabled]="isLoading"
             (click)="applyFilters()">
             Apply
           </button>
         </div>
-      </div>
+      </app-lcars-panel>
 
       @if (!isLoading && reports.length === 0) {
         <p class="records-empty">No reports match this filter.</p>
@@ -110,32 +109,47 @@
                     </p>
                   }
 
+                  @if (report.openChatReportCount > 0) {
+                    <p class="moderation-no-details">
+                      Also
+                      <a [routerLink]="'/' + appRoutes.ADMIN_CHAT_REPORTS">
+                        {{ report.openChatReportCount }} open chat
+                        {{
+                          report.openChatReportCount === 1
+                            ? 'report'
+                            : 'reports'
+                        }}
+                      </a>
+                      of their messages.
+                    </p>
+                  }
+
                   <dl class="admin-record-details">
                     <div class="admin-record-detail">
-                      <span class="label">Reported by</span>
-                      <span class="value">{{ reporterName(report) }}</span>
+                      <dt class="label">Reported by</dt>
+                      <dd class="value">{{ reporterName(report) }}</dd>
                     </div>
                     <div class="admin-record-detail">
-                      <span class="label">Raised</span>
-                      <span class="value">
-                        {{ report.createdAt | date: 'medium' }}
-                      </span>
+                      <dt class="label">Raised</dt>
+                      <dd class="value">
+                        {{ report.createdAt | appDate: 'medium' }}
+                      </dd>
                     </div>
                     @if (report.reviewedBy) {
                       <div class="admin-record-detail">
-                        <span class="label">Last reviewed by</span>
-                        <span class="value">
+                        <dt class="label">Last reviewed by</dt>
+                        <dd class="value">
                           {{ report.reviewedBy }}
                           @if (report.reviewedAt) {
-                            — {{ report.reviewedAt | date: 'medium' }}
+                            — {{ report.reviewedAt | appDate: 'medium' }}
                           }
-                        </span>
+                        </dd>
                       </div>
                     }
                     @if (report.moderatorNotes) {
                       <div class="admin-record-detail">
-                        <span class="label">Notes</span>
-                        <span class="value">{{ report.moderatorNotes }}</span>
+                        <dt class="label">Notes</dt>
+                        <dd class="value">{{ report.moderatorNotes }}</dd>
                       </div>
                     }
                   </dl>
@@ -159,7 +173,7 @@
                   ) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="markActioned(report)"
                       title="Close as actioned"
                       aria-label="Close as actioned"
@@ -167,7 +181,7 @@
                     ></button>
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon delete-icon"
                       (click)="dismiss(report)"
                       title="Dismiss report"
                       aria-label="Dismiss report"
@@ -175,10 +189,19 @@
                     ></button>
                   }
 
+                  <button
+                    type="button"
+                    class="cta-icon"
+                    (click)="holdMessages(report)"
+                    title="Hold their chat messages"
+                    aria-label="Hold their chat messages"
+                  ><i class="fas fa-box-archive"></i
+                  ></button>
+
                   @if (report.reported.isAccountDisabled) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="enableReported(report)"
                       title="Restore this account"
                       aria-label="Restore this account"
@@ -200,7 +223,7 @@
           }
         </div>
       }
-    </section>
+    </app-collapsible-section>
   </div>
 
   <div class="admin-side-column col">
@@ -209,12 +232,12 @@
     </div>
     <div class="buttons">
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN_USERS"
         >Manage members</a
       >
       <a
-        class="full-width-btn-link sunflower"
+        class="full-width-btn-link"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

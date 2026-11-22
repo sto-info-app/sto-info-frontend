@@ -13,15 +13,24 @@ import {
   STORYTIME_AVAILABILITY_UNAVAILABLE,
   StorytimeAvailability,
 } from 'src/app/models/storytime.models';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
-import { StorytimeService } from 'src/app/storytime/storytime.service';
 
+import { HelpFeaturesService } from '../help-features.service';
 import { HELP_TOPICS } from '../help.data';
-import { HelpTopic } from '../help.models';
+import { HelpFeatures, HelpTopic } from '../help.models';
+import { ALL_HELP_FEATURES_ON, helpFeaturesWith } from '../help.testing';
 import { HelpGuideComponent } from './help-guide.component';
 
 describe('HelpGuideComponent', () => {
+  // Whether the reader is a site administrator (FC-050).
+  let isAdmin = false;
+
+  beforeEach(() => {
+    isAdmin = false;
+  });
+
   let fixture: ComponentFixture<HelpGuideComponent>;
   let component: HelpGuideComponent;
   let paramMap$: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
@@ -31,10 +40,10 @@ describe('HelpGuideComponent', () => {
   // The Storytime topic is the gated one, so it is what the visibility tests
   // need; the Community topic is always available and proves the other side.
   const storytimeTopic = HELP_TOPICS.find(
-    topic => topic.requiresStorytime,
+    topic => topic.requiresFeature === 'STORYTIME',
   ) as HelpTopic;
   const openTopic = HELP_TOPICS.find(
-    topic => !topic.requiresStorytime,
+    topic => topic.requiresFeature === undefined,
   ) as HelpTopic;
   const firstGuide = storytimeTopic.guides[0];
   const secondGuide = storytimeTopic.guides[1];
@@ -46,11 +55,13 @@ describe('HelpGuideComponent', () => {
    * @param storytimeAvailability Whether the Storytime feature is on, off, or
    *   could not be asked about at all.
    * @param permissions The permission codes the reader holds.
+   * @param others Where the other switches stand, when not on.
    */
   const createComponent = (
     slug: string | null,
     storytimeAvailability: StorytimeAvailability = STORYTIME_AVAILABILITY_ENABLED,
     permissions: string[] = [],
+    others: Partial<HelpFeatures> = {},
   ): void => {
     paramMap$ = new BehaviorSubject(
       convertToParamMap(slug === null ? {} : { guideSlug: slug }),
@@ -65,9 +76,18 @@ describe('HelpGuideComponent', () => {
         { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
         { provide: PageTitleService, useValue: pageTitleSpy },
         {
-          provide: StorytimeService,
-          useValue: { getAvailability: () => of(storytimeAvailability) },
+          provide: HelpFeaturesService,
+          useValue: {
+            features: () =>
+              of(
+                helpFeaturesWith({
+                  STORYTIME: storytimeAvailability,
+                  ...others,
+                }),
+              ),
+          },
         },
+        { provide: AuthService, useValue: { isAdmin: () => isAdmin } },
         {
           provide: AccessControlService,
           useValue: {
@@ -127,6 +147,38 @@ describe('HelpGuideComponent', () => {
 
   // One route serves every guide, so route data cannot name the page and the
   // component has to.
+  it('should show a guide’s video under its summary', () => {
+    createComponent('finding-a-fleet');
+
+    const summary = fixture.nativeElement.querySelector(
+      '.help-guide__summary',
+    ) as Element;
+
+    expect(summary.nextElementSibling?.tagName).toBe('APP-HELP-VIDEO');
+    expect(
+      fixture.nativeElement.querySelector('.help-video__poster .sr-only')
+        ?.textContent,
+    ).toBe('Play the video: Finding a Fleet on STO Info');
+  });
+
+  it('should show no video for a guide without one', () => {
+    createComponent('roster-history-and-corrections');
+
+    expect(component.guide?.slug).toBe('roster-history-and-corrections');
+    expect(fixture.nativeElement.querySelector('app-help-video')).toBeNull();
+  });
+
+  // The videos are the site's own help, so no switch hides them.
+  it('should still show a Fleet guide’s video while Fleet is off', () => {
+    createComponent('finding-a-fleet', STORYTIME_AVAILABILITY_ENABLED, [], {
+      FLEET: 'DISABLED',
+    });
+
+    expect(
+      fixture.nativeElement.querySelector('app-help-video'),
+    ).not.toBeNull();
+  });
+
   it('should set the page title from the guide', () => {
     createComponent(firstGuide.slug);
 
@@ -138,6 +190,23 @@ describe('HelpGuideComponent', () => {
 
     expect(component.topicTitle).toBe(storytimeTopic.title);
     expect(pageText()).toContain(storytimeTopic.title);
+  });
+
+  // FC-048: the breadcrumb leads back to the guide's section as well as to
+  // Help, so a reader can step back one level rather than start again.
+  it('should lead back to the topic’s own page from the breadcrumb', () => {
+    createComponent(firstGuide.slug);
+
+    const crumbs = Array.from(
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '.help-guide__breadcrumb a',
+      ),
+    ).map(link => [link.getAttribute('href'), link.textContent?.trim()]);
+
+    expect(crumbs).toEqual([
+      ['/help', 'Help'],
+      [`/help/topics/${storytimeTopic.id}`, storytimeTopic.title],
+    ]);
   });
 
   it('should offer the other guides in the topic, but not this one', () => {
@@ -181,7 +250,11 @@ describe('HelpGuideComponent', () => {
     firstToggle.click();
     fixture.detectChanges();
 
-    expect(pageText()).not.toContain(firstSection.paragraphs[0]);
+    expect(
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(
+        '.collapsible-section__content',
+      )?.hidden,
+    ).toBe(true);
     expect(pageText()).toContain(firstSection.heading);
   });
 
@@ -205,6 +278,7 @@ describe('HelpGuideComponent', () => {
 
     expect(component.guide).toBeNull();
     expect(component.unavailableReason).toBe('DISABLED');
+    expect(component.topicLink).toBe('');
     expect(navigateSpy).not.toHaveBeenCalled();
     expect(pageText()).toContain('switched off at the moment');
   });
@@ -221,14 +295,18 @@ describe('HelpGuideComponent', () => {
   });
 
   // An outage is not a missing page either, and it is not the same thing as
-  // the switch being off — so it gets its own wording on the same notice.
-  it('should say the systems are not answering when the backend cannot be reached', () => {
+  // the switch being off. Transient unavailability must not hide useful help
+  // (plan section 5; FC-044), so the guide is read, under a notice saying
+  // the systems are not answering.
+  it('should keep the guide, saying the systems are not answering, when the backend cannot be reached', () => {
     createComponent(firstGuide.slug, STORYTIME_AVAILABILITY_UNAVAILABLE);
 
-    expect(component.guide).toBeNull();
-    expect(component.unavailableReason).toBe('OFFLINE');
+    expect(component.guide).toBe(firstGuide);
+    expect(component.unavailableReason).toBeNull();
+    expect(component.unreachableFeatureName).toBe('Storytime');
     expect(navigateSpy).not.toHaveBeenCalled();
     expect(pageText()).toContain('systems are not answering');
+    expect(pageText()).toContain(firstGuide.title);
   });
 
   // Only the gated topic waits on the backend. A Community guide is words on a
@@ -323,11 +401,10 @@ describe('HelpGuideComponent', () => {
         { provide: ActivatedRoute, useValue: { paramMap: paramMap$ } },
         { provide: PageTitleService, useValue: pageTitleSpy },
         {
-          provide: StorytimeService,
-          useValue: {
-            getAvailability: () => of(STORYTIME_AVAILABILITY_ENABLED),
-          },
+          provide: HelpFeaturesService,
+          useValue: { features: () => of(ALL_HELP_FEATURES_ON) },
         },
+        { provide: AuthService, useValue: { isAdmin: () => isAdmin } },
         {
           provide: AccessControlService,
           useValue: {
@@ -348,5 +425,90 @@ describe('HelpGuideComponent', () => {
 
     expect(component.guide).toBe(firstGuide);
     expect(navigateSpy).not.toHaveBeenCalled();
+  });
+
+  // Fleet Community's and chat's guides stay while they are off (FC-050), so
+  // they can still be found, and say that they are off.
+  describe('guides about Fleet Community and chat (FC-049, FC-050)', () => {
+    const notes = () =>
+      [...fixture.nativeElement.querySelectorAll('.help-switched-off')].map(
+        (note: Element) => note.textContent?.trim(),
+      );
+
+    it('should show a Fleet guide while it is off, saying so once', () => {
+      createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        FLEET: 'DISABLED',
+        CHAT: 'DISABLED',
+      });
+
+      expect(component.guide?.slug).toBe('fleet-settings');
+      expect(component.unavailableReason).toBeNull();
+      expect(component.switchedOff).toContain(
+        'Fleet Community is switched off at the moment',
+      );
+      // Chat's parts are noted only when chat alone is off.
+      expect(notes()).toEqual([component.switchedOff]);
+      expect(pageText()).toContain('Read Fleet roster exports as');
+      expect(navigateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should say nothing is off while the switch cannot be read', () => {
+      createComponent('fleet-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        FLEET: 'UNAVAILABLE',
+      });
+
+      expect(component.guide?.slug).toBe('fleet-settings');
+      expect(component.switchedOff).toBeNull();
+      expect(notes()).toEqual([]);
+    });
+
+    it('should note the parts about chat while chat alone is off', () => {
+      createComponent(
+        'what-you-are-notified-about',
+        STORYTIME_AVAILABILITY_ENABLED,
+        [],
+        { CHAT: 'DISABLED' },
+      );
+
+      expect(component.switchedOff).toBeNull();
+      expect(
+        component.sectionNotes.map(note =>
+          note?.startsWith('Fleet chat is switched off at the moment'),
+        ),
+      ).toEqual([undefined, true, undefined, undefined, undefined]);
+      expect(pageText()).toContain('Mentions, replies and direct messages');
+    });
+
+    it('should show a chat guide while chat is off, saying so once', () => {
+      createComponent('chat-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        CHAT: 'DISABLED',
+      });
+
+      expect(component.switchedOff).toContain(
+        'Fleet chat is switched off at the moment',
+      );
+      expect(notes()).toEqual([component.switchedOff]);
+      expect(pageText()).toContain('Show when I am typing');
+    });
+
+    it('should show every part, unnoted, while chat is on', () => {
+      createComponent('chat-settings');
+
+      expect(pageText()).toContain('Who can see when I am online');
+      expect(pageText()).toContain('Show when I am typing');
+      expect(component.sectionNotes.every(note => note === null)).toBe(true);
+    });
+
+    // Every other guide stays on offer at the foot too.
+    it('should still offer the Fleet guide at the foot while it is off', () => {
+      createComponent('your-settings', STORYTIME_AVAILABILITY_ENABLED, [], {
+        FLEET: 'DISABLED',
+        CHAT: 'DISABLED',
+      });
+
+      expect(component.otherGuides.map(guide => guide.slug)).toContain(
+        'fleet-settings',
+      );
+    });
   });
 });

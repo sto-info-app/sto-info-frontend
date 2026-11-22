@@ -1,0 +1,400 @@
+@use 'lcars-rotation' as rotation;
+@use 'lcars-variables' as vars;
+
+// ─── Fleet Community ─────────────────────────────────────────────────────────
+// The layout the Fleet system's pages are built from, held in one partial for
+// the same reason Storytime and Custom Tracking have one: the directory, a
+// Community's page, the roster and the import wizard are made of the same
+// handful of shapes, and that is what keeps them recognisably one thing.
+// ---
+// What is here and what is not:
+// ---
+// - A shape a *page* writes in its own template lives here, because a
+//   component's encapsulated styles cannot reach a class a page wrote.
+// - A shape that belongs to a Fleet component lives with that component.
+// - A shape the whole application already has — `.lcars-btn`,
+//   `.lcars-input-container`, `.lcars-text-bar`, the tab strip, the card
+//   mixins — is used, not restated. Nothing here replaces a shared control.
+// ---
+// Every class is prefixed `fleet-community-`, so a rule from this partial can
+// be traced to it from the browser's inspector without searching.
+// ---
+// Colour: the Fleet system takes the palette's rotation, as every page does
+// since 12 October 2026, rather than the one sky it was drawn in before. The
+// palette is named from `lcars-variables`, never written out as a literal, and
+// the colours that carry meaning — a Fleet's recruitment state, an upload's
+// scan state — are left to the components that say those things.
+
+// The blocks a Fleet page projects into its shell — a filter, a form, a panel,
+// a table — each take the next colour of the rotation, so a page's lone field
+// is not left grey and two blocks side by side differ. Sections are left out:
+// they rotate among themselves, as on every other page. Written here rather
+// than in the shell's own stylesheet because the blocks belong to the page
+// that projected them, out of reach of the shell's encapsulated styles; the
+// position sits in the mixin's `:where()`, so an `accent-*` class still wins.
+.fleet-page-shell {
+  @include rotation.rotate-accent(
+    '> *',
+    'nth-child',
+    ':not(app-collapsible-section)'
+  );
+}
+
+// The page's own column. Matches the padding the shell puts around a heading,
+// so a page that uses one and a page that uses both line up.
+.fleet-community-page {
+  padding: 1rem;
+}
+
+// A listing of Communities, Fleets or Armadas. Cards stretch, so a row is one
+// height whatever mix of status pills and actions the cards in it carry.
+.fleet-community-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+  align-items: stretch;
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+
+// A single column below the point at which two cards stop having room for a
+// Fleet name and a Community name side by side.
+@media (width <= 480px) {
+  .fleet-community-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+// What a listing says when it has nothing in it. Italic and dimmed, matching
+// `.lcars-empty-state`, with room for the sentence that says what to do next —
+// an empty directory is a normal state here, not a fault.
+.fleet-community-empty {
+  padding: 1rem 0;
+  margin: 1rem 0;
+  font-style: italic;
+  color: vars.$lcars-grey-light;
+}
+
+// ─── Tables ──────────────────────────────────────────────────────────────────
+// The roster, its history and the reports are rows of figures, and a table is
+// the honest shape for them: a reader compares a column down, which a grid of
+// cards does not let them do. Header cells are Antonio in the colour of the
+// block the table sits in (sky where nothing gives it one), figures are
+// right-aligned so their digits line up, and a row lights on hover only as a
+// reading aid.
+// ---
+// Below 720px there is no room for the columns, and a page must never scroll
+// sideways (R29), so each row becomes a block of labelled lines: every cell
+// carries its column's name in `data-label`, and the header row is hidden
+// from sight but kept for a screen reader.
+.fleet-community-table {
+  width: 100%;
+  margin: 1rem 0;
+  border-collapse: collapse;
+
+  caption {
+    padding: 0 0 0.5rem;
+    text-align: left;
+    color: vars.$lcars-grey-light;
+  }
+
+  th {
+    padding: 0.5rem 0.75rem;
+    font-family: vars.$font-antonio;
+    font-weight: normal;
+    text-align: left;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
+    border-bottom: 2px solid var(--lcars-accent, #{vars.$lcars-sky});
+  }
+
+  td {
+    padding: 0.5rem 0.75rem;
+    vertical-align: top;
+    border-bottom: 1px solid vars.$lcars-grey-border;
+  }
+
+  tbody tr:hover {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  // A figure: right-aligned so a column of them reads as one.
+  .fleet-community-table__number {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  // A header cell that sorts: the whole cell is the control. The theme's
+  // `button` rule draws every button as a 200 px pill, so its size, margin and
+  // alignment are set back here too; left alone, eight sortable columns made
+  // the roster 1,850 px wide (FC-044).
+  .fleet-community-table__sort {
+    display: inline;
+    width: auto;
+    height: auto;
+    margin: 0;
+    border-radius: 0;
+    text-align: inherit;
+    padding: 0;
+    font: inherit;
+    color: inherit;
+    text-transform: inherit;
+    letter-spacing: inherit;
+    cursor: pointer;
+    background: none;
+    border: 0;
+  }
+}
+
+@media (width <= 720px) {
+  .fleet-community-table {
+    // Laid out as blocks rather than as a table, so a long unbroken value
+    // (a log entry's JSON counts) wraps in its row instead of widening the
+    // whole table past the screen and carrying every value off it (FC-044).
+    display: block;
+
+    tbody {
+      display: block;
+    }
+
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+      white-space: nowrap;
+    }
+
+    tr {
+      display: block;
+      padding: 0.5rem 0;
+      border-bottom: 2px solid vars.$lcars-grey-border;
+    }
+
+    td {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.25rem 1rem;
+      justify-content: space-between;
+      padding: 0.25rem 0;
+      border: 0;
+      overflow-wrap: anywhere;
+
+      // A value too long to sit beside its label goes beneath it.
+      > * {
+        min-width: 0;
+      }
+    }
+
+    td::before {
+      font-family: vars.$font-antonio;
+      text-transform: uppercase;
+      color: var(--lcars-accent, #{vars.$lcars-sky});
+      content: attr(data-label);
+    }
+
+    .fleet-community-table__number {
+      text-align: right;
+    }
+  }
+}
+
+// ─── Reports ─────────────────────────────────────────────────────────────────
+// Each report is its own component beneath the reports page, so what they
+// share is declared once here rather than in five encapsulated sheets.
+
+// A sentence about the report as a whole: what it covers, what it hides.
+.fleet-report-notice {
+  margin: 0.5rem 0;
+  font-style: italic;
+  color: vars.$lcars-grey-light;
+}
+
+// A second line under a cell's value, saying something about it.
+.fleet-report-note {
+  display: block;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+// ─── Forms ───────────────────────────────────────────────────────────────────
+// `.form-row`, `.field-hint` and `.compact` are a convention rather than a
+// global rule: each feature declares its own. These are the Fleet system's,
+// declared once for every Fleet form rather than once per page.
+
+// A row of fields that becomes a column when there is no longer room for two.
+.fleet-community-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  > * {
+    flex: 1 1 260px;
+    min-width: 0;
+  }
+}
+
+// The row a listing's own filters sit in, below the three every listing
+// shares. Global rather than encapsulated because these controls are written
+// by the listing and projected into the filter bar, which puts them outside
+// the filter bar's own styles however the two are nested on screen.
+// ---
+// Matches the row above it deliberately: a platform control that sat a little
+// differently from the ordering control would read as belonging to something
+// else.
+.fleet-community-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-end;
+  margin-top: 1rem;
+}
+
+// The sentence under a field saying what it means. Not an error: errors are
+// `.field-error`, which the input container already styles.
+.fleet-community-field-hint {
+  margin: 0.35rem 0 0;
+  font-size: 0.85rem;
+  color: vars.$lcars-grey-light;
+}
+
+// The row a form's buttons sit in. Wraps rather than shrinking the buttons,
+// because a pill narrower than its label loses the label.
+.fleet-community-form-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+// ─── Artwork dialogue ────────────────────────────────────────────────────────
+// Choosing, cropping and describing a banner or an emblem. Global rather than
+// encapsulated with the component, as Storytime's is, because the rules reach
+// into `image-cropper`'s own template and into the Material dialogue's action
+// row — neither of which a component's scoped styles can see.
+
+#fleet-community-image-dialog-container {
+  padding: 10px;
+
+  .mat-mdc-dialog-actions {
+    gap: 1rem;
+    padding: 1rem 3rem;
+  }
+
+  .field-hint {
+    margin: 0.35rem 0 0;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    color: vars.$lcars-grey-light;
+  }
+}
+
+.fleet-community-image-crop {
+  &__guidance {
+    margin: 0 0 0.35rem;
+  }
+
+  &__layout {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 1rem;
+
+    // Only once a picture has been chosen is there a second column worth
+    // reserving room for.
+    &.has-image {
+      flex-flow: row nowrap;
+      gap: 1.5rem;
+      align-items: flex-start;
+    }
+  }
+
+  &__main {
+    flex: 2;
+    min-width: 0;
+
+    --cropper-overlay-color: transparent;
+
+    image-cropper {
+      width: 100%;
+      max-height: 55vh;
+
+      div,
+      div img {
+        width: auto;
+        max-height: 55vh;
+      }
+    }
+  }
+
+  &__side {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 220px;
+  }
+
+  &__preview img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+    border: 2px solid vars.$lcars-sunflower;
+  }
+
+  &__alt {
+    margin-top: 1rem;
+  }
+
+  &__actions {
+    display: flex;
+    flex-flow: row wrap;
+    gap: 0.5rem;
+  }
+}
+
+@media (width <= 768px) {
+  // With no room for a preview beside the cropper, it goes under it.
+  .fleet-community-image-crop__layout.has-image {
+    flex-flow: column nowrap;
+    gap: 1rem;
+  }
+}
+
+// ─── Mention list ────────────────────────────────────────────────────────────
+// The people offered while a mention is typed in chat (FC-033). It is Angular
+// Material's autocomplete panel, which the overlay draws at the foot of the
+// page, out of reach of the chat composer's encapsulated styles. The panel's
+// own classes are named as well, to outrank Material's rules for it, which
+// would otherwise square off its corners and stand each name 48px tall.
+.cdk-overlay-pane
+  .mat-mdc-autocomplete-panel.mdc-menu-surface.fleet-community-mention-list {
+  min-width: 12rem;
+  padding: 0.25rem 0;
+  border: 1px solid vars.$lcars-sky;
+  border-radius: 0.5rem;
+  background: vars.$lcars-black;
+  box-shadow: none;
+
+  .mat-mdc-option {
+    min-height: 0;
+    padding: 0.25rem 0.75rem;
+    color: inherit;
+    font: inherit;
+    letter-spacing: inherit;
+
+    &:hover {
+      background: none;
+    }
+
+    &.mat-mdc-option-active {
+      background: vars.$lcars-sky;
+      color: vars.$lcars-black;
+    }
+  }
+}

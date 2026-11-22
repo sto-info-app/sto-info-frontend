@@ -19,6 +19,31 @@
         >{{ appRouteTitles.COMMUNITY }}</a
       >
       <!--
+        One entry, for the same reason Storytime has one. The three
+        listings — Fleets, Communities and Armadas — are reached from the
+        section's own tab strip, where each can be described.
+
+        Sits beside Community because the two are the site's people-facing
+        sections: one is a directory of officers, the other a directory of
+        the groups they fly with.
+
+        Present unless the server says the feature is off. A backend that
+        could not be reached leaves the entry alone, because following it
+        is how a visitor learns there is an outage at all.
+
+        Prefix-matched, unlike the Dashboard entry: nothing else in this
+        list sits under `/fleets`, so the button stays lit while a reader
+        drills into a Community, a Fleet or an Armada, and never lights
+        alongside another.
+      -->
+      @if (isFleetOffered$ | async) {
+        <a
+          [routerLink]="getRouteLink(appRoutes.FLEETS)"
+          routerLinkActive="peach"
+          >{{ appRouteTitles.FLEETS }}</a
+        >
+      }
+      <!--
         One entry only. Storytime is a section of the site rather than a set of
         peers to Community and Help, and its own pages — Stories, Arcs, the
         Spotlight, and a member's writing — are reached from its landing page,

@@ -1,4 +1,4 @@
-<section class="custom-tracking-values">
+<section class="custom-tracking-values lcars-rotate">
   @if (!canEdit) {
     <output class="custom-tracking-notice">
       Recording values is paused at the moment. Everything already recorded is
@@ -53,7 +53,7 @@
   }
 
   @if (!fixedTarget && targets.length > 0) {
-    <div class="lcars-input-container bluey custom-tracking-search">
+    <div class="lcars-input-container custom-tracking-search">
       <label for="custom-tracking-target-search">Find a record</label>
       <input
         id="custom-tracking-target-search"
@@ -62,7 +62,7 @@
         placeholder="Name or handle" />
     </div>
 
-    <div class="lcars-select-container perano">
+    <div class="lcars-select-container">
       <label
         class="select-label"
         for="custom-tracking-target"
@@ -88,7 +88,7 @@
   }
 
   @if (record) {
-    <div class="lcars-input-container bluey custom-tracking-search">
+    <div class="lcars-input-container custom-tracking-search">
       <label for="custom-tracking-value-search">Find a field</label>
       <input
         id="custom-tracking-value-search"
@@ -128,7 +128,7 @@
       and a group bound in two places at once is a fight nobody wins.
     -->
     <form
-      class="custom-tracking-builder"
+      class="custom-tracking-builder lcars-rotate"
       (submit)="onSubmit($event)">
       @for (section of shownSections; track section.id) {
         <div class="custom-tracking-panel">
@@ -181,7 +181,7 @@
 
               @for (tab of section.tabs; track tab.id) {
                 <div
-                  class="custom-tracking-tab-panel"
+                  class="custom-tracking-tab-panel lcars-rotate"
                   role="tabpanel"
                   tabindex="0"
                   [id]="'custom-tracking-value-panel-' + tab.id"
@@ -227,13 +227,13 @@
       <div class="custom-tracking-form-actions">
         <button
           type="submit"
-          class="lcars-btn lcars-btn-auto sunflower"
+          class="lcars-btn lcars-btn-auto green"
           [disabled]="isLoading || !canEdit">
           Save this record
         </button>
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto bluey"
+          class="lcars-btn lcars-btn-auto"
           [disabled]="isLoading || !hasUnsavedChanges()"
           (click)="revert()">
           Undo my changes

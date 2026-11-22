@@ -3,6 +3,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CharacterCardComponent } from 'src/app/shared/components/character-card/character-card.component';
 import { CharacterCardVm } from 'src/app/shared/components/character-card/character-card.model';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { displayFromPublic } from 'src/app/shared/custom-tracking/custom-tracking-display.builder';
@@ -35,6 +36,7 @@ import { RegistryService } from '../registry.service';
     CharacterCardComponent,
     CommunityTabsComponent,
     CustomTrackingDisplayComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class RegistryAccountComponent

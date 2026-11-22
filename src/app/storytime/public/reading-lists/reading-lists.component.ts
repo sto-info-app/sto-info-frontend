@@ -11,6 +11,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { ReadingList } from 'src/app/models/storytime.models';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
@@ -27,7 +28,13 @@ import { ReadingListService } from '../../reading-list.service';
   selector: 'app-reading-lists',
   templateUrl: './reading-lists.component.html',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, LcarsToggleComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterLink,
+    LcarsToggleComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class ReadingListsComponent implements OnInit {
   /** The reader's lists, most recently touched first. */

@@ -92,7 +92,7 @@ export class AccessControlAdminService {
    * it and any request against a member who already holds it.
    *
    * @param userId - The member whose role is changing.
-   * @param payload - The role to give them.
+   * @param payload - The role to give them, and why (FC-039).
    * @returns An observable of the member's updated access summary.
    */
   setUserRole(
@@ -113,16 +113,18 @@ export class AccessControlAdminService {
    *
    * @param userId - The member the override applies to.
    * @param permissionCode - The permission code to stop overriding.
+   * @param reason - Why, kept in the site admin log (FC-039).
    * @returns An observable of the member's updated access summary.
    */
   removePermissionOverride(
     userId: string,
     permissionCode: string,
+    reason: string,
   ): Observable<UserAccessSummary> {
     return this.authenticated<UserAccessSummary>(options =>
       this._http.delete<UserAccessSummary>(
         `${API_URLS.ACCESS_CONTROL_ADMIN_USERS}/${userId}/permission-overrides/${encodeURIComponent(permissionCode)}`,
-        options,
+        { ...options, body: { reason } },
       ),
     );
   }

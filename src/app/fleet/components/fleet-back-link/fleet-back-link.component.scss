@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+// A row of one takes the colour the page gives the row rather than always
+// the rotation's first, so the way back differs from the block beside it.
+.fleet-back-link__pill {
+  --lcars-accent: inherit;
+}

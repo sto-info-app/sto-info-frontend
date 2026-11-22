@@ -3,26 +3,38 @@ import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   NgZone,
+  OnDestroy,
   OnInit,
   inject,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, take } from 'rxjs';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { Observable, Subscription, take } from 'rxjs';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
 import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import {
+  FRIEND_CHAT_FAILED,
+  FriendChatService,
+} from 'src/app/community/friend-chat.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { CommunityService } from '../../community.service';
 import { CommunityTabsComponent } from '../../community-tabs/community-tabs.component';
 import {
+  MEMBER_CARD_CHAT,
   MEMBER_CARD_UNFRIEND,
   buildFriendMemberCard,
+  withPresence,
 } from '../../member-card.builders';
 import {
   BlockedMember,
@@ -34,8 +46,15 @@ import {
   FriendsTab,
 } from '../../models/community.models';
 import { buildRegistryProfileLink } from '../../registry/registry-card.builders';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
 
-const PAGE_SIZE = 12;
+// Five a page: a card is a row of its own now, in the shape of an account
+// card, so a page of twelve ran well past the screen.
+const PAGE_SIZE = 5;
+
+/** The friends section, which a page turn scrolls back to. */
+export const RESULTS_ID = 'crew-manifest';
 
 /**
  * A friend alongside the card built for them.
@@ -84,6 +103,7 @@ const TAB_CONFIG: Record<FriendsTab, { heading: string; empty: string }> = {
   styleUrls: ['./friends-page.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     RouterModule,
@@ -92,15 +112,34 @@ const TAB_CONFIG: Record<FriendsTab, { heading: string; empty: string }> = {
     LcarsSuccessMessageComponent,
     MemberCardComponent,
     CommunityTabsComponent,
+    CollapsibleSectionComponent,
+    LcarsPaginationComponent,
   ],
 })
-export class FriendsPageComponent implements OnInit {
+export class FriendsPageComponent implements OnInit, OnDestroy {
+  private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _communityService = inject(CommunityService);
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
-  private readonly _dialog = inject(MatDialog);
+  private readonly _confirmPrompt = new ConfirmPrompt();
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _presence = inject(ChatPresenceService);
+  private readonly _friendChat = inject(FriendChatService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  /** The friends shown who are online, read again each minute (FC-034). */
+  private _presenceWatch: Subscription | null = null;
+
+  /** Who of the friends shown is online, as the last reading had it. */
+  private _online: ReadonlySet<string> = new Set();
+
+  /** Whether chat is switched on, for the Chat button on each card (FC-033). */
+  isChatOffered = false;
+
+  /** Where the friends start, for a page turn to scroll back to. */
+  readonly resultsId = RESULTS_ID;
 
   tab: FriendsTab = 'friends';
   isLoading = false;
@@ -131,6 +170,17 @@ export class FriendsPageComponent implements OnInit {
    * the viewer navigates with the back button.
    */
   ngOnInit(): void {
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(features => {
+        this.isChatOffered = features.chatEnabled;
+        this.buildFriendCards();
+      });
+
     this._route.queryParamMap
       .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe(params => {
@@ -190,6 +240,17 @@ export class FriendsPageComponent implements OnInit {
     this.load();
   }
 
+  /**
+   * Turns to another page, and brings the top of the results back into
+   * view, since the pagination sits beneath a page of cards.
+   *
+   * @param page - The 1-based page number.
+   */
+  turnPage(page: number): void {
+    this.loadPage(page);
+    document.getElementById(RESULTS_ID)?.scrollIntoView({ block: 'start' });
+  }
+
   // ----- Loading -----
 
   /**
@@ -222,14 +283,53 @@ export class FriendsPageComponent implements OnInit {
       result => {
         this.friends = result?.items ?? [];
         this.total = result?.total ?? 0;
-        this.friendVms = this.friends.map(friend => ({
-          id: friend.id,
-          friend,
-          card: buildFriendMemberCard(friend),
-        }));
+        this.buildFriendCards();
+        this.watchPresence();
       },
       'Something went wrong loading your friends.',
     );
+  }
+
+  /**
+   * Builds a card for each friend listed, marked online as last read.
+   */
+  private buildFriendCards(): void {
+    this.friendVms = this.friends.map(friend => ({
+      id: friend.id,
+      friend,
+      card: withPresence(
+        buildFriendMemberCard(
+          friend,
+          this._userSettingsService.displayTimezone(),
+          this.isChatOffered,
+        ),
+        this._online,
+      ),
+    }));
+  }
+
+  /**
+   * Stops reading who is online with the page.
+   */
+  ngOnDestroy(): void {
+    this._presenceWatch?.unsubscribe();
+  }
+
+  /**
+   * Marks the friends shown who are online, and keeps doing so each minute.
+   */
+  private watchPresence(): void {
+    this._presenceWatch?.unsubscribe();
+    this._presenceWatch = this._presence
+      .watch(this.friends.map(friend => friend.member.username))
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(online => {
+        this._online = online;
+        this.friendVms = this.friendVms.map(vm => ({
+          ...vm,
+          card: withPresence(vm.card, online),
+        }));
+      });
   }
 
   /**
@@ -291,7 +391,30 @@ export class FriendsPageComponent implements OnInit {
   onMemberCardAction(friend: Friend, actionKey: string): void {
     if (actionKey === MEMBER_CARD_UNFRIEND) {
       this.removeFriend(friend);
+    } else if (actionKey === MEMBER_CARD_CHAT) {
+      this.openChat(friend);
     }
+  }
+
+  /**
+   * Opens chat with a friend (FC-033), by the friendship, and goes to the
+   * conversation.
+   *
+   * @param friend - The friend.
+   */
+  openChat(friend: Friend): void {
+    this.isLoading = true;
+    this.errorMessage = '';
+    this._friendChat
+      .open(friend.id)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: () => (this.isLoading = false),
+        error: () => {
+          this.isLoading = false;
+          this.errorMessage = FRIEND_CHAT_FAILED;
+        },
+      });
   }
 
   /**
@@ -522,14 +645,8 @@ export class FriendsPageComponent implements OnInit {
     data: { title: string; message: string; confirmText: string },
     onConfirm: () => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._confirmPrompt
+      .ask({ ...data, cancelText: 'Cancel' })
       .subscribe(confirmed => {
         if (confirmed) {
           onConfirm();

@@ -1,0 +1,292 @@
+@charset "utf-8";
+@use 'lcars-variables' as vars;
+@use 'alert-themes/lcars-alert-shared';
+
+@keyframes data-cascade-colour-change {
+  0% {
+    color: vars.$alert-theme-blue-cascade;
+  }
+
+  25% {
+    color: vars.$alert-theme-blue-cascade;
+  }
+
+  50% {
+    color: vars.$alert-theme-blue-cascade;
+  }
+
+  75% {
+    color: vars.$alert-theme-blue-cascade;
+  }
+
+  80% {
+    color: vars.$a11y-black;
+  }
+
+  90% {
+    color: vars.$a11y-black;
+  }
+
+  100% {
+    color: vars.$lcars-c72;
+  }
+}
+
+@keyframes alert-blue {
+  0% {
+    background-color: vars.$lcars-c72;
+  }
+
+  25% {
+    background-color: vars.$lcars-c72;
+  }
+
+  50% {
+    background-color: vars.$alert-theme-blue-main;
+  }
+
+  75% {
+    background-color: vars.$alert-theme-blue-main;
+  }
+
+  80% {
+    background-color: vars.$alert-theme-blue-main;
+  }
+
+  90% {
+    background-color: vars.$lcars-c72;
+  }
+
+  100% {
+    background-color: vars.$lcars-c72;
+  }
+}
+
+.panel-1 a {
+  animation: alert-blue 1s infinite;
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.panel-4 {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.1s;
+}
+
+.submit-button {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.left-frame-top,
+.left-frame,
+.panel-3,
+.top-corner-bg,
+.corner-bg,
+.bar-1,
+.bar-6 {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.3s;
+}
+
+/* Animate Alert & Moving Bars */
+.bar-2,
+.bar-7 {
+  animation:
+    alert-blue 1s infinite 0.3s,
+    resizeGroup1 60s linear infinite alternate;
+}
+
+.bar-3,
+.bar-8 {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.4s;
+}
+
+.bar-4,
+.bar-9 {
+  animation:
+    alert-blue 1s infinite 0.5s,
+    resizeGroup2 60s linear infinite alternate;
+}
+
+/* END: Animate Alert & Moving Bars */
+
+.button#top-left a {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.6s;
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.button#bottom-left a {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.button#top-right a {
+  background-color: vars.$alert-theme-blue-button;
+}
+
+.button#bottom-right a {
+  background-color: vars.$lcars-c71;
+}
+
+.bar-5,
+.bar-10 {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.7s;
+}
+
+.panel-5 {
+  animation: alert-blue 1s infinite;
+}
+
+.panel-6 {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.8s;
+}
+
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10 {
+  animation: alert-blue 1s infinite;
+  animation-delay: 0.9s;
+}
+
+.left-frame-top {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.left-frame {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.data-cascade#frozen .row-1,
+.data-cascade#frozen .row-2,
+.data-cascade#frozen .row-3,
+.data-cascade#frozen .row-6 {
+  color: vars.$alert-theme-blue-cascade;
+}
+
+.data-cascade#frozen .row-4 {
+  color: vars.$alert-theme-blue-highlight;
+}
+
+.data-cascade#frozen .row-5 {
+  color: vars.$lcars-c72;
+}
+
+.top-corner-bg {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.bar-1,
+.bar-2,
+.bar-3,
+.bar-4,
+.bar-5,
+.bar-6,
+.bar-7,
+.bar-8,
+.bar-9,
+.bar-10 {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.gap {
+  margin-top: 10px;
+}
+
+/* .panel-1, .panel-2, */
+.panel-3,
+.panel-4,
+.panel-5,
+.panel-6,
+.panel-7,
+.panel-8,
+.panel-9,
+.panel-10 {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.corner-bg {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+code {
+  color: vars.$alert-theme-blue-cascade;
+}
+
+hr {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.border {
+  border: 2px solid vars.$alert-theme-blue-main;
+}
+
+.buttons a {
+  background-color: vars.$alert-theme-blue-button;
+  color: vars.$alert-theme-blue-button-text;
+}
+
+.buttons a:nth-child(odd) {
+  background-color: vars.$alert-theme-blue-button;
+}
+
+.buttons a:nth-child(even) {
+  background-color: vars.$lcars-c71;
+}
+
+.silver {
+  background-color: vars.$lcars-c71 !important;
+}
+
+.alert-blue {
+  background-color: vars.$alert-theme-blue-button !important;
+}
+
+.sidebar-buttons a {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.lcars-bar {
+  background-color: vars.$a11y-black;
+  border-right: 18px solid vars.$alert-theme-blue-button;
+  border-left: 18px solid vars.$alert-theme-blue-button;
+}
+
+.lcars-bar-inner {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.lcars-bar-slice-bottom {
+  background-color: vars.$alert-theme-blue-main;
+}
+
+.lcars-text-bar {
+  background-color: vars.$alert-theme-blue-main;
+  border-right: 28px solid vars.$alert-theme-blue-button;
+  border-left: 28px solid vars.$alert-theme-blue-button;
+}
+
+footer {
+  background: linear-gradient(
+    vars.$alert-theme-blue-footer-light 50%,
+    vars.$alert-theme-blue-footer-dark 50%
+  );
+}
+
+#footer-panel {
+  background-color: vars.$alert-theme-blue-footer-panel;
+}
+
+#footer-inside::before {
+  background-color: vars.$alert-theme-blue-footer-light;
+}
+
+#footer-inside::after {
+  background-color: vars.$alert-theme-blue-footer-dark;
+}
+
+#footer-text a {
+  color: vars.$alert-theme-blue-button;
+}

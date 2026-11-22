@@ -15,6 +15,7 @@ import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { CharacterAdmiraltyService } from 'src/app/dashboard/services/character-admiralty.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CharacterAdmiraltyComponent } from './character-admiralty.component';
+import { LCARS_COLOURS } from 'src/app/shared/constants/lcars-colours.constants';
 
 describe('CharacterAdmiraltyComponent', () => {
   let component: CharacterAdmiraltyComponent;
@@ -350,20 +351,22 @@ describe('CharacterAdmiraltyComponent', () => {
 
   it('should resolve a campaign accent and fall back when absent', () => {
     expect(component.accent(mockProgress[0])).toBe('#4b84c4');
-    expect(component.accent(mockProgress[1])).toBe('#fa0');
+    expect(component.accent(mockProgress[1])).toBe(LCARS_COLOURS.gold);
   });
 
   it('should set black on a light accent and white on a dark one', () => {
     // The seeded Federation blue and Klingon red sit either side of the
     // crossover, and are the pair the panel headings actually have to carry.
-    expect(component.accentTextColor(mockProgress[0])).toBe('#0d0d0d');
+    expect(component.accentTextColor(mockProgress[0])).toBe(
+      LCARS_COLOURS.black,
+    );
 
     const klingon = {
       ...mockProgress[0],
       campaign: { ...mockProgress[0].campaign, accentColor: '#b33a3a' },
     };
 
-    expect(component.accentTextColor(klingon)).toBe('#fff');
+    expect(component.accentTextColor(klingon)).toBe(LCARS_COLOURS.a11yWhite);
   });
 
   it('should set white on an accent dark enough to take the linear ramp', () => {
@@ -372,7 +375,7 @@ describe('CharacterAdmiraltyComponent', () => {
       campaign: { ...mockProgress[0].campaign, accentColor: '#0a0a0a' },
     };
 
-    expect(component.accentTextColor(nearBlack)).toBe('#fff');
+    expect(component.accentTextColor(nearBlack)).toBe(LCARS_COLOURS.a11yWhite);
   });
 
   it('should fall back to white when an accent cannot be read', () => {
@@ -381,7 +384,7 @@ describe('CharacterAdmiraltyComponent', () => {
       campaign: { ...mockProgress[0].campaign, accentColor: '#12' },
     };
 
-    expect(component.accentTextColor(broken)).toBe('#fff');
+    expect(component.accentTextColor(broken)).toBe(LCARS_COLOURS.a11yWhite);
   });
 
   it('should render a panel for every campaign', () => {

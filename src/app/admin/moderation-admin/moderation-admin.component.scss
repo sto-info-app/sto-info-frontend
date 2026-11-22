@@ -8,7 +8,8 @@
 // that tint: an account is not a complaint, and its card is coloured by the
 // member's role instead, the same way Manage Permissions colours the same
 // account.
-#report-admin-page {
+#report-admin-page,
+#chat-report-admin-page {
   .admin-record-card {
     border-left-color: color.adjust(vars.$lcars-cardinal, $lightness: -10%);
   }
@@ -19,16 +20,18 @@
   }
 
   .admin-record-title span {
-    color: rgb(255 255 255 / 78%);
+    color: vars.$white-a78;
   }
 
   .status-pill {
-    background: rgb(0 0 0 / 28%);
+    background: vars.$black-a28;
     color: vars.$lcars-white;
   }
 }
 
 #report-admin-page,
+#chat-report-admin-page,
+#moderation-hold-page,
 #user-admin-page {
   // The report body stacks a free-text account above the detail grid, so the
   // grid must not also try to sit beside it.
@@ -41,14 +44,19 @@
 
   .moderation-no-details {
     font-style: italic;
-    color: rgb(255 255 255 / 60%);
+    color: vars.$white-a60;
   }
 
-  // Disable and restore are the consequential actions on these pages, so they
-  // get the destructive treatment rather than the neutral one.
+  // An action that refuses or takes something away answers in red, one that
+  // accepts, restores or keeps answers in green, and the rest in orange
+  // (green and red are kept for those).
   .moderation-record-actions {
     .cta-icon {
       @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-orange);
+    }
+
+    .approve-icon {
+      @include mixins.lcars-icon-button(vars.$lcars-perano, vars.$lcars-green);
     }
 
     .delete-icon {
@@ -59,4 +67,65 @@
   .admin-form-actions {
     margin-top: 1rem;
   }
+}
+
+// A chat report's evidence: the messages before the reported one, oldest
+// first, with the reported one marked (FC-035), and what a hold keeps
+// (FC-036).
+#chat-report-admin-page,
+#moderation-hold-page {
+  .chat-report-evidence {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .chat-report-evidence__messages {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .chat-report-evidence__message {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.35rem 0.6rem;
+    border-left: 4px solid vars.$white-a20;
+    overflow-wrap: anywhere;
+  }
+
+  .chat-report-evidence__message--reported {
+    border-left-color: vars.$lcars-orange;
+    background: vars.$white-a6;
+  }
+
+  .chat-report-evidence__meta {
+    font-size: 0.8rem;
+    color: vars.$white-a66;
+  }
+
+  .chat-report-evidence__body {
+    white-space: pre-wrap;
+  }
+
+  .chat-report-evidence__outcome {
+    margin: 0;
+    font-size: 0.85rem;
+  }
+
+  .admin-form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}
+
+// A verified erasure's outcome (FC-038).
+.roster-erasure__notice {
+  margin: 0 0 1rem;
+  color: vars.$lcars-green;
 }

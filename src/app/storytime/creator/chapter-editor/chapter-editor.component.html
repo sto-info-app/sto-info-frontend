@@ -7,9 +7,11 @@
   class="storytime-page">
   <h1>{{ isNew ? 'Write a Chapter' : 'Edit Chapter' }}</h1>
 
-  <nav class="storytime-page-actions">
+  <nav
+    class="storytime-page-actions"
+    aria-label="This Chapter">
     <a
-      class="lcars-btn lcars-btn-auto bluey"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="[
         '/',
         appRoutes.STORYTIME,
@@ -21,7 +23,7 @@
       Back to the Chapters
     </a>
     <a
-      class="lcars-btn lcars-btn-auto sky"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
       Back to the Story
     </a>
@@ -38,14 +40,12 @@
     [formGroup]="form"
     class="storytime-form"
     (ngSubmit)="save()">
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Chapter Details</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="Chapter Details"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="chapter-title">Title</label>
             <input
               id="chapter-title"
@@ -62,7 +62,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container bluey">
+          <div class="lcars-input-container">
             <label for="chapter-slug">URL slug</label>
             <input
               id="chapter-slug"
@@ -79,7 +79,6 @@
             fieldId="chapter-language"
             label="Language"
             controlName="languageCode"
-            colour="sunflower"
             [options]="languageOptions">
             <p>
               Only set this when the Chapter is written in a different language
@@ -89,7 +88,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container gold storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="chapter-synopsis">Synopsis</label>
             <textarea
               id="chapter-synopsis"
@@ -104,13 +103,12 @@
           fieldId="chapter-content"
           label="Chapter"
           controlName="contentSource"
-          colour="perano"
           previewClass="storytime-chapter__body"
           [rows]="24">
           A Chapter needs some content before it can be published.
         </app-storytime-markdown-field>
       </div>
-    </section>
+    </app-collapsible-section>
 
     <!--
       The cover waits for the Chapter to exist. It is set against a saved
@@ -118,12 +116,10 @@
       first save would mean holding a file with nowhere to put it.
     -->
     @if (chapter) {
-      <section class="storytime-section">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Cover</span>
-        </div>
-
-        <div class="storytime-panel">
+      <app-collapsible-section
+        heading="Cover"
+        barClass="small-lcars-bar-gap">
+        <div class="storytime-panel storytime-panel--bare">
           <app-storytime-image-manager
             [slot]="imageSlots.CHAPTER_COVER"
             [targetId]="chapter.id"
@@ -132,15 +128,13 @@
             altControlName="coverImageAlt"
             (changed)="onImageChanged($event)"></app-storytime-image-manager>
         </div>
-      </section>
+      </app-collapsible-section>
     }
   </form>
 
-  <section class="storytime-section">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Videos</span>
-    </div>
-
+  <app-collapsible-section
+    heading="Videos"
+    barClass="small-lcars-bar-gap">
     <div class="storytime-panel">
       @if (mediaErrorMessage) {
         <app-lcars-error-message
@@ -149,7 +143,7 @@
       }
 
       <div class="form-row">
-        <div class="lcars-input-container cool storytime-field-full">
+        <div class="lcars-input-container storytime-field-full">
           <label for="chapter-media-url">Paste a YouTube link</label>
           <input
             id="chapter-media-url"
@@ -174,7 +168,7 @@
 
       <div class="storytime-form-actions">
         <button
-          class="lcars-btn sunflower"
+          class="lcars-btn"
           type="button"
           [disabled]="isNew"
           (click)="addMedia()">
@@ -202,14 +196,12 @@
         </ul>
       }
     </div>
-  </section>
+  </app-collapsible-section>
 
   @if (!isNew && cast.length > 0) {
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Who appears</span>
-      </div>
-
+    <app-collapsible-section
+      heading="Who appears"
+      barClass="small-lcars-bar-gap">
       <div class="storytime-panel">
         @if (castErrorMessage) {
           <app-lcars-error-message
@@ -238,7 +230,7 @@
           </button>
         </div>
       </div>
-    </section>
+    </app-collapsible-section>
   }
 
   <!--

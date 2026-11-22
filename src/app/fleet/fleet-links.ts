@@ -1,0 +1,771 @@
+import { ROOT_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+
+/** The directory's own address, and the root every scope hangs below. */
+const FLEETS = '/' + ROOT_ROUTES.FLEETS;
+
+/**
+ * The segment standing where a Community's slug would, for a Fleet that has
+ * none.
+ *
+ * A standalone Fleet is a record of a Fleet nobody here runs, and it needs
+ * an address for the same reason every other record does: so it can be
+ * linked to, and so the person about to confirm a second one is shown the
+ * first. It has no Community to name, so the position names its absence.
+ *
+ * Reserved against Community slugs by the server, which is what lets one
+ * word mean exactly one thing in that position.
+ */
+export const FLEET_STANDALONE_SEGMENT = 'standalone';
+
+/**
+ * Router links to the canonical address of each kind of scope.
+ *
+ * Built here rather than written out at each call site. A router link is an
+ * array of segments and a canonical Fleet address has six of them, so a
+ * hand-written copy is a quiet way to produce a link that resolves to the
+ * wrong page — or, worse, to a Fleet of the same name under a different
+ * Community.
+ *
+ * Each segment is passed whole. Angular encodes them, so a slug is handed over
+ * as it was read rather than being escaped here and escaped again on the way
+ * out.
+ */
+export const FLEET_LINKS = {
+  /**
+   * The Fleet listing, which is the directory's landing page.
+   *
+   * @returns The router link.
+   */
+  fleetDirectory: (): string[] => [FLEETS],
+
+  /**
+   * The Community listing.
+   *
+   * @returns The router link.
+   */
+  communityDirectory: (): string[] => [FLEETS, 'communities'],
+
+  /**
+   * The Armada listing.
+   *
+   * @returns The router link.
+   */
+  armadaDirectory: (): string[] => [FLEETS, 'armadas'],
+
+  /**
+   * One Community's page.
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  community: (communitySlug: string): string[] => [
+    FLEETS,
+    'communities',
+    communitySlug,
+  ],
+
+  /**
+   * One Fleet's page, below the Community that registered it.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleet: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    FLEETS,
+    'communities',
+    communitySlug,
+    'fleets',
+    platformSegment,
+    fleetSlug,
+  ],
+
+  /**
+   * The page a roster export is checked on and imported from.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterImportForm: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'import',
+  ],
+
+  /**
+   * A Fleet's roster, as one export listed it.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRoster: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'roster',
+  ],
+
+  /**
+   * A Fleet's roster history, newest interval first.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetHistory: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'history',
+  ],
+
+  /**
+   * One member's history in a Fleet, below its history so that tab stays lit.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @param identityId - The member.
+   * @returns The router link.
+   */
+  fleetMember: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+    identityId: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetHistory(communitySlug, platformSegment, fleetSlug),
+    'members',
+    identityId,
+  ],
+
+  /**
+   * A Fleet's reports, as much of each as the reader is shown.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetReports: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'reports',
+  ],
+
+  /**
+   * The tier of each of a Fleet's holdings, and their history (FC-023).
+   * Public: for whoever may see the Fleet.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetHoldings: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'holdings',
+  ],
+
+  /**
+   * A Fleet's news (FC-027): for whoever each post is published to.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetNews: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'news',
+  ],
+
+  /**
+   * A Fleet's activity (FC-029).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetActivity: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'activity',
+  ],
+
+  /**
+   * A Fleet's calendar (FC-030).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetEvents: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'events',
+  ],
+
+  /**
+   * A Community's own calendar (FC-030).
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityEvents: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'events',
+  ],
+
+  /**
+   * A Community's own activity (FC-029).
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityActivity: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'activity',
+  ],
+
+  /**
+   * A Community's own news (FC-027), not its Fleets' or Armadas'.
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityNews: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'news',
+  ],
+
+  /**
+   * One post of a scope's news (FC-027).
+   *
+   * @param newsLink - The scope's news, from {@link communityNews},
+   *   {@link fleetNews} or {@link armadaNews}.
+   * @param postSlug - The post's address.
+   * @returns The router link.
+   */
+  newsPost: (newsLink: readonly string[], postSlug: string): string[] => [
+    ...newsLink,
+    postSlug,
+  ],
+
+  /**
+   * Where a new post of a scope's news is written (FC-027). A literal no
+   * post's address can be: every address ends in a suffix of its own.
+   *
+   * @param newsLink - The scope's news.
+   * @returns The router link.
+   */
+  newsWrite: (newsLink: readonly string[]): string[] => [...newsLink, 'write'],
+
+  /**
+   * Where a post of a scope's news is changed (FC-027).
+   *
+   * @param newsLink - The scope's news.
+   * @param postSlug - The post's address.
+   * @returns The router link.
+   */
+  newsEdit: (newsLink: readonly string[], postSlug: string): string[] => [
+    ...newsLink,
+    postSlug,
+    'edit',
+  ],
+
+  /**
+   * Where a Fleet's roster is looked into: the imports, the renames, the
+   * conflicts and the rank order, for whoever imports or investigates.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetInvestigate: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'investigate',
+  ],
+
+  /**
+   * A Fleet's roster imports, newest first.
+   *
+   * Below the Investigate section, so its tab stays lit here. The address it
+   * had before still arrives, by a redirect.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterImports: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'imports',
+  ],
+
+  /**
+   * The renames a Fleet's rosters suggest, for its investigators to decide.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterIdentities: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'identities',
+  ],
+
+  /**
+   * The names a Fleet was known by before, for its investigators to record
+   * so older exports still match (FC-050).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetFormerNames: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'former-names',
+  ],
+
+  /**
+   * The exports of a Fleet claiming one moment, for its investigators to
+   * choose between.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRosterConflicts: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'conflicts',
+  ],
+
+  /**
+   * A Fleet's rank order, for its investigators to set.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRankOrder: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetInvestigate(communitySlug, platformSegment, fleetSlug),
+    'rank-order',
+  ],
+
+  /**
+   * One of a Fleet's roster imports, and where it has got to.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @param importId - The import.
+   * @returns The router link.
+   */
+  fleetRosterImport: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+    importId: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRosterImports(
+      communitySlug,
+      platformSegment,
+      fleetSlug,
+    ),
+    importId,
+  ],
+
+  /**
+   * One Fleet's page, where no Community registered it.
+   *
+   * The same shape as a registered Fleet's, with the reserved segment where
+   * the Community's slug would be. One shape rather than two, so a link to
+   * a Fleet is built the same way wherever it comes from.
+   *
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  standaloneFleet: (platformSegment: string, fleetSlug: string): string[] => [
+    FLEETS,
+    'communities',
+    FLEET_STANDALONE_SEGMENT,
+    'fleets',
+    platformSegment,
+    fleetSlug,
+  ],
+
+  /**
+   * The signed-in person's own Fleet applications and invitations (FC-021).
+   *
+   * @returns The router link.
+   */
+  myApplications: (): string[] => [FLEETS, 'applications'],
+
+  /**
+   * The page for applying to a Fleet whose recruitment state is APPLICATION.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetApply: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'apply',
+  ],
+
+  /**
+   * Where a Fleet's officers run its recruitment: applications, invitations,
+   * members and settings (FC-021).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRecruitment: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'recruitment',
+  ],
+
+  /**
+   * A Fleet's applications, for its deciders.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetApplications: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'applications',
+  ],
+
+  /**
+   * One application to a Fleet, in full.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @param applicationId - The application.
+   * @returns The router link.
+   */
+  fleetApplication: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+    applicationId: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetApplications(communitySlug, platformSegment, fleetSlug),
+    applicationId,
+  ],
+
+  /**
+   * A Fleet's invitations.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetInvitations: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'invitations',
+  ],
+
+  /**
+   * Where a Fleet's Owner and Admins manage who governs it (FC-022).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetManage: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleet(communitySlug, platformSegment, fleetSlug),
+    'manage',
+  ],
+
+  /**
+   * Where a Community's Owner and Admins manage who governs it (FC-022).
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communityManage: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.community(communitySlug),
+    'manage',
+  ],
+
+  /**
+   * Where a Community's Owner changes its name, web address and the rest.
+   *
+   * @param communitySlug - The Community's URL segment.
+   * @returns The router link.
+   */
+  communitySettings: (communitySlug: string): string[] => [
+    ...FLEET_LINKS.communityManage(communitySlug),
+    'settings',
+  ],
+
+  /**
+   * Where a Fleet's Owner changes its name, web address and the rest.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetSettings: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetManage(communitySlug, platformSegment, fleetSlug),
+    'settings',
+  ],
+
+  /**
+   * A Fleet's members, for whoever may remove one.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetMembers: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'members',
+  ],
+
+  /**
+   * How a Fleet recruits: its state, requirements and application form.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param fleetSlug - The Fleet's URL segment.
+   * @returns The router link.
+   */
+  fleetRecruitmentSettings: (
+    communitySlug: string,
+    platformSegment: string,
+    fleetSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.fleetRecruitment(communitySlug, platformSegment, fleetSlug),
+    'settings',
+  ],
+
+  /**
+   * One Armada's page, below the Community that registered it.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armada: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    FLEETS,
+    'communities',
+    communitySlug,
+    'armadas',
+    platformSegment,
+    armadaSlug,
+  ],
+
+  /**
+   * An Armada's news (FC-027): for whoever each post is published to.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaNews: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'news',
+  ],
+
+  /**
+   * An Armada's calendar (FC-030).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaEvents: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'events',
+  ],
+
+  /**
+   * An Armada's activity (FC-029).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaActivity: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'activity',
+  ],
+
+  /**
+   * How an Armada's shape changed (FC-026). For whoever may see it.
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaHistory: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'history',
+  ],
+
+  /**
+   * An Armada's requests to join, for its managers (FC-026).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaRequests: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'requests',
+  ],
+
+  /**
+   * Where an Armada's Owner and Admins manage who governs it (FC-025).
+   *
+   * @param communitySlug - The holding Community's URL segment.
+   * @param platformSegment - The platform, as a URL segment.
+   * @param armadaSlug - The Armada's URL segment.
+   * @returns The router link.
+   */
+  armadaManage: (
+    communitySlug: string,
+    platformSegment: string,
+    armadaSlug: string,
+  ): string[] => [
+    ...FLEET_LINKS.armada(communitySlug, platformSegment, armadaSlug),
+    'manage',
+  ],
+};

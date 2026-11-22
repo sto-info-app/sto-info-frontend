@@ -31,6 +31,8 @@ import {
 } from 'src/app/shared/constants/app-image-assets.constants';
 import { encodeStoHandle } from 'src/app/shared/utils/sto-handle.utils';
 import { CharacterOverviewSummaryComponent } from 'src/app/dashboard/character-overview/character-overview-summary.component';
+import { CharacterFleetPanelComponent } from 'src/app/fleet/character/character-fleet-panel/character-fleet-panel.component';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { CharacterPicComponent } from '../dialogs/character-pic/character-pic.component';
 import { CharacterDetailComponent } from './character-detail.component';
 
@@ -43,6 +45,7 @@ describe('CharacterDetailComponent', () => {
   let mockDialog: jest.Mocked<MatDialog>;
   let routeParamsSubject: BehaviorSubject<Record<string, string>>;
   let routeQueryParamsSubject: BehaviorSubject<ParamMap>;
+  let fleetOffered: BehaviorSubject<boolean>;
 
   const mockAccount: StoAccount = {
     id: 'acc-1',
@@ -96,9 +99,15 @@ describe('CharacterDetailComponent', () => {
       convertToParamMap({}),
     );
 
+    fleetOffered = new BehaviorSubject(true);
+
     await TestBed.configureTestingModule({
       imports: [CharacterDetailComponent, MatButtonModule, LoadingBarComponent],
       providers: [
+        {
+          provide: FleetConfigurationService,
+          useValue: { isOffered: () => fleetOffered.asObservable() },
+        },
         { provide: CharacterService, useValue: mockCharacterService },
         { provide: StoAccountService, useValue: mockStoAccountService },
         {
@@ -116,7 +125,12 @@ describe('CharacterDetailComponent', () => {
         },
       ],
       schemas: [NO_ERRORS_SCHEMA],
-    }).compileComponents();
+    })
+      // The panel has specs of its own; here it is only an element.
+      .overrideComponent(CharacterDetailComponent, {
+        remove: { imports: [CharacterFleetPanelComponent] },
+      })
+      .compileComponents();
   });
 
   beforeEach(() => {
@@ -169,6 +183,23 @@ describe('CharacterDetailComponent', () => {
 
       expect(component.character).toEqual(mockCharacter);
       expect(component.isLoading).toBe(false);
+
+      // Between switching Captain and pinning, the way to the account's
+      // Endeavour Perks. The router is mocked here, so where it leads is
+      // checked through getEndeavoursLink.
+      fixture.detectChanges();
+      const actions = [
+        ...fixture.nativeElement.querySelector('.header-actions').children,
+      ] as HTMLElement[];
+      const endeavours = actions[1];
+      expect(actions[0].tagName).toBe('APP-STO-SWITCHER-BUTTON');
+      expect(endeavours.tagName).toBe('A');
+      expect(endeavours.getAttribute('aria-label')).toBe('Endeavour Perks');
+      expect(endeavours.querySelector('i')?.className).toBe(
+        'fa-kit fa-sto-endeavor',
+      );
+      expect(actions[2].querySelector('.fa-thumbtack')).not.toBeNull();
+
       expect(mockStoAccountService.getAccounts).toHaveBeenCalled();
       expect(mockCharacterService.getCharactersByAccount).toHaveBeenCalledWith(
         'acc-1',
@@ -210,6 +241,39 @@ describe('CharacterDetailComponent', () => {
       }),
     );
 
+    // Read out to anybody who cannot see the icon, so it names the rank.
+    it.each([
+      ['Fleet Admiral', 'Fleet Admiral'],
+      ['', 'Rank icon'],
+    ])(
+      'should describe the rank icon by its rank (%p)',
+      fakeAsync((title: string, described: string) => {
+        const character: Character = {
+          ...mockCharacter,
+          rank: { title, levelRange: '65', iconUrl: 'https://cdn/rank.png' },
+        };
+        mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+        mockCharacterService.getCharactersByAccount.mockReturnValue(
+          of([character]),
+        );
+        mockCharacterService.getCharacter.mockReturnValue(of(character));
+
+        fixture.detectChanges();
+        routeParamsSubject.next({
+          handle: 'TestAccount',
+          characterHandle: 'TestChar',
+        });
+        tick();
+        fixture.detectChanges();
+
+        const icon = (fixture.nativeElement as HTMLElement).querySelector(
+          'img.rank-icon',
+        ) as HTMLImageElement;
+        expect(icon.alt).toBe(described);
+        expect(icon.title).toBe(described);
+      }),
+    );
+
     it('should fold the data, biography and notes away as three sections', fakeAsync(() => {
       const character = {
         ...mockCharacter,
@@ -231,7 +295,13 @@ describe('CharacterDetailComponent', () => {
       fixture.detectChanges();
 
       const host = fixture.nativeElement as HTMLElement;
-      const sections = [...host.querySelectorAll('app-collapsible-section')];
+      // The side column's photo and navigation fold too; this is about the
+      // sections of the overview itself.
+      const sections = [
+        ...host.querySelectorAll(
+          '#character-detail-main-column app-collapsible-section',
+        ),
+      ];
       expect(
         sections.map(s =>
           s.querySelector('.collapsible-section__title')?.textContent?.trim(),
@@ -269,7 +339,11 @@ describe('CharacterDetailComponent', () => {
         sections[0].querySelector('button[aria-expanded]') as HTMLButtonElement
       ).click();
       fixture.detectChanges();
-      expect(host.querySelector('.detail-grid')).toBeNull();
+      expect(
+        host
+          .querySelector('.detail-grid')
+          ?.closest<HTMLElement>('.collapsible-section__content')?.hidden,
+      ).toBe(true);
       expect(
         sections[0].querySelector('button[title="Edit Character"]'),
       ).not.toBeNull();
@@ -400,6 +474,42 @@ describe('CharacterDetailComponent', () => {
     }));
   });
 
+  describe('the Character’s Fleet panel', () => {
+    function open(): void {
+      mockStoAccountService.getAccounts.mockReturnValue(of([mockAccount]));
+      mockCharacterService.getCharactersByAccount.mockReturnValue(
+        of([mockCharacter]),
+      );
+      mockCharacterService.getCharacter.mockReturnValue(of(mockCharacter));
+
+      fixture.detectChanges();
+      routeParamsSubject.next({
+        handle: 'TestAccount',
+        characterHandle: 'TestChar',
+      });
+      tick();
+      fixture.detectChanges();
+    }
+
+    it('shows the panel while Fleet Community is on', fakeAsync(() => {
+      open();
+
+      expect(
+        fixture.nativeElement.querySelector('app-character-fleet-panel'),
+      ).not.toBeNull();
+    }));
+
+    it('leaves the panel out while Fleet Community is off', fakeAsync(() => {
+      fleetOffered.next(false);
+
+      open();
+
+      expect(
+        fixture.nativeElement.querySelector('app-character-fleet-panel'),
+      ).toBeNull();
+    }));
+  });
+
   describe('Navigation', () => {
     beforeEach(() => {
       component.accountHandle = 'TestAccount';
@@ -431,6 +541,12 @@ describe('CharacterDetailComponent', () => {
 
     it('should get route link', () => {
       expect(component.getRouteLink('test')).toBe('/test');
+    });
+
+    it('should link to the account’s Endeavour Perks', () => {
+      expect(component.getEndeavoursLink()).toBe(
+        `/dashboard/accounts/${encodeStoHandle('TestAccount')}/endeavours`,
+      );
     });
   });
 

@@ -25,19 +25,37 @@ Practical mitigations (system-level):
 Production CSP:
 
 ```
-default-src 'self'; img-src 'self' data: blob: https://cdn.startrekonline.info cdn-cookieyes.com www.googletagmanager.com; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn-cookieyes.com https://www.googletagmanager.com https://cdn.logrocket.io https://cdn.lr-ingest.io https://cdn.lr-in.com https://cdn.lr-in-prod.com https://cdn.lr-ingest.com https://cdn.ingest-lr.com https://cdn.lr-intake.com https://cdn.intake-lr.com https://cdn.logr-ingest.com https://cdn.lrkt-in.com https://cdn.logr-in.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.gstatic.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-src 'self'; child-src 'self' blob:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:; connect-src 'self' https://api.startrekonline.info https://cdn.startrekonline.info *.cookieyes.com cdn-cookieyes.com google-analytics.com *.google-analytics.com https://*.logrocket.io https://*.lr-ingest.io https://*.logrocket.com https://*.lr-in.com https://*.lr-in-prod.com https://*.lr-ingest.com https://*.ingest-lr.com https://*.lr-intake.com https://*.intake-lr.com https://*.logr-ingest.com https://*.lrkt-in.com https://*.logr-in.com https://static.cloudflareinsights.com;
+default-src 'self'; img-src 'self' data: blob: https://cdn.startrekonline.info cdn-cookieyes.com www.googletagmanager.com https://i.ytimg.com; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn-cookieyes.com https://www.googletagmanager.com https://cdn.logrocket.io https://cdn.lr-ingest.io https://cdn.lr-in.com https://cdn.lr-in-prod.com https://cdn.lr-ingest.com https://cdn.ingest-lr.com https://cdn.lr-intake.com https://cdn.intake-lr.com https://cdn.logr-ingest.com https://cdn.lrkt-in.com https://cdn.logr-in.com https://static.cloudflareinsights.com https://kit.fontawesome.com; style-src 'self' 'unsafe-inline' https://fonts.gstatic.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; object-src 'none'; frame-src 'self' https://kit.fontawesome.com https://www.youtube-nocookie.com; child-src 'self' blob:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:; connect-src 'self' https://api.startrekonline.info https://cdn.startrekonline.info *.cookieyes.com cdn-cookieyes.com google-analytics.com *.google-analytics.com https://*.logrocket.io https://*.lr-ingest.io https://*.logrocket.com https://*.lr-in.com https://*.lr-in-prod.com https://*.lr-ingest.com https://*.ingest-lr.com https://*.lr-intake.com https://*.intake-lr.com https://*.logr-ingest.com https://*.lrkt-in.com https://*.logr-in.com https://static.cloudflareinsights.com https://XXXXXXXXXXXXXXXXX.ingest.de.sentry.io https://ka-p.fontawesome.com wss://api.startrekonline.info;
 ```
 
 Dev CSP:
 
 ```
-default-src 'self'; img-src 'self' data: blob: https://cdn.startrekonline.info cdn-cookieyes.com www.googletagmanager.com; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn-cookieyes.com https://www.googletagmanager.com https://cdn.logrocket.io https://cdn.lr-ingest.io https://cdn.lr-in.com https://cdn.lr-in-prod.com https://cdn.lr-ingest.com https://cdn.ingest-lr.com https://cdn.lr-intake.com https://cdn.intake-lr.com https://cdn.logr-ingest.com https://cdn.lrkt-in.com https://cdn.logr-in.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.gstatic.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; object-src 'none'; frame-src 'self'; child-src 'self' blob:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:; connect-src 'self' https://dev-api.startrekonline.info https://cdn.startrekonline.info *.cookieyes.com cdn-cookieyes.com google-analytics.com *.google-analytics.com https://*.logrocket.io https://*.lr-ingest.io https://*.logrocket.com https://*.lr-in.com https://*.lr-in-prod.com https://*.lr-ingest.com https://*.ingest-lr.com https://*.lr-intake.com https://*.intake-lr.com https://*.logr-ingest.com https://*.lrkt-in.com https://*.logr-in.com https://static.cloudflareinsights.com;
+default-src 'self'; img-src 'self' data: blob: https://cdn.startrekonline.info cdn-cookieyes.com www.googletagmanager.com https://i.ytimg.com; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn-cookieyes.com https://www.googletagmanager.com https://cdn.logrocket.io https://cdn.lr-ingest.io https://cdn.lr-in.com https://cdn.lr-in-prod.com https://cdn.lr-ingest.com https://cdn.ingest-lr.com https://cdn.lr-intake.com https://cdn.intake-lr.com https://cdn.logr-ingest.com https://cdn.lrkt-in.com https://cdn.logr-in.com https://static.cloudflareinsights.com https://kit.fontawesome.com; style-src 'self' 'unsafe-inline' https://fonts.gstatic.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; object-src 'none'; frame-src 'self' https://kit.fontawesome.com https://www.youtube-nocookie.com; child-src 'self' blob:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:; connect-src 'self' https://dev-api.startrekonline.info https://cdn.startrekonline.info *.cookieyes.com cdn-cookieyes.com google-analytics.com *.google-analytics.com https://*.logrocket.io https://*.lr-ingest.io https://*.logrocket.com https://*.lr-in.com https://*.lr-in-prod.com https://*.lr-ingest.com https://*.ingest-lr.com https://*.lr-intake.com https://*.intake-lr.com https://*.logr-ingest.com https://*.lrkt-in.com https://*.logr-in.com https://static.cloudflareinsights.com https://XXXXXXXXXXXXXXXXX.ingest.de.sentry.io https://ka-p.fontawesome.com wss://dev-api.startrekonline.info;
 ```
+
+Tribble CSP (the Fleet Community staging environment):
+
+```
+default-src 'self'; img-src 'self' data: blob: https://cdn.startrekonline.info cdn-cookieyes.com www.googletagmanager.com https://i.ytimg.com; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' https://cdn-cookieyes.com https://www.googletagmanager.com https://cdn.logrocket.io https://cdn.lr-ingest.io https://cdn.lr-in.com https://cdn.lr-in-prod.com https://cdn.lr-ingest.com https://cdn.ingest-lr.com https://cdn.lr-intake.com https://cdn.intake-lr.com https://cdn.logr-ingest.com https://cdn.lrkt-in.com https://cdn.logr-in.com https://static.cloudflareinsights.com https://kit.fontawesome.com; style-src 'self' 'unsafe-inline' https://fonts.gstatic.com https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; object-src 'none'; frame-src 'self' https://kit.fontawesome.com https://www.youtube-nocookie.com; child-src 'self' blob:; form-action 'self'; frame-ancestors 'none'; base-uri 'self'; manifest-src 'self'; media-src 'self'; worker-src 'self' blob:; connect-src 'self' https://tribble-api.startrekonline.info https://cdn.startrekonline.info *.cookieyes.com cdn-cookieyes.com google-analytics.com *.google-analytics.com https://*.logrocket.io https://*.lr-ingest.io https://*.logrocket.com https://*.lr-in.com https://*.lr-in-prod.com https://*.lr-ingest.com https://*.ingest-lr.com https://*.lr-intake.com https://*.intake-lr.com https://*.logr-ingest.com https://*.lrkt-in.com https://*.logr-in.com https://static.cloudflareinsights.com https://XXXXXXXXXXXXXXXXX.ingest.de.sentry.io https://ka-p.fontawesome.com wss://tribble-api.startrekonline.info;
+```
+
+The three differ only in `connect-src`, which names each environment's own API. Taken from the
+live headers on 20 October 2026, when `https://i.ytimg.com` was added to `img-src` so YouTube's
+video stills load: Storytime's, Custom Tracking's and the help guides'. The players themselves
+come from `https://www.youtube-nocookie.com`, already in `frame-src`.
+
+Each `connect-src` also names its API's `wss://` address, for Fleet chat's live connection: an
+`https://` source does not cover a `wss://` address, and without it the browser refuses the chat
+socket on every page. Tribble's was added first, on 20 October 2026, after its new policy blocked
+chat there; production's and dev's followed the same day, ahead of Fleet chat's release.
 
 Where this is configured:
 
-- CSP is set on the **Render static site** for the frontend under the "Manage Headers" section.
-- It is currently applied to `/*`.
+- CSP is set on each environment's **Render static site** for the frontend under the "Manage
+  Headers" section.
+- It is currently applied to `/*` on production and dev. On tribble it was not sent with
+  `/favicon.ico` when checked on 20 October 2026.
 - It is managed from a single administrator account.
 
 ### Other security headers (frontend static site)
@@ -53,10 +71,40 @@ These headers are also configured in the same place (Render static site -> Manag
 
 ## Consent and analytics security
 
-- Analytics and session replay are consent-gated.
-- LogRocket sanitises request bodies by redacting keys containing "password".
+- Analytics and LogRocket are consent-gated.
+- Nothing a person types, reads or sends reaches a telemetry provider (FC-038):
+  - LogRocket masks every text and input, and drops every request's and
+    response's body and credentials.
+  - Sentry's Session Replay masks every text, input and picture.
+  - Sentry errors carry no request body, query or cookies.
+  - Sentry breadcrumbs keep where a request went, without its query.
 
-See [src/app/shared/services/log-rocket.service.ts](../src/app/shared/services/log-rocket.service.ts).
+See [src/app/shared/services/log-rocket.service.ts](../src/app/shared/services/log-rocket.service.ts)
+and [src/app/shared/telemetry/sentry-privacy.ts](../src/app/shared/telemetry/sentry-privacy.ts).
+The backend's side, including the audit trail, is its `docs/privacy-erasure.md`.
+
+## Pictures
+
+Every uploaded picture is private at Cloudflare and reachable only by an
+address the API signs, for about a day, while the picture may be shown
+(FC-040). The browser draws the addresses it is given and never builds one; a
+picture that is revoked is replaced by the "photo unavailable" image. The
+backend's side is its `docs/image-delivery.md`.
+
+Site admins can rescan published pictures (FC-041). One found infected is taken
+down, and its owner is told only that a picture failed a security check. Scan
+Diagnostics shows what a rescan found by asset ID and code, never the picture,
+its owner or a signature name. The backend's side is its
+`docs/rescan-campaigns.md`.
+
+## Site admin accountability
+
+Every site-level admin action asks for a reason, which the server keeps with
+the action in its site admin log (FC-039): role and permission changes,
+disabling and restoring accounts, report decisions and content moderation. The
+log is kept like the audit trail: 180 days, the IP address 90. Site admins read
+it, with the other logs they act in and the retention runs, on the Security
+Log page. The backend's side is its `docs/admin-audit.md`.
 
 ## Rate limiting
 

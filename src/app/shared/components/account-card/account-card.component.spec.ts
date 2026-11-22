@@ -1,7 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component } from '@angular/core';
 import { provideRouter } from '@angular/router';
-import { AccountCardComponent } from './account-card.component';
+import {
+  AccountCardComponent,
+  COPY_FEEDBACK_MS,
+} from './account-card.component';
 import { AccountCardVm } from './account-card.model';
 
 @Component({
@@ -75,6 +78,233 @@ describe('AccountCardComponent', () => {
     fixture.componentRef.setInput('vm', vm);
     fixture.detectChanges();
   }
+
+  // #1090: a copy button beside the handle and beside a copyable detail.
+  describe('copying', () => {
+    let writeText: jest.Mock;
+
+    const copyButtons = (): HTMLButtonElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('button.copy-icon'));
+    const announcement = (): string =>
+      fixture.nativeElement
+        .querySelector('[aria-live="polite"]')
+        .textContent.trim();
+    // Lets the clipboard's promise settle; whenStable would wait on the
+    // feedback timer too, which the fake clock holds.
+    const flush = async (): Promise<void> => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    };
+    const icon = (button: HTMLButtonElement): string =>
+      Array.from(button.querySelector('i')?.classList ?? [])
+        .filter(name => name !== 'fas')
+        .join(' ');
+
+    beforeEach(() => {
+      writeText = jest.fn(() => Promise.resolve());
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText },
+        configurable: true,
+      });
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('draws no copy button unless asked', () => {
+      render(buildVm());
+
+      expect(copyButtons()).toHaveLength(0);
+    });
+
+    it('names a button by what it copies, after each copyable detail', () => {
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              private: true,
+              copyable: true,
+            },
+            {
+              icon: 'fas fa-envelope',
+              text: 'a@b.c',
+              label: 'Email',
+              private: true,
+              copyable: true,
+            },
+            { icon: 'fas fa-note-sticky', text: 'notes', label: 'Notes' },
+          ],
+        }),
+      );
+
+      const buttons = copyButtons();
+
+      expect(buttons.map(button => button.title)).toEqual([
+        'Copy username',
+        'Copy email',
+      ]);
+      expect(
+        buttons.map(button => button.closest('.account-detail-row')),
+      ).not.toContain(null);
+      // The header offers nothing to copy; outside the value, so Privacy
+      // Mode's blur never covers a button.
+      expect(
+        fixture.nativeElement.querySelector('.header-handle button'),
+      ).toBeNull();
+      expect(buttons[1].closest('.account-detail-value')).toBeNull();
+      expect(buttons.map(icon)).toEqual(['fa-copy', 'fa-copy']);
+    });
+
+    it('copies the value, shows a tick for a moment and says so, without opening the account', async () => {
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              copyable: true,
+            },
+            {
+              icon: 'fas fa-envelope',
+              text: 'a@b.c',
+              label: 'Email',
+              copyable: true,
+            },
+          ],
+        }),
+      );
+      const [handle, email] = copyButtons();
+      const event = new MouseEvent('click', {
+        bubbles: true,
+        cancelable: true,
+      });
+      const stopPropagation = jest.spyOn(event, 'stopPropagation');
+
+      handle.dispatchEvent(event);
+      await flush();
+      fixture.detectChanges();
+
+      expect(writeText).toHaveBeenCalledWith('stevex');
+      expect(stopPropagation).toHaveBeenCalled();
+      expect(handle.title).toBe('Copied');
+      expect(icon(handle)).toBe('fa-check');
+      expect(announcement()).toBe('Username copied');
+      // The other button is left as it was.
+      expect(email.title).toBe('Copy email');
+
+      jest.advanceTimersByTime(COPY_FEEDBACK_MS);
+      fixture.detectChanges();
+
+      expect(handle.title).toBe('Copy username');
+      expect(icon(handle)).toBe('fa-copy');
+    });
+
+    it('copies a detail by its own value', async () => {
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-envelope',
+              text: 'a@b.c',
+              label: 'Email',
+              copyable: true,
+            },
+          ],
+        }),
+      );
+
+      copyButtons()[0].click();
+      await flush();
+      fixture.detectChanges();
+
+      expect(writeText).toHaveBeenCalledWith('a@b.c');
+      expect(announcement()).toBe('Email copied');
+    });
+
+    it('names a detail with no label of its own by its value', async () => {
+      render(
+        buildVm({
+          details: [
+            { icon: 'fas fa-hashtag', text: 'ABC-123', copyable: true },
+          ],
+        }),
+      );
+      const [button] = copyButtons();
+
+      expect(button.title).toBe('Copy abc-123');
+
+      button.click();
+      await flush();
+      fixture.detectChanges();
+
+      expect(writeText).toHaveBeenCalledWith('ABC-123');
+      expect(announcement()).toBe('ABC-123 copied');
+    });
+
+    it('says the copy failed in a browser with no clipboard', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        configurable: true,
+      });
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              copyable: true,
+            },
+          ],
+        }),
+      );
+      const [handle] = copyButtons();
+
+      handle.click();
+      await flush();
+      fixture.detectChanges();
+
+      expect(handle.title).toBe('Could not copy');
+      expect(announcement()).toBe('Username could not be copied');
+    });
+
+    it('says when the clipboard refuses, and keeps the copy icon', async () => {
+      writeText.mockRejectedValue(new Error('denied'));
+      render(
+        buildVm({
+          details: [
+            {
+              icon: 'fas fa-user',
+              text: 'stevex',
+              label: 'Username',
+              copyable: true,
+            },
+          ],
+        }),
+      );
+      const [handle] = copyButtons();
+
+      handle.click();
+      await flush();
+      fixture.detectChanges();
+
+      expect(handle.title).toBe('Could not copy');
+      expect(icon(handle)).toBe('fa-copy');
+      expect(announcement()).toBe('Username could not be copied');
+
+      jest.advanceTimersByTime(COPY_FEEDBACK_MS);
+      fixture.detectChanges();
+
+      expect(handle.title).toBe('Copy username');
+    });
+  });
 
   it('should render the handle and captain count', () => {
     render(buildVm());

@@ -1,13 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, inject } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnDestroy,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
-import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Observable, take } from 'rxjs';
+import { Observable, Subscription, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import {
+  FRIEND_CHAT_FAILED,
+  FriendChatService,
+} from 'src/app/community/friend-chat.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { MemberCardComponent } from 'src/app/shared/components/member-card/member-card.component';
 import { MemberCardVm } from 'src/app/shared/components/member-card/member-card.model';
@@ -18,8 +32,10 @@ import {
   MEMBER_CARD_ACCEPT_REQUEST,
   MEMBER_CARD_ADD_FRIEND,
   MEMBER_CARD_BLOCK,
+  MEMBER_CARD_CHAT,
   MEMBER_CARD_UNFRIEND,
   buildRegistryMemberCard,
+  withPresence,
 } from '../../member-card.builders';
 import {
   RegistryListMode,
@@ -28,8 +44,16 @@ import {
 } from '../../models/registry.models';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
+import { UserSettingsService } from 'src/app/dashboard/services/user-settings.service';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
-const PAGE_SIZE = 12;
+// Five a page: a card is a row of its own now, in the shape of an account
+// card, so a page of twelve ran well past the screen.
+const PAGE_SIZE = 5;
+
+/** The results section, which a page turn scrolls back to. */
+export const RESULTS_ID = 'personnel-records';
 
 /**
  * A listed member alongside the card built for them.
@@ -94,16 +118,39 @@ const MODE_CONFIG: Record<
     LcarsSuccessMessageComponent,
     MemberCardComponent,
     CommunityTabsComponent,
+    CollapsibleSectionComponent,
+    LcarsPaginationComponent,
+    SettingsLinkComponent,
   ],
 })
 export class RegistryListComponent
   extends RegistryPageBaseDirective
-  implements OnInit
+  implements OnInit, OnDestroy
 {
+  private readonly _userSettingsService = inject(UserSettingsService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
+  private readonly _friendChat = inject(FriendChatService);
+  private readonly _presence = inject(ChatPresenceService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  /** The members shown who are online, read again each minute (FC-034). */
+  private _presenceWatch: Subscription | null = null;
+
+  /** Who of the members shown is online, as the last reading had it. */
+  private _online: ReadonlySet<string> = new Set();
+
+  /** Whether chat is switched on, for the Chat button on a friend's card (FC-033). */
+  isChatOffered = false;
+
+  /** The cog beside the heading, to whether the reader is listed here. */
+  readonly settingsLink = SETTINGS_LINKS.registry;
+
+  /** Where the results start, for a page turn to scroll back to. */
+  readonly resultsId = RESULTS_ID;
   private readonly _registryService = inject(RegistryService);
   private readonly _communityService = inject(CommunityService);
   private readonly _authService = inject(AuthService);
-  private readonly _dialog = inject(MatDialog);
+  private readonly _confirmPrompt = new ConfirmPrompt();
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
 
@@ -139,7 +186,26 @@ export class RegistryListComponent
       this.searchTerm = this._route.snapshot.queryParamMap.get('q') ?? '';
     }
 
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(features => {
+        this.isChatOffered = features.chatEnabled;
+        this.buildCards();
+      });
+
     this.loadPage(1);
+  }
+
+  /**
+   * Stops reading who is online with the page, besides what the base cancels.
+   */
+  override ngOnDestroy(): void {
+    super.ngOnDestroy();
+    this._presenceWatch?.unsubscribe();
   }
 
   /**
@@ -160,14 +226,66 @@ export class RegistryListComponent
       result => {
         this.profiles = result?.items ?? [];
         this.total = result?.total ?? 0;
-        this.profileVms = this.profiles.map(profile => ({
-          id: profile.username,
-          profile,
-          card: buildRegistryMemberCard(profile, this.canAct),
-        }));
+        this.buildCards();
+        this.watchPresence();
       },
       'Something went wrong loading the registry.',
     );
+  }
+
+  /**
+   * Builds a card for each member listed, marked online as last read.
+   */
+  private buildCards(): void {
+    this.profileVms = this.profiles.map(profile => ({
+      id: profile.username,
+      profile,
+      card: withPresence(
+        buildRegistryMemberCard(
+          profile,
+          this.canAct,
+          this._userSettingsService.displayTimezone(),
+          this.isChatOffered,
+        ),
+        this._online,
+      ),
+    }));
+  }
+
+  /**
+   * Marks the members shown who are online, and keeps doing so each minute
+   * (FC-034). The server answers for the viewer alone: anybody they may not
+   * see is simply offline.
+   */
+  private watchPresence(): void {
+    this._presenceWatch?.unsubscribe();
+    this._online = new Set();
+
+    if (!this.canAct) {
+      return;
+    }
+
+    this._presenceWatch = this._presence
+      .watch(this.profiles.map(profile => profile.username))
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(online => {
+        this._online = online;
+        this.profileVms = this.profileVms.map(vm => ({
+          ...vm,
+          card: withPresence(vm.card, online),
+        }));
+      });
+  }
+
+  /**
+   * Turns to another page, and brings the top of the results back into
+   * view, since the pagination sits beneath a page of cards.
+   *
+   * @param page - The 1-based page number.
+   */
+  turnPage(page: number): void {
+    this.loadPage(page);
+    document.getElementById(RESULTS_ID)?.scrollIntoView({ block: 'start' });
   }
 
   /**
@@ -227,7 +345,37 @@ export class RegistryListComponent
 
       case MEMBER_CARD_BLOCK:
         this.blockMember(profile);
+        return;
+
+      case MEMBER_CARD_CHAT:
+        this.openChat(profile);
     }
+  }
+
+  /**
+   * Opens chat with a listed friend (FC-033), by the friendship, as their
+   * profile does, and goes to the conversation.
+   *
+   * @param profile - The friend.
+   */
+  openChat(profile: RegistryProfileSummary): void {
+    const friendshipId = profile.relationship?.friendshipId;
+    if (!friendshipId) {
+      return;
+    }
+
+    this.isActing = true;
+    this.actionError = '';
+    this._friendChat
+      .open(friendshipId)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: () => (this.isActing = false),
+        error: () => {
+          this.isActing = false;
+          this.actionError = FRIEND_CHAT_FAILED;
+        },
+      });
   }
 
   /**
@@ -328,14 +476,8 @@ export class RegistryListComponent
     data: { title: string; message: string; confirmText: string },
     onConfirm: () => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._confirmPrompt
+      .ask({ ...data, cancelText: 'Cancel' })
       .subscribe(confirmed => {
         if (confirmed) {
           onConfirm();

@@ -13,6 +13,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { forkJoin, Subject, takeUntil } from 'rxjs';
 import { EndeavourRankBadgeComponent } from 'src/app/shared/components/endeavour-rank-badge/endeavour-rank-badge.component';
+import { LcarsCollapsibleBarComponent } from 'src/app/shared/components/lcars-collapsible-bar/lcars-collapsible-bar.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -30,6 +31,7 @@ import {
 import { EndeavourService } from '../services/endeavour.service';
 import { HandleResolverService } from '../services/handle-resolver.service';
 import { StoSwitcherButtonComponent } from '../switcher/sto-switcher-button.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-endeavours',
@@ -38,10 +40,12 @@ import { StoSwitcherButtonComponent } from '../switcher/sto-switcher-button.comp
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     FormsModule,
     RouterModule,
     LoadingBarComponent,
+    LcarsCollapsibleBarComponent,
     LcarsErrorMessageComponent,
     EndeavourRankBadgeComponent,
     StoSwitcherButtonComponent,

@@ -27,7 +27,7 @@
   font-size: 0.9rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  background-color: rgb(255 255 255 / 8%);
+  background-color: vars.$white-a8;
   color: vars.$lcars-grey-light;
   transition:
     background-color 0.2s ease,
@@ -55,11 +55,11 @@
 
   &--off#{&}--active {
     background-color: vars.$lcars-cardinal;
-    color: #fff;
+    color: vars.$a11y-white;
   }
 
   &--on#{&}--active {
     background-color: vars.$lcars-green;
-    color: #000;
+    color: vars.$a11y-black;
   }
 }

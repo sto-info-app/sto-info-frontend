@@ -1,5 +1,13 @@
-@if (isSubmitting) {
+@if (isSubmitting && !scanState) {
   <app-loading-bar loadingText="Uploading"></app-loading-bar>
+}
+@if (scanState) {
+  <app-asset-scan-status [state]="scanState"></app-asset-scan-status>
+}
+@if (scanTookTooLong) {
+  <app-lcars-warning-message
+    title="Still Checking"
+    message="The check is taking longer than usual. Your picture has not been lost: it will appear once the check finishes. You can close this and come back to it."></app-lcars-warning-message>
 }
 
 <div class="custom-tracking-image-dialog">
@@ -84,7 +92,7 @@
     <button
       type="button"
       mat-button
-      class="lcars-btn sunflower"
+      class="lcars-btn green"
       [disabled]="!canUpload"
       (click)="onUploadImageClick()">
       Upload
@@ -93,7 +101,7 @@
       type="button"
       mat-button
       mat-dialog-close
-      class="lcars-btn red"
+      class="lcars-btn"
       [disabled]="isSubmitting"
       (click)="onCloseClick()">
       Cancel

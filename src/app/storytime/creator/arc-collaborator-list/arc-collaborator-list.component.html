@@ -3,14 +3,16 @@
   class="storytime-page">
   <h1>Arc collaborators</h1>
 
-  <nav class="storytime-page-actions">
+  <nav
+    class="storytime-page-actions"
+    aria-label="This Arc">
     <a
-      class="lcars-btn lcars-btn-auto bluey"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'arcs', arcId]">
       Back to the Arc
     </a>
     <a
-      class="lcars-btn lcars-btn-auto sky"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="[
         '/',
         appRoutes.STORYTIME,

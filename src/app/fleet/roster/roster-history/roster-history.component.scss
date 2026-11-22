@@ -1,0 +1,56 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.roster-history__notice,
+.roster-history__note {
+  color: vars.$lcars-grey-light;
+}
+
+.roster-history__notice {
+  font-style: italic;
+}
+
+.roster-history__note {
+  display: block;
+  font-size: 0.85rem;
+}
+
+// The kinds of change to show, in their own panel: a box of ticks, laid out
+// in a row that wraps.
+.roster-history__kinds {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.roster-history__kind {
+  display: inline-flex;
+  gap: 0.4rem;
+  align-items: center;
+}
+
+// Each interval is a section of its own, and its bar takes the page's
+// rotation; the space under it is the section's.
+.roster-history__interval {
+  display: block;
+  padding-bottom: 1rem;
+}
+
+.roster-history__changes {
+  padding-left: 1.25rem;
+  margin: 0.5rem 0;
+
+  li {
+    margin: 0.25rem 0;
+  }
+
+  a {
+    color: var(--lcars-accent, #{vars.$lcars-sky});
+  }
+}

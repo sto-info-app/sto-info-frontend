@@ -21,6 +21,7 @@ import {
   SpecializationType,
 } from '../models/character-specialization.model';
 import { CharacterSpecializationService } from '../services/character-specialization.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** A titled group of specializations sharing the same catalog type. */
 export interface SpecializationGroup {
@@ -36,6 +37,7 @@ export interface SpecializationGroup {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     FormsModule,
     RouterModule,
@@ -50,12 +52,6 @@ export class CharacterSpecializationComponent extends CharacterProgressBaseCompo
   readonly qualificationPoints = SPECIALIZATION_QUALIFICATION_POINTS;
   readonly unlockLevel = SPECIALIZATION_UNLOCK_LEVEL;
   readonly featureName = 'Specializations';
-
-  /** Whether the side-column briefing is collapsed. */
-  readonly briefingCollapsed = signal(false);
-
-  /** Specialization groups the user has collapsed, keyed by catalog type. */
-  readonly collapsedGroups = signal<Set<SpecializationType>>(new Set());
 
   /** The captain slot whose assignment is currently being saved. */
   readonly savingSlot = signal<SpecializationSlot | null>(null);
@@ -166,35 +162,6 @@ export class CharacterSpecializationComponent extends CharacterProgressBaseCompo
       specializationId,
       pointsSpent,
     );
-  }
-
-  /** Shows or hides the side-column briefing. */
-  toggleBriefing(): void {
-    this.briefingCollapsed.update(collapsed => !collapsed);
-  }
-
-  /** Whether a specialization group's list is collapsed. */
-  isGroupCollapsed(type: SpecializationType): boolean {
-    return this.collapsedGroups().has(type);
-  }
-
-  /**
-   * Shows or hides one specialization group's list, leaving its heading bar in
-   * place so the group can be expanded again.
-   *
-   * @param type - The catalog type identifying the group.
-   * @returns void
-   */
-  toggleGroup(type: SpecializationType): void {
-    this.collapsedGroups.update(types => {
-      const next = new Set(types);
-      if (next.has(type)) {
-        next.delete(type);
-      } else {
-        next.add(type);
-      }
-      return next;
-    });
   }
 
   /** The point total that fully completes a specialization. */

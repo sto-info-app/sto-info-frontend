@@ -9,7 +9,7 @@
     @if (post.publishedAt) {
       <time class="news-date">
         <i class="fas fa-calendar-day news-date-icon" aria-hidden="true"></i>
-        {{ post.publishedAt | date: 'mediumDate' }}
+        {{ post.publishedAt | appDate: 'mediumDate' }}
       </time>
     }
   </div>

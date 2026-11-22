@@ -292,16 +292,22 @@ describe('RegistryCharacterComponent', () => {
       await setup();
       fixture.detectChanges();
 
-      const toggle: HTMLButtonElement = fixture.nativeElement.querySelector(
-        'app-collapsible-section button[aria-expanded]',
+      // The biography is the last of the record's sections.
+      const toggles: HTMLButtonElement[] = Array.from(
+        fixture.nativeElement.querySelectorAll(
+          'app-collapsible-section button[aria-expanded]',
+        ),
       );
+      const toggle = toggles[toggles.length - 1];
       toggle.click();
       fixture.detectChanges();
 
       expect(toggle.getAttribute('aria-expanded')).toBe('false');
       expect(
-        fixture.nativeElement.querySelector('.registry-character-biography'),
-      ).toBeNull();
+        fixture.nativeElement
+          .querySelector('.registry-character-biography')
+          ?.closest('.collapsible-section__content')?.hidden,
+      ).toBe(true);
       expect(fixture.nativeElement.textContent).toContain('Biography');
     });
 

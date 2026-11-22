@@ -1,0 +1,46 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.governance-hub {
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__closed {
+    color: vars.$lcars-orange;
+    font-weight: 600;
+  }
+
+  &__list {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // The button and what it is for side by side where there is room, stacked
+  // on a phone.
+  &__item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+  }
+
+  // In the colour of the pill beside it, so each line reads as one entry.
+  &__description {
+    flex: 1 1 18rem;
+    margin: 0;
+    color: var(--lcars-accent, #{vars.$lcars-sky});
+  }
+
+  &__close {
+    display: block;
+    margin-top: 2.5rem;
+  }
+}

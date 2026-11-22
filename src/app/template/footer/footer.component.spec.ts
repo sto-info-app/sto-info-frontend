@@ -1,14 +1,19 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute } from '@angular/router';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
+
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 
 import { FooterComponent } from './footer.component';
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
   let fixture: ComponentFixture<FooterComponent>;
+  let fleetOffered$: BehaviorSubject<boolean>;
 
   beforeEach(() => {
+    fleetOffered$ = new BehaviorSubject<boolean>(false);
+
     TestBed.configureTestingModule({
       imports: [FooterComponent],
       providers: [
@@ -19,6 +24,10 @@ describe('FooterComponent', () => {
             queryParams: of({}),
           },
         },
+        {
+          provide: FleetConfigurationService,
+          useValue: { isOffered: () => fleetOffered$ },
+        },
       ],
     });
     fixture = TestBed.createComponent(FooterComponent);
@@ -28,6 +37,38 @@ describe('FooterComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  describe('Fleets link', () => {
+    /**
+     * Reads the footer's link labels.
+     *
+     * @returns The text of every footer link.
+     */
+    const linkLabels = (): string[] =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('a'),
+      ).map(link => link.textContent?.trim() ?? '');
+
+    it('should stay hidden before the feature state is known', () => {
+      expect(linkLabels()).not.toContain('Fleets');
+    });
+
+    it('should appear once the section is offered', () => {
+      fleetOffered$.next(true);
+      fixture.detectChanges();
+
+      expect(linkLabels()).toContain('Fleets');
+    });
+
+    it('should sit directly after Community', () => {
+      fleetOffered$.next(true);
+      fixture.detectChanges();
+
+      const labels = linkLabels();
+
+      expect(labels.indexOf('Fleets')).toBe(labels.indexOf('Community') + 1);
+    });
   });
 
   describe('Storytime link', () => {

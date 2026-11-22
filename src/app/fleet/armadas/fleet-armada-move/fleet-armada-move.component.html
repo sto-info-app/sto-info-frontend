@@ -1,0 +1,127 @@
+@if (view(); as view) {
+  <app-lcars-panel
+    class="fleet-armada-move"
+    heading="Armada"
+    [level]="2">
+    @if (notice(); as done) {
+      <p class="fleet-armada-move__notice">
+        <output>{{ done }}</output>
+      </p>
+    }
+    @if (error(); as refusal) {
+      <app-lcars-error-message
+        title="Not done"
+        [message]="refusal" />
+    }
+
+    @if (view.placement; as placement) {
+      <p>
+        In
+        <a [routerLink]="armadaLink(placement.armada)">{{
+          placement.armada.name
+        }}</a>
+        as {{ positionLabels[placement.position] }}
+        @if (placement.parent; as parent) {
+          under
+          @if (fleetLink(parent); as link) {
+            <a [routerLink]="link">{{ fleetNameOf(parent) }}</a>
+          } @else {
+            {{ fleetNameOf(parent) }}
+          }
+        }
+        since {{ placement.since | appDate: 'mediumDate' }}.
+      </p>
+
+      @if (!view.mayRequest) {
+        <p class="fleet-community-field-hint">
+          Asking to move it is for the Fleet’s managers.
+        </p>
+      } @else if (view.openRequest; as open) {
+        <!-- A move asked for: the Fleet stays here until it is approved. -->
+        <p>
+          You have asked to move it to
+          <a [routerLink]="armadaLink(open.armada)">{{ open.armada.name }}</a
+          >. It stays here while the request waits for that Armada’s managers,
+          until {{ open.expiresAt | appDate: 'medium' }}; on approval it moves
+          in one step.
+        </p>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto red"
+          [disabled]="busy()"
+          (click)="onWithdraw(open.id)">
+          Withdraw the request
+        </button>
+      } @else if (view.cannotRequestBecause; as because) {
+        <p>{{ because }}</p>
+      } @else if (view.choices.length === 0) {
+        <p>
+          No other open Armada in this Community takes Fleets on this platform
+          with this allegiance, so there is nowhere to move it to.
+        </p>
+      } @else {
+        <form
+          class="fleet-armada-move__form lcars-rotate"
+          aria-label="Move to another Armada"
+          (submit)="$event.preventDefault(); onRequest()">
+          <div class="lcars-input-container">
+            <label for="fleet-armada-move-choice">Move to</label>
+            <select
+              id="fleet-armada-move-choice"
+              [disabled]="busy()"
+              (change)="armadaId.set($any($event.target).value)">
+              <option value="">Choose an Armada</option>
+              @for (choice of view.choices; track choice.id) {
+                <option
+                  [value]="choice.id"
+                  [selected]="choice.id === armadaId()">
+                  {{ choice.name }}
+                </option>
+              }
+            </select>
+          </div>
+          <div class="lcars-input-container">
+            <label for="fleet-armada-move-message">Message (optional)</label>
+            <textarea
+              id="fleet-armada-move-message"
+              rows="2"
+              [attr.maxlength]="textLimit"
+              [value]="message()"
+              [disabled]="busy()"
+              (input)="message.set($any($event.target).value)"></textarea>
+          </div>
+          <p class="fleet-community-field-hint">
+            The Fleet stays in {{ placement.armada.name }} while the request
+            waits. That Armada’s managers choose where it goes; when they
+            approve, it leaves here and takes its new place in one step. The
+            request lapses after 14 days unanswered.
+          </p>
+          <div class="fleet-community-form-actions">
+            <button
+              type="submit"
+              class="lcars-btn lcars-btn-auto green"
+              [disabled]="busy() || armadaId() === ''">
+              Ask to move
+            </button>
+          </div>
+        </form>
+      }
+    } @else {
+      <p>
+        Not in an Armada. Joining one is asked for on
+        <a [routerLink]="fleetPageLink()">the Fleet’s page</a>, under Armada.
+      </p>
+    }
+
+    @if (view.lastAnswered; as last) {
+      <p class="fleet-armada-move__last">
+        The last request, to join {{ last.armada.name }}, was
+        {{ last.status.toLowerCase() }} on
+        {{ last.answeredAt ?? last.expiresAt | appDate: 'mediumDate' }}.
+      </p>
+      @if (last.reason; as why) {
+        <p class="fleet-armada-move__last">Reason: {{ why }}</p>
+      }
+    }
+  </app-lcars-panel>
+}

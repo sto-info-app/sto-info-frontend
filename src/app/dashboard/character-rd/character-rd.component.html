@@ -14,7 +14,7 @@
         ></app-lcars-error-message>
         <div class="buttons-row">
           <a
-            class="lcars-btn-auto sunflower"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="accountsLink"
           >Back to Accounts</a>
         </div>
@@ -194,7 +194,7 @@
   <!-- Side column -->
   <div
     id="rd-side-column"
-    class="col"
+    class="col lcars-rotate"
   >
     <!-- Filters are pointless while the tracker is level-locked. -->
     @if (!isLevelLocked()) {
@@ -223,23 +223,25 @@
     <ng-content select="[rdAsideNav]"></ng-content>
 
     @if (!embedded) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Navigation</span>
-      </div>
-      <div class="buttons">
-        <a
-          [routerLink]="characterLink()"
-          class="full-width-btn-link peach"
-        >Character</a>
-        <a
-          [routerLink]="accountLink()"
-          class="full-width-btn-link sunflower"
-        >Account</a>
-        <a
-          [routerLink]="accountsLink"
-          class="full-width-btn-link bluey"
-        >Accounts</a>
-      </div>
+      <app-collapsible-section
+        heading="Navigation"
+        barClass="small-lcars-bar-gap"
+      >
+        <div class="buttons">
+          <a
+            [routerLink]="characterLink()"
+            class="full-width-btn-link"
+          >Character</a>
+          <a
+            [routerLink]="accountLink()"
+            class="full-width-btn-link"
+          >Account</a>
+          <a
+            [routerLink]="accountsLink"
+            class="full-width-btn-link"
+          >Accounts</a>
+        </div>
+      </app-collapsible-section>
     }
   </div>
 </div>

@@ -1,0 +1,85 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+
+import { FleetActivityFeedComponent } from 'src/app/fleet/activity/fleet-activity-feed/fleet-activity-feed.component';
+import { FleetEventsUpcomingComponent } from 'src/app/fleet/events/fleet-events-upcoming/fleet-events-upcoming.component';
+import { ArmadaPanelComponent } from 'src/app/fleet/armadas/armada-panel/armada-panel.component';
+import { ArmadaTabsComponent } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import { CommunityStructurePanelComponent } from 'src/app/fleet/armadas/community-structure-panel/community-structure-panel.component';
+import { FleetArmadaPanelComponent } from 'src/app/fleet/armadas/fleet-armada-panel/fleet-armada-panel.component';
+import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
+import { FleetNewsLatestComponent } from 'src/app/fleet/news/fleet-news-latest/fleet-news-latest.component';
+import { OwnershipOfferPanelComponent } from 'src/app/fleet/governance/ownership-offer-panel/ownership-offer-panel.component';
+import { FleetRecruitmentPanelComponent } from 'src/app/fleet/recruitment/fleet-recruitment-panel/fleet-recruitment-panel.component';
+import { FleetScopeArtworkComponent } from 'src/app/fleet/scope/fleet-scope-artwork/fleet-scope-artwork.component';
+import { FleetFollowComponent } from 'src/app/fleet/scope/fleet-follow/fleet-follow.component';
+import { FleetScopeHeaderComponent } from 'src/app/fleet/scope/fleet-scope-header/fleet-scope-header.component';
+import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+
+/**
+ * Whichever of loading, absent, failed or a record a scope page is showing.
+ *
+ * Shared by the three scope pages, which differ in what they ask the server
+ * and in the facts they list, and not at all in how any of that is framed.
+ *
+ * Absent is an information notice rather than an error. A closed Community
+ * or an out-of-date link is an ordinary thing to run into, and dressing it
+ * as a fault would have readers reporting it.
+ */
+@Component({
+  selector: 'app-fleet-scope-view',
+  templateUrl: './fleet-scope-view.component.html',
+  styleUrls: ['./fleet-scope-view.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterLink,
+    ArmadaPanelComponent,
+    ArmadaTabsComponent,
+    LcarsPanelComponent,
+    CommunityStructurePanelComponent,
+    FleetActivityFeedComponent,
+    FleetEventsUpcomingComponent,
+    FleetArmadaPanelComponent,
+    FleetScopeArtworkComponent,
+    FleetScopeHeaderComponent,
+    FleetFollowComponent,
+    FleetNewsLatestComponent,
+    FleetRecruitmentPanelComponent,
+    OwnershipOfferPanelComponent,
+    FleetTabsComponent,
+    HelpLinkComponent,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+    LoadingBarComponent,
+  ],
+})
+export class FleetScopeViewComponent {
+  /** What the page currently has to show. */
+  @Input({ required: true }) state!: FleetScopePageState;
+
+  /** What is said while the request is in flight. */
+  @Input({ required: true }) loadingText!: string;
+
+  /** What is said when nothing answers to the address. */
+  @Input({ required: true }) missingMessage!: string;
+
+  /**
+   * Raised when the record should be read again.
+   *
+   * Passed straight up rather than acted on here. This component knows what
+   * a page is showing and nothing about how it was asked for.
+   */
+  @Output() readonly changed = new EventEmitter<void>();
+}

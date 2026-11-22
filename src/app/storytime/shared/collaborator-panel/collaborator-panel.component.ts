@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { CollaborationInvitationStatus } from 'src/app/models/storytime.models';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
@@ -66,6 +67,7 @@ export interface CapabilityChange<T> {
     ReactiveFormsModule,
     LoadingBarComponent,
     LcarsToggleComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class CollaboratorPanelComponent<T extends CollaborationSummary> {

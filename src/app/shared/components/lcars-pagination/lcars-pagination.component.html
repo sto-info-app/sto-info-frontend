@@ -1,0 +1,15 @@
+<div class="lcars-pagination">
+  <button
+    type="button"
+    [disabled]="page() <= 1"
+    (click)="turn.emit(-1)">
+    {{ previousLabel() }}
+  </button>
+  <span>Page {{ page() }} of {{ pageCount() }}</span>
+  <button
+    type="button"
+    [disabled]="page() >= pageCount()"
+    (click)="turn.emit(1)">
+    {{ nextLabel() }}
+  </button>
+</div>

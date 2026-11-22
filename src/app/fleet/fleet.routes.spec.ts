@@ -1,0 +1,762 @@
+import { Route } from '@angular/router';
+
+import { AuthGuard } from 'src/app/core/auth/auth.guard';
+import { APP_ROUTE_TITLES } from 'src/app/shared/constants/app-routing.constants';
+
+import { FleetHomeComponent } from './fleet-home/fleet-home.component';
+import { FLEET_ROUTES } from './fleet.routes';
+
+describe('FLEET_ROUTES', () => {
+  const parentRoute: Route = FLEET_ROUTES[0];
+  const children = parentRoute.children ?? [];
+
+  /**
+   * Finds a child route by path.
+   *
+   * @param path - The path to find.
+   * @returns The route.
+   */
+  const childAt = (path: string): Route | undefined =>
+    children.find(child => child.path === path);
+
+  it('declares one parent holding the listings and the scope pages', () => {
+    expect(FLEET_ROUTES).toHaveLength(1);
+    expect(parentRoute.path).toBe('');
+    expect(children).toHaveLength(83);
+  });
+
+  // The parent is the component that answers whether the feature is switched
+  // on. A reader who followed a link to a switched-off feature should be told
+  // so rather than made to wait for a chunk that will then say nothing.
+  it('loads the shell eagerly rather than as a chunk of its own', () => {
+    expect(parentRoute.component).toBe(FleetHomeComponent);
+    expect(parentRoute.loadComponent).toBeUndefined();
+  });
+
+  it('puts the Fleet listing at the directory’s own address', () => {
+    expect(childAt('')?.data?.['title']).toBe(APP_ROUTE_TITLES.FLEETS);
+  });
+
+  // `communities` and `armadas` are literal siblings of the Fleet listing,
+  // which is what keeps a Community slug from ever being mistaken for a page
+  // of the directory's own, however the directory grows.
+  it.each([
+    ['communities', APP_ROUTE_TITLES.FLEET_COMMUNITIES],
+    ['armadas', APP_ROUTE_TITLES.FLEET_ARMADAS],
+  ])('puts the %s listing on its own address', (path, title) => {
+    expect(childAt(path)?.data?.['title']).toBe(title);
+  });
+
+  // Registering needs an account, and a literal segment can never be a
+  // Community slug: a scope's address always names its collection first.
+  it.each([
+    ['register', APP_ROUTE_TITLES.FLEET_REGISTER],
+    ['register-standalone', APP_ROUTE_TITLES.FLEET_REGISTER_STANDALONE],
+    [
+      'communities/:communitySlug/fleets/register',
+      APP_ROUTE_TITLES.FLEET_REGISTER_FLEET,
+    ],
+    [
+      'communities/:communitySlug/armadas/register',
+      APP_ROUTE_TITLES.FLEET_REGISTER_ARMADA,
+    ],
+    // Importing an export is a thing somebody does to a Fleet they run.
+    // Whether they may is the server's answer, and the page asks it rather
+    // than guarding on a guess, so the guard here is only the sign-in one.
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
+      APP_ROUTE_TITLES.FLEET_ROSTER,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+      APP_ROUTE_TITLES.FLEET_ROSTER_HISTORY,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+      APP_ROUTE_TITLES.FLEET_ROSTER_MEMBER,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+      APP_ROUTE_TITLES.FLEET_INVESTIGATE,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IMPORTS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IMPORT_DETAIL,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+      APP_ROUTE_TITLES.FLEET_ROSTER_IDENTITIES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
+      APP_ROUTE_TITLES.FLEET_FORMER_NAMES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
+      APP_ROUTE_TITLES.FLEET_ROSTER_CONFLICTS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+      APP_ROUTE_TITLES.FLEET_RANK_ORDER,
+    ],
+    // Recruitment (FC-021): each is somebody acting on a Fleet, or on their
+    // own applications.
+    ['applications', APP_ROUTE_TITLES.FLEET_MY_APPLICATIONS],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/apply',
+      APP_ROUTE_TITLES.FLEET_APPLY,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+      APP_ROUTE_TITLES.FLEET_RECRUITMENT,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+      APP_ROUTE_TITLES.FLEET_APPLICATIONS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+      APP_ROUTE_TITLES.FLEET_APPLICATION,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+      APP_ROUTE_TITLES.FLEET_INVITATIONS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+      APP_ROUTE_TITLES.FLEET_MEMBERS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+      APP_ROUTE_TITLES.FLEET_RECRUITMENT_SETTINGS,
+    ],
+    ['communities/:communitySlug/manage', APP_ROUTE_TITLES.FLEET_MANAGE],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage',
+      APP_ROUTE_TITLES.FLEET_MANAGE,
+    ],
+    [
+      'communities/:communitySlug/manage/roles',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/roles',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+    ],
+    [
+      'communities/:communitySlug/manage/delegation',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/delegation',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+    ],
+    [
+      'communities/:communitySlug/manage/history',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/history',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+    ],
+    [
+      'communities/:communitySlug/manage/ownership',
+      APP_ROUTE_TITLES.FLEET_COMMUNITY_OWNERSHIP,
+    ],
+    [
+      'communities/:communitySlug/manage/dispute',
+      APP_ROUTE_TITLES.FLEET_COMMUNITY_DISPUTE,
+    ],
+    [
+      'communities/:communitySlug/manage/settings',
+      APP_ROUTE_TITLES.FLEET_COMMUNITY_SETTINGS,
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
+      APP_ROUTE_TITLES.FLEET_SETTINGS,
+    ],
+  ])('puts %s behind the sign-in guard', (path, title) => {
+    expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
+    expect(childAt(path)?.data?.['title']).toBe(title);
+  });
+
+  /**
+   * `register` is a literal where the deeper routes have a platform
+   * segment — four segments against five — so neither can claim the
+   * other's address whatever order they are declared in.
+   */
+  it('registers into a Community inside the collection it adds to', () => {
+    const paths = children.map(child => child.path);
+
+    expect(paths).toContain('communities/:communitySlug/fleets/register');
+    expect(paths).toContain('communities/:communitySlug/armadas/register');
+  });
+
+  it('loads each listing only when its address is reached', () => {
+    expect(
+      children
+        .filter(child => child.redirectTo === undefined)
+        .every(child => typeof child.loadComponent === 'function'),
+    ).toBe(true);
+  });
+
+  // The page moved when it learnt to import as well as check. A link to its
+  // old address still arrives, at the same Fleet.
+  it('sends the old export check address to the import page', () => {
+    const redirect = childAt(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+    );
+
+    expect(redirect?.redirectTo).toBe(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+    );
+    expect(redirect?.pathMatch).toBe('full');
+  });
+
+  // FC-020 moved the imports and renames under Investigate, so its tab stays
+  // lit on them. A link to their old addresses still arrives.
+  it.each([
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+    ],
+  ])('sends %s where it moved', (path, target) => {
+    expect(childAt(path)?.redirectTo).toBe(target);
+    expect(childAt(path)?.pathMatch).toBe('full');
+  });
+
+  // A Community's canonical address spells out the collection it belongs
+  // to, which is what keeps a Community slug from ever being mistaken for a
+  // page of the directory's own, however the directory grows.
+  it.each([
+    ['communities/:communitySlug', APP_ROUTE_TITLES.FLEET_COMMUNITY],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug',
+      APP_ROUTE_TITLES.FLEET_SCOPE_FLEET,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      APP_ROUTE_TITLES.FLEET_SCOPE_ARMADA,
+    ],
+  ])('addresses a scope at %s', (path, title) => {
+    expect(childAt(path)?.data?.['title']).toBe(title);
+  });
+
+  // An Owner can show a report's counts to anyone, so the page is open to a
+  // signed-out reader, and the server says which reports they see.
+  it('leaves a Fleet’s reports open to a signed-out reader', () => {
+    const reports = childAt(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/reports',
+    );
+
+    expect(reports?.canActivate).toBeUndefined();
+    expect(reports?.data?.['title']).toBe(APP_ROUTE_TITLES.FLEET_REPORTS);
+  });
+
+  // Holdings are public (FC-023), and the server says who may record them.
+  it('leaves a Fleet’s holdings open to a signed-out reader', () => {
+    const holdings = childAt(
+      'communities/:communitySlug/fleets/:platformSegment/:slug/holdings',
+    );
+
+    expect(holdings?.canActivate).toBeUndefined();
+    expect(holdings?.data?.['title']).toBe(APP_ROUTE_TITLES.FLEET_HOLDINGS);
+  });
+
+  /**
+   * A Community's own page is declared last of the three, so
+   * `communities/x/fleets/pc/y` is never read as a Community called `x`
+   * with three segments of nonsense after it.
+   */
+  // Anybody who may see an Armada may read how its shape changed; only its
+  // managers answer requests, and only its Owner and Admins govern it.
+  it('leaves an Armada’s history open to a signed-out reader', () => {
+    const history = childAt(
+      'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+    );
+
+    expect(history?.canActivate).toBeUndefined();
+    expect(history?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.FLEET_ARMADA_HISTORY,
+    );
+  });
+
+  it('asks for an account before an Armada’s requests', () => {
+    const requests = childAt(
+      'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+    );
+
+    expect(requests?.canActivate).toEqual([AuthGuard]);
+    expect(requests?.data?.['title']).toBe(
+      APP_ROUTE_TITLES.FLEET_ARMADA_REQUESTS,
+    );
+  });
+
+  // The Manage pages are the Fleet's and the Community's, told by the route
+  // which kind of scope they govern.
+  it.each([
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+      APP_ROUTE_TITLES.FLEET_MANAGE,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_ROLES,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_DELEGATION,
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+      APP_ROUTE_TITLES.FLEET_GOVERNANCE_HISTORY,
+    ],
+  ])('tells %s that it governs an Armada', (path, title) => {
+    expect(childAt(path)?.data).toEqual({ title, governs: 'ARMADA' });
+    expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
+  });
+
+  // A Community's, a Fleet's and an Armada's news (FC-027): read by whoever
+  // each post is published to, written by its news writers. An Armada's
+  // pages are told by the route that they are an Armada's.
+  describe.each([
+    ['a Community', 'communities/:communitySlug', {}],
+    ['a Fleet', 'communities/:communitySlug/fleets/:platformSegment/:slug', {}],
+    [
+      'an Armada',
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      { governs: 'ARMADA' },
+    ],
+  ])('the news of %s', (_scope, prefix, data) => {
+    it('leaves its list and posts open to a signed-out reader', () => {
+      expect(childAt(`${prefix}/news`)?.canActivate).toBeUndefined();
+      expect(childAt(`${prefix}/news`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS,
+        ...data,
+      });
+      expect(childAt(`${prefix}/news/:postSlug`)?.canActivate).toBeUndefined();
+      expect(childAt(`${prefix}/news/:postSlug`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS_POST,
+        ...data,
+      });
+    });
+
+    it('asks for an account before writing or editing', () => {
+      expect(childAt(`${prefix}/news/write`)?.canActivate).toEqual([AuthGuard]);
+      expect(childAt(`${prefix}/news/write`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS_WRITE,
+        ...data,
+      });
+      expect(childAt(`${prefix}/news/:postSlug/edit`)?.canActivate).toEqual([
+        AuthGuard,
+      ]);
+      expect(childAt(`${prefix}/news/:postSlug/edit`)?.data).toEqual({
+        title: APP_ROUTE_TITLES.FLEET_NEWS_EDIT,
+        ...data,
+      });
+    });
+
+    it('matches the editor’s literal before a post it could be read as', () => {
+      const paths = children.map(child => child.path);
+
+      expect(paths.indexOf(`${prefix}/news/write`)).toBeLessThan(
+        paths.indexOf(`${prefix}/news/:postSlug`),
+      );
+    });
+  });
+
+  // A Community's, a Fleet's and an Armada's activity (FC-029): open to
+  // whoever may see the scope, each item asked about again by the server.
+  it.each([
+    ['communities/:communitySlug/activity', {}],
+    ['communities/:communitySlug/fleets/:platformSegment/:slug/activity', {}],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/activity',
+      { governs: 'ARMADA' },
+    ],
+  ])('leaves %s open to a signed-out reader', (path, data) => {
+    expect(childAt(path)?.canActivate).toBeUndefined();
+    expect(childAt(path)?.data).toEqual({
+      title: APP_ROUTE_TITLES.FLEET_ACTIVITY,
+      ...data,
+    });
+  });
+
+  // A Community's, a Fleet's and an Armada's events (FC-030): read by
+  // whoever each is shown to, written by its event managers.
+  describe.each([
+    ['a Community', 'communities/:communitySlug', {}],
+    ['a Fleet', 'communities/:communitySlug/fleets/:platformSegment/:slug', {}],
+    [
+      'an Armada',
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      { governs: 'ARMADA' },
+    ],
+  ])('the events of %s', (_scope, prefix, data) => {
+    it('leaves the calendar, an event and an occurrence open to a signed-out reader', () => {
+      for (const [path, title] of [
+        [`${prefix}/events`, APP_ROUTE_TITLES.FLEET_EVENTS],
+        [`${prefix}/events/:eventId`, APP_ROUTE_TITLES.FLEET_EVENT],
+        [
+          `${prefix}/events/:eventId/occurrences/:occurrenceId`,
+          APP_ROUTE_TITLES.FLEET_EVENT_OCCURRENCE,
+        ],
+      ]) {
+        expect(childAt(path)?.canActivate).toBeUndefined();
+        expect(childAt(path)?.data).toEqual({ title, ...data });
+      }
+    });
+
+    it('asks for an account before writing or changing one', () => {
+      for (const [path, title] of [
+        [`${prefix}/events/new`, APP_ROUTE_TITLES.FLEET_EVENT_NEW],
+        [`${prefix}/events/:eventId/edit`, APP_ROUTE_TITLES.FLEET_EVENT_EDIT],
+      ]) {
+        expect(childAt(path)?.canActivate).toEqual([AuthGuard]);
+        expect(childAt(path)?.data).toEqual({ title, ...data });
+      }
+    });
+
+    it('matches the editor’s literal before an event it could be read as', () => {
+      const paths = children.map(child => child.path);
+
+      expect(paths.indexOf(`${prefix}/events/new`)).toBeLessThan(
+        paths.indexOf(`${prefix}/events/:eventId`),
+      );
+    });
+  });
+
+  it('matches the deeper scope addresses before the Community’s own', () => {
+    const paths = children.map(child => child.path);
+
+    expect(paths.indexOf('communities/:communitySlug')).toBeGreaterThan(
+      paths.indexOf('communities/:communitySlug/fleets/:platformSegment/:slug'),
+    );
+    expect(paths.indexOf('communities/:communitySlug')).toBeGreaterThan(
+      paths.indexOf(
+        'communities/:communitySlug/armadas/:platformSegment/:slug',
+      ),
+    );
+  });
+
+  /**
+   * Deeper than a Fleet's own page and therefore ahead of it, by the same
+   * rule that puts a Fleet ahead of a Community: the longer address is
+   * matched first so the shorter one never swallows its tail.
+   */
+  it.each([
+    'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/check-export',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/imports',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/imports/:importId',
+    'communities/:communitySlug/fleets/:platformSegment/:slug/identities',
+  ])('matches %s before the Fleet page it sits under', (path: string) => {
+    const paths = children.map(child => child.path);
+
+    expect(
+      paths.indexOf('communities/:communitySlug/fleets/:platformSegment/:slug'),
+    ).toBeGreaterThan(paths.indexOf(path));
+  });
+
+  it.each([
+    'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+    'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+  ])('matches %s before the Armada page it sits under', (path: string) => {
+    const paths = children.map(child => child.path);
+
+    expect(
+      paths.indexOf(
+        'communities/:communitySlug/armadas/:platformSegment/:slug',
+      ),
+    ).toBeGreaterThan(paths.indexOf(path));
+  });
+
+  it.each([
+    ['', 'FleetsDirectoryComponent'],
+    ['communities', 'CommunitiesDirectoryComponent'],
+    ['armadas', 'ArmadasDirectoryComponent'],
+    ['register', 'CommunityRegisterComponent'],
+    ['register-standalone', 'StandaloneRegisterComponent'],
+    ['communities/:communitySlug/fleets/register', 'FleetRegisterComponent'],
+    ['communities/:communitySlug/armadas/register', 'ArmadaRegisterComponent'],
+    ['communities/:communitySlug', 'CommunityPageComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug',
+      'FleetPageComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug',
+      'ArmadaPageComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/import',
+      'RosterImportComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/roster',
+      'RosterPageComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history',
+      'RosterHistoryComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+      'RosterTimelineComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/reports',
+      'FleetReportsPageComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/holdings',
+      'FleetHoldingsComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate',
+      'FleetInvestigateComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+      'RosterImportListComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+      'RosterImportStatusComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+      'RosterIdentityListComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
+      'FleetFormerNamesComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
+      'RosterConflictsComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+      'RankOrderComponent',
+    ],
+    ['applications', 'MyFleetApplicationsComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/apply',
+      'FleetApplyComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+      'FleetRecruitmentHubComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+      'FleetApplicationsComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+      'FleetApplicationDetailComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+      'FleetInvitationsComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+      'FleetMembersComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+      'FleetRecruitmentSettingsComponent',
+    ],
+    ['communities/:communitySlug/manage', 'GovernanceHubComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage',
+      'GovernanceHubComponent',
+    ],
+    ['communities/:communitySlug/manage/roles', 'GovernanceRolesComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/roles',
+      'GovernanceRolesComponent',
+    ],
+    [
+      'communities/:communitySlug/manage/delegation',
+      'GovernanceDelegationComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/delegation',
+      'GovernanceDelegationComponent',
+    ],
+    ['communities/:communitySlug/manage/history', 'GovernanceHistoryComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/history',
+      'GovernanceHistoryComponent',
+    ],
+    [
+      'communities/:communitySlug/manage/ownership',
+      'CommunityOwnershipComponent',
+    ],
+    ['communities/:communitySlug/manage/dispute', 'CommunityDisputeComponent'],
+    ['communities/:communitySlug/manage/settings', 'ScopeSettingsComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
+      'ScopeSettingsComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/history',
+      'ArmadaHistoryComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/requests',
+      'ArmadaRequestsComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage',
+      'GovernanceHubComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/roles',
+      'GovernanceRolesComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/delegation',
+      'GovernanceDelegationComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/manage/history',
+      'GovernanceHistoryComponent',
+    ],
+    ['communities/:communitySlug/news', 'FleetNewsListComponent'],
+    ['communities/:communitySlug/news/write', 'FleetNewsEditorComponent'],
+    ['communities/:communitySlug/news/:postSlug', 'FleetNewsPostComponent'],
+    [
+      'communities/:communitySlug/news/:postSlug/edit',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news',
+      'FleetNewsListComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news/write',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug',
+      'FleetNewsPostComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/news/:postSlug/edit',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news',
+      'FleetNewsListComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news/write',
+      'FleetNewsEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug',
+      'FleetNewsPostComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/news/:postSlug/edit',
+      'FleetNewsEditorComponent',
+    ],
+    ['communities/:communitySlug/events', 'FleetEventCalendarComponent'],
+    ['communities/:communitySlug/events/new', 'FleetEventEditorComponent'],
+    ['communities/:communitySlug/events/:eventId', 'FleetEventDetailComponent'],
+    [
+      'communities/:communitySlug/events/:eventId/edit',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/events/:eventId/occurrences/:occurrenceId',
+      'FleetEventOccurrenceComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events',
+      'FleetEventCalendarComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/new',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId',
+      'FleetEventDetailComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/edit',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
+      'FleetEventOccurrenceComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events',
+      'FleetEventCalendarComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/new',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId',
+      'FleetEventDetailComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/edit',
+      'FleetEventEditorComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/events/:eventId/occurrences/:occurrenceId',
+      'FleetEventOccurrenceComponent',
+    ],
+    ['communities/:communitySlug/activity', 'FleetActivityPageComponent'],
+    [
+      'communities/:communitySlug/fleets/:platformSegment/:slug/activity',
+      'FleetActivityPageComponent',
+    ],
+    [
+      'communities/:communitySlug/armadas/:platformSegment/:slug/activity',
+      'FleetActivityPageComponent',
+    ],
+  ])('loads the right component for %s', async (path, expected) => {
+    const loaded = await (
+      childAt(path)?.loadComponent as () => Promise<{ name: string }>
+    )();
+
+    expect(loaded.name).toBe(expected);
+  });
+});

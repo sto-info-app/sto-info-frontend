@@ -1,14 +1,12 @@
-<section class="storytime-section">
-  <div class="lcars-text-bar small-lcars-bar-gap">
-    <span>Invite somebody</span>
-  </div>
-
+<app-collapsible-section
+  heading="Invite somebody"
+  barClass="small-lcars-bar-gap">
   <form
-    class="storytime-panel storytime-form"
+    class="storytime-panel storytime-form storytime-panel--rotate"
     [formGroup]="form"
     (ngSubmit)="invited.emit()">
     <div class="form-row">
-      <div class="lcars-input-container perano">
+      <div class="lcars-input-container">
         <label [attr.for]="idPrefix + '-user'">Member ID</label>
         <input
           [id]="idPrefix + '-user'"
@@ -21,7 +19,7 @@
         }
       </div>
 
-      <div class="lcars-input-container gold">
+      <div class="lcars-input-container">
         <label [attr.for]="idPrefix + '-role'">What you call them</label>
         <input
           [id]="idPrefix + '-role'"
@@ -50,7 +48,7 @@
       </button>
     </div>
   </form>
-</section>
+</app-collapsible-section>
 
 @if (isLoading) {
   <app-loading-bar loadingText="Loading collaborators"></app-loading-bar>
@@ -95,7 +93,7 @@
         <div class="storytime-actions">
           <button
             type="button"
-            class="lcars-btn lcars-btn-auto cardinal"
+            class="lcars-btn lcars-btn-auto red"
             (click)="confirmRevoke(collaborator)">
             {{ isPending(collaborator) ? 'Withdraw invitation' : 'Remove' }}
           </button>

@@ -225,12 +225,14 @@ describe('CustomTrackingDisplayFieldComponent', () => {
     expect(query('.custom-tracking-display-swatch')).toBeNull();
   });
 
-  it('fetches a picture through the variant the server named', () => {
+  it('draws a picture from the address the API signed', () => {
     build(
       aDisplayField({
         fieldType: CustomTrackingFieldType.IMAGE,
         image: {
           imageId: 'image-1',
+          imageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
           altText: 'A ship at speed',
           shape: CustomTrackingImageShape.SQUARE,
         },
@@ -247,12 +249,14 @@ describe('CustomTrackingDisplayFieldComponent', () => {
 
   // A guessed variant name produces a broken picture and no error anywhere, so
   // nothing is drawn until the server has said which one to use.
-  it('draws no picture before the configuration has arrived', () => {
+  it('draws the picture before the configuration has arrived', () => {
     build(
       aDisplayField({
         fieldType: CustomTrackingFieldType.IMAGE,
         image: {
           imageId: 'image-1',
+          imageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
           altText: 'A ship at speed',
           shape: CustomTrackingImageShape.SQUARE,
         },
@@ -262,21 +266,39 @@ describe('CustomTrackingDisplayFieldComponent', () => {
       null,
     );
 
-    expect(query('img')).toBeNull();
-    expect(component.imageUrl).toBe('');
+    // FC-040: the API sends the finished, signed address, so nothing here
+    // waits for the configuration to work one out.
+    expect(component.imageUrl).toBe(
+      'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
+    );
   });
 
-  it('draws no picture for a shape the server does not describe', () => {
+  it('draws a picture whatever shape the server describes', () => {
     build(
       aDisplayField({
         fieldType: CustomTrackingFieldType.IMAGE,
         image: {
           imageId: 'image-1',
+          imageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
           altText: 'A ship at speed',
           shape: CustomTrackingImageShape.PORTRAIT,
         },
         value: {},
         answered: true,
+      }),
+    );
+
+    expect(component.imageUrl).toContain('?sig=1');
+  });
+
+  it('draws nothing for an image field with no picture', () => {
+    build(
+      aDisplayField({
+        fieldType: CustomTrackingFieldType.IMAGE,
+        image: null,
+        value: {},
+        answered: false,
       }),
     );
 

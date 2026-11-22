@@ -1,0 +1,84 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (shown.months.length === 0) {
+  <p class="fleet-community-empty">
+    Nobody applied, joined or was invited in this span.
+  </p>
+} @else {
+  <table class="fleet-community-table">
+    <caption>
+      Month by month, how each way of joining went
+    </caption>
+    <thead>
+      <tr>
+        <th scope="col">Month</th>
+        <th scope="col">Route</th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Received
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Accepted
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Declined
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Withdrawn
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Lapsed
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Pending
+        </th>
+        <th
+          scope="col"
+          class="fleet-community-table__number">
+          Median days to decide
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (row of shown.months; track row.month + row.route) {
+        <tr>
+          <th scope="row">{{ monthName(row.month) }}</th>
+          <td>{{ routeLabels[row.route] }}</td>
+          <td class="fleet-community-table__number">
+            {{ row.received | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.accepted | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.declined | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.withdrawn | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.lapsed | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.pending | reportFigure: cohort }}
+          </td>
+          <td class="fleet-community-table__number">
+            {{ row.medianDaysToDecision ?? '–' }}
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
+}

@@ -1,17 +1,20 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
+import { AuthService } from 'src/app/core/auth/auth.service';
 import { PERMISSIONS } from 'src/app/models/access-control.models';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { StorytimeService } from 'src/app/storytime/storytime.service';
 import { AdminComponent } from './admin.component';
+import { ModerationHoldAdminService } from './moderation-admin/moderation-hold-admin.service';
 
 describe('AdminComponent', () => {
   let component: AdminComponent;
   let fixture: ComponentFixture<AdminComponent>;
   let accessControlService: { getMyPermissions: jest.Mock };
   let storytimeService: { isEnabled: jest.Mock };
+  let holds: { openCounts: jest.Mock };
 
   /**
    * The hrefs of every link on the rendered page.
@@ -27,6 +30,7 @@ describe('AdminComponent', () => {
     // Storytime is on, and this administrator runs none of it. The management
     // cards are the exception on this page, not the rule.
     storytimeService = { isEnabled: jest.fn().mockReturnValue(of(true)) };
+    holds = { openCounts: jest.fn(() => of({ total: 0 })) };
     accessControlService = {
       getMyPermissions: jest
         .fn()
@@ -39,6 +43,8 @@ describe('AdminComponent', () => {
         provideRouter([]),
         { provide: AccessControlService, useValue: accessControlService },
         { provide: StorytimeService, useValue: storytimeService },
+        { provide: ModerationHoldAdminService, useValue: holds },
+        { provide: AuthService, useValue: { getUserId: () => 'admin-1' } },
       ],
     }).compileComponents();
 
@@ -51,17 +57,78 @@ describe('AdminComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('counts the open reports of both kinds beside Community (FC-036)', () => {
+    holds.openCounts.mockReturnValue(of({ total: 4 }));
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'Community · 4 open reports',
+    );
+    expect(hrefs()).toEqual(
+      expect.arrayContaining(['/admin/holds', '/admin/fleet-investigations']),
+    );
+  });
+
+  it('names Community alone when nothing is open, or the count is unknown', () => {
+    fixture.detectChanges();
+    expect(component.openReports).toBe(0);
+
+    holds.openCounts.mockReturnValue(throwError(() => new Error('down')));
+    component.ngOnInit();
+    expect(component.openReports).toBeNull();
+  });
+
   it('builds route links', () => {
     expect(component.getRouteLink('admin/news')).toBe('/admin/news');
   });
 
-  it('links to the permission overrides page', () => {
+  // The site's numbers sit under Operations with the Security Log (FC-053).
+  it('offers Site Statistics under Operations', () => {
+    fixture.detectChanges();
+
+    const card = (fixture.nativeElement as HTMLElement).querySelector(
+      '.admin-landing__card--site-statistics',
+    );
+
+    expect(card?.textContent).toContain('Site Statistics');
+    expect(hrefs()).toContain(`/${APP_ROUTES.ADMIN_SITE_STATISTICS}`);
+  });
+
+  // A site administrator reaches any Community's dispute page, and this is
+  // the way in to a hidden one (FC-050).
+  it.each([
+    [
+      'the permission overrides page',
+      '/admin/permissions',
+      'Manage Permissions',
+    ],
+    ['the Fleet disputes page', '/admin/fleet-disputes', 'Fleet Disputes'],
+    [
+      'the scan diagnostics page',
+      '/admin/scan-diagnostics',
+      'Scan Diagnostics',
+    ],
+  ])('links to %s', (_page, href, label) => {
     fixture.detectChanges();
 
     const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector(
-      'a[href="/admin/permissions"]',
+      `a[href="${href}"]`,
     );
-    expect(link?.textContent).toContain('Manage Permissions');
+    expect(link?.textContent).toContain(label);
+  });
+
+  // The publication pause and the feature switches have a page of their own
+  // since FC-054, reached by a card like every other.
+  it('offers Site Settings under Operations, and no longer draws its panels here', () => {
+    fixture.detectChanges();
+
+    const element = fixture.nativeElement as HTMLElement;
+    const card = element.querySelector('.admin-landing__card--site-settings');
+
+    expect(card?.textContent).toContain('Site Settings');
+    expect(hrefs()).toContain(`/${APP_ROUTES.ADMIN_SITE_SETTINGS}`);
+    expect(element.querySelector('app-publication-pause')).toBeNull();
+    expect(element.querySelector('app-feature-switches')).toBeNull();
   });
 
   // The same cards the Storytime landing page offers. Everything else on this

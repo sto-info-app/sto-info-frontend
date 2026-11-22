@@ -1,0 +1,20 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+// Five to one, which is the shape the cropper asks for, so a banner never
+// arrives at a ratio the page then has to crop again. Fixed by aspect-ratio
+// rather than by height, so it keeps its shape at every width.
+.fleet-scope-header__banner {
+  display: block;
+  width: 100%;
+  aspect-ratio: 5 / 1;
+  margin-bottom: 1rem;
+  border: 2px solid vars.$lcars-sky;
+  border-radius: 8px;
+  object-fit: cover;
+  background: vars.$lcars-black;
+}

@@ -1,0 +1,294 @@
+<div class="character-fleet">
+  <div class="lcars-text-bar small-lcars-bar-gap">
+    <span>Fleet</span>
+  </div>
+
+  <app-help-link
+    slug="your-characters-and-fleets"
+    label="Help with your Character’s Fleet" />
+
+  @if (loading()) {
+    <app-loading-bar loadingText="Reading this Character's Fleet" />
+  } @else {
+    @if (errorMessage()) {
+      <app-lcars-error-message
+        title="Transmission failed"
+        [message]="errorMessage()!" />
+    }
+
+    <!--
+      Proposals first, because they are the only thing here that somebody
+      else is waiting on an answer to.
+    -->
+    @if (pending().length > 0) {
+      <div class="character-fleet__proposals">
+        <div class="character-fleet__heading-row">
+          <h3 class="character-fleet__heading">Awaiting your answer</h3>
+          <app-settings-link [target]="proposalSettingsLink" />
+        </div>
+        <p class="character-fleet__note">{{ pendingNote() }}</p>
+
+        <!--
+          Drawn as the directory draws a Fleet (13 October 2026), with the
+          answers beneath the card's details.
+        -->
+        <div class="character-fleet__cards lcars-rotate">
+          @for (item of pendingCards(); track item.proposal.id) {
+            <app-fleet-scope-card
+              class="character-fleet__proposal"
+              [vm]="item.card">
+              <!--
+                Chosen as part of saying yes, so the answer and its audience
+                are one step. It starts at "Only me", as a recorded Fleet
+                does, and can be changed on the entry afterwards.
+              -->
+              <div class="character-fleet__row">
+                <div class="lcars-input-container lcars-field--short">
+                  <label [attr.for]="'proposal-visibility-' + item.proposal.id"
+                    >Who can see this</label
+                  >
+                  <select
+                    [id]="'proposal-visibility-' + item.proposal.id"
+                    [disabled]="busy()"
+                    (change)="
+                      chooseVisibility(item.proposal, $any($event.target).value)
+                    ">
+                    @for (choice of audienceChoices; track choice[0]) {
+                      <option
+                        [value]="choice[0]"
+                        [selected]="
+                          choice[0] === chosenVisibility(item.proposal)
+                        ">
+                        {{ choice[1] }}
+                      </option>
+                    }
+                  </select>
+                </div>
+              </div>
+              <div class="character-fleet__actions lcars-rotate">
+                <button
+                  type="button"
+                  class="lcars-btn green"
+                  [disabled]="busy()"
+                  (click)="accept(item.proposal)">
+                  {{
+                    item.proposal.recruitedBy
+                      ? 'Yes, I am in this Fleet'
+                      : 'Yes, that is this Captain'
+                  }}
+                </button>
+                <button
+                  type="button"
+                  class="lcars-btn red"
+                  [disabled]="busy()"
+                  (click)="decline(item.proposal)">
+                  No
+                </button>
+              </div>
+            </app-fleet-scope-card>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- The current Fleet, or the absence of one. -->
+    <h3 class="character-fleet__heading">Currently</h3>
+    @if (currentCard(); as item) {
+      <app-fleet-scope-card
+        class="character-fleet__entry"
+        [vm]="item.card">
+        <div class="character-fleet__row">
+          <div class="lcars-input-container lcars-field--short">
+            <label [attr.for]="'visibility-' + item.entry.id"
+              >Who can see this</label
+            >
+            <select
+              [id]="'visibility-' + item.entry.id"
+              [value]="item.entry.visibility"
+              [disabled]="busy()"
+              (change)="
+                changeVisibility(item.entry, $any($event.target).value)
+              ">
+              <!-- Each option says whether it is chosen. The select's own
+                   value is bound before these exist, so the browser would
+                   show the first, "Anyone", for an entry only its owner
+                   sees. -->
+              @for (choice of audienceChoices; track choice[0]) {
+                <option
+                  [value]="choice[0]"
+                  [selected]="choice[0] === item.entry.visibility">
+                  {{ choice[1] }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+
+        <div class="character-fleet__actions lcars-rotate">
+          <button
+            type="button"
+            class="lcars-btn"
+            [disabled]="busy()"
+            (click)="leave()">
+            I have left this Fleet
+          </button>
+          <button
+            type="button"
+            class="lcars-btn red"
+            [disabled]="busy()"
+            (click)="withdraw(item.entry)">
+            Remove — this was never right
+          </button>
+        </div>
+      </app-fleet-scope-card>
+    } @else {
+      <p class="character-fleet__note">
+        No Fleet is recorded for this Captain. Nobody sees what you record here
+        unless you say so.
+      </p>
+    }
+
+    <div class="character-fleet__actions lcars-rotate">
+      <button
+        type="button"
+        class="lcars-btn"
+        [disabled]="busy()"
+        (click)="toggleRecording()">
+        {{ recording() ? 'Cancel' : 'Record a Fleet' }}
+      </button>
+    </div>
+
+    <!-- Recording one. -->
+    @if (recording()) {
+      <form
+        class="character-fleet__form"
+        [formGroup]="form"
+        (ngSubmit)="submit()">
+        <div class="character-fleet__row">
+          <div class="lcars-input-container sky">
+            <label for="character-fleet-search">Find the Fleet</label>
+            <input
+              id="character-fleet-search"
+              type="text"
+              autocomplete="off"
+              formControlName="search" />
+          </div>
+          <button
+            type="button"
+            class="lcars-btn"
+            [disabled]="busy()"
+            (click)="search()">
+            Search
+          </button>
+        </div>
+
+        @if (pickerResults().length > 0) {
+          <ul class="character-fleet__results">
+            @for (result of pickerResults(); track result.id) {
+              <li>
+                <button
+                  type="button"
+                  class="character-fleet__result"
+                  (click)="pick(result)">
+                  {{ result.exactGameName }}
+                  <span class="character-fleet__muted">
+                    on {{ result.platformName }}
+                    @if (result.communityName) {
+                      · {{ result.communityName }}
+                    } @else {
+                      · no Community
+                    }
+                  </span>
+                </button>
+              </li>
+            }
+          </ul>
+        } @else if (pickerSearched() && pickedFleet() === null) {
+          <p class="character-fleet__note">
+            No Fleet here answers to that. A Fleet has to have a record on this
+            site before a Captain can be recorded in it — the Fleet pages are
+            where one is made.
+          </p>
+        }
+
+        @if (pickedFleet(); as picked) {
+          <p class="character-fleet__picked">
+            Recording <strong>{{ picked.exactGameName }}</strong> on
+            {{ picked.platformName }}.
+          </p>
+
+          <div class="character-fleet__row lcars-field-columns">
+            <div class="lcars-input-container sky">
+              <label for="character-fleet-from">Joined on</label>
+              <input
+                id="character-fleet-from"
+                type="date"
+                formControlName="validFrom" />
+            </div>
+
+            <div class="lcars-input-container sky">
+              <label for="character-fleet-visibility">Who can see this</label>
+              <select
+                id="character-fleet-visibility"
+                formControlName="visibility">
+                @for (choice of audienceChoices; track choice[0]) {
+                  <option [value]="choice[0]">{{ choice[1] }}</option>
+                }
+              </select>
+            </div>
+          </div>
+
+          @if (
+            form.controls.validFrom.touched && form.controls.validFrom.invalid
+          ) {
+            <p class="character-fleet__field-error">
+              Please say when this Captain joined.
+            </p>
+          }
+
+          <div class="character-fleet__actions lcars-rotate">
+            <button
+              type="submit"
+              class="lcars-btn green"
+              [disabled]="busy()">
+              Record it
+            </button>
+          </div>
+        }
+      </form>
+    }
+
+    <!-- What has ended. -->
+    @if (past().length > 0) {
+      <h3 class="character-fleet__heading">Previously</h3>
+      <div class="character-fleet__cards lcars-rotate">
+        @for (item of pastCards(); track item.entry.id) {
+          <app-fleet-scope-card
+            class="character-fleet__entry"
+            [vm]="item.card">
+            <div class="character-fleet__actions lcars-rotate">
+              <button
+                type="button"
+                class="lcars-btn red"
+                [disabled]="busy()"
+                (click)="withdraw(item.entry)">
+                Remove — this was never right
+              </button>
+            </div>
+          </app-fleet-scope-card>
+        }
+      </div>
+    }
+
+    <!--
+      Personal unassociation is not erasure (FC-038): this changes the
+      Character's page, never what a Fleet's roster recorded.
+    -->
+    <p class="character-fleet__note character-fleet__privacy">
+      Saying No, leaving or removing a Fleet here changes only what this
+      Character's page says. A Fleet's roster still lists the name it imported.
+      To have your roster data erased from every Fleet,
+      <a [routerLink]="'/' + contactRoute">contact us</a>.
+    </p>
+  }
+</div>

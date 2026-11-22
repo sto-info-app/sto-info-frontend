@@ -1,0 +1,725 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+  viewChild,
+} from '@angular/core';
+import {
+  takeUntilDestroyed,
+  toObservable,
+  toSignal,
+} from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+
+import {
+  catchError,
+  EMPTY,
+  forkJoin,
+  map,
+  Observable,
+  switchMap,
+  take,
+} from 'rxjs';
+
+import {
+  ChatChannel,
+  ChatChannelInput,
+  ChatConversation,
+  ChatPlace,
+  ChatScopeChannels,
+  ChatTranscript,
+  ChatTranscriptRequest,
+} from 'src/app/models/fleet-chat.models';
+import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsInformationMessageComponent } from 'src/app/shared/components/lcars-information-message/lcars-information-message.component';
+import { LcarsWarningMessageComponent } from 'src/app/shared/components/lcars-warning-message/lcars-warning-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { saveFile } from 'src/app/shared/utils/save-file.utils';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
+
+import {
+  ChatChannelDialogComponent,
+  ChatChannelDialogData,
+} from '../chat-channel-dialog/chat-channel-dialog.component';
+import { ChatConversationComponent } from '../chat-conversation/chat-conversation.component';
+import {
+  ChatTranscriptsComponent,
+  isTranscriptDownloadable,
+} from '../chat-transcripts/chat-transcripts.component';
+import { ChatFriendDialogComponent } from '../chat-friend-dialog/chat-friend-dialog.component';
+import { ChatPresenceService } from '../chat-presence.service';
+import {
+  ChatTranscriptDialogComponent,
+  ChatTranscriptDialogData,
+} from '../chat-transcript-dialog/chat-transcript-dialog.component';
+import { ChatSocketService } from '../chat-socket.service';
+import { CHAT_ROLE_LABELS } from '../chat.text';
+import { CHAT_TRANSCRIPTS_PATH, ChatAddressKind } from '../chat.routes';
+import { ChatService } from '../chat.service';
+
+/** What the page shows beside the list. */
+export type ChatSelection =
+  | {
+      readonly kind: 'channel';
+      readonly place: ChatPlace;
+      readonly channel: ChatChannel;
+      readonly scope: ChatScopeChannels;
+    }
+  | {
+      readonly kind: 'conversation';
+      readonly place: ChatPlace;
+      readonly conversation: ChatConversation;
+    };
+
+/**
+ * The name a transcript is saved under: letters, digits and hyphens only.
+ *
+ * @param transcript - The transcript.
+ * @returns The file name.
+ */
+export function transcriptFilename(transcript: ChatTranscript): string {
+  // Each run of anything else becomes one hyphen, so there is at most one to
+  // trim at either end.
+  const slug =
+    transcript.channelName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '') || 'channel';
+
+  return `stoinfo-chat-${slug}-${transcript.toAt.slice(0, 10)}.txt`;
+}
+
+/** What a failed channel action is headed with. */
+const CHANNEL_NOT_SAVED = 'Channel not saved';
+
+/** Where this browser remembers that the list of chats was hidden. */
+export const CHAT_LIST_HIDDEN_KEY = 'chat-list-hidden';
+
+/**
+ * Whether the reader hid the list of chats on this browser. Storage that is
+ * missing or refused leaves the list shown.
+ *
+ * @returns True when it was hidden.
+ */
+function readListHidden(): boolean {
+  try {
+    return localStorage.getItem(CHAT_LIST_HIDDEN_KEY) === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * What a failed transcript download says.
+ *
+ * @param status - The status it failed with, if it reached the server.
+ * @returns The message.
+ */
+function transcriptDownloadError(status: number | undefined): string {
+  switch (status) {
+    case 410:
+      return 'That transcript has expired.';
+    case 403:
+      return 'You may no longer export that channel.';
+    default:
+      return 'The transcript could not be downloaded.';
+  }
+}
+
+/** Which of a target's IDs a scope's own Chat address names. */
+const SCOPE_ADDRESS_KEYS: Readonly<
+  Partial<Record<ChatAddressKind, 'communityId' | 'fleetId' | 'armadaId'>>
+> = {
+  communities: 'communityId',
+  fleets: 'fleetId',
+  armadas: 'armadaId',
+};
+
+/** What a scope is called, as a label before its name. */
+const SCOPE_LABELS: Readonly<Record<ChatScopeChannels['kind'], string>> = {
+  COMMUNITY: 'Community',
+  ARMADA: 'Armada',
+  FLEET: 'Fleet',
+};
+
+/**
+ * Chat (FC-033): every channel the reader may read, by Community, Armada and
+ * Fleet, and their conversations with friends, with the one chosen beside
+ * the list — stacked, one at a time, on a narrow screen.
+ *
+ * The address says what is open: `/chat/channels/:id` or
+ * `/chat/direct/:id`, and a scope's Chat tab's `/chat/fleets/:id` (or
+ * `communities`, `armadas`), which opens its first channel. The + beside
+ * Direct messages opens a conversation with any friend. A scope's
+ * moderators add, change and archive its custom channels here, and its
+ * transcript exporters ask for a channel's transcript and download it for a
+ * day (FC-035).
+ */
+@Component({
+  selector: 'app-chat-page',
+  templateUrl: './chat-page.component.html',
+  styleUrls: ['./chat-page.component.scss'],
+  standalone: true,
+  imports: [
+    ChatConversationComponent,
+    ChatTranscriptsComponent,
+    HelpLinkComponent,
+    LcarsErrorMessageComponent,
+    LcarsInformationMessageComponent,
+    LcarsWarningMessageComponent,
+    LoadingBarComponent,
+    RouterLink,
+    SettingsLinkComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class ChatPageComponent {
+  private readonly _chat = inject(ChatService);
+  private readonly _socket = inject(ChatSocketService);
+  private readonly _dialog = inject(MatDialog);
+  private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _presence = inject(ChatPresenceService);
+
+  /** The Fleet policy, for the figures the server enforces. */
+  private readonly _policy = toSignal(
+    inject(FleetConfigurationService)
+      .getConfiguration()
+      .pipe(map(configuration => configuration?.policy ?? null)),
+    { initialValue: null },
+  );
+
+  readonly settingsLink = SETTINGS_LINKS.chat;
+  readonly scopeLabels = SCOPE_LABELS;
+  readonly roleLabels = CHAT_ROLE_LABELS;
+
+  readonly scopes = signal<ChatScopeChannels[]>([]);
+  readonly conversations = signal<ChatConversation[]>([]);
+  readonly isLoading = signal(true);
+  readonly errorMessage = signal<string | null>(null);
+  /** What a channel action or a transcript request failed with, if so. */
+  readonly actionError = signal<string | null>(null);
+  /** What the failure is headed with. */
+  readonly actionErrorTitle = signal(CHANNEL_NOT_SAVED);
+  readonly transcripts = signal<ChatTranscript[]>([]);
+  readonly transcriptError = signal<string | null>(null);
+
+  /** The channel whose export, edit and archive are shown, if any. */
+  readonly actionsOpenFor = signal<string | null>(null);
+
+  /**
+   * Whether the list of chats is hidden, giving the open place the page's
+   * width. Remembered on this browser, across every chat.
+   */
+  readonly isListHidden = signal(readListHidden());
+
+  /**
+   * How many transcripts may be downloaded, for the count beside the link
+   * to them. As of the last time they were read.
+   */
+  readonly readyCount = computed(
+    () => this.transcripts().filter(isTranscriptDownloadable).length,
+  );
+
+  /** Whether the reader may export a transcript anywhere (FC-035). */
+  readonly mayExport = computed(() =>
+    this.scopes().some(scope => scope.mayExport),
+  );
+
+  /** Where the socket stands, for the banner. */
+  readonly status = this._socket.status;
+
+  /** The friends in the list who are online (FC-034). */
+  readonly online = toSignal(
+    toObservable(this.conversations).pipe(
+      switchMap(conversations =>
+        this._presence.watch(
+          conversations
+            .map(conversation => conversation.other.username)
+            .filter((username): username is string => username !== null),
+        ),
+      ),
+    ),
+    { initialValue: new Set<string>() as ReadonlySet<string> },
+  );
+
+  /**
+   * Whether a friend is online.
+   *
+   * @param conversation - The conversation with them.
+   * @returns True when they are, as the reader may know it.
+   */
+  isOnline(conversation: ChatConversation): boolean {
+    return this.online().has(conversation.other.username as string);
+  }
+
+  private readonly _conversation = viewChild(ChatConversationComponent);
+
+  /** Whether the transcripts were read while open, since they were opened. */
+  private _transcriptsReadOpen = false;
+
+  /** What the address asks for. */
+  private readonly _address = toSignal(
+    this._route.paramMap.pipe(
+      map(params => ({
+        kind: params.get('kind') as ChatAddressKind | null,
+        id: params.get('id'),
+      })),
+    ),
+    { initialValue: { kind: null, id: null } },
+  );
+
+  /** What is open beside the list, once the list is read. */
+  readonly selection = computed<ChatSelection | null>(() => {
+    const { kind, id } = this._address();
+
+    if (kind === 'channels') {
+      for (const scope of this.scopes()) {
+        const channel = scope.channels.find(each => each.id === id);
+
+        if (channel !== undefined) {
+          return {
+            kind: 'channel',
+            place: { channelId: channel.id },
+            channel,
+            scope,
+          };
+        }
+      }
+    }
+
+    if (kind === 'direct') {
+      const conversation = this.conversations().find(each => each.id === id);
+
+      if (conversation !== undefined) {
+        return {
+          kind: 'conversation',
+          place: { conversationId: conversation.id },
+          conversation,
+        };
+      }
+    }
+
+    return null;
+  });
+
+  /** Whether the reader's transcripts are open beside the list. */
+  readonly isTranscriptsOpen = computed(
+    () => this._address().kind === CHAT_TRANSCRIPTS_PATH,
+  );
+
+  /** Whether the address names something the list does not hold. */
+  readonly isMissing = computed(
+    () =>
+      !this.isLoading() &&
+      this.errorMessage() === null &&
+      (this._address().kind === 'channels' ||
+        this._address().kind === 'direct') &&
+      this.selection() === null,
+  );
+
+  constructor() {
+    this.load().subscribe();
+    this._route.paramMap.pipe(takeUntilDestroyed()).subscribe(() => {
+      this.openScopeChat();
+
+      // Read afresh each time they are opened, unless the page's own first
+      // reading has already read them open.
+      if (!this.isTranscriptsOpen()) {
+        this._transcriptsReadOpen = false;
+      } else if (!this._transcriptsReadOpen && !this.isLoading()) {
+        this.loadTranscripts();
+      }
+    });
+  }
+
+  /**
+   * Whether a channel is the one open.
+   *
+   * @param channel - The channel.
+   * @returns True when it is.
+   */
+  protected isOpenChannel(channel: ChatChannel): boolean {
+    const selection = this.selection();
+
+    return selection?.kind === 'channel' && selection.channel.id === channel.id;
+  }
+
+  /**
+   * Whether a conversation is the one open.
+   *
+   * @param conversation - The conversation.
+   * @returns True when it is.
+   */
+  protected isOpenConversation(conversation: ChatConversation): boolean {
+    const selection = this.selection();
+
+    return (
+      selection?.kind === 'conversation' &&
+      selection.conversation.id === conversation.id
+    );
+  }
+
+  /**
+   * Shows a channel's actions, or hides them again; showing one channel's
+   * hides any other's.
+   *
+   * @param channel - The channel.
+   */
+  protected toggleActions(channel: ChatChannel): void {
+    this.actionsOpenFor.update(open =>
+      open === channel.id ? null : channel.id,
+    );
+  }
+
+  /** Hides the list of chats, or shows it again, and remembers which. */
+  protected toggleList(): void {
+    const hidden = !this.isListHidden();
+
+    this.isListHidden.set(hidden);
+
+    try {
+      if (hidden) {
+        localStorage.setItem(CHAT_LIST_HIDDEN_KEY, 'true');
+      } else {
+        localStorage.removeItem(CHAT_LIST_HIDDEN_KEY);
+      }
+    } catch {
+      // Storage refused: the choice lasts for this visit only.
+    }
+  }
+
+  /** Hides the channel actions, once one of them is chosen. */
+  protected closeActions(): void {
+    this.actionsOpenFor.set(null);
+  }
+
+  /**
+   * Asks for a transcript of a channel (FC-035).
+   *
+   * @param scope - Its scope.
+   * @param channel - The channel.
+   */
+  protected exportTranscript(
+    scope: ChatScopeChannels,
+    channel: ChatChannel,
+  ): void {
+    const policy = this._policy();
+
+    // Without the server's figures there is no reach to offer; the page
+    // only shows once the Fleet configuration has been read, so this waits
+    // for nothing in practice.
+    if (policy === null) {
+      return;
+    }
+
+    const data: ChatTranscriptDialogData = {
+      channelName: channel.name,
+      scopeName: `${SCOPE_LABELS[scope.kind]} ${scope.name}`,
+      reachDays: policy.chatTranscriptHistoryDays,
+    };
+
+    this._dialog
+      .open(ChatTranscriptDialogComponent, { data })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((request: ChatTranscriptRequest | undefined) => {
+        if (request === undefined) {
+          return;
+        }
+
+        this.actionError.set(null);
+        this._chat
+          .requestTranscript(channel.id, request)
+          .pipe(take(1), takeUntilDestroyed(this._destroyRef))
+          .subscribe({
+            // Opened where it shows as being written, since the list
+            // holds only a link to them.
+            next: transcript => {
+              this.transcripts.update(each => [transcript, ...each]);
+              void this._router.navigate(['/chat', CHAT_TRANSCRIPTS_PATH]);
+            },
+            // Said above the list, where the request was made from.
+            error: (error: { error?: { message?: string } }) =>
+              this.failAction(
+                'Transcript not asked for',
+                error.error?.message ??
+                  'The transcript could not be asked for.',
+              ),
+          });
+      });
+  }
+
+  /**
+   * Says, above the list, what a channel action or a transcript request
+   * failed with.
+   *
+   * @param title - What it is headed with.
+   * @param message - What went wrong.
+   */
+  private failAction(title: string, message: string): void {
+    this.actionErrorTitle.set(title);
+    this.actionError.set(message);
+  }
+
+  /** Reads the reader's transcripts again. */
+  protected refreshTranscripts(): void {
+    this.loadTranscripts();
+  }
+
+  /**
+   * Downloads a transcript.
+   *
+   * @param transcript - The transcript.
+   */
+  protected download(transcript: ChatTranscript): void {
+    this.transcriptError.set(null);
+    this._chat
+      .downloadTranscript(transcript.id)
+      .pipe(take(1), takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: file => saveFile(file, transcriptFilename(transcript)),
+        error: (error: { status?: number }) => {
+          this.transcriptError.set(transcriptDownloadError(error.status));
+          this.loadTranscripts();
+        },
+      });
+  }
+
+  /** Goes back to the list alone, on a narrow screen. */
+  protected showList(): void {
+    void this._router.navigate(['/chat']);
+  }
+
+  /** Opens chat again here after another tab took its place. */
+  protected reconnect(): void {
+    this._conversation()?.reopen();
+  }
+
+  /**
+   * Handles the open place becoming unreadable: reads the list again and
+   * goes back to it.
+   */
+  protected onRemoved(): void {
+    this.load().subscribe(() => this.showList());
+  }
+
+  /**
+   * Picks a friend and opens the conversation with them, reading the list
+   * again first when it is new to it.
+   */
+  protected messageFriend(): void {
+    this._dialog
+      .open(ChatFriendDialogComponent)
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((conversation: ChatConversation | undefined) => {
+        if (conversation === undefined) {
+          return;
+        }
+
+        const go = () =>
+          void this._router.navigate(['/chat', 'direct', conversation.id]);
+
+        if (this.conversations().some(each => each.id === conversation.id)) {
+          go();
+        } else {
+          this.load().subscribe(go);
+        }
+      });
+  }
+
+  /**
+   * Adds a custom channel to a scope.
+   *
+   * @param scope - The scope.
+   */
+  protected addChannel(scope: ChatScopeChannels): void {
+    this.editChannel(scope, null, input =>
+      this._chat.create(scope.target, input),
+    );
+  }
+
+  /**
+   * Changes a custom channel.
+   *
+   * @param scope - Its scope.
+   * @param channel - The channel.
+   */
+  protected changeChannel(
+    scope: ChatScopeChannels,
+    channel: ChatChannel,
+  ): void {
+    this.editChannel(scope, channel, input =>
+      this._chat.update(scope.target, channel.id, input),
+    );
+  }
+
+  /**
+   * Archives a custom channel, once confirmed.
+   *
+   * @param scope - Its scope.
+   * @param channel - The channel.
+   */
+  protected archiveChannel(
+    scope: ChatScopeChannels,
+    channel: ChatChannel,
+  ): void {
+    this._dialog
+      .open(ConfirmDialogComponent, {
+        data: {
+          title: `Archive ${channel.name}?`,
+          message:
+            'Nobody will read or post in it again, and its messages go with the usual retention. A new channel may take its place.',
+          confirmText: 'Archive',
+          cancelText: 'Keep it',
+        },
+      })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe(confirmed => {
+        if (!confirmed) {
+          return;
+        }
+
+        this._chat
+          .archive(scope.target, channel.id)
+          .pipe(take(1), takeUntilDestroyed(this._destroyRef))
+          .subscribe({
+            next: () => {
+              if (this.isOpenChannel(channel)) {
+                this.showList();
+              }
+
+              this.load().subscribe();
+            },
+            error: () =>
+              this.failAction(
+                CHANNEL_NOT_SAVED,
+                `${channel.name} could not be archived.`,
+              ),
+          });
+      });
+  }
+
+  /**
+   * Opens the channel editor, then saves what it gives back.
+   *
+   * @param scope - The scope.
+   * @param channel - The channel, or null for a new one.
+   * @param save - How to save it.
+   */
+  private editChannel(
+    scope: ChatScopeChannels,
+    channel: ChatChannel | null,
+    save: (input: ChatChannelInput) => Observable<ChatChannel>,
+  ): void {
+    const data: ChatChannelDialogData = { scopeName: scope.name, channel };
+
+    this._dialog
+      .open(ChatChannelDialogComponent, { data })
+      .afterClosed()
+      .pipe(take(1))
+      .subscribe((input: ChatChannelInput | undefined) => {
+        if (input === undefined) {
+          return;
+        }
+
+        this.actionError.set(null);
+        save(input)
+          .pipe(take(1), takeUntilDestroyed(this._destroyRef))
+          .subscribe({
+            next: saved => {
+              this.load().subscribe(() =>
+                this._router.navigate(['/chat', 'channels', saved.id]),
+              );
+            },
+            error: (error: { error?: { message?: string } }) =>
+              this.failAction(
+                CHANNEL_NOT_SAVED,
+                error.error?.message ?? 'The channel could not be saved.',
+              ),
+          });
+      });
+  }
+
+  /**
+   * Reads the reader's channels and conversations.
+   *
+   * @returns When done.
+   */
+  private load(): Observable<void> {
+    return forkJoin([this._chat.channels(), this._chat.conversations()]).pipe(
+      map(([scopes, conversations]) => {
+        this.scopes.set(scopes);
+        this.conversations.set(conversations);
+        this.errorMessage.set(null);
+        this.isLoading.set(false);
+        this.openScopeChat();
+
+        if (this.mayExport() || this.isTranscriptsOpen()) {
+          this.loadTranscripts();
+        }
+      }),
+      catchError((error: { status?: number }) => {
+        this.isLoading.set(false);
+        this.errorMessage.set(
+          error.status === 404
+            ? 'Chat is not switched on.'
+            : 'Chat could not be read. Try again shortly.',
+        );
+
+        return EMPTY;
+      }),
+      takeUntilDestroyed(this._destroyRef),
+    );
+  }
+
+  /** Reads the transcripts the reader asked for in the last day. */
+  private loadTranscripts(): void {
+    this._transcriptsReadOpen = this.isTranscriptsOpen();
+    this._chat
+      .transcripts()
+      .pipe(take(1), takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: transcripts => this.transcripts.set(transcripts),
+        error: () =>
+          this.transcriptError.set('Your transcripts could not be read.'),
+      });
+  }
+
+  /**
+   * Opens a scope's first channel when the address names the scope, as its
+   * Chat tab does.
+   */
+  private openScopeChat(): void {
+    const { kind, id } = this._address();
+    const key = kind === null ? undefined : SCOPE_ADDRESS_KEYS[kind];
+
+    if (key === undefined || this.isLoading()) {
+      return;
+    }
+
+    const scope = this.scopes().find(
+      each =>
+        each.target[key] === id &&
+        (key !== 'communityId' ||
+          (each.target.fleetId === null && each.target.armadaId === null)),
+    );
+    const first = scope?.channels[0];
+
+    void this._router.navigate(
+      first === undefined ? ['/chat'] : ['/chat', 'channels', first.id],
+      { replaceUrl: true },
+    );
+  }
+}

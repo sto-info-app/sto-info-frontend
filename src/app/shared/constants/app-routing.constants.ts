@@ -2,6 +2,7 @@ export const ROOT_ROUTES = {
   ABOUT: 'about',
   COMMUNITY: 'community',
   DASHBOARD: 'dashboard',
+  FLEETS: 'fleets',
   HELP: 'help',
   NEWS: 'news',
   ADMIN: 'admin',
@@ -10,6 +11,7 @@ export const ROOT_ROUTES = {
 
 const REGISTRY_ROOT = ROOT_ROUTES.COMMUNITY + '/registry';
 const REGISTRY_PROFILES = REGISTRY_ROOT + '/profiles';
+const FLEET_COMMUNITIES_ROOT = ROOT_ROUTES.FLEETS + '/communities';
 
 export const APP_ROUTES = {
   //Default
@@ -29,6 +31,9 @@ export const APP_ROUTES = {
   RESOURCES: 'resources',
   HELP: ROOT_ROUTES.HELP,
   HELP_GUIDE: ROOT_ROUTES.HELP + '/:guideSlug',
+  // Two segments where a guide has one, so a section never answers for a guide
+  // (FC-048).
+  HELP_TOPIC: ROOT_ROUTES.HELP + '/topics/:topicId',
   CONTACT: 'contact',
   TERMS_OF_USE: 'terms-of-use',
   CREDITS: 'credits',
@@ -56,6 +61,7 @@ export const APP_ROUTES = {
   STO_CHARACTER_ADD: ROOT_ROUTES.DASHBOARD + '/accounts/:handle/characters/add',
   STO_CHARACTER_EDIT:
     ROOT_ROUTES.DASHBOARD + '/accounts/:handle/:characterHandle/edit',
+  STO_DASHBOARD_FLEETS: ROOT_ROUTES.DASHBOARD + '/fleets',
   STO_DASHBOARD_STATS: ROOT_ROUTES.DASHBOARD + '/stats',
   STO_DASHBOARD_STATS_DETAIL: ROOT_ROUTES.DASHBOARD + '/stats/:breakdownId',
 
@@ -74,12 +80,119 @@ export const APP_ROUTES = {
   // Community - Friends and blocking (authenticated)
   COMMUNITY_FRIENDS: ROOT_ROUTES.COMMUNITY + '/friends',
 
+  // Fleet Community
+  //
+  // A scope's canonical address spells out the collection it belongs to, so
+  // no Community slug can ever be mistaken for a page of the directory's own:
+  // `communities` and `armadas` are siblings of the Fleet listing at
+  // `/fleets`, and a Community sits one segment below one of them.
+  FLEETS: ROOT_ROUTES.FLEETS,
+  FLEET_COMMUNITIES: FLEET_COMMUNITIES_ROOT,
+  FLEET_ARMADAS: ROOT_ROUTES.FLEETS + '/armadas',
+  FLEET_REGISTER: ROOT_ROUTES.FLEETS + '/register',
+  FLEET_REGISTER_STANDALONE: ROOT_ROUTES.FLEETS + '/register-standalone',
+  FLEET_REGISTER_FLEET:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/fleets/register',
+  FLEET_REGISTER_ARMADA:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/armadas/register',
+  FLEET_COMMUNITY: FLEET_COMMUNITIES_ROOT + '/:communitySlug',
+  FLEET_SCOPE_FLEET:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/fleets/:platformSegment/:slug',
+  FLEET_SCOPE_ARMADA:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/armadas/:platformSegment/:slug',
+  FLEET_ROSTER_IMPORT:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/import',
+  FLEET_ROSTER:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/roster',
+  FLEET_ROSTER_HISTORY:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/history',
+  FLEET_ROSTER_MEMBER:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/history/members/:identityId',
+  FLEET_REPORTS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/reports',
+  FLEET_HOLDINGS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/holdings',
+  FLEET_INVESTIGATE:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate',
+  FLEET_ROSTER_IMPORTS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/imports',
+  FLEET_ROSTER_IMPORT_DETAIL:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/imports/:importId',
+  FLEET_ROSTER_IDENTITIES:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/identities',
+  FLEET_FORMER_NAMES:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/former-names',
+  FLEET_ROSTER_CONFLICTS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/conflicts',
+  FLEET_RANK_ORDER:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/investigate/rank-order',
+  FLEET_MY_APPLICATIONS: ROOT_ROUTES.FLEETS + '/applications',
+  FLEET_APPLY:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/apply',
+  FLEET_RECRUITMENT:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment',
+  FLEET_APPLICATIONS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications',
+  FLEET_APPLICATION:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/applications/:applicationId',
+  FLEET_INVITATIONS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/invitations',
+  FLEET_MEMBERS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/members',
+  FLEET_RECRUITMENT_SETTINGS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/recruitment/settings',
+  FLEET_COMMUNITY_MANAGE: FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage',
+  FLEET_COMMUNITY_OWNERSHIP:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/ownership',
+  FLEET_COMMUNITY_DISPUTE:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/dispute',
+  FLEET_COMMUNITY_SETTINGS:
+    FLEET_COMMUNITIES_ROOT + '/:communitySlug/manage/settings',
+  FLEET_MANAGE:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/manage',
+  FLEET_SETTINGS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/fleets/:platformSegment/:slug/manage/settings',
+  FLEET_ARMADA_HISTORY:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/armadas/:platformSegment/:slug/history',
+  FLEET_ARMADA_REQUESTS:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/armadas/:platformSegment/:slug/requests',
+  FLEET_ARMADA_MANAGE:
+    FLEET_COMMUNITIES_ROOT +
+    '/:communitySlug/armadas/:platformSegment/:slug/manage',
+
   // News
   NEWS: ROOT_ROUTES.NEWS,
   NEWS_DETAIL: ROOT_ROUTES.NEWS + '/:slug',
 
   // Notifications
   NOTIFICATIONS: 'notifications',
+
+  // Chat (FC-033)
+  CHAT: 'chat',
 
   // Admin
   ADMIN: ROOT_ROUTES.ADMIN,
@@ -92,8 +205,17 @@ export const APP_ROUTES = {
   ADMIN_NOTIFICATIONS: ROOT_ROUTES.ADMIN + '/notifications',
   ADMIN_NOTIFICATIONS_SEND: ROOT_ROUTES.ADMIN + '/notifications/send',
   ADMIN_REPORTS: ROOT_ROUTES.ADMIN + '/reports',
+  ADMIN_CHAT_REPORTS: ROOT_ROUTES.ADMIN + '/chat-reports',
+  ADMIN_HOLDS: ROOT_ROUTES.ADMIN + '/holds',
+  ADMIN_FLEET_INVESTIGATIONS: ROOT_ROUTES.ADMIN + '/fleet-investigations',
+  ADMIN_FLEET_DISPUTES: ROOT_ROUTES.ADMIN + '/fleet-disputes',
+  ADMIN_ROSTER_ERASURES: ROOT_ROUTES.ADMIN + '/roster-erasures',
   ADMIN_USERS: ROOT_ROUTES.ADMIN + '/users',
   ADMIN_PERMISSIONS: ROOT_ROUTES.ADMIN + '/permissions',
+  ADMIN_SCAN_DIAGNOSTICS: ROOT_ROUTES.ADMIN + '/scan-diagnostics',
+  ADMIN_SECURITY_LOG: ROOT_ROUTES.ADMIN + '/security-log',
+  ADMIN_SITE_STATISTICS: ROOT_ROUTES.ADMIN + '/site-statistics',
+  ADMIN_SITE_SETTINGS: ROOT_ROUTES.ADMIN + '/site-settings',
 
   // Storytime
   STORYTIME: ROOT_ROUTES.STORYTIME,
@@ -182,6 +304,8 @@ export const APP_ROUTE_TITLES = {
   // Replaced once the guide loads: one route serves every guide, so the
   // address is the only thing that says which one is being read.
   HELP_GUIDE: 'Help',
+  // Replaced with the section's title once it loads.
+  HELP_TOPIC: 'Help',
   CONTACT: 'Contact us',
   TERMS_OF_USE: 'Terms of Use',
   CREDITS: 'Credits',
@@ -205,6 +329,7 @@ export const APP_ROUTE_TITLES = {
   STO_CHARACTER_DETAIL: 'Character Details',
   STO_CHARACTER_ADD: 'Add Character',
   STO_CHARACTER_EDIT: 'Edit Character',
+  STO_DASHBOARD_FLEETS: 'Communities You Follow',
   STO_DASHBOARD_STATS: 'Stats',
   STO_DASHBOARD_STATS_DETAIL: 'Stat Detail',
 
@@ -222,12 +347,66 @@ export const APP_ROUTE_TITLES = {
   // Community - Friends and blocking (authenticated)
   COMMUNITY_FRIENDS: 'Friends',
 
+  // Fleet Community
+  FLEETS: 'Fleets',
+  FLEET_COMMUNITIES: 'Fleet Communities',
+  FLEET_ARMADAS: 'Armadas',
+  FLEET_REGISTER: 'Register a Community',
+  FLEET_REGISTER_STANDALONE: 'Confirm a Fleet',
+  FLEET_REGISTER_FLEET: 'Register a Fleet',
+  FLEET_REGISTER_ARMADA: 'Register an Armada',
+  FLEET_COMMUNITY: 'Fleet Community',
+  FLEET_SCOPE_FLEET: 'Fleet',
+  FLEET_SCOPE_ARMADA: 'Armada',
+  FLEET_ROSTER_IMPORT: 'Import a Roster Export',
+  FLEET_ROSTER: 'Roster',
+  FLEET_ROSTER_HISTORY: 'Roster History',
+  FLEET_ROSTER_MEMBER: 'Roster Member',
+  FLEET_REPORTS: 'Fleet Reports',
+  FLEET_HOLDINGS: 'Fleet Holdings',
+  FLEET_NEWS: 'News',
+  FLEET_NEWS_POST: 'News Post',
+  FLEET_NEWS_WRITE: 'Write a Post',
+  FLEET_NEWS_EDIT: 'Edit a Post',
+  FLEET_ACTIVITY: 'Activity',
+  FLEET_EVENTS: 'Events',
+  FLEET_EVENT: 'Event',
+  FLEET_EVENT_OCCURRENCE: 'Occurrence',
+  FLEET_EVENT_NEW: 'New Event',
+  FLEET_EVENT_EDIT: 'Change an Event',
+  FLEET_INVESTIGATE: 'Investigate',
+  FLEET_ROSTER_IMPORTS: 'Roster Imports',
+  FLEET_ROSTER_IMPORT_DETAIL: 'Roster Import',
+  FLEET_ROSTER_IDENTITIES: 'Roster Identities',
+  FLEET_FORMER_NAMES: 'Former Names',
+  FLEET_ROSTER_CONFLICTS: 'Conflicting Exports',
+  FLEET_RANK_ORDER: 'Rank Order',
+  FLEET_MY_APPLICATIONS: 'Your Fleet Applications',
+  FLEET_APPLY: 'Apply to a Fleet',
+  FLEET_RECRUITMENT: 'Recruitment',
+  FLEET_APPLICATIONS: 'Fleet Applications',
+  FLEET_APPLICATION: 'Fleet Application',
+  FLEET_INVITATIONS: 'Fleet Invitations',
+  FLEET_MEMBERS: 'Fleet Members',
+  FLEET_RECRUITMENT_SETTINGS: 'Recruitment Settings',
+  FLEET_MANAGE: 'Manage',
+  FLEET_ARMADA_HISTORY: 'Armada History',
+  FLEET_ARMADA_REQUESTS: 'Armada Requests',
+  FLEET_GOVERNANCE_ROLES: 'Roles',
+  FLEET_GOVERNANCE_DELEGATION: 'Delegation',
+  FLEET_GOVERNANCE_HISTORY: 'Governance History',
+  FLEET_COMMUNITY_OWNERSHIP: 'Community Ownership',
+  FLEET_COMMUNITY_DISPUTE: 'Community Site Administration',
+  FLEET_COMMUNITY_SETTINGS: 'Community Settings',
+  FLEET_SETTINGS: 'Fleet Settings',
+
   // News
   NEWS: 'News',
   NEWS_DETAIL: 'News',
 
   // Notifications
   NOTIFICATIONS: 'Notifications',
+  CHAT: 'Chat',
 
   // Admin
   ADMIN: 'Admin',
@@ -240,8 +419,17 @@ export const APP_ROUTE_TITLES = {
   ADMIN_NOTIFICATIONS: 'Sent Notifications',
   ADMIN_NOTIFICATIONS_SEND: 'Send Notification',
   ADMIN_REPORTS: 'Reported Officers',
+  ADMIN_CHAT_REPORTS: 'Chat Reports',
+  ADMIN_HOLDS: 'Moderation Holds',
+  ADMIN_FLEET_INVESTIGATIONS: 'Fleet Investigations',
+  ADMIN_FLEET_DISPUTES: 'Fleet Disputes',
+  ADMIN_ROSTER_ERASURES: 'Roster Erasures',
   ADMIN_USERS: 'Manage Members',
   ADMIN_PERMISSIONS: 'Manage Permissions',
+  ADMIN_SCAN_DIAGNOSTICS: 'Scan Diagnostics',
+  ADMIN_SECURITY_LOG: 'Security Log',
+  ADMIN_SITE_STATISTICS: 'Site Statistics',
+  ADMIN_SITE_SETTINGS: 'Site Settings',
 
   // Storytime
   STORYTIME: 'Storytime',

@@ -19,15 +19,13 @@
     [formGroup]="form"
     class="storytime-form"
     (ngSubmit)="save()">
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>What is featured</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="What is featured"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
           <div class="storytime-setting-field">
-            <div class="lcars-select-container gold">
+            <div class="lcars-select-container">
               <label
                 class="select-label"
                 for="spotlight-entity-type"
@@ -65,8 +63,8 @@
             </details>
           </div>
 
-          <div class="lcars-input-container perano">
-            <label>{{ targetLabel }}</label>
+          <div class="lcars-input-container">
+            <span class="lcars-input-label">{{ targetLabel }}</span>
             <div class="field-picker">
               @if (selectedTitle) {
                 <div class="field-picker__identity">
@@ -84,7 +82,7 @@
               @if (isNew) {
                 <button
                   type="button"
-                  class="lcars-btn lcars-btn-auto perano field-picker__btn"
+                  class="lcars-btn lcars-btn-auto field-picker__btn"
                   (click)="openPicker()">
                   {{ selectedTitle ? 'Change selection' : 'Search and select' }}
                 </button>
@@ -114,16 +112,14 @@
           </div>
         </div>
       </div>
-    </section>
+    </app-collapsible-section>
 
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>What readers see</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="What readers see"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
-          <div class="lcars-input-container perano storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="spotlight-headline">Headline</label>
             <input
               id="spotlight-headline"
@@ -141,7 +137,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container bluey storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="spotlight-summary">Summary</label>
             <textarea
               id="spotlight-summary"
@@ -158,7 +154,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container gold storytime-field-full">
+          <div class="lcars-input-container storytime-field-full">
             <label for="spotlight-reason">Why it was chosen</label>
             <textarea
               id="spotlight-reason"
@@ -169,7 +165,7 @@
         </div>
 
         <div class="form-row">
-          <div class="lcars-input-container sky">
+          <div class="lcars-input-container">
             <label for="spotlight-slug">URL slug</label>
             <input
               id="spotlight-slug"
@@ -183,7 +179,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </app-collapsible-section>
 
     <!--
       Artwork waits for the entry to exist. It is set against a saved entry
@@ -191,27 +187,21 @@
       would mean holding a file with nowhere to put it.
     -->
     @if (entry) {
-      <section class="storytime-section">
-        <div class="storytime-panel">
-          <app-storytime-image-manager
-            [slot]="imageSlots.SPOTLIGHT_OVERRIDE"
-            [targetId]="entry.id"
-            [imageUrl]="entry.overrideImageUrl"
-            [imageAlt]="entry.overrideImageAlt"
-            altControlName="overrideImageAlt"
-            (changed)="onImageChanged($event)"></app-storytime-image-manager>
-        </div>
-      </section>
+      <app-storytime-image-manager
+        [slot]="imageSlots.SPOTLIGHT_OVERRIDE"
+        [targetId]="entry.id"
+        [imageUrl]="entry.overrideImageUrl"
+        [imageAlt]="entry.overrideImageAlt"
+        altControlName="overrideImageAlt"
+        (changed)="onImageChanged($event)"></app-storytime-image-manager>
     }
 
-    <section class="storytime-section">
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>When it shows</span>
-      </div>
-
-      <div class="storytime-panel">
+    <app-collapsible-section
+      heading="When it shows"
+      barClass="small-lcars-bar-gap">
+      <div class="storytime-panel storytime-panel--rotate">
         <div class="form-row">
-          <div class="lcars-input-container violet">
+          <div class="lcars-input-container">
             <label for="spotlight-priority">Display priority</label>
             <input
               id="spotlight-priority"
@@ -223,7 +213,7 @@
             </p>
           </div>
 
-          <div class="lcars-input-container green">
+          <div class="lcars-input-container">
             <label for="spotlight-starts">Starts showing</label>
             <input
               id="spotlight-starts"
@@ -238,7 +228,7 @@
             }
           </div>
 
-          <div class="lcars-input-container red">
+          <div class="lcars-input-container">
             <label for="spotlight-ends">Stops showing</label>
             <input
               id="spotlight-ends"
@@ -250,7 +240,7 @@
           </div>
         </div>
       </div>
-    </section>
+    </app-collapsible-section>
 
     <app-storytime-editor-actions
       [isSaving]="isSaving"

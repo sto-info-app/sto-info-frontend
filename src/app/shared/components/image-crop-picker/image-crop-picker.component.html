@@ -1,0 +1,19 @@
+<input
+  type="file"
+  [title]="'Choose a picture for the ' + label()"
+  [attr.aria-label]="'Choose a picture for the ' + label()"
+  (change)="fileChange.emit($event)"
+  accept="image/jpg, image/jpeg, image/png"
+  [disabled]="disabled()"
+  class="file-input" />
+
+@if (imageChangedEvent(); as chosen) {
+  <image-cropper
+    [imageChangedEvent]="chosen"
+    [maintainAspectRatio]="true"
+    [aspectRatio]="aspectRatio()"
+    [output]="'blob'"
+    [format]="format()"
+    (imageCropped)="imageCropped.emit($event)"
+    (loadImageFailed)="loadImageFailed.emit()"></image-cropper>
+}

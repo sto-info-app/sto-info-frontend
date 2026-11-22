@@ -1,0 +1,133 @@
+@switch (state.kind) {
+  @case ('LOADING') {
+    <app-loading-bar [loadingText]="loadingText" />
+  }
+
+  @case ('MISSING') {
+    <app-lcars-information-message
+      title="No such record"
+      [message]="missingMessage" />
+  }
+
+  @case ('ERROR') {
+    <app-lcars-error-message
+      title="Transmission failed"
+      [message]="state.message" />
+  }
+
+  @case ('READY') {
+    @if (state.tabs) {
+      <app-fleet-tabs [vm]="state.tabs" />
+    }
+
+    @if (state.armadaTabs) {
+      <app-armada-tabs [vm]="state.armadaTabs" />
+    }
+
+    @if (state.notice) {
+      <app-lcars-information-message
+        title="About this record"
+        [message]="state.notice" />
+    }
+
+    <app-fleet-scope-header [vm]="state.header" />
+
+    <app-help-link
+      slug="communities-fleets-and-armadas"
+      label="Help with Communities, Fleets and Armadas" />
+
+    @if (state.actions.length) {
+      <nav
+        class="buttons-row fleet-scope-view__actions"
+        aria-label="What you can do here">
+        @for (action of state.actions; track action.link) {
+          <a
+            class="lcars-btn lcars-btn-auto"
+            [routerLink]="action.link"
+            [attr.aria-label]="action.description"
+            >{{ action.label }}</a
+          >
+        }
+      </nav>
+    }
+
+    <!--
+      The blocks of the record, each in the next colour of the rotation
+      whichever component draws it.
+    -->
+    <div class="lcars-rotate">
+      @if (state.ownershipOffer) {
+        <app-ownership-offer-panel [vm]="state.ownershipOffer" />
+      }
+
+      @if (state.following) {
+        <app-fleet-follow [vm]="state.following" />
+      }
+
+      @if (state.armada) {
+        <app-armada-panel [vm]="state.armada" />
+      }
+
+      @if (state.fleetArmada) {
+        <app-fleet-armada-panel [vm]="state.fleetArmada" />
+      }
+
+      @if (state.communityNews) {
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
+          heading="News">
+          <app-fleet-news-latest [vm]="state.communityNews" />
+        </app-lcars-panel>
+      }
+
+      @if (state.communityEvents; as events) {
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
+          heading="Events">
+          <app-fleet-events-upcoming
+            [source]="events"
+            [latest]="5" />
+        </app-lcars-panel>
+      }
+
+      @if (state.communityActivity; as activity) {
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
+          heading="Activity">
+          <app-fleet-activity-feed
+            [source]="activity.source"
+            [latest]="5"
+            [allLink]="activity.allLink" />
+        </app-lcars-panel>
+      }
+
+      @if (state.communityStructure) {
+        <app-community-structure-panel [vm]="state.communityStructure" />
+      }
+
+      @if (state.recruitment) {
+        <app-fleet-recruitment-panel
+          [vm]="state.recruitment"
+          (changed)="changed.emit()" />
+      }
+
+      @if (state.artwork) {
+        <app-fleet-scope-artwork
+          [vm]="state.artwork"
+          (changed)="changed.emit()" />
+      }
+
+      @if (state.description) {
+        <app-lcars-panel
+          [level]="2"
+          [collapsible]="true"
+          heading="About">
+          <p class="fleet-scope-view__description">{{ state.description }}</p>
+        </app-lcars-panel>
+      }
+    </div>
+  }
+}

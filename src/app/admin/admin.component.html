@@ -11,7 +11,7 @@
   <app-collapsible-section
     heading="Site Content"
     barClass="small-lcars-bar-gap">
-    <ul class="admin-landing__panels">
+    <ul class="admin-landing__panels lcars-rotate">
       <li class="admin-landing__card--news">
         <a [routerLink]="getRouteLink(appRoutes.ADMIN_NEWS)">
           <span class="admin-landing__name">News &amp; Release Notes</span>
@@ -39,16 +39,62 @@
       </li>
     </ul>
   </app-collapsible-section>
-
   <app-collapsible-section
-    heading="Community"
+    [heading]="
+      openReports ? 'Community · ' + openReports + ' open reports' : 'Community'
+    "
+    sectionKey="Community"
     barClass="small-lcars-bar-gap">
-    <ul class="admin-landing__panels">
+    <ul class="admin-landing__panels lcars-rotate">
       <li class="admin-landing__card--reports">
         <a [routerLink]="getRouteLink(appRoutes.ADMIN_REPORTS)">
           <span class="admin-landing__name">Reported Officers</span>
           <p class="admin-landing__summary">
             Work through reports members have raised about other members.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--chat-reports">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_CHAT_REPORTS)">
+          <span class="admin-landing__name">Chat Reports</span>
+          <p class="admin-landing__summary">
+            Messages members have reported in chat, with the messages before
+            them.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--holds">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_HOLDS)">
+          <span class="admin-landing__name">Moderation Holds</span>
+          <p class="admin-landing__summary">
+            Evidence kept past its deletion while a case is open, and read with
+            a purpose.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--investigations">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_FLEET_INVESTIGATIONS)">
+          <span class="admin-landing__name">Fleet Investigations</span>
+          <p class="admin-landing__summary">
+            Every site admin's read-only look into a Fleet's imports, and why.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--disputes">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_FLEET_DISPUTES)">
+          <span class="admin-landing__name">Fleet Disputes</span>
+          <p class="admin-landing__summary">
+            Find any Community, members-only and private ones included, and open
+            its dispute page.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--erasures">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_ROSTER_ERASURES)">
+          <span class="admin-landing__name">Roster Erasures</span>
+          <p class="admin-landing__summary">
+            Erase somebody's roster data from every Fleet, at their verified
+            request.
           </p>
         </a>
       </li>
@@ -71,6 +117,48 @@
       </li>
     </ul>
   </app-collapsible-section>
+  <app-collapsible-section
+    heading="Operations"
+    barClass="small-lcars-bar-gap">
+    <ul class="admin-landing__panels lcars-rotate">
+      <li class="admin-landing__card--scan-diagnostics">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SCAN_DIAGNOSTICS)">
+          <span class="admin-landing__name">Scan Diagnostics</span>
+          <p class="admin-landing__summary">
+            See what the file scanner has done, what it runs on and what is
+            waiting for it, and why an upload was refused.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--site-settings">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SITE_SETTINGS)">
+          <span class="admin-landing__name">Site Settings</span>
+          <p class="admin-landing__summary">
+            Pause or resume publication, and switch Fleet Communities,
+            Storytime and Custom Tracking on or off, each with a reason.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--security-log">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SECURITY_LOG)">
+          <span class="admin-landing__name">Security Log</span>
+          <p class="admin-landing__summary">
+            What site admins and the retention jobs did, when, to whom and why.
+          </p>
+        </a>
+      </li>
+      <li class="admin-landing__card--site-statistics">
+        <a [routerLink]="getRouteLink(appRoutes.ADMIN_SITE_STATISTICS)">
+          <span class="admin-landing__name">Site Statistics</span>
+          <p class="admin-landing__summary">
+            How many members there are and how many are active, sign-ups,
+            Storytime content published, Fleet Communities and chat, and what
+            is waiting on you.
+          </p>
+        </a>
+      </li>
+    </ul>
+  </app-collapsible-section>
 
   <!--
     Storytime's own management pages, for administrators who hold them. Filtered
@@ -82,7 +170,7 @@
     <app-collapsible-section
       heading="Storytime"
       barClass="small-lcars-bar-gap">
-      <ul class="admin-landing__panels">
+      <ul class="admin-landing__panels lcars-rotate">
         @for (link of storytimeLinks; track link.permission) {
           <li class="admin-landing__card--{{ link.cardKey }}">
             <a [routerLink]="storytimeLinkFor(link)">

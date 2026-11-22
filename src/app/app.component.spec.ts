@@ -12,6 +12,8 @@ import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
 import { SeoService } from './shared/services/seo.service';
+import { SignedImageRenewalService } from './shared/services/signed-image-renewal.service';
+import { UserSettingsService } from './dashboard/services/user-settings.service';
 
 describe('AppComponent', () => {
   let component: AppComponent;
@@ -64,7 +66,10 @@ describe('AppComponent', () => {
     stopAppStatePolling: jest.Mock<void, []>;
   };
   let mockPageTitleService: { init: jest.Mock<void, []> };
+  // The settings load is fire-and-forget; the component only has to ask.
+  let mockUserSettingsService: { loadQuietly: jest.Mock<void, []> };
   let mockSeoService: { init: jest.Mock<void, []> };
+  let mockSignedImageRenewal: { start: jest.Mock<void, []> };
   let mockScriptLoaderService: {
     loadScript: jest.Mock<
       void,
@@ -161,6 +166,8 @@ describe('AppComponent', () => {
       stopAppStatePolling: jest.fn(),
     };
 
+    mockUserSettingsService = { loadQuietly: jest.fn() };
+    mockSignedImageRenewal = { start: jest.fn() };
     mockPageTitleService = {
       init: jest.fn(),
     };
@@ -198,6 +205,11 @@ describe('AppComponent', () => {
         { provide: SeoService, useValue: mockSeoService },
         { provide: ScriptLoaderService, useValue: mockScriptLoaderService },
         { provide: MatDialog, useValue: mockDialog },
+        { provide: UserSettingsService, useValue: mockUserSettingsService },
+        {
+          provide: SignedImageRenewalService,
+          useValue: mockSignedImageRenewal,
+        },
       ],
     })
       .overrideComponent(AppComponent, {
@@ -225,6 +237,12 @@ describe('AppComponent', () => {
     expect(mockSeoService.init).toHaveBeenCalled();
   });
 
+  it('should renew expired picture addresses across the site', () => {
+    fixture.detectChanges();
+
+    expect(mockSignedImageRenewal.start).toHaveBeenCalledTimes(1);
+  });
+
   it('should update login state and start countdown when authenticated', () => {
     runWithPatchedTimer('setInterval', () => {
       mockAuthService.getSecondsUntilLoginSessionExpiry.mockReturnValue(0);
@@ -241,6 +259,29 @@ describe('AppComponent', () => {
       expect(component.isLoggedIn).toBe(true);
       expect(closeAllSpy).toHaveBeenCalled();
       expect(mockAuthService.performLogout).not.toHaveBeenCalled();
+    });
+  });
+
+  /**
+   * The timezone these carry governs every date in the application, so they are
+   * loaded once at the root rather than by the settings page. A preference that
+   * only applied on the page where it is edited would be no preference at all.
+   */
+  it('should load the account settings once the user is signed in', () => {
+    runWithPatchedTimer('setInterval', () => {
+      component.ngOnInit();
+      mockAuthService.isAuthenticated$.next(true);
+
+      expect(mockUserSettingsService.loadQuietly).toHaveBeenCalled();
+    });
+  });
+
+  it('should not load the account settings for a signed-out visitor', () => {
+    runWithPatchedTimer('setInterval', () => {
+      component.ngOnInit();
+      mockAuthService.isAuthenticated$.next(false);
+
+      expect(mockUserSettingsService.loadQuietly).not.toHaveBeenCalled();
     });
   });
 
@@ -421,7 +462,13 @@ describe('AppComponent', () => {
       (globalThis as unknown as { CookieYes: unknown }).CookieYes = undefined;
       options.onLoad?.();
     });
-    (component as unknown as AppComponentInternals).loadCookieYesScript();
+
+    expect(() =>
+      (component as unknown as AppComponentInternals).loadCookieYesScript(),
+    ).not.toThrow();
+    expect(mockScriptLoaderService.loadScript).toHaveBeenCalledWith(
+      expect.objectContaining({ src: 'https://test' }),
+    );
   });
 
   it('should handle missing dataLayer in gtag function', () => {
@@ -461,6 +508,13 @@ describe('AppComponent', () => {
     (
       component as unknown as AppComponentInternals
     ).loadGoogleAnalyticsWithTrackingDisabled();
+
+    // The missing queue is put back before anything is pushed to it.
+    expect(
+      Array.isArray(
+        (globalThis as unknown as { dataLayer: unknown }).dataLayer,
+      ),
+    ).toBe(true);
   });
 
   it('should not open the refresh dialog if already open', () => {

@@ -1,0 +1,7 @@
+// When an occurrence is, with the event's own clock (FC-030).
+@use 'lcars-variables' as vars;
+
+.fleet-event-when__zone {
+  color: vars.$lcars-sky;
+  font-size: 0.9rem;
+}

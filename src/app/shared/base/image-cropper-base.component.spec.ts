@@ -1,4 +1,9 @@
-import { Component, NO_ERRORS_SCHEMA, inject } from '@angular/core';
+import {
+  Component,
+  NO_ERRORS_SCHEMA,
+  SecurityContext,
+  inject,
+} from '@angular/core';
 import {
   ComponentFixture,
   TestBed,
@@ -55,26 +60,140 @@ class TestImageCropperComponent extends ImageCropperBaseComponent {
   }
 }
 
+// A dialogue's preview and Upload button, with no change detection strategy
+// declared: the real dialogues declare none, so they are OnPush, Angular 22's
+// default.
+@Component({
+  selector: 'app-test-image-cropper-preview',
+  template: `
+    @if (croppedImage) {
+      <img
+        class="preview"
+        [src]="croppedImage"
+        alt="" />
+    }
+    <button
+      type="button"
+      [disabled]="!croppedImage">
+      Upload
+    </button>
+  `,
+  standalone: true,
+})
+class TestImageCropperPreviewComponent extends ImageCropperBaseComponent {
+  protected override readonly _dialogRef = inject(
+    MatDialogRef<TestImageCropperPreviewComponent>,
+  );
+}
+
+/** A FileReader whose read finishes when the test says so. */
+interface ControlledReader {
+  readAsDataURL: jest.Mock;
+  onloadend: () => void;
+  result: string;
+}
+
+/**
+ * Replaces FileReader with readers the test finishes by hand, one per read.
+ *
+ * @param results - What each read produces, in order.
+ * @returns The readers, in the order they are made.
+ */
+function controlReaders(...results: string[]): ControlledReader[] {
+  const readers = results.map(result => ({
+    readAsDataURL: jest.fn(),
+    onloadend: (): void => undefined,
+    result,
+  }));
+  let next = 0;
+
+  jest
+    .spyOn(window, 'FileReader')
+    .mockImplementation(() => readers[next++] as unknown as FileReader);
+
+  return readers;
+}
+
+describe('ImageCropperBaseComponent preview', () => {
+  let fixture: ComponentFixture<TestImageCropperPreviewComponent>;
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [TestImageCropperPreviewComponent, NoopAnimationsModule],
+      providers: [{ provide: MatDialogRef, useValue: { close: jest.fn() } }],
+    }).compileComponents();
+
+    fixture = TestBed.createComponent(TestImageCropperPreviewComponent);
+    fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const upload = (): HTMLButtonElement =>
+    (fixture.nativeElement as HTMLElement).querySelector('button')!;
+
+  const preview = (): HTMLImageElement | null =>
+    (fixture.nativeElement as HTMLElement).querySelector('img.preview');
+
+  // The cropper crops the selected area as soon as the picture loads. The
+  // preview is read after that, so the dialogue has to be marked when the read
+  // finishes, or Upload waits for a drag of the crop box.
+  it('shows the crop made on loading and enables Upload, with no drag', () => {
+    const [reader] = controlReaders('data:image/png;base64,first');
+
+    fixture.componentInstance.onImageCropped({
+      blob: new Blob(['a'], { type: 'image/png' }),
+      width: 300,
+      height: 300,
+    } as ImageCroppedEvent);
+    fixture.detectChanges();
+
+    expect(upload().disabled).toBe(true);
+
+    reader.onloadend();
+    fixture.detectChanges();
+
+    expect(preview()?.getAttribute('src')).toBe('data:image/png;base64,first');
+    expect(upload().disabled).toBe(false);
+  });
+
+  it('keeps the newest crop when an older read finishes after it', () => {
+    const [older, newer] = controlReaders(
+      'data:image/png;base64,older',
+      'data:image/png;base64,newer',
+    );
+    const crop = (data: string): void =>
+      fixture.componentInstance.onImageCropped({
+        blob: new Blob([data], { type: 'image/png' }),
+        width: 300,
+        height: 300,
+      } as ImageCroppedEvent);
+
+    crop('older');
+    crop('newer');
+    newer.onloadend();
+    older.onloadend();
+    fixture.detectChanges();
+
+    expect(preview()?.getAttribute('src')).toBe('data:image/png;base64,newer');
+  });
+});
+
 describe('ImageCropperBaseComponent', () => {
   let component: TestImageCropperComponent;
   let fixture: ComponentFixture<TestImageCropperComponent>;
   let mockDialogRef: jest.Mocked<
     Pick<MatDialogRef<TestImageCropperComponent>, 'close'>
   >;
-  let mockSanitizer: jest.Mocked<Pick<DomSanitizer, 'bypassSecurityTrustUrl'>>;
 
   beforeEach(async () => {
     mockDialogRef = { close: jest.fn() };
-    mockSanitizer = {
-      bypassSecurityTrustUrl: jest.fn().mockImplementation(url => url),
-    };
 
     await TestBed.configureTestingModule({
       imports: [TestImageCropperComponent, NoopAnimationsModule],
-      providers: [
-        { provide: MatDialogRef, useValue: mockDialogRef },
-        { provide: DomSanitizer, useValue: mockSanitizer },
-      ],
+      providers: [{ provide: MatDialogRef, useValue: mockDialogRef }],
       schemas: [NO_ERRORS_SCHEMA],
     }).compileComponents();
 
@@ -223,10 +342,15 @@ describe('ImageCropperBaseComponent', () => {
       mockReader.onloadend();
       tick();
 
-      expect(mockSanitizer.bypassSecurityTrustUrl).toHaveBeenCalledWith(
-        'data:image/png;base64,abc',
-      );
       expect(component.croppedImage).toBe('data:image/png;base64,abc');
+      // The preview binds it as it is, without bypassing the sanitiser, which
+      // passes a `data:` URL untouched rather than prefixing it `unsafe:`.
+      expect(
+        TestBed.inject(DomSanitizer).sanitize(
+          SecurityContext.URL,
+          component.croppedImage,
+        ),
+      ).toBe('data:image/png;base64,abc');
     }));
 
     it('should log an error and return early if blob is missing', () => {

@@ -12,6 +12,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable, finalize, forkJoin } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   AppealStatus,
   ModerationAppeal,
@@ -24,6 +25,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { StorytimeModerationService } from '../../storytime-moderation.service';
 import { REPORT_REASON_LABELS } from '../../storytime.constants';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * The Storytime moderation queue: what has been reported, and who has appealed.
@@ -41,11 +43,13 @@ import { REPORT_REASON_LABELS } from '../../storytime.constants';
   templateUrl: './moderation-queue.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class ModerationQueueComponent implements OnInit {
@@ -132,6 +136,9 @@ export class ModerationQueueComponent implements OnInit {
       return;
     }
 
+    // The server closes every open report about the content with the
+    // removal, in one transaction (FC-044): a second request from here could
+    // be cancelled by leaving the page, leaving the report open.
     this.runAction(
       this._moderationService.removeContent({
         targetType: report.targetType,
@@ -139,30 +146,28 @@ export class ModerationQueueComponent implements OnInit {
         reasonCode: report.reasonCode,
         message,
       }),
-      () =>
-        this._moderationService
-          .resolveReport(report.id, {
-            status: StorytimeReportStatus.ACTIONED,
-            resolution: message,
-          })
-          .pipe(
-            takeUntilDestroyed(this._destroyRef),
-            observeInZone(this._ngZone, this._cdr),
-          )
-          .subscribe(),
     );
   }
 
   /**
-   * Closes a report without acting on the content.
+   * Closes a report without acting on the content, with a note for the
+   * record: the reason the site admin log keeps (FC-039).
    *
    * @param report - The report.
    */
   dismiss(report: StorytimeReport): void {
+    const resolution = this.form.getRawValue().resolution.trim();
+
+    if (!resolution) {
+      this.errorMessage =
+        'Say why the report is dismissed. It is kept with the report and in the site admin log.';
+      return;
+    }
+
     this.runAction(
       this._moderationService.resolveReport(report.id, {
         status: StorytimeReportStatus.DISMISSED,
-        resolution: this.form.getRawValue().resolution.trim() || undefined,
+        resolution,
       }),
     );
   }
@@ -186,17 +191,23 @@ export class ModerationQueueComponent implements OnInit {
   }
 
   /**
-   * Decides an appeal either way.
+   * Decides an appeal either way, telling the creator why: the reason the
+   * site admin log keeps (FC-039).
    *
    * @param appeal - The appeal.
    * @param uphold - Whether it succeeds.
    */
   private decide(appeal: ModerationAppeal, uphold: boolean): void {
+    const reviewNotes = this.form.getRawValue().message.trim();
+
+    if (!reviewNotes) {
+      this.errorMessage =
+        'Say what the creator is told about their appeal. They are shown it word for word.';
+      return;
+    }
+
     this.runAction(
-      this._moderationService.decideAppeal(appeal.id, {
-        uphold,
-        reviewNotes: this.form.getRawValue().message.trim() || undefined,
-      }),
+      this._moderationService.decideAppeal(appeal.id, { uphold, reviewNotes }),
     );
   }
 
@@ -206,7 +217,7 @@ export class ModerationQueueComponent implements OnInit {
    * @param action - The action to run.
    * @param onSuccess - Anything else to do once it succeeds.
    */
-  private runAction(action: Observable<unknown>, onSuccess?: () => void): void {
+  private runAction(action: Observable<unknown>): void {
     this.isLoading = true;
     this.errorMessage = '';
 
@@ -217,7 +228,6 @@ export class ModerationQueueComponent implements OnInit {
       )
       .subscribe({
         next: () => {
-          onSuccess?.();
           this.form.reset();
           this.load();
         },

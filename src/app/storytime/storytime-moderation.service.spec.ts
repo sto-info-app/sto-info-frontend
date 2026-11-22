@@ -241,7 +241,10 @@ describe('StorytimeModerationService', () => {
 
     it('decides an appeal', async () => {
       const decided = firstValueFrom(
-        service.decideAppeal(APPEAL_ID, { uphold: true }),
+        service.decideAppeal(APPEAL_ID, {
+          uphold: true,
+          reviewNotes: 'You are right.',
+        }),
       );
 
       const request = httpMock.expectOne(
@@ -296,7 +299,11 @@ describe('StorytimeModerationService', () => {
       ['getAppeals', () => service.getAppeals()],
       [
         'decideAppeal',
-        () => service.decideAppeal(APPEAL_ID, { uphold: false }),
+        () =>
+          service.decideAppeal(APPEAL_ID, {
+            uphold: false,
+            reviewNotes: 'Stands.',
+          }),
       ],
     ])('refuses %s', async (_name, act) => {
       await expect(firstValueFrom(act())).rejects.toThrow('No token found');

@@ -9,12 +9,13 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
-import { filter } from 'rxjs';
+import { filter, Observable } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   APP_ROUTE_TITLES,
   APP_ROUTES,
 } from 'src/app/shared/constants/app-routing.constants';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { GeneralThemeService } from 'src/app/shared/services/general-theme.service';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { RoutingService } from 'src/app/shared/services/routing.service';
@@ -57,6 +58,22 @@ export class SideBarComponent {
    */
   @Input() isStorytimeOffered = false;
 
+  /**
+   * Whether to offer the Fleet section in the navigation.
+   *
+   * Asked here rather than handed down like Storytime, because the answer
+   * is already cached for the lifetime of the application: the
+   * configuration is fetched once and shared, so a component that depends
+   * on it costs nothing after the first page. The Community tab strip
+   * needs the same fact and is not on the root's chain of inputs, so
+   * asking is the one mechanism that serves every entry point.
+   *
+   * Read through the async pipe, which marks this view for checking when
+   * the answer arrives — a plain field would go stale, for the same
+   * reason the Dashboard entry below has to be pushed by hand.
+   */
+  readonly isFleetOffered$: Observable<boolean>;
+
   appRoutes = APP_ROUTES;
   appRouteTitles = APP_ROUTE_TITLES;
   themePanel6RandomText: string;
@@ -83,6 +100,7 @@ export class SideBarComponent {
   private readonly _router = inject(Router);
   private readonly _routingService = inject(RoutingService);
   private readonly _generalThemeService = inject(GeneralThemeService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
   private readonly _authService = inject(AuthService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly _ngZone = inject(NgZone);
@@ -91,6 +109,8 @@ export class SideBarComponent {
   constructor() {
     this.themePanel6RandomText =
       this._generalThemeService.createDynamicSideColumnText();
+
+    this.isFleetOffered$ = this._fleetConfiguration.isOffered();
 
     this.isDashboardActive = this.matchesDashboard();
     this.watchDashboardEntry();

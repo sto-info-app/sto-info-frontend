@@ -8,12 +8,16 @@ import {
   inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
+import {
+  AdminReasonPrompt,
+  AdminReasonRequest,
+} from 'src/app/admin/admin-reason-prompt';
 import { Observable, finalize, take } from 'rxjs';
 import { PrivacyModeService } from 'src/app/dashboard/services/privacy-mode.service';
 import { ModeratedUser } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
@@ -27,6 +31,9 @@ import {
   memberRoleLabel,
   memberRoleModifier,
 } from 'src/app/shared/utils/member-role.utils';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -58,20 +65,24 @@ const DISABLED_FILTER_LABELS: Record<DisabledFilter, string> = {
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     FormsModule,
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class UserAdminListComponent implements OnInit {
   private readonly _moderationService = inject(ModerationService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _dialog = inject(MatDialog);
+  private readonly _reasons = new AdminReasonPrompt();
 
   /**
    * Whether the names and email addresses on this page are blurred. Read by the
@@ -174,27 +185,27 @@ export class UserAdminListComponent implements OnInit {
   }
 
   /**
-   * Disables a member's account.
+   * Disables a member's account, once a reason is given. The reason is kept
+   * in the site admin log (FC-039), and with each report it closes.
    *
    * @param user - The member to disable.
    */
   disable(user: ModeratedUser): void {
     const name = this.displayName(user);
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Disable Account',
-        message: `
-          <p>Disable <strong>${name}</strong>?</p>
-          <p>They are signed out immediately and cannot sign in again, their
-          record leaves the registry, and every open report about them is
-          closed as actioned.</p>
-          <p><strong>WARNING:</strong> They are not told why.</p>`,
+        message:
+          `Disable ${name}? They are signed out immediately and cannot ` +
+          'sign in again, their record leaves the registry, and every open ' +
+          'report about them is closed as actioned. They are not told why.',
         confirmText: 'Disable',
+        confirmTone: 'refuse',
       },
-      () =>
+      reason =>
         this.runAction(
-          () => this._moderationService.disableUser(user.id),
+          () => this._moderationService.disableUser(user.id, { reason }),
           `${name}'s account was disabled.`,
           'Failed to disable that account.',
         ),
@@ -202,25 +213,25 @@ export class UserAdminListComponent implements OnInit {
   }
 
   /**
-   * Restores a disabled member's account.
+   * Restores a disabled member's account, once a reason is given for the
+   * site admin log (FC-039).
    *
    * @param user - The member to restore.
    */
   enable(user: ModeratedUser): void {
     const name = this.displayName(user);
 
-    this.confirm(
+    this.askReason(
       {
         title: 'Restore Account',
-        message: `
-          <p>Restore <strong>${name}</strong>?</p>
-          <p>They can sign in again and their record returns to the registry.
-          Reports already closed against them stay closed.</p>`,
+        message:
+          `Restore ${name}? They can sign in again and their record returns ` +
+          'to the registry. Reports already closed against them stay closed.',
         confirmText: 'Restore',
       },
-      () =>
+      reason =>
         this.runAction(
-          () => this._moderationService.enableUser(user.id),
+          () => this._moderationService.enableUser(user.id, reason),
           `${name}'s account was restored.`,
           'Failed to restore that account.',
         ),
@@ -301,27 +312,19 @@ export class UserAdminListComponent implements OnInit {
   }
 
   /**
-   * Opens the LCARS confirmation dialog and runs the action if confirmed.
+   * Asks why, and runs the action with the reason once one is given. The
+   * reason is kept in the site admin log (FC-039).
    *
    * @param data - The dialog copy.
-   * @param onConfirm - Invoked when the administrator confirms.
+   * @param onConfirm - Invoked with the reason, trimmed.
    */
-  private confirm(
-    data: { title: string; message: string; confirmText: string },
-    onConfirm: () => void,
+  private askReason(
+    data: AdminReasonRequest,
+    onConfirm: (reason: string) => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
-      .subscribe(confirmed => {
-        if (confirmed) {
-          onConfirm();
-        }
-      });
+    this._reasons
+      .ask(data)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe(onConfirm);
   }
 }

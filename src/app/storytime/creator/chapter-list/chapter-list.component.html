@@ -13,9 +13,11 @@
       [message]="errorMessage"></app-lcars-error-message>
   }
 
-  <nav class="storytime-page-actions">
+  <nav
+    class="storytime-page-actions"
+    aria-label="This Story">
     <a
-      class="lcars-btn lcars-btn-auto green"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="[
         '/',
         appRoutes.STORYTIME,
@@ -28,7 +30,7 @@
       Add a Chapter
     </a>
     <a
-      class="lcars-btn lcars-btn-auto bluey"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]"
       >Back to the Story</a
     >
@@ -74,7 +76,7 @@
                     class="fa-solid fa-clock"
                     aria-hidden="true"></i>
                   Scheduled for
-                  {{ chapter.scheduledPublishAt | date: 'medium' }} (UTC)
+                  {{ chapter.scheduledPublishAt | appDate: 'medium' }}
                 </li>
               }
             </ul>

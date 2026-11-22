@@ -1,0 +1,9 @@
+:host {
+  display: block;
+}
+
+// Above the filters, in the same place the Community listing offers
+// registration, so the two read as one control that moves with the tab.
+.fleets-directory__confirm {
+  margin: 0 0 1rem;
+}

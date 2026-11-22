@@ -183,6 +183,32 @@ describe('AccountsComponent', () => {
     ]);
   });
 
+  // The username and the email are what somebody types elsewhere, so each
+  // row carries a copy button; the notes do not (#1090).
+  it('should offer to copy the username and the email, and nothing else', () => {
+    stoAccountServiceSpy.getAccounts.mockReturnValue(
+      of([
+        {
+          ...mockAccount,
+          username: 'captain-login',
+          email: 'captain@example.com',
+          notes: 'Primary account.',
+        } as StoAccount,
+      ]),
+    );
+
+    component.ngOnInit();
+
+    const card = component.accountVms()[0].card;
+    expect(
+      card.details.map(detail => [detail.label, !!detail.copyable]),
+    ).toEqual([
+      ['Username', true],
+      ['Email', true],
+      ['Notes', false],
+    ]);
+  });
+
   it('should label an unresolved launcher generically', () => {
     stoAccountServiceSpy.getAccounts.mockReturnValue(
       of([{ ...mockAccount, launcherId: 'missing' } as StoAccount]),
@@ -592,12 +618,14 @@ describe('AccountsComponent', () => {
       {
         id: 'p1',
         name: 'Windows',
+        providesRosterExport: true,
         createdAt: '2023-01-01',
         updatedAt: '2023-01-01',
       },
       {
         id: 'p2',
         name: 'Xbox',
+        providesRosterExport: false,
         createdAt: '2023-01-01',
         updatedAt: '2023-01-01',
       },

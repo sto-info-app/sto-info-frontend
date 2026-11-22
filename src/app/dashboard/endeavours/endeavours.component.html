@@ -14,7 +14,7 @@
         ></app-lcars-error-message>
         <div class="buttons-row">
           <a
-            class="lcars-btn-auto sunflower"
+            class="lcars-btn lcars-btn-auto"
             [routerLink]="accountsLink"
           >Back to Accounts</a>
         </div>
@@ -150,23 +150,12 @@
     id="endeavours-side-column"
     class="col"
   >
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Filters</span>
-      <button
-        type="button"
-        class="cta-icon"
-        (click)="filtersCollapsed = !filtersCollapsed"
-        [title]='filtersCollapsed ? "Show Filters" : "Hide Filters"'
-      >
-        <i
-          class="fas"
-          [class.fa-caret-down]="filtersCollapsed"
-          [class.fa-caret-up]="!filtersCollapsed"
-        ></i>
-      </button>
-    </div>
+    <app-lcars-collapsible-bar
+      label="Filters"
+      [(collapsed)]="filtersCollapsed"
+    />
     @if (!filtersCollapsed) {
-      <div class="filter-section">
+      <div class="filter-section lcars-rotate">
         <label
           class="select-label"
           for="perk-search-input"
@@ -180,7 +169,7 @@
           (ngModelChange)="searchText.set($event)"
         />
 
-        <div class="lcars-select-container perano">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             for="category-select"
@@ -221,24 +210,13 @@
       </div>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Sort</span>
-      <button
-        type="button"
-        class="cta-icon"
-        (click)="sortCollapsed = !sortCollapsed"
-        [title]='sortCollapsed ? "Show Sort" : "Hide Sort"'
-      >
-        <i
-          class="fas"
-          [class.fa-caret-down]="sortCollapsed"
-          [class.fa-caret-up]="!sortCollapsed"
-        ></i>
-      </button>
-    </div>
+    <app-lcars-collapsible-bar
+      label="Sort"
+      [(collapsed)]="sortCollapsed"
+    />
     @if (!sortCollapsed) {
-      <div class="filter-section">
-        <div class="lcars-select-container tangerine">
+      <div class="filter-section lcars-rotate">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             for="sort-by-select"
@@ -253,7 +231,7 @@
             <option value="nodes">Perks Earnt</option>
           </select>
         </div>
-        <div class="lcars-select-container gold">
+        <div class="lcars-select-container">
           <label
             class="select-label"
             for="sort-order-select"
@@ -278,18 +256,20 @@
       </div>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="accountLink()"
-        class="full-width-btn-link sunflower"
-      >Account</a>
-      <a
-        [routerLink]="accountsLink"
-        class="full-width-btn-link bluey"
-      >Accounts</a>
-    </div>
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap"
+    >
+      <div class="buttons">
+        <a
+          [routerLink]="accountLink()"
+          class="full-width-btn-link"
+        >Account</a>
+        <a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link"
+        >Accounts</a>
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

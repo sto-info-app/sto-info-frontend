@@ -334,4 +334,59 @@ describe('DashboardService', () => {
       httpMock.expectNone(API_URLS.CLOSE_ACCOUNT);
     });
   });
+
+  describe('removeProfilePic', () => {
+    it("takes the member's picture down", () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      let completed = false;
+      service.removeProfilePic().subscribe({
+        complete: () => (completed = true),
+      });
+
+      const req = httpMock.expectOne(API_URLS.REMOVE_USER_PROFILE_PIC);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      expect(completed).toBe(true);
+    });
+
+    it('should return error if no token found', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      service.removeProfilePic().subscribe({
+        error: error => expect(error.message).toBe('No token found'),
+      });
+      httpMock.expectNone(API_URLS.REMOVE_USER_PROFILE_PIC);
+    });
+  });
+
+  // FC-038: what closing would do to the Communities the user owns.
+  describe('closurePreview', () => {
+    it('asks what closing would do to each Community', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue({
+        headers: new HttpHeaders().set('Authorization', 'Bearer fake-token'),
+      });
+
+      service.closurePreview().subscribe(res => {
+        expect(res).toEqual([]);
+      });
+
+      const req = httpMock.expectOne(API_URLS.CLOSE_ACCOUNT_COMMUNITIES);
+
+      expect(req.request.method).toBe('GET');
+      req.flush([]);
+    });
+
+    it('fails without a token', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+      const error = jest.fn();
+
+      service.closurePreview().subscribe({ error });
+
+      expect(error).toHaveBeenCalledWith(new Error('No token found'));
+      httpMock.expectNone(API_URLS.CLOSE_ACCOUNT_COMMUNITIES);
+    });
+  });
 });

@@ -1,3 +1,5 @@
+@use 'lcars-variables' as vars;
+
 :host {
   display: block;
   min-width: 600px;
@@ -55,7 +57,7 @@
     }
 
     #cropped-image-preview {
-      border: 2px solid #fa0;
+      border: 2px solid vars.$lcars-gold;
       max-width: 85%;
       min-width: 85%;
       width: 85%;

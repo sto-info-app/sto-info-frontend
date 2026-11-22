@@ -1,0 +1,33 @@
+@use 'lcars-tabs' as tabs;
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+// Which conflicts, as a tab strip: each tab takes the next colour of the
+// rotation, and the one shown is filled with its own.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+.roster-conflicts__filters {
+  margin: 0 0 1rem;
+}
+
+.roster-conflicts__notice {
+  color: vars.$lcars-green;
+}
+
+// Each group of exports is a section of its own, its bar taking the page's
+// rotation; its links are written in the section's colour.
+.roster-conflicts__group {
+  display: block;
+  padding-bottom: 1rem;
+
+  a {
+    color: var(--lcars-accent, #{vars.$lcars-sky});
+  }
+}
+
+.roster-conflicts__selected {
+  color: vars.$lcars-green;
+}

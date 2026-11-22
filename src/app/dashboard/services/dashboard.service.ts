@@ -7,11 +7,23 @@ import {
   User,
   UserProfileUpdateResult,
   UserSettings,
+  UserSettingsUpdate,
 } from '../models/user.model';
 
 import { AuthService } from 'src/app/core/auth/auth.service';
 import { EditPersonalDetailsFormValues } from 'src/app/models/user-auth.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
+
+/** What closing the account does to one Community the user owns (FC-038). */
+export interface OwnedCommunityOutcome {
+  readonly communityId: string;
+  readonly name: string;
+  /** Handed to an Admin, or closed because none can take it. */
+  readonly outcome: 'TRANSFER' | 'CLOSE';
+  readonly toUserId: string | null;
+  readonly toUsername: string | null;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +49,7 @@ export class DashboardService {
     return this._http.get<UserSettings>(API_URLS.USER_SETTINGS, httpOptions);
   }
 
-  updateUserSettings(settings: UserSettings): Observable<UserSettings> {
+  updateUserSettings(settings: UserSettingsUpdate): Observable<UserSettings> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
     if (!httpOptions) {
       return throwError(() => new Error('No token found'));
@@ -70,9 +82,7 @@ export class DashboardService {
       );
   }
 
-  updateProfilePic(
-    profilePicForm: FormData,
-  ): Observable<UserProfileUpdateResult> {
+  updateProfilePic(profilePicForm: FormData): Observable<AcceptedAsset> {
     const httpOptions = this._authService.getHttpOptionsWithAccessToken();
 
     // Remove the Content-Type header if it exists
@@ -85,7 +95,7 @@ export class DashboardService {
     }
 
     return this._http
-      .post<UserProfileUpdateResult>(
+      .post<AcceptedAsset>(
         API_URLS.UPDATE_USER_PROFILE_PIC,
         profilePicForm,
         httpOptions,
@@ -96,6 +106,41 @@ export class DashboardService {
           return throwError(() => error);
         }),
       );
+  }
+
+  /**
+   * Takes the member's profile picture off, and down.
+   *
+   * @returns Completes once it is down.
+   */
+  removeProfilePic(): Observable<void> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.delete<void>(
+      API_URLS.REMOVE_USER_PROFILE_PIC,
+      httpOptions,
+    );
+  }
+
+  /**
+   * What closing the account would do to each open Fleet Community the user
+   * owns (FC-038).
+   *
+   * @returns Each, and whether it goes to an Admin or is closed.
+   */
+  closurePreview(): Observable<OwnedCommunityOutcome[]> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+
+    return this._http.get<OwnedCommunityOutcome[]>(
+      API_URLS.CLOSE_ACCOUNT_COMMUNITIES,
+      httpOptions,
+    );
   }
 
   closeAccount() {

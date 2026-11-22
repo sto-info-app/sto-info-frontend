@@ -20,8 +20,8 @@
     justify-content: space-between;
     gap: 0.75rem;
     padding: 0.6rem 1rem;
-    background: #333;
-    border-bottom: 2px solid rgb(255 255 255 / 10%);
+    background: vars.$lcars-card-header-bg;
+    border-bottom: 2px solid vars.$white-a10;
     color: vars.$lcars-black;
   }
 
@@ -53,7 +53,7 @@
     flex-shrink: 0;
     font-size: 0.85rem;
     font-weight: 600;
-    color: rgb(0 0 0 / 80%);
+    color: vars.$black-a80;
 
     .news-date-icon {
       font-size: 0.8rem;
@@ -86,7 +86,7 @@
       color: inherit;
 
       &:hover {
-        color: #8ff;
+        color: vars.$lcars-c44;
       }
     }
   }
@@ -118,8 +118,8 @@
     align-items: center;
     justify-content: center;
     padding: 0.8rem;
-    background: rgb(0 0 0 / 40%);
-    border-left: 1px solid rgb(255 255 255 / 10%);
+    background: vars.$black-a40;
+    border-left: 1px solid vars.$white-a10;
     color: vars.$lcars-perano;
     text-decoration: none;
 
@@ -128,8 +128,8 @@
     }
 
     &:hover {
-      background: rgb(0 0 0 / 55%);
-      color: #8ff;
+      background: vars.$black-a55;
+      color: vars.$lcars-c44;
     }
   }
 }

@@ -1,0 +1,112 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+.site-statistics__as-of {
+  margin: 0 0 1rem;
+  color: vars.$lcars-grey-light;
+  font-size: 0.9rem;
+}
+
+// The headline tiles, as the Statistics page's own.
+.site-statistics__hero {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+  margin: 0 0 2rem;
+}
+
+.site-statistics__chart-note {
+  margin: 0 0 1rem;
+  color: vars.$lcars-grey-light;
+  font-size: 0.9rem;
+}
+
+// Two to a row, stacking on a phone: three left no room for a panel's name,
+// which the block shows on one line. The grid rotates the palette across the
+// panels it holds.
+.site-statistics__panels {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1.25rem;
+  margin: 0.5rem 0 1.5rem;
+  padding: 0;
+  list-style: none;
+}
+
+// The panel card the rest of the site draws: a coloured spine down the left,
+// the name on a solid block across the top, and the body beneath it. The
+// colour is read at runtime from the grid's rotation.
+.site-statistics__panel {
+  @include mixins.lcars-accent-panel-card;
+
+  min-width: 0;
+  box-shadow:
+    inset 0 1px 0 vars.$white-a8,
+    inset 0 -1px 0 vars.$black-a30,
+    0 4px 8px vars.$black-a40;
+}
+
+.site-statistics__heading {
+  @include mixins.lcars-accent-panel-card-heading;
+}
+
+.site-statistics__name {
+  @include mixins.lcars-panel-card-name;
+}
+
+.site-statistics__body {
+  @include mixins.lcars-panel-card-body;
+
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0;
+  color: vars.$lcars-white;
+}
+
+// The four windows side by side, each a label over its number.
+.site-statistics__windows {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0;
+}
+
+.site-statistics__window {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  dt {
+    color: var(--lcars-panel-accent);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  dd {
+    margin: 0;
+    font-size: 1.5rem;
+  }
+}
+
+// A single total stands as large as the hero tiles' numbers.
+.site-statistics__total {
+  margin: 0;
+  font-size: 2rem;
+  text-align: center;
+}
+
+.site-statistics__note {
+  margin: 0;
+  color: vars.$lcars-grey-light;
+  font-size: 0.8rem;
+}
+
+@media (width <= 768px) {
+  .site-statistics__panels {
+    grid-template-columns: 1fr;
+  }
+}

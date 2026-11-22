@@ -1,10 +1,16 @@
-<section class="custom-tracking-options">
-  <h4>
-    {{ optionNoun === 'tag' ? 'Tags' : 'Choices' }}
-    <span class="custom-tracking-count">
-      {{ liveOptions.length }} of {{ limits.MAX_OPTIONS_PER_FIELD }}
-    </span>
-  </h4>
+<!--
+  The choices a field offers are a block of their own beneath its editor, drawn
+  as every other block of the page is; the count rides on the heading block.
+-->
+<app-lcars-panel
+  class="custom-tracking-options"
+  [heading]="optionNoun === 'tag' ? 'Tags' : 'Choices'"
+  [level]="4">
+  <span
+    panelMarks
+    class="custom-tracking-count custom-tracking-options__count">
+    {{ liveOptions.length }} of {{ limits.MAX_OPTIONS_PER_FIELD }}
+  </span>
 
   <p class="field-hint">
     @if (optionNoun === 'tag') {
@@ -27,7 +33,7 @@
       @for (option of liveOptions; track option.id; let index = $index) {
         <li>
           @if (editingOptionId === option.id) {
-            <div class="lcars-input-container perano">
+            <div class="lcars-input-container">
               <label [attr.for]="editorId + '-edit'">
                 Rename {{ option.label }}
               </label>
@@ -39,14 +45,14 @@
             </div>
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto sunflower"
+              class="lcars-btn lcars-btn-auto green"
               [disabled]="isSaving || editedLabel.invalid"
               (click)="saveEditing(option)">
               Save
             </button>
             <button
               type="button"
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               (click)="cancelEditing()">
               Cancel
             </button>
@@ -121,8 +127,8 @@
       {{ optionNoun }}s allowed. Withdraw one before adding another.
     </output>
   } @else {
-    <div class="custom-tracking-option-add">
-      <div class="lcars-input-container gold">
+    <div class="custom-tracking-option-add lcars-rotate">
+      <div class="lcars-input-container">
         <label [attr.for]="editorId + '-new'"> Add a {{ optionNoun }} </label>
         <input
           type="text"
@@ -132,7 +138,7 @@
       </div>
       <button
         type="button"
-        class="lcars-btn lcars-btn-auto green"
+        class="lcars-btn lcars-btn-auto"
         [disabled]="isSaving || newLabel.invalid"
         (click)="add()">
         Add
@@ -155,4 +161,4 @@
       </ul>
     </div>
   }
-</section>
+</app-lcars-panel>

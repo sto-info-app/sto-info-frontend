@@ -31,8 +31,19 @@ export const API_URLS = {
   USER: apiUrl + '/user',
   USER_SETTINGS: apiUrl + '/user/settings',
   CLOSE_ACCOUNT: apiUrl + '/user/close-account',
+  CLOSE_ACCOUNT_COMMUNITIES: apiUrl + '/user/close-account/communities',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
   UPDATE_USER_PROFILE_PIC: apiUrl + '/user/update-profile-pic',
+  REMOVE_USER_PROFILE_PIC: apiUrl + '/user/profile-pic',
+
+  // Uploads. Every picture the site accepts is scanned before it is
+  // published, so a page that has just sent one asks this until it is told
+  // the file is in use or was refused.
+  FILE_ASSET_STATUS: (assetId: string): string =>
+    apiUrl + '/file-assets/' + assetId + '/status',
+  // A signed picture address lasts at most two hours; a page left open asks
+  // here for the ones that expired.
+  RENEW_IMAGE_ADDRESSES: apiUrl + '/file-assets/image-addresses/renew',
 
   // STO Account
   STO_ACCOUNT: apiUrl + '/account',
@@ -94,6 +105,27 @@ export const API_URLS = {
   REPORTS: apiUrl + '/reports',
   MODERATION_ADMIN_REPORTS: apiUrl + '/admin/moderation/reports',
   MODERATION_ADMIN_USERS: apiUrl + '/admin/moderation/users',
+  // The site admins' queue of chat reports (FC-035).
+  CHAT_ADMIN_REPORTS: apiUrl + '/admin/chat-reports',
+  // Site admins' holds on chat evidence, and looks into Fleets (FC-036).
+  MODERATION_HOLDS_ADMIN: apiUrl + '/admin/moderation-holds',
+  FLEET_INVESTIGATIONS_ADMIN: apiUrl + '/admin/fleet-investigations',
+  ROSTER_ERASURES_ADMIN: apiUrl + '/admin/roster-erasures',
+  MODERATION_ADMIN_OPEN_COUNTS: apiUrl + '/admin/moderation/open-counts',
+  FILE_SCANNING_ADMIN_DIAGNOSTICS: apiUrl + '/admin/file-scanning/diagnostics',
+  // Refused assets and one asset's scan outcome, and the Security Log (FC-039).
+  FILE_SCANNING_ADMIN_REJECTIONS: apiUrl + '/admin/file-scanning/rejections',
+  FILE_SCANNING_ADMIN_ASSETS: apiUrl + '/admin/file-scanning/assets',
+  SECURITY_LOG_ADMIN: apiUrl + '/admin/security-log',
+  SITE_STATISTICS_ADMIN: apiUrl + '/admin/site-statistics',
+  // Private image delivery (FC-040).
+  IMAGE_ESTATE_ADMIN: apiUrl + '/admin/image-estate',
+  RESCAN_CAMPAIGNS_ADMIN: apiUrl + '/admin/rescan-campaigns',
+  // Failed background jobs, and the publication pause (FC-042).
+  FILE_SCANNING_ADMIN_FAILED_JOBS: apiUrl + '/admin/file-scanning/failed-jobs',
+  FILE_PUBLICATION_ADMIN: apiUrl + '/admin/file-publication',
+  // The site features' master switches (FC-045).
+  FEATURE_SWITCHES_ADMIN: apiUrl + '/admin/feature-switches',
 
   // Access control (what the signed-in user is permitted to do, and the admin
   // side that grants or withholds it per user)
@@ -147,6 +179,7 @@ export const API_URLS = {
   NOTIFICATIONS_BANNERS: apiUrl + '/notifications/banners',
   NOTIFICATIONS_UNREAD_COUNT: apiUrl + '/notifications/unread-count',
   NOTIFICATIONS_READ_ALL: apiUrl + '/notifications/read-all',
+  NOTIFICATIONS_DISMISS_READ: apiUrl + '/notifications/dismiss-read',
   NOTIFICATIONS_ADMIN: apiUrl + '/notifications/admin',
   NOTIFICATIONS_ADMIN_BANNERS: apiUrl + '/notifications/admin/banners',
 
@@ -163,4 +196,27 @@ export const API_URLS = {
   CUSTOM_TRACKING_TABS: apiUrl + '/custom-tracking/tabs',
   CUSTOM_TRACKING_FIELDS: apiUrl + '/custom-tracking/fields',
   CUSTOM_TRACKING_OPTIONS: apiUrl + '/custom-tracking/options',
+
+  // Fleet Community
+  //
+  // The three directory listings sit at the top level rather than under a
+  // `/fleet` prefix, because a Community, a Fleet and an Armada are records in
+  // their own right and everything addressed below one hangs off its own
+  // collection: `/fleet-communities/:id/fleets`, and so on.
+  FLEET_CONFIGURATION: apiUrl + '/fleet/configuration',
+  FLEET_COMMUNITIES: apiUrl + '/fleet-communities',
+  FLEETS: apiUrl + '/fleets',
+  ARMADAS: apiUrl + '/armadas',
+  // The signed-in person's own applications and invitations, across Fleets.
+  FLEET_RECRUITMENT: apiUrl + '/fleet-recruitment',
+  // A site administrator's dispute actions on a Community (FC-022).
+  FLEET_COMMUNITIES_ADMIN: apiUrl + '/admin/fleet-communities',
+  // A site administrator taking a scoped news post down (FC-027).
+  FLEET_NEWS_ADMIN: apiUrl + '/admin/fleet-news',
+  // The signed-in person's own Fleet activity (FC-029).
+  FLEET_ACTIVITY: apiUrl + '/fleet-activity',
+  // The signed-in person's own upcoming Fleet events (FC-030).
+  FLEET_EVENTS: apiUrl + '/fleet-events',
+  // Chat (FC-031, FC-033): the reader's channels, conversations and messages.
+  CHAT: apiUrl + '/chat',
 };

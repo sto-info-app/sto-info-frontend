@@ -10,6 +10,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -22,6 +23,8 @@ import {
 } from 'src/app/models/notification.models';
 import { SEVERITY_META } from 'src/app/shared/constants/notifications.constants';
 import { NotificationService } from 'src/app/notifications/notification.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 const LOAD_TIMEOUT_MS = 12000;
 
@@ -37,11 +40,14 @@ const LOAD_TIMEOUT_MS = 12000;
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class BannerAdminListComponent implements OnInit {

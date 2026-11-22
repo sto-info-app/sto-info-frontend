@@ -29,7 +29,46 @@ export interface UserProfileUpdateResult {
   userProfileData: UserProfile | null;
 }
 
+/**
+ * Who may see that a user is online.
+ *
+ * Hiding is not a value here. A user who wants to disappear for an afternoon
+ * sets `appearOffline` instead, so the audience they chose is still there when
+ * they come back.
+ */
+export type PresenceVisibility = 'EVERYONE' | 'FRIENDS' | 'FLEETS_AND_ARMADAS';
+
+/**
+ * Every account setting, as the settings page reads them.
+ *
+ * `displayTimezone` is null when dates should follow the viewer's own device,
+ * which is the default. `stoExportTimezone` is null when roster exports should
+ * be read in the zone of the device importing them, which is also the default;
+ * either way the import page shows dates read through the zone before
+ * anything is imported, because reading an export in the wrong zone shifts
+ * every date in it by hours.
+ */
 export interface UserSettings {
   privacyMode: boolean;
   sessionTimeoutMinutes: number;
+  displayTimezone: string | null;
+  stoExportTimezone: string | null;
+  presenceVisibility: PresenceVisibility;
+  appearOffline: boolean;
+  typingIndicatorsEnabled: boolean;
+  notifyMention: boolean;
+  notifyReply: boolean;
+  notifyDirectMessage: boolean;
+  notifyRosterAssociation: boolean;
+  notifyEventReminder: boolean;
 }
+
+/**
+ * A change to the account settings.
+ *
+ * Only privacy mode is required; an omitted field leaves the stored value
+ * alone, which is what lets an older client keep working rather than quietly
+ * resetting settings it has never heard of.
+ */
+export type UserSettingsUpdate = Partial<UserSettings> &
+  Pick<UserSettings, 'privacyMode'>;

@@ -1,0 +1,73 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// A block of a page, so it lays out as one and keeps the space a card leaves
+// beneath it.
+:host {
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+// The panel-card shape, drawn from the page's accent at runtime rather than
+// from a colour fixed when the stylesheet is built.
+.lcars-panel {
+  @include mixins.lcars-accent-panel-card;
+}
+
+.lcars-panel__heading {
+  @include mixins.lcars-accent-panel-card-heading;
+}
+
+.lcars-panel__name {
+  @include mixins.lcars-panel-card-name;
+}
+
+.lcars-panel__marks {
+  @include mixins.lcars-panel-card-marks;
+
+  // Nothing projected leaves no gap at the end of the block.
+  &:empty {
+    display: none;
+  }
+}
+
+.lcars-panel__body {
+  @include mixins.lcars-panel-card-body;
+}
+
+// The caret that folds a collapsible panel, black on the heading block like
+// its name, at the block's far end. It gives up everything the theme's global
+// `button` rule draws - a 200 by 60 pill with margins - which stood the
+// heading block three times as tall as an unfolding panel's.
+.lcars-panel__toggle {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  width: auto;
+  height: auto;
+  margin: 0;
+  padding: 0 0.25rem;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: vars.$lcars-black;
+  font-size: 1.2rem;
+  line-height: 1;
+  text-align: inherit;
+  text-transform: none;
+  cursor: pointer;
+
+  &:hover {
+    filter: brightness(1.6);
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-black;
+    outline-offset: 2px;
+  }
+}
+
+// A folded panel is its heading block alone.
+.lcars-panel__body[hidden] {
+  display: none;
+}

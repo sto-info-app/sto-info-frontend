@@ -328,6 +328,30 @@ describe('CharacterService', () => {
     });
   });
 
+  describe('removeCharacterProfilePic', () => {
+    it("takes the character's picture down", () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(mockHeader);
+
+      let completed = false;
+      service.removeCharacterProfilePic('1').subscribe({
+        complete: () => (completed = true),
+      });
+
+      const req = httpMock.expectOne(`${API_URLS.CHARACTER}/1/profile-image`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(null, { status: 204, statusText: 'No Content' });
+      expect(completed).toBe(true);
+    });
+
+    it('should throw error when no token', () => {
+      mockAuthService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+      service.removeCharacterProfilePic('1').subscribe({
+        error: err => expect(err.message).toBe('No token found'),
+      });
+      httpMock.expectNone(`${API_URLS.CHARACTER}/1/profile-image`);
+    });
+  });
+
   describe('updateCharacterProfilePic', () => {
     it('should upload profile pic and remove Content-Type header', () => {
       const headersMap = new Map<string, string>();

@@ -16,19 +16,19 @@
   margin: 0.75rem 0 0.5rem;
 }
 
+// The chips take the row's rotation, so the active one is told apart by a
+// ring rather than by a colour of its own (and by `aria-pressed`).
 .filter-chip {
   border: none;
   font-size: 0.9rem;
   font-weight: 700;
-
-  &:nth-child(odd) {
-    background: #58e;
-    color: #0d0d0d;
-  }
+  background-color: var(--lcars-accent, #{vars.$lcars-c43});
+  color: vars.$lcars-black;
 
   &.active {
-    background-color: vars.$lcars-sunflower;
-    color: vars.$lcars-black;
+    box-shadow:
+      0 0 0 3px vars.$lcars-black,
+      0 0 0 5px vars.$a11y-white;
   }
 
   &:hover {
@@ -40,36 +40,4 @@
 .news-empty {
   font-style: italic;
   opacity: 0.8;
-}
-
-.news-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  margin-top: 1.5rem;
-
-  button {
-    min-height: 46px;
-    padding: 0.6rem 1.15rem 0.45rem;
-    border: none;
-    border-radius: 999px;
-    background: #58e;
-    color: #0d0d0d;
-    cursor: pointer;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    font-weight: 700;
-    font-size: inherit;
-    font-family: inherit;
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
-    &:hover:not(:disabled) {
-      filter: brightness(1.08);
-    }
-  }
 }

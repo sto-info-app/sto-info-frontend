@@ -21,6 +21,7 @@ import {
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 import { CustomTrackingConfigurationService } from 'src/app/shared/custom-tracking/custom-tracking-configuration.service';
 
 /** What a caller may set when creating or changing a section or tab. */
@@ -618,15 +619,38 @@ export class CustomTrackingService {
     image: Blob,
     altText: string,
     fileName: string,
-  ): Observable<CustomTrackingImageAnswer> {
+  ): Observable<AcceptedAsset> {
     const body = new FormData();
 
     body.append('image', image, fileName);
     body.append('altText', altText);
 
-    return this._http.post<CustomTrackingImageAnswer>(
+    return this._http.post<AcceptedAsset>(
       `${API_URLS.CUSTOM_TRACKING_FIELDS}/${fieldId}/scopes/${scope}/targets/${targetId}/image`,
       body,
+      this._authOptions,
+    );
+  }
+
+  /**
+   * Reads the picture answering one image field.
+   *
+   * Asked once a scanner has cleared an upload. The answer row is not
+   * written until the picture is published, so before that there is
+   * nothing to read — FC-012.
+   *
+   * @param fieldId - The image field.
+   * @param scope - Whether an account or a character is described.
+   * @param targetId - The record described.
+   * @returns The picture, or null when there is none.
+   */
+  findImage(
+    fieldId: string,
+    scope: CustomTrackingTargetScope,
+    targetId: string,
+  ): Observable<CustomTrackingImageAnswer | null> {
+    return this._http.get<CustomTrackingImageAnswer | null>(
+      `${API_URLS.CUSTOM_TRACKING_FIELDS}/${fieldId}/scopes/${scope}/targets/${targetId}/image`,
       this._authOptions,
     );
   }

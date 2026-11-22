@@ -1,0 +1,41 @@
+@use 'lcars-variables' as vars;
+
+// At the top of whatever line it sits on: a flex row's, or a line of text's.
+:host {
+  display: inline-flex;
+  align-self: flex-start;
+  vertical-align: top;
+}
+
+// A cog in the lilac the help links wear, so the two asides to a page read as
+// a pair: one says how the page works, the other where to change it.
+.settings-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.375rem;
+  height: 1.375rem;
+  border-radius: 50%;
+  color: vars.$lcars-help-link;
+  font-size: 0.75rem;
+  text-decoration: none;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
+
+  &:hover,
+  &:focus-visible {
+    color: vars.$lcars-white;
+
+    // The cog turns only for those who have not asked for less motion; the
+    // colour change marks the hover either way.
+    @media (prefers-reduced-motion: no-preference) {
+      transform: rotate(45deg);
+    }
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-sunflower;
+    outline-offset: 2px;
+  }
+}

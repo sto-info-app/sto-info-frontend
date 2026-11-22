@@ -1,0 +1,38 @@
+@charset "utf-8";
+@use 'lcars-variables' as vars;
+
+@keyframes data-cascade-colour-change {
+  0% {
+    color: vars.$alert-theme-blue-static-cascade;
+  }
+
+  25% {
+    color: vars.$alert-theme-blue-static-cascade;
+  }
+
+  50% {
+    color: vars.$alert-theme-blue-static-cascade;
+  }
+
+  75% {
+    color: vars.$alert-theme-blue-static-cascade;
+  }
+
+  80% {
+    color: vars.$lcars-black;
+  }
+
+  90% {
+    color: vars.$lcars-black;
+  }
+
+  100% {
+    color: vars.$alert-theme-blue-static-cascade-end;
+  }
+}
+
+@keyframes alert-blue {
+  100% {
+    background-color: vars.$alert-theme-blue-static-flash;
+  }
+}

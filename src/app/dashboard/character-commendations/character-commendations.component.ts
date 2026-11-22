@@ -22,6 +22,7 @@ import {
   COMMENDATION_UNLOCK_LEVEL,
 } from '../models/character-commendation.model';
 import { CharacterCommendationService } from '../services/character-commendation.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-character-commendations',
@@ -30,6 +31,7 @@ import { CharacterCommendationService } from '../services/character-commendation
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     FormsModule,
     RouterModule,

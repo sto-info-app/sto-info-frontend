@@ -70,72 +70,76 @@
     id="stat-detail-side"
     class="col"
   >
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Filters</span>
-    </div>
-    <div class="buttons filter-buttons">
-      @if (accounts.length > 1) {
-        <div class="lcars-select-container sunflower">
-          <label
-            class="select-label"
-            for="account-select"
-          >Select Account</label>
-          <select
-            id="account-select"
-            title="Select Account"
-            [(ngModel)]="selectedAccountId"
-            (change)="onAccountChange($any($event.target).value)"
-          >
-            <option value="all">All Accounts</option>
-            @for (account of accounts; track account.id) {
-              <option [value]="account.id">{{ account.handle }}</option>
-            }
-          </select>
-        </div>
-      }
+    <app-collapsible-section
+      heading="Filters"
+      barClass="small-lcars-bar-gap"
+    >
+      <div class="buttons filter-buttons">
+        @if (accounts.length > 1) {
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="account-select"
+            >Select Account</label>
+            <select
+              id="account-select"
+              title="Select Account"
+              [(ngModel)]="selectedAccountId"
+              (change)="onAccountChange($any($event.target).value)"
+            >
+              <option value="all">All Accounts</option>
+              @for (account of accounts; track account.id) {
+                <option [value]="account.id">{{ account.handle }}</option>
+              }
+            </select>
+          </div>
+        }
 
-      @if (hasData && hasZeros) {
-        <button
-          type="button"
-          class="full-width-btn-link filter-btn"
-          [class.active]="!hideZeros"
-          (click)="toggleHideZeros()"
-        >
-          {{ hideZeros ? "Show Zero Stats" : "Hide Zero Stats" }}
-        </button>
-      }
-    </div>
-
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      @if (sectionEntries.length > 1) {
-        <div class="lcars-select-container perano">
-          <label
-            class="select-label"
-            for="report-navigation-select"
-          >{{ sectionTitle }}</label>
-          <select
-            id="report-navigation-select"
-            title="Navigate to report"
-            [ngModel]="breakdownId"
-            (ngModelChange)="navigateToReport($event)"
+        @if (hasData && hasZeros) {
+          <button
+            type="button"
+            class="full-width-btn-link filter-btn"
+            [class.active]="!hideZeros"
+            (click)="toggleHideZeros()"
           >
-            @for (entry of sectionEntries; track entry.id) {
-              <option [value]="entry.id">{{ entry.label }}</option>
-            }
-          </select>
-        </div>
-      }
-      <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
-        class="full-width-btn-link sunflower"
-      >Back to Stats</a>
-      <a
-        [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
-        class="full-width-btn-link sunflower"
-      >Dashboard</a>
-    </div>
+            {{ hideZeros ? "Show Zero Stats" : "Hide Zero Stats" }}
+          </button>
+        }
+      </div>
+    </app-collapsible-section>
+
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap"
+    >
+      <div class="buttons">
+        @if (sectionEntries.length > 1) {
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="report-navigation-select"
+            >{{ sectionTitle }}</label>
+            <select
+              id="report-navigation-select"
+              title="Navigate to report"
+              [ngModel]="breakdownId"
+              (ngModelChange)="navigateToReport($event)"
+            >
+              @for (entry of sectionEntries; track entry.id) {
+                <option [value]="entry.id">{{ entry.label }}</option>
+              }
+            </select>
+          </div>
+        }
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_STATS)"
+          class="full-width-btn-link"
+        >Back to Stats</a>
+        <a
+          [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD)"
+          class="full-width-btn-link"
+        >Dashboard</a>
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

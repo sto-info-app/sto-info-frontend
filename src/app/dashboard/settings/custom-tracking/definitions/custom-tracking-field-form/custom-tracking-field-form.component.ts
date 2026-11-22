@@ -43,6 +43,7 @@ import {
   settingsFormValues,
   timezoneChoices,
 } from '../custom-tracking-field-settings.utility';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** One grouping of field types, as the chooser offers them. */
 export interface CustomTrackingFieldTypeGroup {
@@ -78,6 +79,7 @@ let nextFieldFormId = 0;
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    LcarsPanelComponent,
     ReactiveFormsModule,
     LcarsErrorMessageComponent,
     LcarsToggleComponent,

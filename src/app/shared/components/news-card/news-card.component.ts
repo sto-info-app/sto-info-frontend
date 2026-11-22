@@ -8,13 +8,14 @@ import {
 } from 'src/app/models/news.models';
 import { APP_ROUTES } from '../../constants/app-routing.constants';
 import { RoutingService } from '../../services/routing.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 @Component({
   selector: 'app-news-card',
   templateUrl: './news-card.component.html',
   styleUrls: ['./news-card.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [AppDatePipe, CommonModule, RouterModule],
 })
 export class NewsCardComponent {
   @Input({ required: true }) post!: NewsPost;

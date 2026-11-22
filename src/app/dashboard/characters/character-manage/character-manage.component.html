@@ -20,216 +20,222 @@
         [formGroup]="characterForm"
         class="character-manage-form"
       >
-        <!-- Section: Basic Identification -->
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Identification</span>
-        </div>
+        <app-collapsible-section
+          heading="Identification"
+          barClass="small-lcars-bar-gap"
+        >
+          <div class="character-manage-fields lcars-rotate">
+            <div class="form-row lcars-rotate">
+              <div class="lcars-input-container">
+                <label for="handle-input">Captain Name</label>
+                <input
+                  id="handle-input"
+                  formControlName="handle"
+                  placeholder="e.g. Jean-Luc Picard"
+                />
+              </div>
+            </div>
 
-        <div class="form-row">
-          <div class="lcars-input-container perano">
-            <label for="handle-input">Captain Name</label>
-            <input
-              id="handle-input"
-              formControlName="handle"
-              placeholder="e.g. Jean-Luc Picard"
-            />
+            <div class="form-row lcars-rotate">
+              <div class="lcars-input-container">
+                <label for="first-name-input">First Name</label>
+                <input
+                  id="first-name-input"
+                  formControlName="firstName"
+                />
+              </div>
+              <div class="lcars-input-container">
+                <label for="middle-name-input">Middle Name</label>
+                <input
+                  id="middle-name-input"
+                  formControlName="middleName"
+                />
+              </div>
+              <div class="lcars-input-container">
+                <label for="last-name-input">Last Name</label>
+                <input
+                  id="last-name-input"
+                  formControlName="lastName"
+                />
+              </div>
+            </div>
           </div>
-        </div>
+        </app-collapsible-section>
 
-        <div class="form-row">
-          <div class="lcars-input-container bluey">
-            <label for="first-name-input">First Name</label>
-            <input
-              id="first-name-input"
-              formControlName="firstName"
-            />
+        <app-collapsible-section
+          heading="Service History"
+          barClass="small-lcars-bar-gap"
+        >
+          <div class="character-manage-fields lcars-rotate">
+            <div class="form-row lcars-rotate">
+              <div class="lcars-input-container">
+                <label for="level-input">Level</label>
+                <input
+                  id="level-input"
+                  type="number"
+                  formControlName="level"
+                  min="0"
+                  max="65"
+                />
+              </div>
+
+              <div class="lcars-input-container">
+                <label for="created-date-input">Created Date</label>
+                <input
+                  id="created-date-input"
+                  type="date"
+                  formControlName="createdDate"
+                />
+              </div>
+            </div>
+
+            <div class="form-row lcars-rotate">
+              <div class="lcars-select-container">
+                <label
+                  class="select-label"
+                  for="faction-select"
+                >Starting Faction</label>
+                <select
+                  id="faction-select"
+                  title="Starting Faction"
+                  formControlName="factionId"
+                >
+                  @for (f of factions; track f.id) {
+                    <option [value]="f.id">{{ f.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lcars-select-container">
+                <label
+                  class="select-label"
+                  for="general-faction-select"
+                >General Allegiance</label>
+                <select
+                  id="general-faction-select"
+                  title="General Allegiance"
+                  formControlName="generalFactionId"
+                >
+                  @for (gf of generalFactions; track gf.id) {
+                    <option [value]="gf.id">{{ gf.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row lcars-rotate">
+              <div class="lcars-select-container">
+                <label
+                  class="select-label"
+                  for="recruit-type-select"
+                >Recruit Type</label>
+                <select
+                  id="recruit-type-select"
+                  title="Recruit Type"
+                  formControlName="recruitTypeId"
+                >
+                  @for (rt of recruitTypes; track rt.id) {
+                    <option [value]="rt.id">{{ rt.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lcars-select-container">
+                <label
+                  class="select-label"
+                  for="class-select"
+                >Career Path (Class)</label>
+                <select
+                  id="class-select"
+                  title="Career Path (Class)"
+                  formControlName="classId"
+                >
+                  @for (c of classes; track c.id) {
+                    <option [value]="c.id">{{ c.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row lcars-rotate">
+              <div class="lcars-select-container">
+                <label
+                  class="select-label"
+                  for="species-select"
+                >Species</label>
+                <select
+                  id="species-select"
+                  title="Species"
+                  formControlName="speciesId"
+                >
+                  @for (s of speciesList; track s.id) {
+                    <option [value]="s.id">{{ s.name }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="lcars-select-container">
+                <label
+                  class="select-label"
+                  for="sex-select"
+                >Sex</label>
+                <select
+                  id="sex-select"
+                  title="Sex"
+                  formControlName="sexId"
+                >
+                  @for (sex of sexes; track sex.id) {
+                    <option [value]="sex.id">{{ sex.name }}</option>
+                  }
+                </select>
+              </div>
+            </div>
           </div>
-          <div class="lcars-input-container bluey">
-            <label for="middle-name-input">Middle Name</label>
-            <input
-              id="middle-name-input"
-              formControlName="middleName"
-            />
+        </app-collapsible-section>
+
+        <app-collapsible-section
+          heading="Personal Data"
+          barClass="small-lcars-bar-gap"
+        >
+          <div class="character-manage-fields lcars-rotate">
+            <div class="lcars-input-container">
+              <label for="biography-input">Biography</label>
+              <textarea
+                id="biography-input"
+                formControlName="biography"
+                rows="5"
+              ></textarea>
+            </div>
+
+            <div class="lcars-input-container">
+              <label for="notes-input">Notes</label>
+              <textarea
+                id="notes-input"
+                formControlName="notes"
+                rows="3"
+              ></textarea>
+            </div>
+
+            <div class="form-row toggles-row registry-visibility">
+              <app-lcars-toggle
+                formControlName="publiclyVisible"
+                label="Publicly Visible"
+                ariaLabel="Publicly Visible"
+              >
+              </app-lcars-toggle>
+              <p class="registry-visibility__hint">
+                When on, this captain appears in the Galactic Personnel Registry —
+                but only if both your profile and this STO account are also publicly
+                visible. Your notes are never shown.
+              </p>
+            </div>
           </div>
-          <div class="lcars-input-container bluey">
-            <label for="last-name-input">Last Name</label>
-            <input
-              id="last-name-input"
-              formControlName="lastName"
-            />
-          </div>
-        </div>
-
-        <!-- Section: Service History -->
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Service History</span>
-        </div>
-
-        <div class="form-row">
-          <div class="lcars-input-container tangerine">
-            <label for="level-input">Level</label>
-            <input
-              id="level-input"
-              type="number"
-              formControlName="level"
-              min="0"
-              max="65"
-            />
-          </div>
-
-          <div class="lcars-input-container gold">
-            <label for="created-date-input">Created Date</label>
-            <input
-              id="created-date-input"
-              type="date"
-              formControlName="createdDate"
-            />
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="lcars-select-container sunflower">
-            <label
-              class="select-label"
-              for="faction-select"
-            >Starting Faction</label>
-            <select
-              id="faction-select"
-              title="Starting Faction"
-              formControlName="factionId"
-            >
-              @for (f of factions; track f.id) {
-                <option [value]="f.id">{{ f.name }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="lcars-select-container perano">
-            <label
-              class="select-label"
-              for="general-faction-select"
-            >General Allegiance</label>
-            <select
-              id="general-faction-select"
-              title="General Allegiance"
-              formControlName="generalFactionId"
-            >
-              @for (gf of generalFactions; track gf.id) {
-                <option [value]="gf.id">{{ gf.name }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="lcars-select-container tangerine">
-            <label
-              class="select-label"
-              for="recruit-type-select"
-            >Recruit Type</label>
-            <select
-              id="recruit-type-select"
-              title="Recruit Type"
-              formControlName="recruitTypeId"
-            >
-              @for (rt of recruitTypes; track rt.id) {
-                <option [value]="rt.id">{{ rt.name }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="lcars-select-container bluey">
-            <label
-              class="select-label"
-              for="class-select"
-            >Career Path (Class)</label>
-            <select
-              id="class-select"
-              title="Career Path (Class)"
-              formControlName="classId"
-            >
-              @for (c of classes; track c.id) {
-                <option [value]="c.id">{{ c.name }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <div class="form-row">
-          <div class="lcars-select-container gold">
-            <label
-              class="select-label"
-              for="species-select"
-            >Species</label>
-            <select
-              id="species-select"
-              title="Species"
-              formControlName="speciesId"
-            >
-              @for (s of speciesList; track s.id) {
-                <option [value]="s.id">{{ s.name }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="lcars-select-container perano">
-            <label
-              class="select-label"
-              for="sex-select"
-            >Sex</label>
-            <select
-              id="sex-select"
-              title="Sex"
-              formControlName="sexId"
-            >
-              @for (sex of sexes; track sex.id) {
-                <option [value]="sex.id">{{ sex.name }}</option>
-              }
-            </select>
-          </div>
-        </div>
-
-        <!-- Section: Biography & Notes -->
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>Personal Data</span>
-        </div>
-
-        <div class="lcars-input-container perano">
-          <label for="biography-input">Biography</label>
-          <textarea
-            id="biography-input"
-            formControlName="biography"
-            rows="5"
-          ></textarea>
-        </div>
-
-        <div class="lcars-input-container gold">
-          <label for="notes-input">Notes</label>
-          <textarea
-            id="notes-input"
-            formControlName="notes"
-            rows="3"
-          ></textarea>
-        </div>
-
-        <div class="form-row toggles-row registry-visibility">
-          <app-lcars-toggle
-            formControlName="publiclyVisible"
-            label="Publicly Visible"
-            ariaLabel="Publicly Visible"
-          >
-          </app-lcars-toggle>
-          <p class="registry-visibility__hint">
-            When on, this captain appears in the Galactic Personnel Registry —
-            but only if both your profile and this STO account are also publicly
-            visible. Your notes are never shown.
-          </p>
-        </div>
+        </app-collapsible-section>
 
         <div class="form-actions">
           <button
             mat-button
-            class="lcars-btn red"
+            class="lcars-btn"
             type="button"
             (click)="onCancel()"
           >
@@ -253,16 +259,18 @@
     id="character-manage-side-column"
     class="col"
   >
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        (click)="onCancel()"
-        (keypress)="onCancel()"
-        tabindex="0"
-        class="full-width-btn-link sunflower"
-      >Return</a>
-    </div>
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap"
+    >
+      <div class="buttons">
+        <a
+          (click)="onCancel()"
+          (keypress)="onCancel()"
+          tabindex="0"
+          class="full-width-btn-link"
+        >Return</a>
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

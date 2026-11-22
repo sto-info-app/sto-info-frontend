@@ -1,0 +1,112 @@
+<div id="chat-friend-dialog">
+  <div
+    class="lcars-text-bar small-lcars-bar-gap"
+    mat-dialog-title>
+    <span>Message a friend</span>
+  </div>
+
+  <div mat-dialog-content>
+    <div class="lcars-input-container">
+      <label for="chat-friend-search">Search your friends</label>
+      <input
+        id="chat-friend-search"
+        type="search"
+        autocomplete="off"
+        maxlength="50"
+        placeholder="e.g. captain.picard"
+        [value]="term()"
+        (input)="search($any($event.target).value)" />
+    </div>
+
+    <div
+      class="chat-friend-dialog__results"
+      aria-live="polite">
+      @if (friends().length > 0) {
+        <ul class="chat-friend-dialog__friends">
+          @for (friend of friends(); track friend.id) {
+            <li>
+              <button
+                type="button"
+                class="chat-friend-dialog__friend"
+                [attr.aria-label]="
+                  'Message ' +
+                  friend.member.username +
+                  (isOnline(friend) ? ' (online)' : '')
+                "
+                [disabled]="opening() !== null"
+                (click)="message(friend)">
+                <span class="chat-friend-dialog__avatar">
+                  <app-entity-avatar
+                    [src]="friend.member.profilePicture100"
+                    alt=""
+                    [size]="100"></app-entity-avatar>
+                  <span
+                    class="chat-presence"
+                    [class.chat-presence--online]="isOnline(friend)"
+                    aria-hidden="true"></span>
+                </span>
+                <span class="chat-friend-dialog__name">{{
+                  friend.member.username
+                }}</span>
+                <span
+                  class="chat-friend-dialog__action"
+                  aria-hidden="true">
+                  {{ opening() === friend.id ? 'Opening…' : 'Message' }}
+                </span>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+
+      @if (isLoading()) {
+        <p class="chat-friend-dialog__note">Reading your friends…</p>
+      } @else if (loadFailed()) {
+        <p class="chat-friend-dialog__note chat-friend-dialog__error">
+          Your friends could not be read. Try again shortly.
+        </p>
+      } @else if (friends().length === 0) {
+        @if (term().trim() === '') {
+          <p class="chat-friend-dialog__note">
+            You have no friends to message yet. Find some on the
+            <a
+              [routerLink]="friendsLink"
+              mat-dialog-close
+              >Friends page</a
+            >.
+          </p>
+        } @else {
+          <p class="chat-friend-dialog__note">
+            No friends match “{{ term().trim() }}”.
+          </p>
+        }
+      } @else if (hasMore()) {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto chat-friend-dialog__more"
+          (click)="showMore()">
+          Show more friends
+        </button>
+      }
+
+      @if (openError(); as error) {
+        <p
+          class="chat-friend-dialog__note chat-friend-dialog__error"
+          role="alert">
+          {{ error }}
+        </p>
+      }
+    </div>
+  </div>
+
+  <div
+    class="buttons-container lcars-flex-right"
+    mat-dialog-actions>
+    <button
+      type="button"
+      class="lcars-btn"
+      (click)="cancel()">
+      Cancel
+    </button>
+  </div>
+</div>

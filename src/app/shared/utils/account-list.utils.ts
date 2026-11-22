@@ -205,7 +205,14 @@ function compareCreatedDates(
     return aDate ? -1 : 1;
   }
 
-  return direction * (Date.parse(aDate) - Date.parse(bDate));
+  // Compared as text, which works because the format is fixed-width and
+  // big-endian. Parsing them into instants to subtract would reintroduce a
+  // timezone into a value that deliberately has none.
+  if (aDate === bDate) {
+    return 0;
+  }
+
+  return direction * (aDate < bDate ? -1 : 1);
 }
 
 /**

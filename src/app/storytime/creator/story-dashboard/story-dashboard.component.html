@@ -15,7 +15,7 @@
 
   <div class="storytime-page-actions">
     <a
-      class="lcars-btn lcars-btn-auto green"
+      class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', 'new']">
       Create a Story
     </a>
@@ -81,7 +81,7 @@
                 [formGroup]="appealForm"
                 (ngSubmit)="sendAppeal()">
                 <div class="form-row">
-                  <div class="lcars-input-container red storytime-field-full">
+                  <div class="lcars-input-container storytime-field-full">
                     <label [attr.for]="'appeal-' + story.id">Your appeal</label>
                     <textarea
                       [id]="'appeal-' + story.id"
@@ -106,7 +106,7 @@
             } @else {
               <div class="storytime-actions">
                 <button
-                  class="lcars-btn lcars-btn-auto sunflower storytime-dashboard__appeal-open"
+                  class="lcars-btn lcars-btn-auto storytime-dashboard__appeal-open"
                   type="button"
                   (click)="startAppeal(story)">
                   Appeal this removal
@@ -123,7 +123,7 @@
 
           <nav class="storytime-actions">
             <a
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -140,7 +140,7 @@
               }
             </a>
             <a
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -157,7 +157,7 @@
               }
             </a>
             <a
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,
@@ -174,7 +174,7 @@
               }
             </a>
             <a
-              class="lcars-btn lcars-btn-auto bluey"
+              class="lcars-btn lcars-btn-auto"
               [routerLink]="[
                 '/',
                 appRoutes.STORYTIME,

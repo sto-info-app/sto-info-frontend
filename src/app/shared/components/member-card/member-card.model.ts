@@ -4,66 +4,82 @@
 export interface MemberCardAction {
   /** Stable key emitted by the card's `action` output. */
   key: string;
+
   /** Button label. */
   label: string;
-  /** LCARS colour class applied alongside `lcars-btn`, e.g. `sunflower`. */
+
+  /** LCARS colour class applied alongside `lcars-btn`, e.g. `green`. */
   colourClass: string;
-  /** Accessible label, naming the member the button acts on. */
+
+  /**
+   * Accessible label, naming the member the button acts on.
+   *
+   * A listing shows a column of cards whose buttons all read "Block", so the
+   * label is the only thing that says who is being blocked.
+   */
   ariaLabel: string;
 }
 
 /**
- * The pill shown above a member card's counts.
+ * The relationship pill at the end of a card's heading block.
  */
 export interface MemberCardBadge {
   /** Pill copy, e.g. `Friend`. */
   label: string;
+
   /** Modifier suffix selecting the pill colour, e.g. `friend`. */
   modifier: string;
 }
 
 /**
- * One label/value pair in a member card's counts row.
+ * One detail set out label beside value: a count, or a date.
  */
-export interface MemberCardStat {
-  /** The label shown above or beside the value. */
+export interface MemberCardDetail {
   label: string;
-  /** The value itself. */
-  value: string | number;
+
+  /** Already written out, so the card decides nothing about dates. */
+  value: string;
 }
 
 /**
  * Presentation model for a member card.
  *
- * The registry listings and the friends list both build one of these, so the
- * card itself stays free of any knowledge of which endpoint the member came
- * from or what the viewer may do with them.
+ * The registry and the friends list both build one of these, so the card
+ * stays free of any knowledge of which endpoint the member came from or what
+ * the viewer is entitled to do with them.
  */
 export interface MemberCardVm {
   /** Stable identity for list tracking. */
   id: string;
-  /** The member's username, shown under their avatar. */
+
+  /** The username, exactly as recorded: its case is part of it. */
   username: string;
-  /** Resolved profile image URL, or null for the placeholder. */
+
+  /** The avatar, or null for the placeholder. */
   imageUrl: string | null;
-  /**
-   * Router link to the member's public record, or null when it cannot be
-   * opened — a member who has since made their record private.
-   */
+
+  /** Router link to the record, or null when the viewer cannot open it. */
   link: string[] | null;
-  /** Tooltip explaining why an unlinked member cannot be opened. */
+
+  /** Tooltip explaining why an unlinked card cannot be opened. */
   unlinkedTitle: string | null;
-  /** The relationship pill, or null when there is nothing to indicate. */
+
+  /** The relationship pill, or null when there is nothing to say. */
   badge: MemberCardBadge | null;
+
   /**
-   * Reserves the badge row even when there is no badge, so the rows below line
-   * up across a listing where only some cards carry one.
+   * Whether the member has STO Info open now, as far as the viewer may know
+   * (FC-034): a green dot beside the name. False for anybody the viewer may
+   * not see, which tells nothing of their choice.
    */
-  reserveBadgeSlot: boolean;
-  /** The public counts shown in the card's body. */
-  stats: MemberCardStat[];
-  /** Secondary lines beneath the counts, e.g. `Joined 14 January 2026`. */
-  meta: string[];
-  /** Action buttons, empty for read-only contexts such as an anonymous visit. */
+  online: boolean;
+
+  /** What the member has done on STO Info: joined, last seen, friends since. */
+  siteDetails: MemberCardDetail[];
+
+  /** What they have in the game: accounts, Captains, playing since. */
+  gameDetails: MemberCardDetail[];
+
+  /** Action buttons; empty for a read-only context such as an anonymous visit. */
   actions: MemberCardAction[];
 }

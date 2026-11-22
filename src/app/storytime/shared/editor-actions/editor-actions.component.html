@@ -9,7 +9,7 @@
 
   @if (canPublish) {
     <button
-      class="lcars-btn sunflower"
+      class="lcars-btn green"
       type="button"
       [disabled]="isSaving"
       (click)="publish.emit()">
@@ -18,7 +18,7 @@
   }
 
   <a
-    class="lcars-btn red"
+    class="lcars-btn"
     [routerLink]="cancelLink"
     >Cancel</a
   >

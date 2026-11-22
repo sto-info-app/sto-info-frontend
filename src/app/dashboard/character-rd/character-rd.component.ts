@@ -18,6 +18,7 @@ import {
   StoRarity,
 } from '../models/character-rd.model';
 import { CharacterRdService } from '../services/character-rd.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-character-rd',
@@ -26,6 +27,7 @@ import { CharacterRdService } from '../services/character-rd.service';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     FormsModule,
     RouterModule,

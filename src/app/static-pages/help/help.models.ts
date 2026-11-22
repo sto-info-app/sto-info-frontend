@@ -1,4 +1,22 @@
 import { Permission } from 'src/app/models/access-control.models';
+import { StorytimeAvailability } from 'src/app/models/storytime.models';
+
+/**
+ * A switch part of the help waits on (FC-049).
+ *
+ * Storytime, Fleet Community and Fleet chat can each be turned off. Storytime
+ * switched off is meant to look like a feature that does not exist, and help
+ * agrees: a section, a guide or a part of a guide about it is not offered.
+ * Fleet Community's and Fleet chat's help stays, with a note that the feature
+ * is off, so that it can still be found (FC-050).
+ */
+export type HelpFeature = 'STORYTIME' | 'FLEET' | 'CHAT';
+
+/**
+ * Where each switch stands: on, off, or unknown because the backend could
+ * not be asked. The same three words Storytime already uses.
+ */
+export type HelpFeatures = Readonly<Record<HelpFeature, StorytimeAvailability>>;
 
 /**
  * One block of a guide: a heading and the plain-English copy beneath it.
@@ -14,6 +32,12 @@ export interface HelpGuideSection {
   paragraphs: string[];
   /** Bullet points shown after the paragraphs, when the copy needs a list. */
   points?: string[];
+  /**
+   * The switch this part of the guide waits on, when the rest of the guide
+   * does not: the Settings guide to Fleet controls describes chat's among
+   * them, and those go when chat is off (FC-049).
+   */
+  requiresFeature?: HelpFeature;
 }
 
 /**
@@ -30,6 +54,17 @@ export interface HelpGuideLink {
 }
 
 /**
+ * A video walking through what a guide describes, published on the site's
+ * YouTube channel.
+ */
+export interface HelpGuideVideo {
+  /** The video's eleven-character YouTube identifier. */
+  videoId: string;
+  /** The video's title on YouTube, which a screen reader is told it is. */
+  title: string;
+}
+
+/**
  * One help guide.
  *
  * Guides are content, not components: they are written here as data and
@@ -43,6 +78,14 @@ export interface HelpGuide {
   title: string;
   /** One sentence describing the guide, shown on the help index. */
   summary: string;
+  /**
+   * The guide's video, shown under its summary. Absent on a guide with none.
+   *
+   * Shown whatever the site's switches say: it is the site's own help, not
+   * something a member embedded, so `STORYTIME_YOUTUBE_ENABLED` does not
+   * govern it.
+   */
+  video?: HelpGuideVideo;
   /** The guide itself, in the order it is read. */
   sections: HelpGuideSection[];
   /** Places to go and try what the guide describes. */
@@ -58,6 +101,12 @@ export interface HelpGuide {
    * Absent on every guide anybody may read, which is most of them.
    */
   requiresPermission?: Permission;
+  /**
+   * The switch this guide waits on, when its topic does not (FC-049): a
+   * settings guide about Fleet notices waits on Fleet Community, while the
+   * rest of the settings help does not.
+   */
+  requiresFeature?: HelpFeature;
 }
 
 /**
@@ -75,14 +124,25 @@ export interface HelpTopic {
   /** A sentence introducing what the topic covers. */
   intro: string;
   /**
-   * Whether the topic is only offered while Storytime is switched on.
+   * The switch the whole topic waits on, if any.
    *
    * Storytime can be turned off entirely, and its route guard sends visitors to
    * the not-found page rather than telling them the feature exists but is
    * unavailable. Help has to agree with that: guides describing a feature
    * nobody can reach would advertise exactly what the switch is there to hide.
+   * Fleet Community and its chat are switched the same way (FC-049).
    */
-  requiresStorytime: boolean;
+  requiresFeature?: HelpFeature;
+  /**
+   * Whether the topic is only for site administrators (FC-050).
+   *
+   * Running the site is the ADMIN role's, and no permission stands for it,
+   * so the topic waits on the role itself. Its guides are never offered to
+   * anybody else, their addresses answer anybody else with the not-found
+   * page, and they stay out of the sitemap. The server refuses the pages they
+   * describe whatever the client believes.
+   */
+  requiresAdmin?: boolean;
   /** The guides in this topic, in reading order. */
   guides: HelpGuide[];
 }

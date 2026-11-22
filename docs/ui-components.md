@@ -13,6 +13,10 @@ Two rules run through all of it:
   far apart — plus the shapes the rest of the site has no equivalent for.
 - **A colour says what kind of thing something is, not what state it is in**, so
   it means the same on every page.
+- **Colours mix (12 October 2026).** Elements side by side take successive
+  LCARS colours, as the dashboard's tiles do, rather than one colour repeated.
+  Green and red are kept for accepting and refusing; a status keeps its own
+  colour. See [Palette rotation](#palette-rotation).
 
 ---
 
@@ -24,8 +28,8 @@ Two rules run through all of it:
 | LCARS colour classes | `src/styles/lcars-theme-colours.scss` | `.<name>` (background) and `.go-<name>` (text) for the full LCARS palette. |
 | Angular Material base | `src/styles/angular-mat-base.scss` | Material's generated theme. Overrides for it sit at the top of `lcars-theme.scss`. |
 | App globals | `src/styles/styles.scss` | Forms, buttons, list-page patterns, badges, utilities — anything more than one feature uses. |
-| Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
-| Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`). |
+| Shared SCSS API | `src/styles/_lcars-variables.scss`, `_lcars-mixins.scss`, `_lcars-rotation.scss`, `_lcars-tabs.scss`, `_registry-layout.scss`, `_news-colours.scss`, `_notification-card.scss`, `_sto-rarity-colours.scss`, `_lcars-palette-properties.scss` | Variables and mixins. No output of their own except where noted. |
+| Feature partials | `src/styles/_storytime.scss`, `_custom-tracking.scss`, `_help.scss`, `_fleet-community.scss` | One partial per feature whose pages are built from the same handful of shapes. Every rule scoped by the feature's class prefix (`storytime-`, `custom-tracking-`, `help-`, `fleet-community-`). |
 | Rendered Markdown | `src/styles/_markdown.scss` | The classes both Markdown renderers emit for the site's own constructs (`.sto-indent`, `.sto-spacer`). Global rather than per feature: the same writing is shown on a News post, in a Chapter and in the editor preview beside it, and `[innerHTML]` content never carries a component's encapsulation attribute anyway. |
 | Component SCSS | `<component>/<component>.component.scss` | Everything else — one component's own layout. |
 
@@ -48,24 +52,152 @@ stylesheet imports by name and never by relative path:
 
 ## Colour
 
+### No literal colours
+
+**A colour is written down once, in `src/styles/_lcars-variables.scss`, and
+named everywhere else.** No other stylesheet writes a hexadecimal or calls
+`rgb()`, `rgba()`, `hsl()` or `hsla()`: stylelint's `color-no-hex` and
+`function-disallowed-list` reject both, and only `_lcars-variables.scss` and
+the generated `angular-mat-base.scss` are exempt. A colour the palette lacks is
+added to `_lcars-variables.scss` under a name — never snapped to a near one —
+and two names with one value make the second an alias of the first.
+
+- **A solid colour** is `vars.$lcars-ice`. Inside a custom property or an
+  `@supports` query it needs interpolating: `--accent: #{vars.$lcars-ice};`.
+- **A tint of pure white or black** is a variable named by its alpha as a
+  percentage: `vars.$white-a10`, `vars.$black-a40`.
+- **A tint of any other named colour** is
+  `color.change(vars.$lcars-c46, $alpha: 0.2)` (with `@use 'sass:color'`), not
+  `rgba()`, which the lint rule refuses.
+- **A colour inside a `data:` SVG** is
+  `fill='#{mixins.url-colour(vars.$a11y-white)}'`, which writes the
+  percent-encoded `%23fff`.
+- **A colour TypeScript needs as a value** — the smart chart's segment fills,
+  a catalogue accent's fallback and ink — comes from `LCARS_COLOURS` in
+  `src/app/shared/constants/lcars-colours.constants.ts`. Each entry mirrors a
+  Sass variable, and its spec reads `_lcars-variables.scss` and fails if the
+  two disagree. Wherever CSS applies the colour, read a `--lcars-*` property
+  instead (see below).
+
+The alert-condition themes follow the rule too. They live in
+`src/styles/alert-themes/` and take their colours from the `$alert-theme-*`
+slots. `angular.json` builds each as a stylesheet bundle that it does not inject
+(`lcars-red-alert.css`, `lcars-red-alert-static.css`, …), and
+`AlertThemeService` links one into the page when an alert begins.
+
+### Palette rotation
+
+A page should not be one colour repeated. Elements that sit side by side take
+successive colours from one order — **sunflower, perano, orange, sky, gold,
+bluey, tangerine, cool** — through the custom property `--lcars-accent`. Every
+colour in it carries black text at 5.8:1 or better, and neighbours differ in
+hue as well as lightness.
+
+`src/styles/_lcars-rotation.scss` holds the order (`$lcars-rotation`) and the
+mixin `rotation.rotate-accent($selector, $position, $condition)`, with no
+output of its own; `styles.scss` emits the rules once.
+
+**What rotates without being asked**
+
+| Where | How |
+|---|---|
+| `.buttons` (a side stack) and `.buttons-row` (an inline row) | Each child takes the next colour. A row of one — a section's lone "All news" — takes the section's colour instead, so it matches its bar. |
+| `<app-collapsible-section>`s on a page | They rotate among themselves (`nth-of-type`), whatever sits between them, and what each holds takes its colour. The bar itself stays the frame's blue on every section, so the page's headings read as one with the LCARS frame around it. A section alone in its host — a panel component's one section — takes its host's colour instead, so a row of such components rotates too. |
+
+**What reads the accent** — each falls back to the colour it had before when
+nothing around it rotates: `.lcars-btn` (background), `.full-width-btn-link`
+in a stack, `.buttons a`, `.lcars-input-container` (`--lci-color`),
+`.lcars-select-container` (background) and `<app-lcars-panel>`. Section bars
+and tab strips do **not**: they belong to the LCARS frame around the content,
+so every bar is the frame's blue with a light-blue title, and every tab strip
+has perano labels with the open tab in sunflower, whatever rotates around
+them. Because the property inherits, a section's pills and fields take the
+section's colour unless they rotate among themselves.
+
+**Choosing colours yourself**
+
+- `class="lcars-rotate"` on any container rotates its direct children: a
+  form's fields, a grid of panels or tiles, a row of choosers. A container of
+  one leaves its child the colour around it.
+- `class="accent-<name>"` (any colour in the order, plus `green` and `red`)
+  pins one element's accent. The rotations add no weight of their own
+  (`:where()`) and the accent classes are declared after them, so an accent
+  class always wins.
+- A colour class on the element itself (`class="lcars-btn sky"`) still names
+  its colour outright. Keep those for colours that mean something — a status,
+  a news category, a rarity, a faction — and leave the rest to the rotation.
+
+**Green and red** are not in the order:
+
+- **Green** — a control that commits or confirms: Save, Create, Send, Submit,
+  Upload, Publish, the yes of a dialog; and one that accepts something offered
+  or asked: Accept, Approve, Join, Grant.
+- **Red** — a control that refuses, rejects, deletes, removes or otherwise
+  destroys, and the no of a yes-or-no confirmation (`ConfirmDialogComponent`'s
+  Cancel).
+- **Neither** — everything else rotates, including a form's Cancel or Close,
+  which only abandons an edit, and a filter's Search, Apply or Clear, which
+  commit nothing.
+
+Two reds never sit side by side: where a confirmation's yes is itself the red
+one — Remove, Withdraw, Take it down — its Cancel rotates. The dialogs that
+ask for a reason take the tone of what they confirm: the governance reason
+dialog's `confirmTone` (`'accept'` by default, `'refuse'` for a destructive
+action) and the admin reason prompt's tone set the confirm green or red and
+the Cancel opposite or rotating to match. A colour that shows a state — a
+pressed toggle, the selected filter, a thumbs-down given, a Fleet's
+recruiting pill — is not a call to action, and keeps its own meaning.
+
+Where two controls that would both be red share a row, the one that destroys
+nothing rotates (13 October 2026): Storytime moderation's Dismiss beside
+Remove the content, a permission override's Withdraw beside Deny, the
+character panel's "I have left this Fleet" beside "Remove — this was never
+right", and an event's "Take my answer back" beside Can't go. An event's
+answers are Going green, Can't go red and Maybe rotating, so the answer given
+is marked by a ring and `aria-pressed`, as the news chips are.
+
+**Links that stand on their own are pills.** A link that is an action or a
+destination in its own right — "All news", "The full calendar", "Back to the
+Community" — is an `.lcars-btn` pill, in a `.buttons-row` when several sit
+together. A link inside a sentence stays a link.
+
 ### The SCSS palette
 
-`_lcars-variables.scss` is the single place any LCARS colour is written down:
-`$lcars-sunflower`, `$lcars-perano`, `$lcars-bluey`, `$lcars-orange`,
-`$lcars-green`, `$lcars-violet`, `$lcars-cardinal`, `$lcars-cool`, `$lcars-gold`,
-`$lcars-tangerine`, `$lcars-red`, `$lcars-sky`, plus `$lcars-c47` / `$lcars-c48`.
+`_lcars-variables.scss` holds the LCARS palette — `$lcars-sunflower`,
+`$lcars-perano`, `$lcars-bluey`, `$lcars-orange`, `$lcars-green`,
+`$lcars-violet`, `$lcars-cardinal`, `$lcars-cool`, `$lcars-gold`,
+`$lcars-tangerine`, `$lcars-red`, `$lcars-sky` — and every other colour of
+thelcars.com's palette under its class name (`$lcars-almond`, `$lcars-ice`,
+`$lcars-mars`, `$lcars-c43` … `$lcars-c72`), plus `$lcars-bahama` and the
+smart chart's `$lcars-chart-aqua`.
 
 It also holds the structural colours (`$lcars-black`, `$lcars-white`,
-`$lcars-grey-bg`, `$lcars-grey-border`, `$lcars-grey-light`), the raised-surface
-set used by cards and list rows (`$lcars-card-surface`,
-`$lcars-card-surface-hover`, `$lcars-card-border` — deliberately stronger than
-`$lcars-grey-bg`, which is too faint once a card carries controls of its own),
-the career and faction colours, the STO item-rarity colours, and
-`$font-antonio`.
+`$lcars-grey-bg`, `$lcars-grey-border`, `$lcars-grey-light`,
+`$lcars-grey-dark`), the raised-surface set used by cards and list rows
+(`$lcars-card-surface`, `$lcars-card-surface-hover`, `$lcars-card-border` —
+deliberately stronger than `$lcars-grey-bg`, which is too faint once a card
+carries controls of its own), the career and faction colours, the STO
+item-rarity colours, and `$font-antonio`. Beside them, named for what they are
+used as:
+
+| Group | Variables |
+|---|---|
+| Tints | `$white-a3` … `$white-a87`, `$black-a5` … `$black-a90` |
+| Progress pages | `$lcars-panel-bg`, `$lcars-text`, `$lcars-text-muted` (also the fallbacks of the matching `--lcars-*` properties) |
+| Cards | `$lcars-card-header-bg`, `$lcars-portrait-shade`, `$lcars-banner-shade` |
+| Solid washes | `$lcars-grey-pill`, `$lcars-grey-raised` |
+| Fields | `$lcars-field-bg`, `$lcars-field-bg-focus`, `$lcars-field-error-text`, `$lcars-field-error-bg`, `$lcars-field-error-border` |
+| Chrome | `$lcars-text-bar-label`, `$lcars-scrollbar-track`, `$lcars-scrollbar-thumb`, `$lcars-scrollbar-thumb-hover` |
+| Help popups | `$lcars-help-bg`, `$lcars-help-bg-hover`, `$lcars-help-border`, `$lcars-help-text`, `$lcars-help-note` |
+| Registry | `$lcars-public-green`, `$lcars-public-green-deep`, `$lcars-private-red` |
+| Messages | `$lcars-error-text`, `$lcars-lock-message`, `$lcars-interruption-title`, `$lcars-biography-text`, `$lcars-loading-blue`, `$lcars-quote-blue` |
+| Platforms | `$platform-playstation`, `$platform-xbox`, `$platform-steam` |
+| Alert panel | `$alert-<red\|yellow\|green\|blue\|grey>-main` / `-bright` / `-sub`, and `$alert-grey-title` |
 
 ### Colour classes in templates
 
-`lcars-theme-colours.scss` emits, for every LCARS colour name:
+`lcars-theme-colours.scss` emits, for every LCARS colour name (each written
+as the `$lcars-<name>` variable of the same name, `bahama` included):
 
 - `.<name>` — background colour (e.g. `class="lcars-btn sunflower"`)
 - `.go-<name>` — text colour (e.g. `class="go-mars"`)
@@ -110,6 +242,7 @@ helpers per slug (`common`, `uncommon`, `rare`, `very-rare`, `ultra-rare`,
 |---|---|
 | `.lcars-text-bar` | The standard section heading: a bar with rounded end caps, carrying its title in a black cut-out `<span>`. |
 | `.lcars-text-bar.small-lcars-bar-gap` | Same bar with a tighter top margin, for bars stacked one under another. |
+| `.lcars-text-bar.lcars-text-bar--wraps` | For a title that may not fit a phone on one line: the title is laid out in the bar rather than pinned over it, so a second line makes the bar taller instead of spilling over what follows. On one line it draws exactly as the plain bar does (FC-044). |
 | `.lcars-text-bar .cta-icon` | A single action pinned to the bar's right-hand end, on its own black cut-out. |
 | `.lcars-text-bar .lcars-bar-actions` | A group of actions at that end — reorder arrows, edit, delete, collapse — on the same cut-out, so a bar with one action and a bar with five read as the same shape. |
 | `.lcars-text-bar .title-with-badge` + `.header-count-badge` | Heading with a count pill, e.g. "Captain List (3)". One or two digits keep the round badge; three or more grow it sideways into a pill. |
@@ -124,7 +257,7 @@ owns the ARIA wiring.
 
 | Class | What it is |
 |---|---|
-| `.lcars-btn` (+ a colour class) | The standard pill. 60px tall, fully rounded, uppercase, label bottom-right. Works on `<button>` and `<a>` alike — the rule restates weight and tracking so both look identical. |
+| `.lcars-btn` (+ a colour class) | The standard pill. 60px tall, fully rounded, uppercase, label bottom-right. Works on `<button>` and `<a>` alike — the rule restates weight and tracking, and takes the link underline away, so both look identical. |
 | `.lcars-btn-auto` | The same pill sized to its own label rather than a fixed 150px minimum. Named as `button.lcars-btn-auto` too, so it outranks the base rule and keeps its wide left gutter. |
 | `.full-width-btn-link` | Full-width pill for a sidebar stack; used for both links (navigation) and buttons (actions). |
 | `.buttons` | The sidebar stack itself — a column of `.full-width-btn-link`s. `.buttons.filter-buttons` adds the `.filter-btn` / `.filter-btn.active` treatment. |
@@ -160,9 +293,39 @@ border both read it. Handles `input`, `textarea`, number inputs (spinners
 removed) and date inputs (dark colour scheme, gold accent). A `.field-error` as
 the last child rounds off the bottom corners.
 
+A `<select>` in the container reads as the field beside it: the same dark
+body, a white LCARS arrow in place of the browser's grey box, and an ellipsis
+when its value is longer than the field (FC-044).
+
 **`.lcars-select-container`** — the standard chooser. A fully rounded coloured
 block holding a `.select-label` and a native `<select>` with a custom SVG arrow;
-the same colour variants apply.
+the same colour variants apply. A bare `<label>` as its direct child is drawn
+as the select label too, so leaving the class off no longer sits the label on
+the rounded edge in body type.
+
+**Tick boxes, radio buttons and file inputs** stay native, for their keyboard
+and screen reader behaviour, and are drawn the LCARS way by `styles.scss`
+(FC-044): a sky tick or ring at a fixed 1.1rem, a perano focus ring, and a
+`<label>` wrapping its box laid out beside it, box first. The file input's
+button is a sky pill. A `<fieldset>` is a section of the page rather than a
+box drawn round it, its `<legend>` uppercase Antonio in perano; both rules
+carry no specificity, so a feature that draws its own group keeps it. The
+plain `input` rule below once drew every checkbox and radio 100% wide.
+
+**Field width** — a field whose values
+are short, such as a drop-down of a word or two, a number or a date, need not
+run the width of the form. `styles.scss` lays them out:
+
+| Class | Where | What it does |
+|---|---|---|
+| `.lcars-field-columns` | A row or wrapper whose direct children are fields | Two columns on a wide screen, one at 768px and below. |
+| `.lcars-field--wide` | A child of `.lcars-field-columns` | Spans both columns: a text search, or a drop-down whose options are sentences. |
+| `.lcars-field--short` | A lone `.lcars-input-container` or `.lcars-select-container` | Half the row, where no short neighbour pairs with it. |
+
+Judge each drop-down by its longest realistic option: about 40 characters fit
+half a page, about 25 half a dialog. When in doubt, leave it full width. The
+Fleet directory's search is the model: the name across the row, then its
+choices two to a row.
 
 **`.field-picker`** — a field whose value is chosen in a dialog rather than
 typed (a recipient, a featured work). It sits inside a `.lcars-input-container`
@@ -175,8 +338,10 @@ its label on one line.
 than the main field styles on purpose.
 
 **Bare form scaffolding** — `.form-container`, `.form`, `.form-group` and the
-plain `input` rule in `styles.scss` are the pre-LCARS fallback still used by the
-auth pages. New forms should use `.lcars-input-container` instead.
+plain `input` rule in `styles.scss` are the pre-LCARS fallback. The auth pages
+keep `.form-container` / `.form` for layout only; their fields are
+`.lcars-input-container`s in a `lcars-rotate` form, as every new form's should
+be.
 
 > **Not global:** `.form-row`, `.field-hint` and `.compact` are re-declared per
 > feature (seven and three places respectively). They are a convention, not a
@@ -194,7 +359,8 @@ behind an edge is a section nobody knows is there. Mark the current tab
 `active`.
 
 Used by the character detail page, the community tabs, the Storytime policy
-header and story detail, the Storytime Markdown field, and Custom Tracking.
+header and story detail, the Storytime Markdown field, Custom Tracking, and a
+Fleet's sections (`app-fleet-tabs`).
 
 A strip does not have to switch whole sections: `app-storytime-markdown-field`
 uses one to put Edit and Preview over a single textarea, which is the smallest
@@ -216,10 +382,20 @@ and every undo step behind it.
 | `mixins.lcars-panel-card-controls` | Controls in their own darkened strip at the end of the row, so pressing one is never mistaken for opening the thing the panel is about. |
 | `mixins.lcars-panel-card-marks` / `-badge` | What the bar says besides the name, at its right-hand end. |
 | `mixins.lcars-panel-surface` | The surface a block of a feature sits on, beneath its heading bar. |
+| `mixins.lcars-accent-panel-card($fallback)` | The panel card drawn from `--lcars-accent` at runtime, so a list of cards takes the rotation; `$fallback` where nothing rotates. Sets `--lcars-panel-accent` for what is inside. |
+| `mixins.lcars-accent-panel-card-heading` | Its block across the top, in the accent, with black text. |
 
 The panel-card family is shared deliberately: a captain card on the dashboard, a
 panel in Storytime and a field in the Custom Tracking builder are all the same
 shape, learned once.
+
+**No plain cards**. A card that stands
+for one thing — a Fleet in a directory, a member, a Custom Tracking field, a
+switcher entry — is a panel card in the rotation: its name on the heading
+block, a spine, and the rest in the body, in a `lcars-rotate` list. The
+`accent` mixins draw it; `<app-lcars-panel>` and the Fleet scope card are the
+models. A name whose case is part of it, such as a Fleet's, keeps its case
+on the block rather than taking the uppercase of `lcars-panel-card-name`.
 
 `_notification-card.scss` holds the notification anatomy — a severity-tinted
 left edge and a matching header bar — shared by the user inbox, the admin sent
@@ -246,6 +422,10 @@ cover the smaller pieces.
 | `registry.registry-two-column($container, $main, $side)` | The two-column page shell shared by every registry page, matching the dashboard's account pages. Collapses at 768px. |
 | `registry.registry-detail-grid` | The label/value grid for registry detail panels. One pair per row by design — these panels sit in columns of very different widths. |
 
+Text runs the full width of whatever holds it (13 October 2026): no paragraph,
+hint or intro is capped to a reading measure in `ch`. A line held short under
+a full-width heading reads as a column that has lost its other half.
+
 ### Badges and status
 
 `.faction-badge` (`.federation` / `.klingon` / `.undecided`),
@@ -267,6 +447,18 @@ anything new.
 | `.uppercase`, `.strike`, `.nomar`, `.border`, `.indent` | Vendored theme text helpers. |
 | `i.ext-link` | External-link icon spacing. |
 | `ul.no-bullets` | Unbulleted list. |
+
+### Motion
+
+Everybody whose system asks for less motion (`prefers-reduced-motion: reduce`) gets it everywhere
+(FC-044). One rule at the end of `src/styles/styles.scss`, loaded last so it outranks every
+component, sets `animation: none`, `transition: none` and `scroll-behavior: auto` on every
+element and pseudo-element. Animations stop on the element's own resting style, never a frame of
+the animation, so the blink, pulse, sweep and data-cascade effects stand still and nothing is left
+on an invisible frame. The header's back-to-top button jumps rather than glides for the same
+reader. A component need not add a reduced-motion rule of its own; the few that predate this one
+(the scan-status sweep, the alert panel) still say what they show instead, which the global rule
+does not change.
 
 ---
 
@@ -294,13 +486,50 @@ beneath it, which the reader can fold away.
 
 | Input | Type | Notes |
 |---|---|---|
-| `heading` | `string` (required) | Shown in the bar. |
+| `heading` | `string` (required) | Shown in the bar, as the section's `<h2>`, and names the section's region. |
 | `barClass` | `string` | Classes for the bar itself — `small-lcars-bar-gap` where sections stack. |
+| `badge` | `string \| number \| null` | A count or short mark in the bar's round `.header-count-badge`, beside the heading. Null draws none. Not part of the region's name. |
+| `sectionKey` | `string` | Names the section for the folds remembered on its page. The heading does by default; give a key where two sections on a page share a heading or the heading changes with the data. |
+
+A control of the host's own on the bar — an edit pen — is projected with the
+`sectionActions` attribute and sits ahead of the caret.
+
+**Every section that heads a block of content is one of these** (12 October
+2026). Bars that are only dividers, or head a single line, stay plain
+`.lcars-text-bar`s.
+
+Each section is a `<section>` labelled by its heading text alone, so it is a
+named region: `getByRole('region', { name: 'News' })` finds it whether or not
+its bar carries a badge. Do not wrap one in another region of the same name.
 
 Sections open expanded: a reader arriving at a page wants to read it, not open
-it first. The component owns the caret button, the icon swap and the
-`aria-expanded` / `aria-controls` pairing, which is why this is a component
-rather than repeated markup.
+it first. What a reader folds stays folded on their next visit to that page:
+`SectionFoldService` keeps the folded keys in `localStorage` under
+`lcars-folded-sections:<path>` (the path without its query, so a filtered or
+paged view shares the page's folds), and storage that is missing or refused
+leaves everything open. Folded content is **hidden, not removed**, so a form
+part way through keeps what was typed into it; a spec asserts `hidden` on
+`.collapsible-section__content` rather than that the content is gone.
+`setup-jest.ts` forgets every fold after each test. The component owns the
+caret button, the icon swap and the `aria-expanded` / `aria-controls`
+pairing, which is why this is a component rather than repeated markup.
+
+**`<app-lcars-panel>`** — a block of a page drawn as an LCARS panel card: a
+coloured spine, a solid heading block carrying its name, and a tinted body.
+Since 12 October 2026 it has replaced the bare dark boxes a page used to put a
+block in — a follow box, a filter box, a list of alerts.
+
+| Input | Type | Notes |
+|---|---|---|
+| `heading` | `string` (required) | The name on the heading block, labelling the panel's region. |
+| `level` | `2 \| 3 \| 4` | The heading's level in the page's outline. Default 3. |
+| `accent` | rotation colour \| `null` | A colour of its own; otherwise it takes `--lcars-accent`, so a run of panels in a `lcars-rotate` container varies by itself. |
+| `collapsible` | `boolean` | A caret on the heading block folds the body away, remembered per page as a section's fold is (`panel:` + `panelKey`, or the heading), and hidden rather than removed. Every search and filter panel sets it (13 October 2026). |
+| `panelKey` | `string` | Names the panel for its remembered fold where two on a page share a heading. |
+
+Marks for the heading block — a count, a state — are projected with the
+`panelMarks` attribute. List cards keep the `lcars-panel-card` mixins; the
+component is for a block of a page.
 
 ### Cards
 
@@ -373,6 +602,8 @@ place `.lcars-number-highlight` gives up its sunflower.
 | `<app-entity-avatar>` (3) | `src`, `alt` (required), `size` (`100 \| 300`) | Profile picture with a size-matched placeholder fallback. Resets its failure flag when `src` changes. Replaces the open-coded `<img>` plus `(error)` handler pages used to repeat. |
 | `<app-endeavour-rank-badge>` (3) | `totalNodes`, `size` (`'default' \| 'small'`) | Zero-padded four-digit rank readout. `small` rescales through host CSS variables rather than a second stylesheet. |
 | `<app-smart-chart>` (1) | `data: ChartDataItem[]`, `threshold` (5), `mode` (`'pie' \| 'donut' \| 'bar' \| 'auto'`) | Signal inputs. Switches between an SVG pie/donut and a bar chart on the number of data points; every segment path, bar width and colour class is computed once in a `computed`. Falls back to `<app-lcars-information-message>` when there is no data. |
+| `<app-help-link>` | `slug`, `label` (both required) | A help button, on its own line, to one Help guide (FC-049, FC-050), drawn as an LCARS numbered panel button (13 October 2026): a 44px bar with a 35px rounded cap, a question mark two pixels shy of the bar at each end where the panel's number would stand, and the words on a pill. Always `$lcars-help-link`, thelcars.com's Classic lilac, which nothing else on the site uses, so it reads as "help" wherever it appears. The cap and the mark are `aria-hidden`, so the link is named by its words alone. Goes under a page's or panel's heading. Settings uses it under each panel; `<app-fleet-page-shell>` draws one when given `helpSlug` and `helpLabel`. |
+| `<app-settings-link>` | `target: SettingsLinkTarget` (required) | A cog to the settings for the page it is on: `/dashboard/settings?tab=…`, with `#setting-…` when it leads to one setting. Icon only, in the help links' lilac, named by `aria-label` and `title`; it turns an eighth on hover and focus. Shown only while signed in, as many of its pages are public. Targets come from `SETTINGS_LINKS` in `settings-links.constants.ts`, beside the tab names (`SETTINGS_TABS`) and the setting anchors (`SETTINGS_ANCHORS`) the Settings page uses, so a cog and the page cannot disagree. Goes beside a heading inside a global `.page-heading-row` (flex, wrapping), or in a collapsible section's bar as `sectionActions`. |
 
 ### Feature locks
 
@@ -597,14 +828,1154 @@ Notes:
 
 ---
 
+## Help
+
+The guides are data in `src/app/static-pages/help/help.data.ts`, grouped into
+sections (`HelpTopic`), and three pages show them. The Fleets section and
+Running the site (FC-050) live in `help-fleets.data.ts` and
+`help-site-admin.data.ts`, which `help.data.ts` gathers; `help-section.ts` holds
+the `guideSection` helper they share. Their styles are in `_help.scss`.
+
+- **The Help home** (`/help`, `HelpComponent`) is one tile per section, then
+  "Still stuck?" (FC-048). A tile is a panel card in the next colour of the
+  [rotation](#palette-rotation) (12 October 2026; sections used to keep a
+  colour each): the
+  section's title, how many guides it holds for this reader ("6 guides"), and
+  its introduction. The whole tile is the link.
+- **A section** (`/help/topics/<id>`, `HelpTopicComponent`) lists its guides as
+  the same panels, under a "Help › Section" breadcrumb.
+- **A guide** (`/help/<slug>`, `HelpGuideComponent`). Its breadcrumb leads back
+  to its section.
+
+A section's address has two parts where a guide's has one, so neither can
+answer for the other. No guide may be called `topics`, and `help.data.spec.ts`
+checks this.
+
+Which sections and guides a reader sees is decided in one place,
+`visibleHelpTopics`:
+
+- A section, a guide or one part of a guide can wait on a switch with
+  `requiresFeature`: `STORYTIME`, `FLEET` or `CHAT` (FC-049).
+  `HelpFeaturesService` reads all three; a switch that can't be read counts as
+  on. `HELP_HIDDEN_WHEN_OFF` says what a switched-off feature's help does:
+  Storytime's is not offered, while Fleet Community's and Fleet chat's stay,
+  so they can still be found, and their pages carry a `.help-switched-off`
+  note (FC-050). The note stands once, over the widest thing that is off: a
+  section, then a guide, then one part of it.
+- A section with `requiresAdmin` is offered to site administrators alone, and
+  answers anybody else with the not-found page (FC-050).
+- A guide with `requiresPermission` waits on that permission.
+- A section left with no guides is dropped.
+- If permissions can't be read, the public guides stay.
+
+An address the reader can't open goes to the not-found page. A Storytime
+section or guide whose feature is off says so instead, and a part of a guide
+about it is left out. A section or guide whose feature could not be asked
+about is read as usual, under the `app-feature-unavailable` "Connection Lost"
+notice (`unreachableFeature`): transient unavailability must not hide useful
+help (plan §5; FC-044).
+
+**Fleets and Running the site** (FC-050). Fleets is second and waits on Fleet
+Community as a whole; Running the site is last, and for site administrators
+alone. Every guide in
+both has the same six parts in order — What it is for, Who can use it, Where to
+find it, one or more How sections, Who can see it, When something goes wrong —
+and `help-fleets.data.spec.ts` checks it, with curly quotes throughout. Each
+Fleet page, and each admin page a Running the site guide covers, links to one
+guide through `<app-fleet-page-shell>`'s `helpSlug` and `helpLabel`, or an
+`<app-help-link>` under its heading where there is no shell. One link per page:
+the Community, Fleet and Armada overviews share `fleet-scope-view`'s, and the
+three directory tabs each carry their own, since `<app-fleet-home>`'s shell
+wraps every Fleet page. `help-link-placements.spec.ts` lists where each link
+goes and what it says, and fails if any template anywhere links to a guide that
+does not exist. Dialogs carry none: a Material dialog stays open over a
+`routerLink` navigation, since it closes only on the browser's back and forward.
+
+**STO Info settings** (FC-049) has a guide for the Settings page and one for
+each of its parts, `chat-settings` among them. A help link under each of the
+page's section headings leads to that part's guide. The guides quote the
+form's own labels; `help.testing.ts` lists them, and the specs for the page and
+for the Help data both check them. They also say which tab each setting is on
+and which cogs lead to it, so a setting moved between tabs means a change to
+its guides.
+
+**The Settings page** is in tabs, the shared LCARS strip with roving focus
+(`nextTabIndex`): Account (Privacy, Galactic Personnel Registry, Security,
+Dates and times), Chat (while chat is on), Fleet and Notifications (while Fleet
+Community is on), and Custom Tracking. `?tab=` names the tab, and a tab not
+shown opens Account. Panels are `[hidden]` rather than removed, so every
+control keeps its form binding. `#setting-…` names a setting: once the page,
+the features and the profile are in, it opens the section holding it, scrolls
+to it, focuses its control and marks it with `settings-marked` for two seconds.
+The registry switch is the profile's, not a setting: it is read with
+`DashboardService.getUser()` and saved through `updatePersonalDetails` with the
+personal details as last read, in its own queue.
+
+**Videos.** A guide with a `video` (its YouTube identifier and title) shows it
+under its summary through `<app-help-video>`. Every Fleet guide but Roster
+history and corrections has one, from the site's "STO Info App Help"
+playlist, and `help-fleets.data.spec.ts` checks it. Like a Chapter's video and
+a Custom Tracking one, nothing is loaded from YouTube until the reader presses
+play: until then the page shows YouTube's still from `i.ytimg.com`, and the
+player comes from `youtube-nocookie.com` through `trustedYouTubeEmbed`. No
+switch hides the videos, `STORYTIME_YOUTUBE_ENABLED` included, since they are
+the site's own help. A "Watch on YouTube" link under each opens it there.
+
+`help-guide-slugs.json` lists every public guide and every section anybody may
+open; Running the site's are left out. `scripts/generate-content.mjs` reads it for the sitemap, and
+`help.data.spec.ts` fails if it and the guides disagree.
+
+---
+
+## Fleet Community
+
+The Fleet system is built from the vocabulary above rather than from a language
+of its own: `.lcars-btn` for every button, `.lcars-input-container` for every
+field, `lcars-tab-strip` for every strip of sections, `ConfirmDialogComponent`
+for every destructive confirmation, and the four alert components for state.
+What follows is only what Fleet adds.
+
+### Colour
+
+Fleet used to be drawn in sky throughout — fields, choosers, tab strips,
+table headers. That was retired on 12 October 2026: Fleet's
+pages take the [palette rotation](#palette-rotation) like every other page,
+with green and red kept for accepting and refusing. Community, Fleet and Armada are *not* three colours: they
+are told apart by a label and an icon, which leaves the palette free to mean
+something — a Fleet that is recruiting, closed or disputed, an upload that has
+passed or been refused — and keeps the distinction legible to a reader who
+cannot separate two mid-tone blues.
+
+`_fleet-community.scss` names every colour from `lcars-variables`, as every
+stylesheet must (see [No literal colours](#no-literal-colours)).
+
+### Layout
+
+`src/styles/_fleet-community.scss`, scoped `fleet-community-`. It holds what a
+*page* writes in its own template, which a component's encapsulated styles
+cannot reach:
+
+| Class | What it is |
+|---|---|
+| `.fleet-community-page` | The page column, matching the shell's own padding. |
+| `.fleet-community-grid` | The listing grid for scope cards. Cards stretch, so a row is one height; one column below 480px. |
+| `.fleet-community-empty` | What a listing says when it holds nothing. An empty directory is a normal state here, not a fault. |
+| `.fleet-community-form-row` | A row of fields that becomes a column when two no longer fit. |
+| `.fleet-community-field-hint` | The sentence under a field saying what it means. Not an error — that is `.field-error`, which the input container already styles. |
+| `.fleet-community-form-actions` | The row a form's buttons sit in; wraps rather than shrinking a pill below its label. |
+| `.fleet-community-filter-row` | The row a listing's own controls sit in — a day, a search, a rank, a zone. |
+| `.fleet-community-table` | A table of figures: the roster, its history, every report, an import's rows. See below. |
+| `.fleet-report-notice` | A sentence about a report or section as a whole: what it covers, what it hides. |
+| `.fleet-report-note` | A second line under a cell's value, saying something about it — partial, excluded, across a gap. |
+
+**Tables.** The roster, its history and the reports are rows of figures, and a
+real table is the honest shape for them: a reader compares a column down, which
+cards do not let them do. Header cells are Antonio in sky; a figure's cells take
+`.fleet-community-table__number`, right-aligned in tabular numerals so the
+digits line up; a sortable header wraps its label in a
+`.fleet-community-table__sort` button, with `aria-sort` on the `th`. Below
+720px there is no room for the columns and a page must never scroll sideways,
+so each row becomes a block of labelled lines: **every `td` carries its
+column's name in `data-label`**, which the narrow layout writes before the
+value, and the header row is hidden from sight but kept for a screen reader. A
+table without `data-label` on every cell reads as a column of unlabelled
+numbers on a phone.
+
+A note in a cell is a `span.fleet-report-note`, which is a block of its own.
+Two sit on separate lines on screen but run together in `textContent`, so a
+spec asserts each note element rather than the cell's text.
+
+`.form-row`, `.field-hint` and `.compact` are a per-feature convention rather
+than a global rule, which is why Fleet declares its own rather than assuming
+one exists.
+
+**The theme's bare-element rules.** `lcars-theme.scss` draws every `nav a` as
+the sidebar's 210px violet pill, every bare `button` as a 200px pill, and caps
+every `nav` at 660px, pushed right. Fleet's controls are classes that undo
+what they need: `.buttons-row` and the tab strip lift the `nav` cap, the
+table's sort button and `app-lcars-toggle` set the button's size back, and the
+chat list's links set back the pill (FC-044). A new `nav`, link or button in a
+Fleet page needs the same, or it is drawn as part of the sidebar.
+
+**The directory strip** over every Fleet page lights by the kind of page, not
+by its address: Fleets on a Fleet's page, Armadas on an Armada's, Communities
+on a Community's, although all three addresses run through the Community's. A
+tab given `lightsOn` (a path pattern) decides that way; others still use the
+router's prefix match (FC-044).
+
+### Components
+
+Fleet's own components live in `src/app/fleet/components/`. All are standalone
+and OnPush, and the cards emit an action rather than performing one.
+
+**`<app-fleet-page-shell>`** — the chrome every Fleet page sits in: its tab
+strip, its heading, the line naming what the page is about, and whichever of
+loading, failed or ready it is in.
+
+| Input | Type | Notes |
+|---|---|---|
+| `heading` | `string` (required) | Rendered as the page's `<h1>`. |
+| `subject` | `string \| null` | The Community or Fleet the page is about, under the heading. A name, never an identifier. |
+| `tabs` | `readonly FleetShellTab[]` | `{ link, label, exact }`. Link tabs, because each Fleet section is its own route. Omit for a page with no sections — a strip of one tab says nothing. |
+| `tabsAriaLabel` | `string` | Default `'Fleet sections'`. |
+| `isLoading`, `loadingText` | `boolean`, `string` | Swaps the content for `<app-loading-bar>`, keeping the heading. |
+| `errorMessage` | `string \| null` | Swaps the content for `<app-lcars-error-message>`, which renders **text**. |
+
+Holding the three states here is the point: a dozen Fleet pages each writing
+their own `@if (isLoading)` is a dozen chances for one to show a heading above
+an empty page, or leave a stale list under an error.
+
+The projected content is instantiated by the page whether or not the shell is
+showing it, so do not rely on the shell to delay a child's initialisation —
+only its rendering.
+
+**`<app-fleet-tabs>`** — the strip along the top of every page of a Fleet a
+Community holds: Overview, News, Activity and Events for anybody (News from
+FC-027, Activity from FC-029, Events from FC-030); Roster
+and History for `roster.view`
+holders; Reports for anybody the server shows a report to; Holdings for
+anybody (FC-023); Investigate for whoever imports or investigates its rosters;
+Recruitment for whoever holds `applications.view`, `applications.decide`,
+`recruitment.manage` or `members.manage`; Manage for its Owner and Admins
+(FC-022). It takes a `FleetTabsVm`, which `fleetTabsVmOf(resolved)`
+builds from the resolved Fleet and returns null for a Fleet no Community holds,
+so such a Fleet draws no strip.
+
+On a platform the game writes no roster export on, `providesRoster` is false:
+the roster, history and investigation tabs are not offered, and News,
+Activity, Events, Reports, Holdings, Recruitment and Manage still can be
+(FC-021, FC-030). Every reader has News, Activity, Events and Holdings as well
+as the Overview, so the strip is always drawn.
+
+Every tab but Reports is decided by the reader's capabilities. Reports asks the
+server once per Fleet which reports the reader sees, on every Fleet, since
+holdings are public and read from the Fleet's own records (FC-030). It draws
+no tab when none is shown or the answer fails, rather than one leading to a page that cannot be read. Pages beneath a
+section — an import under Investigate, a member under History — sit beneath
+its address, so its tab stays lit on them.
+
+**`FleetSectionPageDirective<T>`** (`src/app/fleet/scope/`) — the half of a
+section page that every one repeats. It resolves the Fleet the address names,
+tells a Fleet that does not answer (`MISSING`), a request that failed
+(`ERROR`) and a section the reader may not open (`NOT_PERMITTED`) apart, and
+only then calls the page's `load(section, query, params)`. A page declares
+`_requiredCapabilities`, any one of which opens it — empty where the server
+decides, as on Reports — and its `notPermittedMessage`. A section about the
+roster answers `MISSING` on a Fleet with no roster export; a recruitment page
+sets `_needsRoster = false`, since a console Fleet recruits too. Each navigation is
+caught on its own, so a failure on one address does not leave the page unable
+to show the next, and `reload()` reads the section again at the same address.
+
+What a reader chooses on a section page — an export, a page, an ordering, a
+span, a filter — **lives in the address**, so a view can be bookmarked, shared
+with another member and reached with the back button. A page changes the
+query with `queryParamsHandling: 'merge'`, dropping what the change makes
+stale: a new span drops the export the detail was drawn at.
+
+**`<app-fleet-scope-badge>`** — says whether something is a Community, a Fleet
+or an Armada, and on which platform.
+
+| Input | Type | Notes |
+|---|---|---|
+| `scope` | `FleetScopeType` (required) | `COMMUNITY`, `FLEET` or `ARMADA`. |
+| `platform` | `string \| null` | Sits in its own darkened half. A Community spans every platform and so has none. |
+
+**`<app-fleet-scope-card>`** — a Community, Fleet or Armada in a listing. Takes
+`FleetScopeCardVm`, emits `action: string`, and disables every button while
+`isActing`.
+
+The card exists to make two registrations of one name tellable apart. Anybody
+may register a Fleet and nothing proves they run it, so the card shows the
+Community that registered it, the platform, the exact name and when its roster
+was last seen. **The name is rendered exactly as recorded** — two Fleets whose
+names differ only in their spacing are two Fleets, and a directory that tidies
+them is a directory in which one cannot be found.
+
+Every field of the view model is text the card renders as text. A Fleet name
+comes from a CSV somebody uploaded, so nothing in it may reach a component that
+renders HTML.
+
+**Its shape** (13 October 2026) is an LCARS panel card laid out as an account
+card is. The name, keeping its case, sits on a heading block in the listing's
+rotation colour. Beneath it lies the account list's art for the platform
+(`getAccountBgImagePath`; a Community takes the default), shaded. On that, the
+emblem stands where an account shows its endeavour rank, or the character
+listings' "photo unavailable" picture when it has none or it cannot be fetched.
+Lists of them run one card to a line, the full width, as the account and
+captain lists do, so the details sit side by side. Beside the emblem, the details run label over value:
+Platform, Status, Roster and Community, the first two with an icon each: the
+platform's (`getPlatformIconClass`) and the state's. A card does not say
+which kind of record it is: each directory lists one kind. Down its right runs
+the narrow, darkened column of controls an account card carries, with an eye
+that opens the record: named "View Fleet" (or Community, or Armada), as an
+account's is "View Account", and described by the card's name. A record that
+cannot be opened has no column. The Community's name links to it where the
+card is given a `communityLink`.
+
+The card also draws a Captain's Fleets on their Character page
+(`buildCharacterFleetCardVm`): `details` adds the page's own label-over-value
+pairs after the shared ones (Since, Source, Seen on the roster), and the
+answers, the audience chooser and Leave or Remove are projected beneath the
+details as the card's content.
+
+The head of a Community's, Fleet's or Armada's own page (`<app-fleet-scope-header>`)
+is the same card, with `nameHeading` making the name the page's `<h2>` and
+`showScope` putting the kind of record on its block. The page's facts become
+its details, the platform said once, and the banner stays above it.
+
+Beneath it, every block of a record's page is a collapsible `<app-lcars-panel>`
+at level 2, in the page's rotation (13 October 2026): Following, Recruitment,
+News, Events, Activity, About, Artwork, the Armada and Community structure
+blocks and an ownership offer. Their folds are remembered per page. The rest of
+the site keeps its collapsible section bars.
+
+`FleetScopeCardStatus` is its own field rather than a colour on the card: the
+card's colour is only its place in the rotation, and the state's icon and words
+say what state the record is in (`recruiting` green, `application` and
+`invite` gold, `closed` grey, `suspended` red, `disputed` tangerine).
+
+`roster` is a formatted string, not a date: "Never imported", "Imported …", or
+the platform's reason where the game gives no roster export
+(`fleetFreshnessOf(…, FLEET_FRESHNESS_VALUE)`). Deciding which timezone a
+moment is written in belongs to the page, which knows whether it holds an
+instant — rendered through `AppDatePipe` — or a day somebody typed, which is
+never re-zoned at all.
+
+### Recruitment
+
+Recruitment (FC-021) lives in `src/app/fleet/recruitment/`. Every request goes
+through `FleetRecruitmentService`, and every refusal is shown with
+`recruitmentRefusalOf(error, fallback)`: the server's own sentence for a 400,
+403, 404 or 409 — a requirement not met, a form that changed, somebody already
+a member — and the page's words for anything else.
+
+**`<app-fleet-recruitment-panel>`** — on a Fleet's page, beneath the follow
+control, for an active Fleet a Community holds. It reads how the Fleet recruits
+itself, says what the state means, lists the requirements, and offers the
+reader what they may do: join an `OPEN` Fleet with one of their Characters on
+its platform, apply to an `APPLICATION` one on a page of its own, accept or
+decline an open invitation, or leave. It raises `changed` after a join,
+acceptance or decline, so the page reads their standing and tabs again. Leaving
+instead takes the reader to their own applications, saying so: a Fleet only its
+Community can see is gone from them once they leave it. An open invitation shows
+the invitee such a Fleet until they answer it.
+
+A Character is chosen from the reader's own accounts on the Fleet's platform
+(`recruitmentCharactersOf`). Level and faction are the server's to check.
+Whenever somebody joins or is accepted, the page says the site cannot invite
+anybody in game (`IN_GAME_INVITE_NOTE`).
+
+The **Recruitment** tab is a hub like Investigate: Applications and Invitations
+for `applications.view`, Members for `members.manage`, Settings for
+`recruitment.manage`, each its own address below `…/recruitment`. Deciding an
+application and sending an invitation take `applications.decide`. A decision
+and a settings save send the revision or version they read, and a refusal
+because somebody else got there first reads the page again beneath the
+server's message.
+
+**Members** (FC-036): each member offers Suspend… (or Reinstate… once
+suspended) beside Remove…. Each asks for a reason in the same inline form,
+worded for what it does. A suspended member shows as Suspended, with the
+reason; they are told they are suspended, never why, and "Member since" is when
+they joined. A refusal is titled by what was refused ("Not suspended").
+
+The applicant's side is **`/fleets/applications`**: their applications with
+each decision and its reason, their open invitations, and withdrawing one
+still waiting. It is linked from the dashboard and from a Fleet's page while an
+application waits. An accepted application whose membership has since ended
+says whether they left or were removed, and a Fleet they can no longer see is
+named without a link.
+
+A Fleet proposal that recruitment raised on a Character's page says how the
+Character came in — an application, an invitation or a join
+(`RECRUITED_BY_LINES`) — before asking the owner to confirm it once they are
+in the Fleet in game. The panel's note and the Yes button follow what raised
+the proposals waiting: a roster match asks whether the listed Captain is this
+one, while a recruited one asks whether the Character is in the Fleet in game
+(`PROPOSALS_ROSTER_NOTE`, `PROPOSALS_RECRUITED_NOTE`, `PROPOSALS_MIXED_NOTE`).
+A recruited proposal the server withdrew when the Fleet membership ended
+(`WITHDRAWN`) is not shown.
+
+### Governance
+
+Who governs a Community, Fleet or Armada (FC-022, FC-025) lives in
+`src/app/fleet/governance/`.
+Every request goes through `FleetGovernanceService`, and a refusal is shown
+with `recruitmentRefusalOf`, as recruitment's are.
+
+The pages are the same at every level: `GovernancePageDirective` reads the
+address, resolving an Armada when the route says it governs one, a Fleet when
+it names a platform and the Community otherwise, and tells absent, failed and
+not permitted apart. Each lives below the scope's **Manage** hub
+(`FLEET_LINKS.communityManage`, `FLEET_LINKS.fleetManage`,
+`FLEET_LINKS.armadaManage`):
+
+| Page | Address | Who opens it |
+|---|---|---|
+| Manage hub | `…/manage` | The Owner and Admins; on a Community, a site administrator too |
+| Roles | `…/manage/roles` | The Owner changes it; Admins read it |
+| Delegation | `…/manage/delegation` | The Owner changes it; Admins read it |
+| History | `…/manage/history` | The Owner and Admins |
+| Ownership | `communities/:slug/manage/ownership` | The Community's Owner |
+| Site administration | `communities/:slug/manage/dispute` | A site administrator |
+| Settings | `…/manage/settings`, a Community's or a Fleet's | The Owner (`scope.settings.manage`) |
+
+A Fleet's **Manage** tab is offered to its Owner and Admins (`roles` on the tab
+strip's view model). A Community's page offers **Manage** among its actions to
+the same people and to a site administrator.
+
+Roles are appointed from the scope's members, one each: somebody holding a role
+is not offered again until it is withdrawn. Delegation ticks what every Officer
+holds and grants or denies one capability to one person; the Owner is never
+offered, since they hold everything. A reason is asked for wherever something
+is taken away — withdrawing a role, unticking an Officer capability, a denial,
+clearing a grant, closing — and is optional otherwise. Capabilities are named
+with `capabilityNamer(delegable)`, and History reads each change as a sentence
+with `describeGovernanceAction`. A role or grant that ended because of
+something else — its holder leaving, the scope closing, ownership changing
+hands — is marked `automatic` and reads as what ended, naming nobody, with the
+cause as its reason (FC-039). The page says the history is kept for as long as
+the scope exists.
+
+**Settings** (`ScopeSettingsComponent`, FC-050; `FLEET_LINKS.communitySettings`,
+`FLEET_LINKS.fleetSettings`) changes what registration set, with registration's
+labels: the name, web address and who can see it, and for a Community its
+description, how people join and the timezone its dates are shown in, or for a
+Fleet its allegiance. The hub offers it to whoever holds
+`scope.settings.manage`; the page opens to the Owner as well, to say why a
+closed or suspended scope — or a Fleet in one — cannot change. Only what
+changed is sent, with the revision read; a 409 says whether it changed
+meanwhile (with **Reload**) or the web address was taken. A rename makes a new
+web address from the new name, the old one kept by the server as a redirect,
+and the page follows the scope there. After a Fleet is renamed it points at
+**Former names**, since roster exports taken before carry the old name; it
+records nothing itself. A Fleet's recruitment state is changed in its
+recruitment settings, which the page links to, and its platform cannot change.
+
+**`<app-governance-close-dialog>`** — opened through `MatDialog` by the hub and
+by the site administration page. Closing cannot be undone, so the reader types
+the name back as well as a reason; the name is compared with its edge spaces
+trimmed. It closes with `{ reason }`, or nothing when kept open. For an Armada
+it says what closing one does instead: its Fleets leave, its open requests are
+cancelled, and which Fleets were in it stays readable.
+
+**Site administration** (FC-036) adds, on the dispute page:
+
+- **Its Fleets and Armadas**, each with every other registration of its exact
+  name on its platform, private ones included: Community, its Owner, when
+  registered, last import, members and who may see it. A note above them says
+  STO Info cannot tell who leads a Fleet in the game, and none is shown as the
+  real one.
+- **Suspend… / Reinstate… and Close…** on each, and Suspend… / Reinstate… for
+  the Community itself. Suspending and reinstating ask for a reason in
+  **`<app-governance-reason-dialog>`**; closing uses the close dialog with the
+  Fleet's or Armada's name.
+- **Look into its imports…** on each Fleet: the reason dialog asks for a
+  purpose of 10 to 500 characters, and the page then goes to the Fleet's
+  Investigate pages, open to that administrator, read-only, for 24 hours.
+
+A site administrator opens the dispute page of any Community, members-only and
+private ones included (FC-050): the page sets the directive's
+`_siteAdminFindsAnyCommunity`, so for them `resolveCommunity` finds it through
+`FleetGovernanceService.resolveCommunityAsSiteAdmin`
+(`GET /admin/fleet-communities/by-slug/:slug`) rather than the public read.
+Anybody else is still answered by the public read and turned away. The Manage
+hub sets it too, so its **Site administration** entry is reached from the hub
+at a Community a site administrator cannot otherwise see; every other Manage
+page, and the Community's own page, still use the public read. The way in from
+the Admin area is **Fleet Disputes** (`/admin/fleet-disputes`).
+
+History reads a suspension and a reinstatement as sentences too.
+
+**`<app-ownership-offer-panel>`** — on a Community's page, for an Admin of an
+open Community. It reads where ownership stands and shows nothing unless the
+open offer is to the reader. Accepting asks first; declining does not, since
+the Owner can offer it again. The page is not read again afterwards: that would
+draw the panel afresh and lose what it says about the answer.
+
+Confirmations built from names somebody chose escape them with `escapeHtml`
+before they reach the dialog's markup.
+
+### Holdings
+
+A Fleet's holdings (FC-023) live in `src/app/fleet/holdings/`, behind
+`FleetHoldingsService`. **`<app-fleet-holdings>`** is the Holdings tab, a
+`FleetSectionPageDirective` page open to anybody who may see the Fleet, signed
+out included, on every platform.
+
+Each of the seven holdings in the catalogue is drawn with its own track first,
+then its departments, as "2 of 5" and when each was last recorded, and says
+which STO Wiki page and edit date its tiers come from. A track never recorded
+reads as tier 0. When the server says the reader may record (`mayRecord`),
+each holding offers **Record…**, which opens a form for that holding alone: a
+select per track at its tier now, and an optional reason. **Record** stays
+disabled until a tier changes, and only the tracks that changed are sent; a
+tier may go down to put a mistake right.
+
+The history beneath is the server's, newest first, paged by `?page=` as the
+roster history is. Each change reads as one line, "Fleet Starbase: Starbase
+1 → 2, Military 3 → 0.", with its reason, and names who recorded it only when
+the server says the reader is shown recorders (`recordersShown`).
+
+Because holdings and news are public, every registered Fleet's tab strip has
+at least the Overview, News and Holdings, and the strip is always drawn.
+
+### Armadas
+
+How Fleets sit in an Armada (FC-024 to FC-026) lives in
+`src/app/fleet/armadas/`, behind `FleetArmadaService`. Reading works signed
+out; every change needs an account, and a refusal is shown with
+`recruitmentRefusalOf`, as recruitment's are.
+
+**`<app-armada-tree>`** — an Armada's shape as nested lists: the Alpha, or
+"Empty" while the slot stands empty, then each Beta with its Gammas beneath
+it. Lists rather than a drawing, so a keyboard, a screen reader and a phone
+all follow the hierarchy the same way. Each Fleet says its position and when
+it took it, and links to its page. A Fleet the reader may not see keeps its
+place without its name or a link. With `manageable`, each Fleet the reader
+may see offers **Move…** and **Remove…**, raised as `move` and `remove` for
+the page to answer.
+
+Two Fleets in one list with the same name get their Community's name after
+it (`fleetNamer`); one Fleet named twice, as in a history, is still one Fleet.
+The position and the name are separate spans kept apart by `&ngsp;`, so they
+read as two words, not only look like them.
+
+**`<app-armada-panel>`** — the tree on an Armada's page. A manager
+(`armada.manage` at an open Armada) moves a Fleet or takes it out, each with
+a reason; a Gamma needs the Beta it goes under, and a Beta that stops being
+one needs every Gamma under it moved under another Beta, made a Beta or taken
+out too. Taking a Fleet out asks first. A manager is also pointed at any
+requests waiting.
+
+**`<app-fleet-armada-panel>`** — on a Fleet's page: which Armada it is in and
+where. Its `armada.request` holders ask to join one of the Armadas it could,
+with an optional message; withdraw the request; see how the last one was
+answered and why; and take the Fleet out, with a reason and after confirming.
+A Beta with Gammas under it is told it cannot leave until an Armada manager
+moves them.
+
+**`<app-community-structure-panel>`** — on a Community's page: each open
+Armada as a tree, then the Fleets in none. Neither the panel nor the Fleet
+one shows anything when it cannot be read, since neither is what the page is
+for.
+
+An Armada's pages have their own strip, **`<app-armada-tabs>`**: Overview,
+News, Activity and History for anybody, Requests for `armada.manage` holders, Manage for its Owner
+and Admins. **`ArmadaSectionPageDirective<T>`** is the Armada's
+`FleetSectionPageDirective`, for its two section pages:
+
+| Page | Address | Who opens it |
+|---|---|---|
+| History | `…/armadas/:platform/:slug/history` | Anybody who may see the Armada; who made each change and why, its members only |
+| Requests | `…/armadas/:platform/:slug/requests` | `armada.manage` holders |
+
+Both page by `?page=`, and Requests filters by `?status=`, open by default.
+Approving asks where the Fleet goes; rejecting asks why, which the requesting
+Fleet is shown.
+
+Its Manage pages are the governance pages, told by their route's
+`data.governs: 'ARMADA'` that the scope is an Armada. Its Owner, who holds
+`scope.close` there, closes it from the hub as a Fleet is closed, with its
+name and a reason, through `POST …/armadas/:a/governance/close` (FC-050).
+
+### News
+
+A Community's, a Fleet's and an Armada's own news (FC-027) lives in
+`src/app/fleet/news/`, behind `FleetNewsService`. The posts are the site's
+news table's, so the body is Markdown shown through the same `markdown` pipe
+as the site's News; nothing a post can carry is more than the site's own
+news can.
+
+The pages are the same at three kinds of address, and resolve their scope as
+the Manage pages do: **`FleetNewsPageDirective<T>`** extends
+`GovernancePageDirective<T>`, so an Armada's pages are told so by
+`data.governs: 'ARMADA'`, and a Community's by having no platform in the
+address.
+
+| Page | Address | Who opens it |
+|---|---|---|
+| News | `…/news` | Anybody who may see the scope; which posts, and drafts for its news writers, is the server's answer |
+| A post | `…/news/:postSlug` | Anybody it is published to; a draft, its news writers |
+| Write a post | `…/news/write` | `news.write` holders, while the scope is open |
+| Edit a post | `…/news/:postSlug/edit` | `news.write` holders, while the scope is open |
+
+`…` is a Community's, a Fleet's or an Armada's own address. `write` is a
+literal no post's address can be, and its route comes first.
+
+**The list** searches titles and summaries, pages, and for news writers
+switches between published posts and drafts. All three are in the address
+(`?q=`, `?page=`, `?status=DRAFT`), so each is a link of its own.
+
+**A post** shows its cover, who wrote it — linking their profile only where
+the server says the reader may open it — and who it is for, in words for the
+kind of scope (`fleetNewsAudienceLabel`). A news writer edits, publishes,
+unpublishes and deletes it while the scope is open, and deletes a draft after
+it closes. A site administrator who writes no news there may unpublish or
+delete it. Unpublishing and deleting ask first, through the shared LCARS
+confirmation.
+
+**The editor** takes a title, an optional summary, the audience and the
+body, with a preview. A new post is saved as a draft or published straight
+away; a new draft opens in the editor again, since a cover needs the post to
+exist. The cover goes through `<app-fleet-image-crop-dialog>` like a banner,
+as the `COVER` slot of a `NEWS_POST` target, and is shown once the scanner
+has cleared it. Reading the post again after a cover changes keeps what has
+been typed.
+
+A Fleet's and an Armada's strips have a **News** tab, after Overview. A
+Community page has no strip, so **`<app-fleet-news-latest>`** shows its
+latest three posts and the way to the rest, and offers its writers a new
+post.
+
+### Activity
+
+A Community's, a Fleet's and an Armada's activity, and each member's own
+(FC-029), live in `src/app/fleet/activity/`, behind `FleetActivityService`.
+The server writes each item as a sentence and decides which the reader sees,
+asking afresh each time, so the pages only draw what they are given.
+
+**`<app-fleet-activity-feed>`** draws a feed. Its `source` is a scope's feed
+(`{ kind: 'SCOPE', target }`) or the reader's own (`{ kind: 'MINE' }`), and a
+new source starts it again. Each item is its sentence, linking where the
+server says to read more, and when it happened. `showScope` names each item's
+Community, Fleet or Armada, for a feed gathering several. `latest` shows only
+that many, with `allLink` leading to the rest; otherwise **Older** reads the
+next page, held while one is being read, until there are none. A feed that
+cannot be read says so rather than that nothing has happened.
+
+| Page | Address | Who opens it |
+|---|---|---|
+| Activity | `…/activity` | Anybody who may see the scope; which items is the server's answer |
+
+It resolves its scope as the News pages do, and draws the scope's strip. A
+Fleet's and an Armada's strips have an **Activity** tab, after News. A
+Community page has no strip, so its Overview shows the latest five items and
+the way to the rest. The Dashboard's Fleets page shows **Your Fleet
+activity**: the Communities the member follows and the Fleets and Armadas they
+belong to, each item naming its scope.
+
+### Events
+
+A Community's, a Fleet's and an Armada's events (FC-030) live in
+`src/app/fleet/events/`, behind `FleetEventsService`. The pages are the same at
+three kinds of address and resolve their scope as the News pages do, through
+**`FleetEventsPageDirective<T>`**, which also carries their links, the wording
+of audiences for the kind of scope, and a change's running and refusal.
+
+| Page | Address | Who opens it |
+|---|---|---|
+| Calendar | `…/events` | Anybody who may see the scope; which events is the server's answer |
+| An event | `…/events/:eventId` | Anybody it is shown to |
+| An occurrence | `…/events/:eventId/occurrences/:occurrenceId` | Anybody it is shown to |
+| New event | `…/events/new` | `events.manage` holders, while the scope is open |
+| Change an event | `…/events/:eventId/edit` | `events.manage` holders, while the scope is open |
+
+`new` is a literal no event's ID can be, and its route comes first.
+
+**Every time says its zone.** **`<app-fleet-event-when>`** writes an
+occurrence in the reader's own zone, as every instant on the site is, and
+always gives the event's clock beside it. It reads "(Europe/London time)"
+where the two agree, and otherwise "your time" with the event's time, zone and,
+where it differs, day. The calendar names the reader's zone too.
+
+**The calendar** is a month grid, or an agenda by default on a narrow screen.
+The view and the month are in the address (`?view=`, `?month=`), so each is a
+link. It reads a week either side of the month and lays each occurrence on the
+day it starts in the reader's zone. Its event managers are offered a new event
+while the scope is open.
+
+**An event** gives its rule in words (`fleetEventRuleOf`), who it is for,
+places, link and description, and the next ten occurrences:
+
+- **Answering.** **`<app-fleet-event-answer>`** answers each occurrence ahead,
+  as one of the reader's own Characters on any account if they choose, and
+  says what the answer means: a place, the waitlist and how far along, or no
+  place.
+- **Reminders.** Ticking leads and saving asks for reminders; unticking every
+  one stops them.
+- **Managing.** Managers change it from now on, cancel it, cancel or move one
+  occurrence on the event's clock, and read the change log on asking.
+  Cancelling asks first.
+
+**An occurrence** shows its counts, who answered for the scope's members, and
+the reader's own recorded attendance. Once it has started, managers get the
+attendance sheet: everybody who answered, then the scope's members, found by
+name, each recorded as came or did not come.
+
+**The editor** takes the title, Markdown description, link, audience (with
+Fleets and roles when chosen), the zone (the Community's own by default), the
+rule, start, length, places and end. **Show what it comes to** asks the server
+for the next year, flagging every occurrence the clocks move and every month a
+monthly day skips, before anything is saved.
+
+A Fleet's and an Armada's strips have an **Events** tab, after Activity. A
+Community page shows its next five in **`<app-fleet-events-upcoming>`**, with
+a link to the calendar. The Dashboard's Fleets page shows **Your upcoming
+events**: the reader's own next thirty days, each naming its scope.
+
+### Chat
+
+Chat's page is `/chat` (FC-033), signed in only, built on the live connection FC-032 added,
+`ChatSocketService`. Everything is in `src/app/fleet/chat`, and the protocol is in the backend's
+`docs/fleet-chat.md`.
+
+**The page** (`ChatPageComponent`):
+
+- **The list.** Every channel the reader may read, by Community, Armada and Fleet (each scope's
+  name linking to its page, a role-limited channel saying who it is for), then Direct messages.
+  The open place sits beside the list. Below 720px the two are stacked, one at a time, and the
+  open place has an "All chats" button back.
+- **Addresses.** One route matcher keeps one page for every address, so moving between places
+  keeps the list and the connection:
+  - `/chat` and `/chat/channels/:id` or `/chat/direct/:id` say what is open;
+  - `/chat/fleets/:id`, `/chat/armadas/:id` and `/chat/communities/:id` open that scope's first
+    channel, replacing the address;
+  - a place the list does not hold says so, with the way back.
+- **The connection.** A banner says when it is reconnecting, when five other tabs pushed this one
+  out ("Use chat here" opens it again), or when the session ended.
+- **Messaging a friend.** The + on the Direct messages heading opens `ChatFriendDialogComponent`:
+  - every friend at once, 20 at a time with "Show more friends", searched by username as typed
+    (after a 300ms pause), each with their picture and online dot;
+  - choosing one opens the conversation by the friendship, or the one already there, and the page
+    reads its list again when the conversation is new to it;
+  - with no friends, it points to the Friends page.
+- **Custom channels.** A scope's moderators add them ("Add channel"), and edit or archive each from
+  the ⋮ beside it. Edit opens `ChatChannelDialogComponent`: a name, who reads it, and who posts, never looser
+  than reading. Archiving asks first with the LCARS confirmation.
+- **Transcripts** (FC-035). Where the reader may export (`mayExport`), each channel has an export
+  button. It opens `ChatTranscriptDialogComponent`:
+  - From and To, in the device's time, defaulting to the last day and bounded to the last seven
+    days (ten minutes' grace, for a clock a little behind the server's);
+  - a purpose of 10 to 500 characters.
+  - Asking opens `/chat/transcripts`, where `ChatTranscriptsComponent` lists what they asked for in
+    the last day in the pane a conversation takes: a `fleet-community-table` row each (channel and
+    scope, range, status, message count), with Download while it is ready and within its day, and
+    labelled lines on a phone. The download is fetched with the reader's token and saved as
+    `stoinfo-chat-<channel>-<date>.txt`, as the server names it too.
+  - Something wrong shows as a status and a message across the messages and download columns
+    (`transcriptProblem`), the message on a line of its own on a phone: **Error**, "There was an
+    issue generating the transcript. Try again later.", once given up on, since nothing was kept;
+    **Warning**, "There was an issue generating the transcript. Check back later.", while it still
+    waits but its job has failed (`jobFailed`), the case in which a site admin may retry it.
+  - The list keeps one link there, "Your transcripts", with a count of those ready to download. They
+    are read with the list, and again each time they are opened.
+  - An in-app notice, linking `/chat/transcripts`, says when one is ready. Refresh reads them again;
+    the page does not poll. A request the server refuses is said above the list, headed "Transcript
+    not asked for".
+
+**One place** (`ChatConversationComponent`):
+
+- **Messages as text.** Every message is written as text, never markup, in compact rows: the time
+  in the reader's zone (the full date in its tooltip and `datetime`), the author in sky, then the
+  text. The same author within five minutes drops the name. A day starts with a divider, and the
+  reader's own messages carry a sky bar on the left.
+- **Mentions** are marked only for the people the server says a message mentions.
+- **Replies** show a one-line quote of what they answer, or "Earlier message" once it is gone or
+  older than four hours. Clicking the quote scrolls to the message when it is on screen.
+- **Moving through time.** "Load earlier" reads back to the four-hour edge, where the top says
+  "You can read back the last four hours here." It says how far back a member can read, not how
+  long chat is kept, and its figure is the server's (`chatMemberHistoryHours` from the Fleet
+  configuration), as is the transcript dialog's reach (`chatTranscriptHistoryDays`) (FC-044). New
+  messages keep the log at the bottom. While the reader is scrolled up, a button counts what
+  arrived.
+- **The composer.** Enter sends and Shift+Enter starts a new line. A counter appears from 1,800
+  characters of the 2,000. Typing `@` opens the list of people who can read the place: arrows move
+  through it, Enter or Tab picks, Escape closes it. Reply starts a reply, and Escape stops it. A
+  message shows as "Sending…" until the server has it, or "Not sent" with the reason, "Try again"
+  and "Discard".
+- **Emoji.** `ChatEmojiButtonComponent` is the face in the message box's bottom right-hand corner.
+  It opens `emoji-picker-element` above the box: search, categories, skin tones and favourites,
+  with British labels. Each emoji picked goes in at the caret, over any selection, unless it
+  would take the message past 2,000 characters, and the picker stays open for another. The face,
+  Escape (which hands the focus back to the box) or a press anywhere else closes it.
+  - The picker is its own chunk, loaded the first time it opens (`CHAT_EMOJI_PICKER_LOADER`).
+  - Its English emoji data comes from `emoji-picker-element-data`, which `angular.json` copies to
+    `/assets/emoji/data.json`, so nothing is fetched from another host and the CSP is unchanged.
+  - The picker keeps that data, the skin tone and the favourites in the browser's IndexedDB.
+- **Deleting.** Reply and Delete appear on hover and focus, and always on a touch screen. Until
+  then they are clipped to nothing rather than not displayed, so they stay in the Tab order: a
+  keyboard reaches Reply, and the row's actions appear because one of them has focus (FC-044;
+  with `display: none` no keyboard could reach them, WCAG 2.1.1). Deleting
+  one's own message asks first. A moderator's Remove asks why, in `ChatRemoveDialogComponent`.
+- **Reporting** (FC-035). Report appears on others' messages where the reader may report
+  (`mayReport`), and always in a conversation. `ChatReportDialogComponent` takes a reason from the
+  member reports' list, with details that "Something else" needs. The reader is thanked ("Thanks,
+  a site admin will look at it.") or told they already reported it, and never told the outcome.
+- **Blocks** (FC-034). A message from somebody across a block reads "Message from a member you
+  can't see", with no name and nothing to do.
+- **Typing** (FC-034). A line under the log says who is writing: one name, two, or "several
+  people". A writer drops off five seconds after their last signal, or when their message arrives.
+  The reader's own signal goes only while they share their typing (Settings).
+- **Access.** The log is an ARIA log. The composer is a combobox with its list, so the whole page
+  works from the keyboard.
+- **Its own life.** It joins its place when shown and leaves it when changed or destroyed. No
+  subscription or timer outlives it.
+
+**The ways in:**
+
+- a Chat door at the end of each Fleet's and Armada's strip, for its members and role holders;
+- a Chat door at the end of the Community strip, for anybody signed in;
+- "Open chat" on the dashboard's Fleets page;
+- the + beside Direct messages, for any friend;
+- a Message button on a friend's profile, which opens the conversation by the friendship.
+
+Each is offered only while chat is switched on.
+
+**Across the site** (FC-034):
+
+- **Staying connected.** `ChatSessionService` keeps the socket open in every signed-in tab while
+  chat is on, and `AppComponent` starts it. Being online means having STO Info open.
+- **Toasts.** `<app-chat-toasts>`, in the app shell, shows a toast for a direct message or a
+  mention of the reader, unless that place is open. It gives who and where, never the text, lasts
+  eight seconds, and links to it.
+- **Presence.** `ChatPresenceService` asks who is online every minute while shown, and only while
+  chat is on. It shows:
+  - a dot beside each friend in the chat page's Direct messages;
+  - an Online badge on a friend's card (`withPresence`);
+  - an Online chip beside a member's name on their profile.
+  - The server answers only for people the reader may see.
+- **Settings.** Presence visibility, appearing offline, typing, and the mention, reply and direct
+  message notices show while chat is on. The roster timezone and the other Fleet notices show
+  while Fleet is on.
+
+**Linked queues and holds** (FC-036), in `src/app/admin/moderation-admin`:
+
+- A chat report says how many open member reports there are about its author,
+  linking to Reported Officers; a member report says how many open chat
+  reports there are about the member, linking to Chat Reports. The Admin page's
+  Community heading carries both queues' open count.
+- A chat report offers **Hold this evidence…** once its evidence is shown, and
+  says when it is held; each report offers holding its author's messages, and
+  each member report holding the member's. Each asks for a reason.
+- **`/admin/holds`**, "Moderation Holds" (`ModerationHoldListComponent`): holds
+  in force first, then released or all. Each shows whose, why, its owner and
+  review date, flagged when due.
+  - **Read what it keeps** asks for a purpose each time, then shows the
+    messages newest first, with where each was, deleted text marked, and
+    Earlier for the page before.
+  - Its log lists every placing, extension, release and reading with its
+    reason or purpose.
+  - **Extend** (`ModerationHoldExtendDialogComponent`) takes a review date up
+    to 180 days ahead and a reason. **Release** takes a reason.
+  - A hold in force also shows when STO Info will release it automatically
+    unless somebody extends it: 14 days after its review date (FC-037).
+    STO Info's own steps show in the log as automatic: telling the owner,
+    warning every site admin, and the release. A hold STO Info released
+    names nobody as having released it.
+- **`/admin/fleet-investigations`**, "Fleet Investigations": every site
+  administrator's look into a Fleet, newest first, with its purpose, linking to
+  the Fleet while it is open.
+- **`/admin/fleet-disputes`**, "Fleet Disputes" (FC-050,
+  `FleetDisputeSearchComponent`): finds any live Community by name or web
+  address, members-only and private ones included, through
+  `FleetGovernanceService.communitiesAsSiteAdmin`
+  (`GET /admin/fleet-communities`). Every Community is listed by name until a
+  term is searched for, 20 to a page, each with who may see it, its state and
+  its Owner's username, and its name links to its dispute page.
+- **`/admin/roster-erasures`**, "Roster Erasures" (FC-038,
+  `RosterErasureListComponent`), for a verified request to erase somebody's
+  roster data:
+  1. The admin gives the Character name and @handle, then **Find their
+     rosters** lists the Fleets whose rosters name them, and how many rows.
+  2. After a reason, **Erase…** asks through `ConfirmDialogComponent`, since
+     it cannot be undone.
+  3. The page then says what the erasure did.
+
+  The list of erasures never names who was erased: each shows the pseudonym
+  that replaced them. There is no replay button (FC-042): after a database
+  restore, the backend makes again every erasure the restore lost by itself
+  when it starts, before it serves anything, and those show as "Replayed from
+  the ledger".
+
+**Reasons for every site admin action** (FC-039). Each is kept in the site
+admin log, so each asks why through `GovernanceReasonDialogComponent` (up to
+500 characters, `ADMIN_REASON_MAX_LENGTH`) where it used to ask only for
+confirmation:
+
+- Manage Permissions: changing a role and withdrawing an override. Setting an
+  override already took a reason.
+- Manage Members, and Reported Officers: disabling and restoring an account.
+- Reported Officers: dismissing a report and closing it as actioned. Claiming
+  one needs no reason.
+- Chat Reports: the note on Resolve and Dismiss is required, and the button
+  waits for it.
+- Storytime Moderation: dismissing a report needs the note for the record, and
+  deciding an appeal needs what the creator is told.
+
+**`/admin/security-log`**, "Security Log" (FC-039, `SecurityLogComponent` in
+`src/app/admin/security-log`), under Operations on the Admin page: what site
+admins and the retention jobs did, newest first, fifty a page, from every log
+that holds it. **Show** narrows it to one source: site admin actions, Fleet
+disputes, moderation holds, Fleet investigations, roster erasures or retention
+runs. Each row gives when, who (or "The system"), what in words, to whom or
+what with its codes and counts, and why. A site admin action with no actor
+reads "An account since closed", except those the system records itself
+(`SYSTEM_SITE_ADMIN_ACTIONS`: the restore check's `LEDGERS_RECONCILED`,
+FC-042), which read "The system".
+
+**Scan Diagnostics** (FC-039) also lists refused uploads, newest verdict
+first, with each one's rejection code and engine, and **Look up** reads one
+asset by its ID. Neither ever shows a signature name.
+
+**Operations on Scan Diagnostics** (FC-042), all read from
+`GET /admin/file-scanning/diagnostics` above Usage, so they come back with the
+rest on **Refresh**; the page never polls.
+
+- **Alerts**: each problem the backend's alert run has open, oldest first,
+  titled as the in-app notification every site admin was sent
+  (`OPERATIONS_ALERT_TITLES`), with its counts in words (`alertDetailOf`) and
+  when it opened and was last seen. "Nothing needs a site admin." when none
+  is. An alert's notification links to `/admin/scan-diagnostics`, which the
+  notifications page already routes as an internal link.
+- **Worker**: one item per process that beat in the last two minutes, with
+  its state in words (`workerStateOf`: every pause reason code, a paused row
+  with no reason, and a fallback), signature version and age, jobs in hand,
+  last heartbeat from the server's own `secondsSinceBeat` ("12 seconds ago"),
+  and since when it has been paused. With none live it says how long since any
+  checked in, or that none has in the last day; processes that stopped beating
+  are counted, not shown.
+- **Publication**: running or paused, since when, by whom ("You", their
+  username, or "An account since closed", as `pausedByOf` says it) and how many
+  uploads wait, with a link to the Admin page. While the job queues cannot be
+  reached (`queuePaused: null`) it says so, and shows no count.
+- **Withdrawn pictures** (FC-043), under Publication: how many withdrawn
+  pictures Cloudflare has still to delete (`owedPicturesOf`), how many for over
+  a day and how old the oldest is, or that every one has been deleted. The
+  `PURGE_OWED` alert opens once one has waited a day.
+
+**Failed jobs** (FC-042, `FailedJobsPanelComponent` in
+`src/app/admin/scan-diagnostics/failed-jobs-panel`), on Scan Diagnostics above
+refused uploads: every job a queue gave up on, 25 a page, newest failure first
+within each queue, narrowed by **Queue** (each with its count). Each row gives
+when it failed, the queue in words, the job ID, attempts, the asset, transcript
+or Fleet it concerns, and the failure code; **Retry** only while `retryable`
+(otherwise why not), **Discard** on every job. **Retry all** and **Discard all
+that can't be retried** act on the queue chosen, or every queue, and say what
+they came to. Each asks for a reason through
+`GovernanceReasonDialogComponent`; a refusal, a 503 while the job queues cannot
+be reached included, shows the server's message and the list is read again; a
+list that cannot be read shows the server's message too. It reads every queue's
+first page on arrival and when the page's **Refresh** calls its `reset()`: the
+backend logs that read with the diagnostics, so a page view is one Security Log
+entry, and only a queue chosen or a later page logs a read of its own.
+
+**Publication pause** (FC-042, `PublicationPauseComponent` in
+`src/app/admin/publication-pause`), under Operations on the Admin page, below
+its cards: whether publication is paused, since when, by whom and how many
+uploads wait, with **Pause publication** or **Resume publication**, each asking
+for a reason. A pause or resume made while the job queues cannot be reached
+still changes the switch, and the control says the queues follow once they
+answer. It carries a help link to the Scan Diagnostics guide.
+
+**Feature switches** (FC-045, `FeatureSwitchesComponent` in
+`src/app/admin/feature-switches`), under Operations on the Admin page, below the
+publication pause: Fleet Communities, Storytime and Custom Tracking, each with
+whether it is **On** or **Off**, when its switch was last changed and by whom
+("Not recorded" when a migration or SQL set it), and the capability flags the
+environment sets beneath it, read-only, as "allowed" or "not allowed".
+**Switch on** (green) or **Switch off** (red) asks for a reason through
+`GovernanceReasonDialogComponent`; each button's accessible name says which
+feature and which way ("Switch Fleet Communities off"). A refusal, such as
+another administrator having switched it first, is shown and the switches are
+read again. Its help link goes to the site admin guide "Switching features on
+and off".
+
+**Contact topics** (FC-045): the Contact page offers **Fleet Communities**,
+before Other, only while `FleetConfigurationService` says Fleet Community is
+on, and not when the configuration cannot be read.
+
+**Security Log subjects** (FC-042): a Scan Diagnostics read names what was read
+("Scan Diagnostics", "Scan Diagnostics: an asset" and so on), and a failed job
+action names its queue as Scan Diagnostics does, or "Failed jobs in every
+queue" for a bulk one; `ALL` is not shown as an ID. A feature switched on or off
+(FC-045) names the feature, with no ID.
+
+**Rescan campaigns** (FC-041, `RescanPanelComponent` in
+`src/app/admin/scan-diagnostics/rescan-panel`), on Scan Diagnostics above
+private image delivery: how many rescans are waiting and how many legacy
+pictures have never been scanned; each of the latest campaigns with its state
+and counts, and **Pause**, **Resume** and **Cancel** while it is open; the
+latest pictures found infected or refused, by asset ID and code only; and
+**Start a campaign**, narrowed by kind of picture, upload dates, days since the
+last scan and "only pictures never scanned", behind or ahead of other
+campaigns. Everything asks for a reason through
+`GovernanceReasonDialogComponent`.
+
+**Private image delivery** (FC-040, `ImageEstatePanelComponent` in
+`src/app/admin/scan-diagnostics/image-estate-panel`), at the foot of Scan
+Diagnostics: how many pictures are still public and where each copy stands;
+the open or last run with its counts; **Take an inventory**, with the last one's
+columns and Cloudflare's counts, orphans and missing pictures by ID; and
+**Copy to private**, **Undo copies** and **Retire old copies**, or **Pause** and
+**Resume** while a run is open. Each run asks for a reason through
+`GovernanceReasonDialogComponent`. Without the signing key the panel says so
+and offers no copy.
+
+**Picture addresses** (FC-040). The browser never builds one: the API signs
+each and sends it with the record (`bannerImageUrl`, `emblemImageUrls` by
+variant, `coverImageUrl`, a Custom Tracking picture's `imageUrl`), and
+`bannerOf`/`emblemOf` in `src/app/fleet/fleet-artwork.ts` only choose which to
+draw. `BASE_CLOUDFLARE_IMAGES_URL` is left for the site's own public artwork,
+such as the "photo unavailable" image.
+
+**The site admins' queue** (FC-035): `/admin/chat-reports`, "Chat Reports" on the Admin page, in
+`src/app/admin/moderation-admin` (`ChatReportAdminListComponent`):
+
+- Open reports first, oldest first, twenty a page. The filter offers open, actioned and dismissed.
+- Each says whose message, the reason and details, where it was (scope and channel, or "Direct
+  message"), and who reported it.
+- "Show evidence" reads the report once and shows the twenty messages before it, oldest first,
+  with the reported one marked. A message deleted before the report shows as such.
+- Resolve and Dismiss take a note (`ChatReportDecisionDialogComponent`), required since FC-039:
+  it is the decision's reason in the site admin log. Remove the message asks why, as a
+  moderator's removal does, and keeps the evidence as it was.
+
+**The connection, `ChatSocketService`:**
+
+- **Opening.** The socket opens when a page first joins a place or sends, WebSocket only, at the
+  API's origin on `/chat/socket`. The access token goes in the first message, never in the
+  address, and a fresh one follows a minute before it runs out.
+- **Status.** `status` is a signal:
+  - `idle`, `connecting`, `online` or `offline` (reconnecting);
+  - `signedOut` when there is no session;
+  - `replaced` when five other tabs pushed this one out. It then waits to be asked again.
+- **Reading.** `join(place)` gives the latest page. After that, each new message comes once
+  through `messages$`, however often the server sends it. `deleted$` and `removed$` say what was
+  deleted, and which places may no longer be read. `leave(place)` stops.
+- **Sending.** `send(place, body)` picks a client ID and sends again with the same ID until the
+  server acknowledges the committed message. A dropped connection neither loses nor doubles it. A
+  refusal comes back as a `ChatSocketError` with the server's status: 403, 404 or 429.
+- **Reconnecting.** On every reconnect, to whichever instance, it joins each place again from the
+  last message it holds. Anything missed comes through `messages$`, and a place it may no longer
+  read through `removed$`.
+
+### Upload and scan state
+
+**`<app-asset-scan-status>`** lives in `src/app/shared/components/`, not in the
+Fleet folder, because every upload in the application moves onto these states:
+a Fleet roster CSV, a captain's portrait and a Storytime cover are the same
+five states and a reader should not learn them twice.
+
+| Input | Type | Notes |
+|---|---|---|
+| `state` | `AssetScanState` (required) | `UPLOADING`, `AWAITING_SCAN`, `SCANNING`, `AVAILABLE`, `REJECTED`. |
+| `fileName` | `string \| null` | Rendered as text; a filename is something somebody chose. |
+
+The wording lives in `shared/constants/asset-scan.constants.ts`. Each state
+carries a label, an icon, a colour and — while it is still moving — a progress
+bar, so the state is said four ways and never by colour alone. The bar stops
+sweeping under `prefers-reduced-motion` rather than disappearing, because it
+still means the upload has not finished.
+
+**A rejection never says what was found.** Naming the signature that matched
+tells somebody probing the scanner exactly what got through; the copy says the
+file was refused, that nothing already in place has changed, and stops.
+
+### Reports
+
+Each of a Fleet's reports is its own view component under
+`src/app/fleet/fleet-reports/`, fed the report the page read. The page draws
+the choice of report, the span in whole days of the reader's own timezone, the
+revision and exports the report covers, and the CSV download; the view draws
+the report's tables and its chart.
+
+- **A hidden figure is `< 5`.** In an aggregate view the server sends null for
+  a count or total it hid, and `reportFigure` writes it as the CSV does, by the
+  report's `minimumCohort`. A contribution total arrives as a decimal string and
+  is written through `BigInt`, since it can exceed what a number holds.
+- **A hidden figure is not drawn.** `reportChartOf` leaves it out of the
+  `SmartChart` — a bar of nought would say there was nothing, and a bar of any
+  height would say how much — and the view says how many it left out.
+- **Nothing is dated more exactly than its exports.** An interval is written as
+  the two exports it lies between, and nothing is spread over the days between.
+- **The CSV is fetched, then saved.** It is read with the reader's token, which
+  a plain link cannot carry, and handed over with `saveFile`, named by the
+  Fleet, the report and the day, since the browser cannot read the
+  `Content-Disposition` the server set across origins.
+
+Attendance, recruitment and holdings (FC-030) are read from the Fleet's own
+records, not its roster. They have no revision or exports, so the page says
+their span instead and offers the last twelve months as the span to go back
+to. `recordHeaderOf` tells them apart from the roster's reports. The page
+opens on every Fleet, console ones included (`_needsRoster` is false), and a
+roster report on a Fleet without one is simply not offered.
+
+- **`<app-attendance-report>`**: each occurrence of the Fleet's own events,
+  going, came, did not come and the rate, with the totals; and each person,
+  for the Owner and Admins alone.
+- **`<app-recruitment-report>`**: month by month and route by route, the
+  outcomes and the median days to a decision. Never a name.
+- **`<app-holdings-report>`**: every tier a track moved, newest first.
+
+Who may see attendance is worded per report (`fleetReportAudienceLabel`): its
+members see counts only, where the roster's members see a report in full.
+
+### Corrections
+
+The pages an investigator changes the roster from — rank order, conflicting
+exports, an import's corrections and rows — share a shape:
+
+- **A reason, given once** for whichever change it is, capped at the server's
+  500 characters, with the button disabled until it is given.
+- **No confirmation dialog.** Each change can be undone by another and is
+  logged with who made it and why.
+  Deleting is different, and still takes `ConfirmDialogComponent`.
+- **The server's own words** for a refusal it understood — a 409, or a 400
+  naming what it would not take — through `app-lcars-error-message`, and a
+  general sentence for anything else. A refusal keeps what was typed.
+- **Read again afterwards**, recorded or refused: either way, what the page
+  showed is no longer how things stand. A change made to something another
+  investigator changed meanwhile is refused and the page reads it again.
+- **The history of changes** is listed beneath, newest first, naming an
+  account since closed as such, and STO Info for what it did itself.
+
+**An export whose file expired** (FC-037) reads "File expired". When a held
+export's file reaches the end of its retention before anybody chose it, STO
+Info retires it. The conflicting exports page then lists it with a note that
+it can no longer be selected, and offers no Select. Its corrections list "STO
+Info retired it", with the reason. One whose file an erasure deleted (FC-038)
+reads "File erased" in the same way.
+
+**Privacy** (FC-038):
+
+- **Closing an account.** The dialog first names each Fleet Community the
+  person owns: either which Admin it goes to, or that it is closed because no
+  Admin can take it. It suggests they transfer each one first. Names are
+  escaped, since the dialog renders HTML.
+- **A Character's Fleet panel.** It says that saying No, leaving or removing
+  changes only that page. A Fleet's roster still lists the name, and the
+  panel links to Contact us for erasure.
+- **A closed Community whose Owner's account was erased** shows no Owner, on
+  its dispute page and its roles page.
+
+**A site administrator looking in** (FC-036) holds `roster.investigate.read`
+rather than `roster.investigate` (`readsOnly(capabilities)`). The Investigate
+hub, an import's page, its rows, conflicting exports, roster identities and
+rank order all open to them and say, once, that they read and change nothing
+(`ROSTER_READ_ONLY_NOTE`). Every control that changes something — reasons,
+ticks, Select, Confirm/Reject/Undo, the rank order form — is left out; the
+rank order is shown as a plain table.
+
+### Warnings and user text
+
+`<app-lcars-warning-message>` renders its message as HTML. Fleet text — a Fleet
+name, a filename, an import error, a chat report — comes from somebody else, so
+it goes to the error or information components, which render text. This is the
+one rule in the feature that a reviewer should check by reading rather than by
+looking.
+
+---
+
 ## Conventions
 
 Every shared component:
 
-- Is **standalone**. Seven declare `ChangeDetectionStrategy.OnPush` — the three
-  toggles, `endeavour-rank-badge`, `smart-chart`, `lcars-search-dialog` and
-  `alert-panel`. The rest still run default change detection; new components
-  should use OnPush.
+- Is **standalone**. Ten declare `ChangeDetectionStrategy.OnPush` — the three
+  toggles, `endeavour-rank-badge`, `smart-chart`, `lcars-search-dialog`,
+  `alert-panel`, `refresh-session-dialog`, `feature-unavailable` and
+  `asset-scan-status`. The rest still run default change detection; new
+  components should use OnPush, as every Fleet component does.
 - Keeps presentation and action apart — a card emits which action was pressed
   and the page performs it.
 - Imports SCSS by name (`@use 'lcars-variables' as vars;`), never by relative

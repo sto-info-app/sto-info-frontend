@@ -15,6 +15,7 @@ import {
   REPUTATION_UNLOCK_LEVEL,
 } from '../models/character-reputation.model';
 import { CharacterReputationService } from '../services/character-reputation.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 @Component({
   selector: 'app-character-reputations',
@@ -23,6 +24,7 @@ import { CharacterReputationService } from '../services/character-reputation.ser
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     FormsModule,
     RouterModule,

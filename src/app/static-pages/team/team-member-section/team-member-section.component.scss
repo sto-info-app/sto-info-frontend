@@ -1,0 +1,3 @@
+// The cards are this component's own view, so the host page's stylesheet
+// never reaches them: the shared shape is drawn here as well.
+@use '../team-shared';

@@ -10,6 +10,7 @@ import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { RouterModule } from '@angular/router';
 import { finalize, take } from 'rxjs';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -26,6 +27,8 @@ import {
   SeverityMeta,
   SEVERITY_META,
 } from 'src/app/shared/constants/notifications.constants';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /**
  * Admin listing of previously sent notifications, rendered with the same card
@@ -40,11 +43,14 @@ import {
   ],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     MatDialogModule,
     RouterModule,
     LoadingBarComponent,
+    HelpLinkComponent,
     LcarsErrorMessageComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class NotificationAdminListComponent implements OnInit {

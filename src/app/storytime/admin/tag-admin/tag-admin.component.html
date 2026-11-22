@@ -14,17 +14,16 @@
     makes a tag filter find anything.
   </p>
 
-  <section class="storytime-section">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>{{ editingTagId ? 'Edit a tag' : 'Add a tag' }}</span>
-    </div>
-
+  <app-collapsible-section
+    [heading]="editingTagId ? 'Edit a tag' : 'Add a tag'"
+    sectionKey="tag-form"
+    barClass="small-lcars-bar-gap">
     <form
-      class="storytime-panel storytime-form"
+      class="storytime-panel storytime-form storytime-panel--rotate"
       [formGroup]="form"
       (ngSubmit)="save()">
       <div class="form-row">
-        <div class="lcars-input-container perano">
+        <div class="lcars-input-container">
           <label for="tag-name">Name</label>
           <input
             id="tag-name"
@@ -37,7 +36,7 @@
         </div>
 
         <div class="storytime-setting-field">
-          <div class="lcars-select-container gold">
+          <div class="lcars-select-container">
             <label
               class="select-label"
               for="tag-category"
@@ -75,7 +74,7 @@
       </div>
 
       <div class="form-row">
-        <div class="lcars-input-container bluey">
+        <div class="lcars-input-container">
           <label for="tag-slug">URL slug</label>
           <input
             id="tag-slug"
@@ -88,7 +87,7 @@
           </p>
         </div>
 
-        <div class="lcars-input-container sky">
+        <div class="lcars-input-container">
           <label for="tag-description">What it means</label>
           <input
             id="tag-description"
@@ -97,7 +96,7 @@
             maxlength="500" />
         </div>
 
-        <div class="lcars-input-container violet">
+        <div class="lcars-input-container">
           <label for="tag-order">Order within its category</label>
           <input
             id="tag-order"
@@ -115,7 +114,7 @@
         </button>
         @if (editingTagId) {
           <button
-            class="lcars-btn red"
+            class="lcars-btn"
             type="button"
             (click)="cancelEdit()">
             Cancel
@@ -123,7 +122,7 @@
         }
       </div>
     </form>
-  </section>
+  </app-collapsible-section>
 
   @if (isLoading) {
     <app-loading-bar loadingText="Loading tags"></app-loading-bar>
@@ -131,11 +130,10 @@
     <p class="storytime-empty">There are no tags yet.</p>
   } @else {
     @for (group of groups; track group.category) {
-      <section class="storytime-section storytime-tag-admin__group">
-        <div class="lcars-text-bar small-lcars-bar-gap">
-          <span>{{ group.label }}</span>
-        </div>
-
+      <app-collapsible-section
+        class="storytime-tag-admin__group"
+        [heading]="group.label"
+        barClass="small-lcars-bar-gap">
         <ul class="storytime-tag-admin__tags">
           @for (tag of group.tags; track tag.id) {
             <li>
@@ -172,7 +170,7 @@
             </li>
           }
         </ul>
-      </section>
+      </app-collapsible-section>
     }
   }
 </section>

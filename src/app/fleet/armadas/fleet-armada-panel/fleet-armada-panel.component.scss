@@ -1,0 +1,25 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-armada {
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 32rem;
+  }
+
+  // In the section's colour: a note about the Armada, not a state.
+  &__last {
+    color: var(--lcars-accent, #{vars.$lcars-sky});
+    overflow-wrap: anywhere;
+  }
+}

@@ -31,6 +31,13 @@
   margin-top: 1rem;
 }
 
+// What one folding section of the form holds, spaced as the form itself is.
+.character-manage-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .form-row {
   display: flex;
   gap: 1rem;
@@ -45,7 +52,7 @@
 }
 
 .error-message {
-  background-color: rgba(vars.$lcars-red, 0.1);
+  background-color: color.change(vars.$lcars-red, $alpha: 0.1);
   color: color.adjust(vars.$lcars-red, $lightness: 20%);
   padding: 1rem;
   border-radius: 4px;

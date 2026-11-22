@@ -1,0 +1,638 @@
+@if (state().kind === 'LOADING') {
+  <app-loading-bar loadingText="Reading scan diagnostics"></app-loading-bar>
+}
+
+<div
+  id="scan-diagnostics-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Scan Diagnostics</h1>
+    <app-help-link
+      slug="site-admin-scanning"
+      label="Help with Scan Diagnostics" />
+    <p class="admin-page-intro">
+      What the file scan worker has done, what it is running on, and what is
+      waiting for it. Every figure is a total: nothing here names a file, an
+      uploader or a signature.
+    </p>
+
+    @if (state().kind === 'ERROR') {
+      <app-lcars-error-message
+        title="Unavailable"
+        [message]="errorMessage"></app-lcars-error-message>
+      <button
+        type="button"
+        class="lcars-btn lcars-btn-auto"
+        (click)="load()">
+        Try again
+      </button>
+    }
+
+    @let current = state();
+    @if (current.kind === 'READY') {
+      @let diagnostics = current.diagnostics;
+
+      <div class="scan-diagnostics__read">
+        <p>Read {{ diagnostics.generatedAt | appDate: 'medium' }}</p>
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto"
+          (click)="refresh()">
+          Refresh
+        </button>
+      </div>
+
+      <app-collapsible-section
+        heading="Alerts"
+        barClass="small-lcars-bar-gap">
+        @if (diagnostics.alerts.length === 0) {
+          <p>Nothing needs a site admin.</p>
+        } @else {
+          <p class="scan-diagnostics__note">
+            Every site admin was told of each in the site when it opened, and
+            will be told again when it clears.
+          </p>
+          <ul
+            class="scan-diagnostics__alerts"
+            aria-label="Open alerts, oldest first">
+            @for (alert of diagnostics.alerts; track alert.kind) {
+              <li>
+                <strong>{{ alertTitleOf(alert) }}</strong>
+                @if (alertDetailOf(alert); as detail) {
+                  <span class="scan-diagnostics__alert-detail">{{
+                    detail
+                  }}</span>
+                }
+                <span class="scan-diagnostics__alert-when"
+                  >Opened {{ alert.openedAt | appDate: 'medium' }} · last seen
+                  {{ alert.lastSeenAt | appDate: 'medium' }}</span
+                >
+              </li>
+            }
+          </ul>
+        }
+      </app-collapsible-section>
+
+      <app-collapsible-section
+        heading="Worker"
+        barClass="small-lcars-bar-gap">
+        @if (diagnostics.workers === null) {
+          <p class="scan-diagnostics__unavailable">
+            The worker’s heartbeat could not be read. Its migrations may not
+            have run here yet.
+          </p>
+        } @else {
+          @let workers = summariseWorkers(diagnostics.workers);
+
+          @if (workers.live.length > 0) {
+            <ul
+              class="scan-diagnostics__workers"
+              aria-label="Worker processes, latest heartbeat first">
+              @for (worker of workers.live; track worker.workerId) {
+                <li>
+                  <h3 class="scan-diagnostics__worker-state">
+                    {{ workerStateOf(worker) }}
+                  </h3>
+                  <dl class="scan-diagnostics__details">
+                    <div>
+                      <dt>Process</dt>
+                      <dd>
+                        <code class="scan-diagnostics__id">{{
+                          worker.workerId
+                        }}</code>
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Signature version</dt>
+                      <dd>{{ worker.definitionsVersion ?? 'Not reported' }}</dd>
+                    </div>
+                    <div>
+                      <dt>Signature age</dt>
+                      <dd>
+                        @if (worker.signatureAgeHours !== null) {
+                          {{ worker.signatureAgeHours }} hours
+                        } @else {
+                          Unknown
+                        }
+                      </dd>
+                    </div>
+                    <div>
+                      <dt>Jobs in hand</dt>
+                      <dd>{{ worker.jobsInHand }}</dd>
+                    </div>
+                    <div>
+                      <dt>Last heartbeat</dt>
+                      <dd>{{ formatSecondsAgo(worker.secondsSinceBeat) }}</dd>
+                    </div>
+                    @if (worker.pausedSince; as pausedSince) {
+                      <div>
+                        <dt>Paused since</dt>
+                        <dd>{{ pausedSince | appDate: 'medium' }}</dd>
+                      </div>
+                    }
+                  </dl>
+                </li>
+              }
+            </ul>
+            @if (workers.gone > 0) {
+              <p class="scan-diagnostics__note">
+                Not shown: {{ workers.gone }} earlier
+                {{ workers.gone === 1 ? 'process' : 'processes' }} that stopped
+                checking in, as each restart leaves one behind for a day.
+              </p>
+            }
+          } @else if (workers.quietMinutes !== null) {
+            <p class="scan-diagnostics__unavailable">
+              No worker has checked in for {{ workers.quietMinutes }}
+              {{ workers.quietMinutes === 1 ? 'minute' : 'minutes' }}. Uploads
+              are not being scanned.
+            </p>
+          } @else {
+            <p class="scan-diagnostics__unavailable">
+              No worker is running: none has checked in during the last day.
+              Uploads are not being scanned.
+            </p>
+          }
+        }
+      </app-collapsible-section>
+
+      <app-collapsible-section
+        heading="Publication"
+        barClass="small-lcars-bar-gap">
+        @let publication = diagnostics.publication;
+        @if (publication.paused) {
+          <p>
+            <strong>Publication is paused.</strong> Uploads are still scanned,
+            but nothing is published until it resumes.
+            @if (publication.queuePaused === null) {
+              The job queues can’t be reached just now; they will be paused as
+              soon as they answer, and nothing is published meanwhile.
+            }
+          </p>
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Since</dt>
+              <dd>
+                {{
+                  publication.pausedAt
+                    ? (publication.pausedAt | appDate: 'medium')
+                    : 'Unknown'
+                }}
+              </dd>
+            </div>
+            <div>
+              <dt>By</dt>
+              <dd>{{ pausedBy(publication) }}</dd>
+            </div>
+            @if (publication.held !== null) {
+              <div>
+                <dt>Waiting to be published</dt>
+                <dd>{{ publication.held }}</dd>
+              </div>
+            }
+          </dl>
+        } @else {
+          <p>
+            <strong>Publication is running.</strong>
+            @if (publication.queuePaused === null) {
+              The job queues can’t be reached just now, so nothing is
+              published until they answer.
+            } @else {
+              Uploads are published as soon as the scanner clears them.
+            }
+          </p>
+        }
+        <p>
+          <a [routerLink]="siteSettingsLink">Pause or resume publication on
+            the Site Settings page</a>, under Operations on the Admin page.
+        </p>
+
+        @let owed = diagnostics.owedPurges;
+        @if (owed.owed === 0) {
+          <p>Every withdrawn picture has been deleted from Cloudflare.</p>
+        } @else {
+          <p>
+            <strong>{{ owedPicturesOf(owed.owed) }} still to be deleted from
+              Cloudflare.</strong>
+            Until it is, a withdrawn picture can still be reached at its old
+            address. The site asks Cloudflare again every hour.
+          </p>
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Owed for over a day</dt>
+              <dd>{{ owed.overdue }}</dd>
+            </div>
+            <div>
+              <dt>Oldest</dt>
+              <dd>{{ owed.oldestHours }} hours</dd>
+            </div>
+          </dl>
+        }
+      </app-collapsible-section>
+
+      <app-collapsible-section
+        heading="Usage"
+        barClass="small-lcars-bar-gap">
+        @if (diagnostics.usage === null) {
+          <p class="scan-diagnostics__unavailable">
+            The worker’s usage figures could not be read. Its migrations may not
+            have run here yet.
+          </p>
+        } @else {
+          <p class="scan-diagnostics__note">
+            A re-scan is a campaign’s, or any scan of a file scanned before. A
+            retry is a claim beyond the first.
+          </p>
+
+          <table class="scan-diagnostics-table">
+            <caption>
+              Scans
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Measure</th>
+                @for (window of diagnostics.usage; track window.window) {
+                  <th
+                    scope="col"
+                    class="scan-diagnostics-table__number">
+                    {{ windowLabels[window.window] }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of activityRows; track row.key) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (window of diagnostics.usage; track window.window) {
+                    <td
+                      class="scan-diagnostics-table__number"
+                      [attr.data-label]="windowLabels[window.window]">
+                      {{ countOf(window, row.key) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <table class="scan-diagnostics-table">
+            <caption>
+              Outcomes
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Outcome</th>
+                @for (window of diagnostics.usage; track window.window) {
+                  <th
+                    scope="col"
+                    class="scan-diagnostics-table__number">
+                    {{ windowLabels[window.window] }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of outcomeRows; track row.key) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (window of diagnostics.usage; track window.window) {
+                    <td
+                      class="scan-diagnostics-table__number"
+                      [attr.data-label]="windowLabels[window.window]">
+                      {{ countOf(window, row.key) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <table class="scan-diagnostics-table">
+            <caption>
+              Latency
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Measure</th>
+                @for (window of diagnostics.usage; track window.window) {
+                  <th
+                    scope="col"
+                    class="scan-diagnostics-table__number">
+                    {{ windowLabels[window.window] }}
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of latencyRows; track row.key) {
+                <tr>
+                  <th scope="row">{{ row.label }}</th>
+                  @for (window of diagnostics.usage; track window.window) {
+                    <td
+                      class="scan-diagnostics-table__number"
+                      [attr.data-label]="windowLabels[window.window]">
+                      {{ durationOf(window, row.key) }}
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </app-collapsible-section>
+
+      <app-collapsible-section
+        heading="Engine"
+        barClass="small-lcars-bar-gap">
+        @if (diagnostics.engine; as engine) {
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Scanner</dt>
+              <dd>{{ engine.engine }} {{ engine.engineVersion ?? '' }}</dd>
+            </div>
+            <div>
+              <dt>Signature version</dt>
+              <dd>{{ engine.signatureVersion ?? 'Not reported' }}</dd>
+            </div>
+            <div>
+              <dt>Signatures built</dt>
+              <dd>
+                @if (engine.definitionsBuiltAt; as builtAt) {
+                  {{ builtAt | appDate: 'medium' }}
+                } @else {
+                  Not reported
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Signature age</dt>
+              <dd>
+                @if (engine.signatureAgeHours !== null) {
+                  {{ engine.signatureAgeHours }} hours
+                } @else {
+                  Unknown
+                }
+              </dd>
+            </div>
+            <div>
+              <dt>Reported</dt>
+              <dd>{{ engine.reportedAt | appDate: 'medium' }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="scan-diagnostics__unavailable">
+            No scan has reported an engine yet, or the worker’s figures could
+            not be read.
+          </p>
+        }
+      </app-collapsible-section>
+
+      <app-collapsible-section
+        heading="Backlog"
+        barClass="small-lcars-bar-gap">
+        @if (diagnostics.queue; as queue) {
+          <dl class="scan-diagnostics__details">
+            <div>
+              <dt>Waiting to be picked up</dt>
+              <dd>{{ queue.waiting }}</dd>
+            </div>
+            <div>
+              <dt>Put back until the scanner is fit</dt>
+              <dd>{{ queue.delayed }}</dd>
+            </div>
+            <div>
+              <dt>Being scanned now</dt>
+              <dd>{{ queue.active }}</dd>
+            </div>
+            <div>
+              <dt>Given up on by the queue</dt>
+              <dd>{{ queue.failed }}</dd>
+            </div>
+          </dl>
+        } @else {
+          <p class="scan-diagnostics__unavailable">
+            The scan queue could not be reached.
+          </p>
+        }
+
+        <dl class="scan-diagnostics__details">
+          <div>
+            <dt>Stored, not yet sent to scan</dt>
+            <dd>{{ diagnostics.awaiting.quarantined }}</dd>
+          </div>
+          <div>
+            <dt>Sent to scan, no verdict yet</dt>
+            <dd>{{ diagnostics.awaiting.scanning }}</dd>
+          </div>
+          <div>
+            <dt>Waiting to be sent again</dt>
+            <dd>{{ diagnostics.awaiting.retryPending }}</dd>
+          </div>
+        </dl>
+      </app-collapsible-section>
+    }
+
+    <!--
+      Each panel draws its own section, so it is given its own colour: one
+      that differs from the sections on either side of it.
+    -->
+    <app-failed-jobs-panel class="accent-cool"></app-failed-jobs-panel>
+
+    <app-collapsible-section
+      heading="Refused uploads"
+      barClass="small-lcars-bar-gap">
+      <p>
+        Why each upload was refused, and with what: the rejection code and the
+        engine, never what matched. The uploader is only told it was not
+        accepted.
+      </p>
+
+      <form
+        class="scan-diagnostics__lookup"
+        (submit)="$event.preventDefault(); lookUp(assetId.value)">
+        <div class="lcars-input-container">
+          <label for="scan-asset-id">Look up an asset by its ID</label>
+          <input
+            #assetId
+            id="scan-asset-id"
+            type="text"
+            autocomplete="off"
+            spellcheck="false" />
+        </div>
+        <button
+          type="submit"
+          class="lcars-btn">
+          Look up
+        </button>
+      </form>
+
+      @switch (lookup().kind) {
+        @case ('LOADING') {
+          <p>Looking it up…</p>
+        }
+        @case ('INVALID') {
+          <p class="scan-diagnostics__unavailable">
+            That is not an asset ID. An ID looks like
+            <code>1b4e28ba-2fa1-11d2-883f-0016d3cca427</code>.
+          </p>
+        }
+        @case ('NOT_FOUND') {
+          <p class="scan-diagnostics__unavailable">No asset has that ID.</p>
+        }
+        @case ('ERROR') {
+          <p class="scan-diagnostics__unavailable">
+            The asset could not be looked up. Please try again.
+          </p>
+        }
+      }
+      @if (lookup(); as found) {
+        @if (found.kind === 'FOUND') {
+          <dl class="scan-diagnostics__details scan-diagnostics__asset">
+            <div>
+              <dt>Asset</dt>
+              <dd>
+                <code>{{ found.asset.id }}</code>
+              </dd>
+            </div>
+            <div>
+              <dt>For</dt>
+              <dd>{{ found.asset.kind }}</dd>
+            </div>
+            <div>
+              <dt>State</dt>
+              <dd>{{ found.asset.state }}</dd>
+            </div>
+            <div>
+              <dt>Rejection code</dt>
+              <dd>{{ found.asset.rejectionCode ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt>Engine</dt>
+              <dd>
+                {{ found.asset.scanEngine ?? '—' }}
+                {{ found.asset.scanEngineVersion ?? '' }}
+              </dd>
+            </div>
+            <div>
+              <dt>Signatures</dt>
+              <dd>{{ found.asset.scanSignatureVersion ?? '—' }}</dd>
+            </div>
+            <div>
+              <dt>Policy</dt>
+              <dd>{{ found.asset.policyVersion }}</dd>
+            </div>
+            <div>
+              <dt>Uploaded</dt>
+              <dd>{{ found.asset.createdAt | appDate: 'medium' }}</dd>
+            </div>
+            <div>
+              <dt>Verdict</dt>
+              <dd>
+                {{
+                  found.asset.lastVerdictAt
+                    ? (found.asset.lastVerdictAt | appDate: 'medium')
+                    : 'None yet'
+                }}
+              </dd>
+            </div>
+          </dl>
+        }
+      }
+
+      @switch (rejections().kind) {
+        @case ('LOADING') {
+          <p>Loading the refused uploads…</p>
+        }
+        @case ('ERROR') {
+          <p class="scan-diagnostics__unavailable">
+            The refused uploads could not be read.
+          </p>
+        }
+      }
+      @if (rejections(); as list) {
+        @if (list.kind === 'READY') {
+          @if (list.page.items.length === 0) {
+            <p>Nothing has been refused.</p>
+          } @else {
+            <table class="fleet-community-table">
+              <caption>
+                Refused uploads, newest verdict first
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Verdict</th>
+                  <th scope="col">Asset</th>
+                  <th scope="col">Code</th>
+                  <th scope="col">Engine</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (asset of list.page.items; track asset.id) {
+                  <tr>
+                    <td data-label="Verdict">
+                      {{
+                        asset.lastVerdictAt
+                          ? (asset.lastVerdictAt | appDate: 'medium')
+                          : '—'
+                      }}
+                    </td>
+                    <td data-label="Asset">
+                      {{ asset.kind }}
+                      <span class="fleet-report-note"
+                        ><code>{{ asset.id }}</code></span
+                      >
+                    </td>
+                    <td data-label="Code">{{ asset.rejectionCode ?? '—' }}</td>
+                    <td data-label="Engine">
+                      {{ asset.scanEngine ?? '—' }}
+                      {{ asset.scanEngineVersion ?? '' }}
+                      @if (asset.scanSignatureVersion) {
+                        <span class="fleet-report-note"
+                          >signatures {{ asset.scanSignatureVersion }}</span
+                        >
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (pageCountOf(list.page) > 1) {
+              <div class="lcars-pagination">
+                <button
+                  type="button"
+                  [disabled]="rejectionPage() <= 1"
+                  (click)="turnRejections(-1)">
+                  Newer
+                </button>
+                <span
+                  >Page {{ rejectionPage() }} of
+                  {{ pageCountOf(list.page) }}</span
+                >
+                <button
+                  type="button"
+                  [disabled]="rejectionPage() >= pageCountOf(list.page)"
+                  (click)="turnRejections(1)">
+                  Older
+                </button>
+              </div>
+            }
+          }
+        }
+      }
+    </app-collapsible-section>
+
+    <app-rescan-panel class="accent-perano"></app-rescan-panel>
+
+    <app-image-estate-panel class="accent-orange"></app-image-estate-panel>
+
+    <div class="scan-diagnostics__back">
+      <a
+        class="lcars-btn lcars-btn-auto"
+        [routerLink]="adminLink"
+        >Back to Admin</a
+      >
+    </div>
+  </div>
+</div>

@@ -1,33 +1,22 @@
-@use 'sass:color';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
 // The help section.
-// Two pages — the index and a guide — that are mostly text, so there is very
-// little here: enough to make the index read as a set of panels the reader
-// chooses between, and enough to keep a wall of prose comfortable to read.
-// Everything is scoped by the `help-` prefix its templates use.
+// Three pages — the index, a section and a guide — that are mostly text, so
+// there is very little here: enough to make the index and each section read as
+// a set of panels the reader chooses between, and enough to keep a wall of
+// prose comfortable to read. Everything is scoped by the `help-` prefix its
+// templates use.
 
-// What each topic's guides are coloured, keyed by the topic's id.
-// ---
-// The values are the ones the rest of the site already uses for the same
-// subjects — crew's sky for Community, the builder's perano for Custom
-// Tracking, a Story's sunflower for Storytime, and the moderation card's red
-// for the guides to running it — so a guide and the pages it describes agree
-// about what colour a thing is. Every one of them carries black text at 4.5:1
-// or better, which is what lets a guide's title sit on the block.
-$help-topic-colours: (
-  'community': vars.$lcars-sky,
-  'custom-tracking': vars.$lcars-perano,
-  'storytime': vars.$lcars-sunflower,
-  'storytime-admin': vars.$lcars-bluey,
-);
-
-#help-page {
+// The index's section tiles (FC-048) and a section's guides are the same
+// panels, so the two pages share everything below.
+#help-page,
+#help-topic-page {
   .help-topic__intro {
     margin-bottom: 1rem;
   }
 
+  .help-tile-grid,
   .help-guide-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -37,12 +26,27 @@ $help-topic-colours: (
     list-style: none;
   }
 
-  // The shape a Storytime panel takes, drawn by the shared mixins rather than
-  // here, in a colour that stands in until the loop below says which topic
-  // this is. A guide belonging to a topic nobody has chosen a colour for is
-  // still a panel rather than an unstyled row.
+  // The shape a Storytime panel takes, in the next colour of the grid's
+  // rotation rather than one colour per section, which left every guide on a
+  // section's page the same. The colour is read at runtime, so the spine and
+  // the wash are mixed from it here rather than by the build-time mixin, as
+  // `<app-lcars-panel>` does.
   .help-panel-card {
-    @include mixins.lcars-panel-card(vars.$lcars-perano);
+    --help-panel-accent: var(--lcars-accent, #{vars.$lcars-perano});
+
+    @include mixins.lcars-card;
+
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    list-style: none;
+    border-left: 10px solid
+      color-mix(in srgb, var(--help-panel-accent) 80%, #{vars.$lcars-black});
+    background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--help-panel-accent) 14%, transparent) 0%,
+      #{vars.$lcars-grey-bg} 100%
+    );
 
     // The grid's gap is the space between panels; the margin a panel brings
     // with it would add a second one under every row.
@@ -59,13 +63,22 @@ $help-topic-colours: (
     text-decoration: none;
 
     &:focus-visible {
-      outline: 2px solid vars.$lcars-perano;
+      outline: 2px solid var(--help-panel-accent);
       outline-offset: 2px;
     }
   }
 
   .help-panel-card__heading {
-    @include mixins.lcars-panel-card-heading(vars.$lcars-perano);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    background: var(--help-panel-accent);
+    border-bottom: 2px solid
+      color-mix(in srgb, var(--help-panel-accent) 80%, #{vars.$lcars-black});
+    color: vars.$lcars-black;
+    text-decoration: none;
   }
 
   .help-panel-card__name {
@@ -83,6 +96,13 @@ $help-topic-colours: (
     @include mixins.lcars-panel-card-marks;
   }
 
+  // How many guides a section holds for the reader. It sits on the title's
+  // block, so it takes the block's black text rather than a colour of its own.
+  .help-panel-card__count {
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
   .help-panel-card__summary {
     @include mixins.lcars-panel-card-body;
 
@@ -97,26 +117,8 @@ $help-topic-colours: (
   }
 }
 
-// Each topic in its own colour. Written after the block above rather than
-// inside it: the two selectors weigh the same, so source order is what decides
-// whether a topic's colour is heard over the stand-in.
-@each $id, $colour in $help-topic-colours {
-  #help-page .help-panel-card--#{$id} {
-    @include mixins.lcars-panel-card($colour);
-
-    margin-bottom: 0;
-
-    > .help-panel-card__link > .help-panel-card__heading {
-      @include mixins.lcars-panel-card-heading($colour);
-    }
-
-    > .help-panel-card__link:focus-visible {
-      outline-color: $colour;
-    }
-  }
-}
-
-#help-guide-page {
+#help-guide-page,
+#help-topic-page {
   .help-guide__breadcrumb {
     display: flex;
     gap: 0.5rem;
@@ -129,6 +131,54 @@ $help-topic-colours: (
     color: vars.$lcars-sunflower;
   }
 
+  // A guide's video, under its summary. The still, the button holding it and
+  // the player that replaces it are one size, so pressing play swaps a picture
+  // for a video rather than resizing the page around it.
+  .help-video {
+    max-width: 48rem;
+    margin: 0 0 1.5rem;
+  }
+
+  .help-video__poster,
+  .help-video__still,
+  .help-video__player {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: none;
+    border-radius: 6px;
+  }
+
+  // The still is a picture, not one of the site's buttons, so the sizing every
+  // LCARS button is given is taken back here, along with the strip of line box
+  // a baseline-aligned image would leave beneath it.
+  .help-video__poster {
+    position: relative;
+    height: auto;
+    margin: 0;
+    padding: 0;
+    background: none;
+    line-height: 0;
+    cursor: pointer;
+  }
+
+  .help-video__play {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    color: vars.$lcars-white;
+    text-shadow: 0 2px 8px vars.$black-a70;
+  }
+
+  .help-video__caption {
+    margin-top: 0.35rem;
+    font-size: 0.85rem;
+  }
+
   .collapsible-section__content {
     max-width: 92%;
   }
@@ -136,4 +186,13 @@ $help-topic-colours: (
   .help-guide__other-summary {
     font-size: 0.9rem;
   }
+}
+
+// A note that the feature a page describes is switched off, while its help
+// stays so that it can still be found (FC-050).
+.help-switched-off {
+  margin: 0 0 1rem;
+  padding-left: 0.75rem;
+  border-left: 0.35rem solid vars.$lcars-tangerine;
+  font-style: italic;
 }

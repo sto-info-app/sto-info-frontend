@@ -1,0 +1,190 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// A Fleet news post as a card, in the anatomy of the site's own news cards
+// (shared/components/news-card): a tinted left edge and header bar, then the
+// body beside a "Read more" column and a chevron.
+:host {
+  display: block;
+}
+
+.fleet-news-card {
+  @include mixins.lcars-card;
+
+  border-left: 10px solid vars.$lcars-c47;
+
+  // Every part of a row is laid out with a gap, never a trailing space: a
+  // space at the edge of a flex item is dropped, which ran the words together.
+  &__header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem 0.75rem;
+    padding: 0.6rem 1rem;
+    background: vars.$lcars-c47;
+    border-bottom: 2px solid color.adjust(vars.$lcars-c47, $lightness: -20%);
+    color: vars.$lcars-black;
+  }
+
+  &--draft {
+    border-left-color: vars.$lcars-sunflower;
+
+    .fleet-news-card__header {
+      background: vars.$lcars-sunflower;
+      border-bottom-color: color.adjust(
+        vars.$lcars-sunflower,
+        $lightness: -20%
+      );
+    }
+  }
+
+  &__header-left,
+  &__date,
+  &__byline {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 0;
+  }
+
+  &__header-left {
+    gap: 0.6rem;
+  }
+
+  &__icon {
+    font-size: 1.05rem;
+  }
+
+  &__audience {
+    font-weight: bold;
+    font-size: 1.05rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  &__draft {
+    padding: 0 0.6rem;
+    border-radius: 1rem;
+    background: vars.$lcars-black;
+    color: vars.$lcars-sunflower;
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  &__date {
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: vars.$black-a80;
+  }
+
+  &__main {
+    display: flex;
+    align-items: stretch;
+    min-height: 72px;
+  }
+
+  &__thumb {
+    align-self: center;
+    flex-shrink: 0;
+    width: 12rem;
+    aspect-ratio: 16 / 9;
+    margin: 0.75rem 0 0.75rem 1rem;
+    object-fit: cover;
+    border-radius: 0.5rem;
+  }
+
+  &__body {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 0.75rem 1rem;
+    overflow-wrap: anywhere;
+  }
+
+  &__title {
+    margin: 0;
+    font-size: clamp(1.2rem, 1rem + 1.2vw, 1.6rem);
+
+    a {
+      text-decoration: none;
+      color: inherit;
+
+      &:hover {
+        color: vars.$lcars-c44;
+      }
+    }
+  }
+
+  &__summary {
+    margin: 0;
+    font-size: 0.95rem;
+    color: vars.$lcars-white;
+  }
+
+  &__byline {
+    margin: 0;
+    font-size: 0.85rem;
+    color: vars.$lcars-sky;
+  }
+
+  &__readmore-col {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    padding: 0.75rem 1rem;
+  }
+
+  &__readmore {
+    text-decoration: none;
+    font-size: 0.85rem !important;
+  }
+
+  &__action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem;
+    background: vars.$black-a40;
+    border-left: 1px solid vars.$white-a10;
+    color: vars.$lcars-perano;
+    text-decoration: none;
+
+    .cta-icon {
+      font-size: 1.2rem;
+    }
+
+    &:hover {
+      background: vars.$black-a55;
+      color: vars.$lcars-c44;
+    }
+  }
+
+  // On a narrow screen the cover sits above the words, and the chevron alone
+  // leads on: the pill would squeeze the title.
+  @media (width <= 640px) {
+    &__main {
+      flex-wrap: wrap;
+    }
+
+    &__thumb {
+      width: calc(100% - 2rem);
+      margin: 0.75rem 1rem 0;
+    }
+
+    &__body {
+      flex-basis: calc(100% - 4rem);
+    }
+
+    &__readmore-col {
+      display: none;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+@use 'lcars-tabs' as tabs;
+
+// Sized by their labels, as the Fleet strip is.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+:host {
+  display: block;
+  margin-bottom: 1rem;
+}

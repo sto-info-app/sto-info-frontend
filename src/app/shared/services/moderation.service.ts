@@ -123,12 +123,13 @@ export class ModerationService {
    * against them.
    *
    * @param userId - The member to disable.
-   * @param payload - The reason recorded against the account.
+   * @param payload - The reason recorded against the account, and in the
+   *   site admin log (FC-039).
    * @returns An observable of the updated member.
    */
   disableUser(
     userId: string,
-    payload: DisableUserRequest = {},
+    payload: DisableUserRequest,
   ): Observable<ModeratedUser> {
     return this.authenticated<ModeratedUser>(options =>
       this._http.post<ModeratedUser>(
@@ -143,13 +144,14 @@ export class ModerationService {
    * Restores a disabled member's account.
    *
    * @param userId - The member to restore.
+   * @param reason - Why, kept in the site admin log (FC-039).
    * @returns An observable of the updated member.
    */
-  enableUser(userId: string): Observable<ModeratedUser> {
+  enableUser(userId: string, reason: string): Observable<ModeratedUser> {
     return this.authenticated<ModeratedUser>(options =>
       this._http.post<ModeratedUser>(
         `${API_URLS.MODERATION_ADMIN_USERS}/${userId}/enable`,
-        {},
+        { reason },
         options,
       ),
     );

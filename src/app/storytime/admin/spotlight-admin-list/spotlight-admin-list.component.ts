@@ -18,6 +18,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runner';
 import { SpotlightService } from '../../spotlight.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
 /**
  * Every Spotlight entry, as the editors who schedule them see it.
@@ -32,6 +33,7 @@ import { SpotlightService } from '../../spotlight.service';
   templateUrl: './spotlight-admin-list.component.html',
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     RouterModule,
     LoadingBarComponent,

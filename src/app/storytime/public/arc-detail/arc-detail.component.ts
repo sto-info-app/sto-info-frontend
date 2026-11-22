@@ -11,6 +11,8 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { switchMap } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { AuthService } from 'src/app/core/auth/auth.service';
 import {
   Arc,
@@ -49,6 +51,8 @@ import { ReactionControlComponent } from '../../shared/reaction-control/reaction
     FollowButtonComponent,
     AddToListComponent,
     CommentThreadComponent,
+    CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class ArcDetailComponent implements OnInit {

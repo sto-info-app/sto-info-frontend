@@ -1,6 +1,14 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
+
+import { BehaviorSubject } from 'rxjs';
+
 import { AuthService } from 'src/app/core/auth/auth.service';
+import {
+  FLEET_FEATURES_DISABLED,
+  FleetFeatureState,
+} from 'src/app/models/fleet.models';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityTabsComponent } from './community-tabs.component';
 
@@ -8,9 +16,13 @@ describe('CommunityTabsComponent', () => {
   let fixture: ComponentFixture<CommunityTabsComponent>;
   let component: CommunityTabsComponent;
   let authServiceSpy: { isLoggedIn: jest.Mock };
+  let fleetOffered$: BehaviorSubject<boolean>;
+  let features$: BehaviorSubject<FleetFeatureState>;
 
   beforeEach(async () => {
     authServiceSpy = { isLoggedIn: jest.fn(() => false) };
+    fleetOffered$ = new BehaviorSubject<boolean>(true);
+    features$ = new BehaviorSubject<FleetFeatureState>(FLEET_FEATURES_DISABLED);
 
     await TestBed.configureTestingModule({
       imports: [CommunityTabsComponent],
@@ -20,6 +32,13 @@ describe('CommunityTabsComponent', () => {
         {
           provide: RoutingService,
           useValue: { getLink: jest.fn((route: string) => `/${route}`) },
+        },
+        {
+          provide: FleetConfigurationService,
+          useValue: {
+            isOffered: () => fleetOffered$,
+            getFeatures: () => features$,
+          },
         },
       ],
     }).compileComponents();
@@ -34,9 +53,11 @@ describe('CommunityTabsComponent', () => {
    * `detectChanges` would not re-evaluate the tabs getter.
    *
    * @param loggedIn - Whether the visitor is signed in.
+   * @param fleetOffered - Whether the Fleet section is being offered.
    */
-  function render(loggedIn = false): void {
+  function render(loggedIn = false, fleetOffered = true): void {
     authServiceSpy.isLoggedIn.mockReturnValue(loggedIn);
+    fleetOffered$.next(fleetOffered);
     fixture.detectChanges();
   }
 
@@ -60,6 +81,7 @@ describe('CommunityTabsComponent', () => {
       'Recently Joined',
       'Recently Active',
       'Profiles',
+      'Fleets',
     ]);
   });
 
@@ -76,6 +98,7 @@ describe('CommunityTabsComponent', () => {
       '/community/registry/recently-joined',
       '/community/registry/recently-active',
       '/community/registry/profiles',
+      '/fleets',
     ]);
   });
 
@@ -106,6 +129,66 @@ describe('CommunityTabsComponent', () => {
     const profiles = component.tabs.find(tab => tab.label === 'Profiles');
 
     expect(profiles?.exact).toBe(false);
+  });
+
+  it('should put Fleets last, after the tabs that stay in the section', () => {
+    render(true);
+
+    const labels = renderedLabels();
+
+    expect(labels[labels.length - 1]).toBe('Fleets');
+    expect(labels[labels.length - 2]).toBe('Friends');
+  });
+
+  it('should drop the Fleets tab when the section is not offered', () => {
+    render(true, false);
+
+    expect(renderedLabels()).not.toContain('Fleets');
+  });
+
+  // The answer arrives after the strip has already rendered, and nothing
+  // else on a community page dirties this view. Without the change-detection
+  // pass the operator forces, the tab would not appear until the reader did
+  // something unrelated.
+  it('should add the Fleets tab when the answer arrives after the first render', () => {
+    render(false, false);
+
+    expect(renderedLabels()).not.toContain('Fleets');
+
+    fleetOffered$.next(true);
+
+    expect(renderedLabels()).toContain('Fleets');
+  });
+
+  it('should match the Fleets tab exactly, since it never lights from here', () => {
+    render();
+
+    const fleets = component.tabs.find(tab => tab.label === 'Fleets');
+
+    expect(fleets?.link).toBe('/fleets');
+    expect(fleets?.exact).toBe(true);
+  });
+
+  it('should offer a Chat door, last, to a signed-in reader while chat is on', () => {
+    features$.next({ ...FLEET_FEATURES_DISABLED, chatEnabled: true });
+    render(true);
+
+    const labels = renderedLabels();
+    const chat = component.tabs.find(tab => tab.label === 'Chat');
+
+    expect(labels[labels.length - 1]).toBe('Chat');
+    expect(chat?.link).toBe('/chat');
+    expect(chat?.exact).toBe(true);
+  });
+
+  it('should offer no Chat door signed out, or while chat is off', () => {
+    features$.next({ ...FLEET_FEATURES_DISABLED, chatEnabled: true });
+    render(false);
+    expect(renderedLabels()).not.toContain('Chat');
+
+    features$.next(FLEET_FEATURES_DISABLED);
+    authServiceSpy.isLoggedIn.mockReturnValue(true);
+    expect(component.tabs.map(tab => tab.label)).not.toContain('Chat');
   });
 
   it('should cap the strip with the LCARS end piece', () => {

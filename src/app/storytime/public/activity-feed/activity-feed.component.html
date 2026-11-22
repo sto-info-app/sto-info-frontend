@@ -35,7 +35,7 @@
             <time
               class="storytime-feed__when"
               [attr.datetime]="entry.occurredAt">
-              {{ entry.occurredAt | date: 'medium' }}
+              {{ entry.occurredAt | appDate: 'medium' }}
             </time>
           </div>
         </li>
@@ -45,7 +45,7 @@
     @if (hasMore) {
       <button
         type="button"
-        class="lcars-btn bluey storytime-feed__more"
+        class="lcars-btn storytime-feed__more"
         [disabled]="isLoading"
         (click)="loadMore()">
         {{ isLoading ? 'Loading…' : 'Show more' }}

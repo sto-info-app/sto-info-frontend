@@ -171,7 +171,10 @@ describe('AccessControlAdminService', () => {
     it('should put the role and return the updated summary', () => {
       let received: UserAccessSummary | undefined;
       service
-        .setUserRole(MEMBER_ID, { role: ASSIGNABLE_ROLES.STORYTIME_CURATOR })
+        .setUserRole(MEMBER_ID, {
+          role: ASSIGNABLE_ROLES.STORYTIME_CURATOR,
+          reason: 'Runs the anthology',
+        })
         .subscribe(result => (received = result));
 
       const req = httpMock.expectOne(
@@ -181,6 +184,7 @@ describe('AccessControlAdminService', () => {
       expect(req.request.headers.get('Authorization')).toBe(AUTH_HEADER);
       expect(req.request.body).toEqual({
         role: ASSIGNABLE_ROLES.STORYTIME_CURATOR,
+        reason: 'Runs the anthology',
       });
       req.flush(summary);
 
@@ -191,7 +195,7 @@ describe('AccessControlAdminService', () => {
       signOut();
 
       service
-        .setUserRole(MEMBER_ID, { role: ASSIGNABLE_ROLES.USER })
+        .setUserRole(MEMBER_ID, { role: ASSIGNABLE_ROLES.USER, reason: 'Why' })
         .subscribe({
           error: (error: Error) => {
             expect(error.message).toBe('No token found');
@@ -205,13 +209,15 @@ describe('AccessControlAdminService', () => {
     it('should delete the override for the permission code', () => {
       let received: UserAccessSummary | undefined;
       service
-        .removePermissionOverride(MEMBER_ID, 'storytime.moderate')
+        .removePermissionOverride(MEMBER_ID, 'storytime.moderate', 'Done')
         .subscribe(result => (received = result));
 
       const req = httpMock.expectOne(
         `${API_URLS.ACCESS_CONTROL_ADMIN_USERS}/${MEMBER_ID}/permission-overrides/storytime.moderate`,
       );
       expect(req.request.method).toBe('DELETE');
+      // FC-039: the reason goes in the body, for the site admin log.
+      expect(req.request.body).toEqual({ reason: 'Done' });
       req.flush(summary);
 
       expect(received).toEqual(summary);
@@ -219,7 +225,7 @@ describe('AccessControlAdminService', () => {
 
     it('should escape a permission code so it stays one path segment', () => {
       service
-        .removePermissionOverride(MEMBER_ID, 'storytime/moderate')
+        .removePermissionOverride(MEMBER_ID, 'storytime/moderate', 'Done')
         .subscribe();
 
       const req = httpMock.expectOne(
@@ -233,7 +239,7 @@ describe('AccessControlAdminService', () => {
       signOut();
 
       service
-        .removePermissionOverride(MEMBER_ID, 'storytime.moderate')
+        .removePermissionOverride(MEMBER_ID, 'storytime.moderate', 'Done')
         .subscribe({
           error: (error: Error) => {
             expect(error.message).toBe('No token found');

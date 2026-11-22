@@ -1,0 +1,5 @@
+// The pager is styled globally as `.lcars-pagination`; its host takes no box
+// of its own, so it lays out as the bare markup always has.
+:host {
+  display: contents;
+}

@@ -216,30 +216,4 @@ describe('StatsComponent', () => {
       );
     });
   });
-
-  describe('section toggles', () => {
-    it('should toggle account breakdown expansion', () => {
-      expect(component.accountBreakdownsExpanded).toBe(true);
-      component.toggleAccountBreakdowns();
-      expect(component.accountBreakdownsExpanded).toBe(false);
-      component.toggleAccountBreakdowns();
-      expect(component.accountBreakdownsExpanded).toBe(true);
-    });
-
-    it('should toggle character breakdown expansion', () => {
-      expect(component.characterBreakdownsExpanded).toBe(true);
-      component.toggleCharacterBreakdowns();
-      expect(component.characterBreakdownsExpanded).toBe(false);
-      component.toggleCharacterBreakdowns();
-      expect(component.characterBreakdownsExpanded).toBe(true);
-    });
-
-    it('should toggle endeavours expansion', () => {
-      expect(component.endeavoursExpanded).toBe(true);
-      component.toggleEndeavours();
-      expect(component.endeavoursExpanded).toBe(false);
-      component.toggleEndeavours();
-      expect(component.endeavoursExpanded).toBe(true);
-    });
-  });
 });

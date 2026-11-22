@@ -16,6 +16,7 @@ import { Subject, takeUntil } from 'rxjs';
 import { filter } from 'rxjs/operators';
 import { environment } from '../environments/environment';
 import { AuthService } from './core/auth/auth.service';
+import { UserSettingsService } from './dashboard/services/user-settings.service';
 import { NotificationService } from './notifications/notification.service';
 import { StorytimeService } from './storytime/storytime.service';
 import { RefreshSessionDialogComponent } from './shared/components/refresh-session-dialog/refresh-session-dialog.component';
@@ -25,6 +26,9 @@ import { LogRocketService } from './shared/services/log-rocket.service';
 import { PageTitleService } from './shared/services/page-title.service';
 import { ScriptLoaderService } from './shared/services/script-loader.service';
 import { SeoService } from './shared/services/seo.service';
+import { SignedImageRenewalService } from './shared/services/signed-image-renewal.service';
+import { ChatSessionService } from './fleet/chat/chat-session.service';
+import { ChatToastsComponent } from './fleet/chat/chat-toasts/chat-toasts.component';
 import { HeaderComponent } from './template/header/header.component';
 import { MainContentComponent } from './template/main-content/main-content.component';
 
@@ -32,7 +36,12 @@ import { MainContentComponent } from './template/main-content/main-content.compo
   selector: 'app-root',
   templateUrl: './app.component.html',
   standalone: true,
-  imports: [HeaderComponent, MainContentComponent, MatDialogModule],
+  imports: [
+    ChatToastsComponent,
+    HeaderComponent,
+    MainContentComponent,
+    MatDialogModule,
+  ],
 })
 export class AppComponent implements OnInit, OnDestroy {
   private readonly _cookieYesScriptId = 'cookieyes';
@@ -61,7 +70,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
   private dialogRef: MatDialogRef<RefreshSessionDialogComponent> | null = null;
   private readonly _authService = inject(AuthService);
+  private readonly _userSettingsService = inject(UserSettingsService);
   private readonly _notificationService = inject(NotificationService);
+  private readonly _chatSession = inject(ChatSessionService);
+  private readonly _signedImageRenewal = inject(SignedImageRenewalService);
   private readonly _storytimeService = inject(StorytimeService);
   private readonly _logRocketService = inject(LogRocketService);
   private readonly _pageTitleService = inject(PageTitleService);
@@ -96,6 +108,14 @@ export class AppComponent implements OnInit, OnDestroy {
     this.subscribeToWarningAnnouncements();
     this.subscribeToExpiryAnnouncements();
     this.subscribeToStorytimeAvailability();
+
+    // Chat's socket, while signed in and chat is on, across the site
+    // (FC-034): being online means having STO Info open.
+    this._chatSession.start();
+
+    // A picture whose signed address expired while the page was open gets a
+    // new one, across the site.
+    this._signedImageRenewal.start();
 
     // Poll banners + unread count on a single cadence for the whole app.
     // Skip in lighthouse-audit mode to avoid non-critical network noise.
@@ -212,6 +232,13 @@ export class AppComponent implements OnInit, OnDestroy {
       .subscribe(loggedIn => {
         this.isLoggedIn = loggedIn;
         if (this.isLoggedIn) {
+          // Loaded here rather than by the settings page, because the timezone
+          // these carry governs every date in the application and a preference
+          // that only applied on the page where it is edited would be no
+          // preference at all. Quietly, because nothing on any page should
+          // break without them: the fallback is the reader's own device.
+          this._userSettingsService.loadQuietly();
+
           if (this.intervalId === null) {
             this.startCountdown();
           }

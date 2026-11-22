@@ -1,0 +1,787 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  ParamMap,
+  Router,
+} from '@angular/router';
+
+import { BehaviorSubject, of, Subject, throwError } from 'rxjs';
+
+import { AuthService } from 'src/app/core/auth/auth.service';
+import { FleetArmadaService } from 'src/app/fleet/armadas/fleet-armada.service';
+import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { FleetGovernanceService } from 'src/app/fleet/governance/fleet-governance.service';
+import { newsPage } from 'src/app/fleet/news/fleet-news.testing';
+import { FleetActivityService } from 'src/app/fleet/activity/fleet-activity.service';
+import { FleetEventsService } from 'src/app/fleet/events/fleet-events.service';
+import { FleetNewsService } from 'src/app/fleet/news/fleet-news.service';
+import { FLEET_SCOPE_ERROR } from 'src/app/fleet/scope/fleet-scope-page.directive';
+import {
+  FleetScopeAction,
+  FleetScopePageState,
+} from 'src/app/fleet/scope/fleet-scope-page.models';
+import {
+  FleetAudience,
+  FleetCommunity,
+  FleetRecruitmentState,
+  FleetScopeStatus,
+  FleetScopeRelationship,
+  FleetScopeViewer,
+  ResolvedFleetCommunity,
+} from 'src/app/models/fleet.models';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { PageTitleService } from 'src/app/shared/services/page-title.service';
+
+import { CommunityPageComponent } from './community-page.component';
+
+/**
+ * Builds a Community as the server would send it.
+ *
+ * @param overrides - Fields to override.
+ * @returns The Community.
+ */
+function community(overrides: Partial<FleetCommunity> = {}): FleetCommunity {
+  return {
+    id: 'community-1',
+    ownerUserId: 'user-1',
+    name: 'United Federation Alliance',
+    slug: 'united-federation-alliance',
+    description: 'A home for casual PvE fleets.',
+    recruitmentState: FleetRecruitmentState.OPEN,
+    visibility: FleetAudience.PUBLIC,
+    preferredTimezone: 'Europe/London',
+    status: FleetScopeStatus.ACTIVE,
+    closedAt: null,
+    bannerImageId: null,
+    bannerImageUrl: null,
+    bannerImageAlt: null,
+    emblemImageId: null,
+    emblemImageUrls: null,
+    emblemImageAlt: null,
+    revision: 1,
+    createdAt: '2026-01-02T03:04:05.000Z',
+    updatedAt: '2026-01-02T03:04:05.000Z',
+    ...overrides,
+  };
+}
+
+/** A viewer who may look and change nothing, which is most of them. */
+const READER: FleetScopeViewer = {
+  capabilities: [],
+  roles: [],
+  mayManageBanner: false,
+  mayManageEmblem: false,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
+};
+
+/** A viewer who may change the artwork. */
+const ARTWORK_KEEPER: FleetScopeViewer = {
+  capabilities: ['scope.images.manage'],
+  roles: [],
+  mayManageBanner: true,
+  mayManageEmblem: true,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
+};
+
+describe('CommunityPageComponent', () => {
+  let fixture: ComponentFixture<CommunityPageComponent>;
+  let params$: BehaviorSubject<ParamMap>;
+  let scopes: { resolveCommunity: jest.Mock };
+  let router: { navigate: jest.Mock };
+  let pageTitle: { setTitle: jest.Mock };
+  let auth: {
+    isLoggedIn: jest.Mock;
+    isLoggedInAsAdmin: jest.Mock;
+    getUserId: jest.Mock;
+  };
+  let governance: { ownership: jest.Mock };
+  let formatted: string | null;
+
+  beforeEach(async () => {
+    params$ = new BehaviorSubject<ParamMap>(
+      convertToParamMap({ communitySlug: 'united-federation-alliance' }),
+    );
+    scopes = {
+      resolveCommunity: jest.fn(() =>
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: READER,
+        }),
+      ),
+    };
+    router = { navigate: jest.fn() };
+    pageTitle = { setTitle: jest.fn() };
+    auth = {
+      isLoggedIn: jest.fn(() => false),
+      isLoggedInAsAdmin: jest.fn(() => false),
+      getUserId: jest.fn(() => 'user-2'),
+    };
+    governance = {
+      ownership: jest.fn(() => of({ offer: null, eligible: [] })),
+    };
+    formatted = '2 January 2026';
+
+    await TestBed.configureTestingModule({
+      imports: [CommunityPageComponent],
+      providers: [
+        { provide: FleetScopeService, useValue: scopes },
+        { provide: Router, useValue: router },
+        {
+          provide: ActivatedRoute,
+          // The snapshot as well as the stream, as the real one has.
+          useValue: {
+            paramMap: params$,
+            snapshot: {
+              // Answers null for a segment that is not there, as the real
+              // one does, so the page's own fallback is the thing tested.
+              paramMap: {
+                get: (): string | null => params$.value.get('communitySlug'),
+              },
+            },
+          },
+        },
+        { provide: PageTitleService, useValue: pageTitle },
+        { provide: AuthService, useValue: auth },
+        { provide: FleetGovernanceService, useValue: governance },
+        {
+          provide: FleetArmadaService,
+          useValue: {
+            communityStructure: jest.fn(() =>
+              of({ armadas: [], standaloneFleets: [] }),
+            ),
+          },
+        },
+        {
+          provide: FleetNewsService,
+          useValue: { list: jest.fn(() => of(newsPage([]))) },
+        },
+        {
+          provide: FleetActivityService,
+          useValue: {
+            scopeFeed: jest.fn(() => of({ items: [], next: null })),
+          },
+        },
+        {
+          provide: FleetEventsService,
+          useValue: {
+            calendar: jest.fn(() =>
+              of({
+                from: '',
+                to: '',
+                entries: [],
+                mayManage: false,
+                isOpen: true,
+              }),
+            ),
+          },
+        },
+      ],
+    })
+      .overrideComponent(CommunityPageComponent, {
+        set: {
+          providers: [
+            {
+              provide: AppDatePipe,
+              useValue: { transform: (): string | null => formatted },
+            },
+          ],
+        },
+      })
+      .compileComponents();
+  });
+
+  /**
+   * Renders the page.
+   */
+  function render(): void {
+    fixture = TestBed.createComponent(CommunityPageComponent);
+    fixture.detectChanges();
+  }
+
+  /**
+   * Reads the state the page is in.
+   *
+   * @returns The state.
+   */
+  const state = (): FleetScopePageState => {
+    let current: FleetScopePageState | undefined;
+    fixture.componentInstance.state$.subscribe(value => (current = value));
+
+    return current as FleetScopePageState;
+  };
+
+  it('asks for the Community the address names', () => {
+    render();
+
+    expect(scopes.resolveCommunity).toHaveBeenCalledWith(
+      'united-federation-alliance',
+    );
+  });
+
+  it('reloads when the address changes', () => {
+    render();
+
+    params$.next(convertToParamMap({ communitySlug: 'ninth-fleet' }));
+
+    expect(scopes.resolveCommunity).toHaveBeenLastCalledWith('ninth-fleet');
+  });
+
+  it('says it is loading before the server has answered', () => {
+    scopes.resolveCommunity.mockReturnValue(new Subject());
+
+    render();
+
+    expect(state().kind).toBe('LOADING');
+  });
+
+  // "No such Community" and "the directory is down" call for different
+  // things from a reader.
+  it('reports an address nothing answers to as absent', () => {
+    scopes.resolveCommunity.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 404 })),
+    );
+
+    render();
+
+    expect(state()).toEqual({ kind: 'MISSING' });
+  });
+
+  // A closed Community keeps its address and is still read there, so "it may have
+  // been closed" would be untrue. Absent and hidden are one answer, so which
+  // it is stays unsaid.
+  it('says there may be no such Community, or that it is not shown, never closed', () => {
+    render();
+
+    expect(fixture.componentInstance.missingMessage).toContain(
+      'There may be no such Community, or it may not be shown to you.',
+    );
+    expect(fixture.componentInstance.missingMessage).not.toContain('closed');
+  });
+
+  it('reports any other failure as a failure', () => {
+    scopes.resolveCommunity.mockReturnValue(
+      throwError(() => new HttpErrorResponse({ status: 500 })),
+    );
+
+    render();
+
+    expect(state()).toEqual({ kind: 'ERROR', message: FLEET_SCOPE_ERROR });
+  });
+
+  it('names the page after the record', () => {
+    render();
+
+    expect(pageTitle.setTitle).toHaveBeenCalledWith(
+      'United Federation Alliance',
+    );
+  });
+
+  describe('what it draws', () => {
+    it('hands its Armadas and Fleets panel the Community', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityStructure).toEqual({
+        communityId: 'community-1',
+        communitySlug: 'united-federation-alliance',
+        communityName: 'United Federation Alliance',
+      });
+    });
+
+    it('hands its News section the Community’s own news', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityNews).toEqual({
+        target: { communityId: 'community-1', fleetId: null, armadaId: null },
+        newsLink: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'news',
+        ],
+      });
+    });
+
+    it('hands its Events section the Community’s own calendar', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityEvents).toEqual({
+        kind: 'SCOPE',
+        target: { communityId: 'community-1', fleetId: null, armadaId: null },
+        calendarLink: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'events',
+        ],
+      });
+    });
+
+    it('hands its Activity section the Community’s own feed', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.communityActivity).toEqual({
+        source: {
+          kind: 'SCOPE',
+          target: { communityId: 'community-1', fleetId: null, armadaId: null },
+        },
+        allLink: [
+          '/fleets',
+          'communities',
+          'united-federation-alliance',
+          'activity',
+        ],
+      });
+    });
+
+    it('heads the page with the Community, and no parent above it', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind).toBe('READY');
+
+      if (drawn.kind !== 'READY') {
+        return;
+      }
+
+      expect(drawn.header.name).toBe('United Federation Alliance');
+      expect(drawn.header.communityName).toBeNull();
+      expect(drawn.header.platform).toBeNull();
+      expect(drawn.description).toBe('A home for casual PvE fleets.');
+    });
+
+    it('lists when it was registered, who can see it and how it writes dates', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.facts).toEqual([
+        { label: 'Registered', value: '2 January 2026' },
+        {
+          label: 'Visible to',
+          value: 'Anyone, including signed-out visitors',
+        },
+        { label: 'Dates shown in', value: 'Europe/London' },
+      ]);
+    });
+
+    // FC-050: a Community's members are its Fleets' members, with its Owner
+    // and Admins, not one Fleet's.
+    it('reads back "Fleet members" as the members of its Fleets', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of({
+          community: community({ visibility: FleetAudience.FLEET_MEMBERS }),
+          redirectedFrom: null,
+          viewer: READER,
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.facts).toContainEqual({
+        label: 'Visible to',
+        value: 'Members of the Community’s Fleets, its Owner and Admins',
+      });
+    });
+
+    it('says when a closed Community was closed', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of({
+          community: community({
+            status: FleetScopeStatus.CLOSED,
+            closedAt: '2026-05-06T07:08:09.000Z',
+          }),
+          redirectedFrom: null,
+          viewer: READER,
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.facts).toContainEqual({
+        label: 'Closed',
+        value: '2 January 2026',
+      });
+      expect(drawn.kind === 'READY' && drawn.header.status).toEqual({
+        label: 'Closed',
+        modifier: 'closed',
+      });
+    });
+
+    // The pipe answers null for a value it cannot read. Showing the instant
+    // as the server wrote it is ugly and true; showing nothing would leave
+    // the row saying "Registered" and then stopping.
+    it('falls back to the raw instant when it cannot be written out', () => {
+      formatted = null;
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.facts[0]).toEqual({
+        label: 'Registered',
+        value: '2026-01-02T03:04:05.000Z',
+      });
+    });
+
+    it('draws the artwork the Community carries', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of({
+          community: community({
+            bannerImageId: 'banner-ref',
+            bannerImageUrl:
+              'https://cdn.test/cdn-cgi/imagedelivery/hash/banner-ref/public',
+            bannerImageAlt: 'A fleet yard at dusk',
+            emblemImageId: 'emblem-ref',
+            emblemImageUrls: {
+              square100:
+                'https://cdn.test/cdn-cgi/imagedelivery/hash/emblem-ref/square100',
+              square300:
+                'https://cdn.test/cdn-cgi/imagedelivery/hash/emblem-ref/square300',
+            },
+            emblemImageAlt: 'A crossed-sabres badge',
+          }),
+          redirectedFrom: null,
+          viewer: READER,
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.banner?.url).toContain(
+        'banner-ref/public',
+      );
+      expect(drawn.kind === 'READY' && drawn.header.emblem?.url).toContain(
+        'emblem-ref/square300',
+      );
+    });
+  });
+
+  describe('its artwork', () => {
+    /*
+     * A page is read far more often than it is edited, so a row of buttons
+     * nobody can press would be the ordinary case rather than the exception.
+     */
+    it('offers nothing to somebody who may change nothing', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork).toBeNull();
+    });
+
+    it('addresses the Community directly', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: ARTWORK_KEEPER,
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'COMMUNITY',
+        communityId: 'community-1',
+      });
+    });
+
+    /*
+     * Offered one slot at a time, because at a Fleet nobody has registered
+     * they are two different answers and one shape covers both.
+     */
+    it('offers only the slots the viewer may change', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: { ...READER, mayManageEmblem: true },
+        }),
+      );
+
+      render();
+
+      const drawn = state();
+      const offered =
+        drawn.kind === 'READY'
+          ? (drawn.artwork?.slots ?? []).filter(slot => slot.mayManage)
+          : [];
+
+      expect(offered).toHaveLength(1);
+      expect(offered[0].label).toBe('Emblem');
+    });
+  });
+
+  describe('when the address is out of date', () => {
+    beforeEach(() => {
+      scopes.resolveCommunity.mockReturnValue(
+        of({
+          community: community(),
+          redirectedFrom: 'the-old-name',
+          viewer: READER,
+        }),
+      );
+    });
+
+    // Replaced rather than pushed: a reader who arrived on a retired slug
+    // and then pressed Back would otherwise be sent to the retired slug
+    // again, and straight back here.
+    it('replaces its own history entry with the current address', () => {
+      render();
+
+      expect(router.navigate).toHaveBeenCalledWith(
+        ['/fleets', 'communities', 'united-federation-alliance'],
+        { replaceUrl: true, queryParamsHandling: 'preserve' },
+      );
+    });
+
+    it('still shows the record it found', () => {
+      render();
+
+      expect(state().kind).toBe('READY');
+    });
+  });
+
+  it('leaves the address alone when it is already the current one', () => {
+    render();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  it('asks for nothing when the address has no segment at all', () => {
+    params$.next(convertToParamMap({}));
+
+    render();
+
+    expect(scopes.resolveCommunity).toHaveBeenLastCalledWith('');
+  });
+  describe('registering into it', () => {
+    /** Somebody who may register Fleets and Armadas here. */
+    const REGISTRAR: FleetScopeViewer = {
+      ...READER,
+      capabilities: ['scope.children.register'],
+    };
+
+    /**
+     * What the page offers.
+     *
+     * @returns Its actions, or none while it is not ready.
+     */
+    const actions = (): FleetScopeAction[] => {
+      const drawn = state();
+
+      return drawn.kind === 'READY' ? drawn.actions : [];
+    };
+
+    it('offers a Fleet and an Armada to whoever may register them here', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: REGISTRAR,
+        }),
+      );
+
+      render();
+
+      expect(actions()).toEqual([
+        {
+          label: 'Register a Fleet here',
+          link: [
+            '/fleets',
+            'communities',
+            'united-federation-alliance',
+            'fleets',
+            'register',
+          ],
+          description: expect.stringContaining('Register a Fleet into'),
+        },
+        {
+          label: 'Register an Armada here',
+          link: [
+            '/fleets',
+            'communities',
+            'united-federation-alliance',
+            'armadas',
+            'register',
+          ],
+          description: expect.stringContaining('Register an Armada into'),
+        },
+      ]);
+      expect(
+        fixture.nativeElement.querySelectorAll('.fleet-scope-view__actions a'),
+      ).toHaveLength(2);
+    });
+
+    // The server says what the viewer may do here, so a control nobody could
+    // use is not drawn: signed in and following is not enough.
+    it('offers nothing to anybody else', () => {
+      render();
+
+      expect(actions()).toEqual([]);
+      expect(
+        fixture.nativeElement.querySelectorAll('.fleet-scope-view__actions a'),
+      ).toHaveLength(0);
+    });
+  });
+
+  describe('following it', () => {
+    it('offers the Community itself as the thing to follow', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind).toBe('READY');
+
+      if (drawn.kind !== 'READY') {
+        return;
+      }
+
+      expect(drawn.following).toEqual({
+        communityId: 'community-1',
+        scopeNoun: 'Community',
+        relationship: FleetScopeRelationship.NONE,
+        isFollowing: false,
+        followerCount: 0,
+      });
+    });
+
+    it('passes on the standing the server reported', () => {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community(),
+          redirectedFrom: null,
+          viewer: {
+            ...READER,
+            relationship: FleetScopeRelationship.MEMBER,
+            isFollowingCommunity: true,
+            followerCount: 12,
+          },
+        }),
+      );
+      render();
+
+      const drawn = state();
+
+      if (drawn.kind !== 'READY') {
+        throw new Error('expected a ready page');
+      }
+
+      expect(drawn.following?.relationship).toBe(FleetScopeRelationship.MEMBER);
+      expect(drawn.following?.isFollowing).toBe(true);
+      expect(drawn.following?.followerCount).toBe(12);
+    });
+  });
+
+  // FC-022: who governs it.
+  describe('managing it', () => {
+    const MANAGE_LINK = [
+      '/fleets',
+      'communities',
+      'united-federation-alliance',
+      'manage',
+    ];
+
+    /**
+     * Resolves the Community for a reader holding some roles.
+     *
+     * @param roles - The role labels they hold.
+     * @param status - The Community's state.
+     */
+    function resolveFor(
+      roles: string[],
+      status: FleetScopeStatus = FleetScopeStatus.ACTIVE,
+    ): void {
+      scopes.resolveCommunity.mockReturnValue(
+        of<ResolvedFleetCommunity>({
+          community: community({ status }),
+          redirectedFrom: null,
+          viewer: { ...READER, roles },
+        }),
+      );
+    }
+
+    /**
+     * The page as drawn, once ready.
+     *
+     * @returns The ready state.
+     */
+    const ready = (): Extract<FleetScopePageState, { kind: 'READY' }> =>
+      state() as Extract<FleetScopePageState, { kind: 'READY' }>;
+
+    it.each([['OWNER'], ['ADMIN']])(
+      'offers Manage to a reader holding %s',
+      (role: string) => {
+        resolveFor([role]);
+        render();
+
+        expect(ready().actions).toEqual([
+          {
+            label: 'Manage',
+            link: MANAGE_LINK,
+            description: 'Manage who runs United Federation Alliance',
+          },
+        ]);
+      },
+    );
+
+    it('offers Manage to a site administrator holding no role', () => {
+      auth.isLoggedInAsAdmin.mockReturnValue(true);
+      resolveFor([]);
+      render();
+
+      expect(ready().actions.map(action => action.label)).toEqual(['Manage']);
+    });
+
+    it('offers nothing to anybody else', () => {
+      resolveFor(['OFFICER']);
+      render();
+
+      expect(ready().actions).toEqual([]);
+      expect(ready().ownershipOffer).toBeNull();
+    });
+
+    it('asks an Admin of an open Community about any offer made to them', () => {
+      resolveFor(['ADMIN']);
+      render();
+
+      expect(ready().ownershipOffer).toEqual({
+        communityId: 'community-1',
+        communityName: 'United Federation Alliance',
+        manageLink: MANAGE_LINK,
+      });
+      expect(governance.ownership).toHaveBeenCalledWith('community-1');
+    });
+
+    it('asks nothing on a closed Community', () => {
+      resolveFor(['ADMIN'], FleetScopeStatus.CLOSED);
+      render();
+
+      expect(ready().ownershipOffer).toBeNull();
+    });
+  });
+});

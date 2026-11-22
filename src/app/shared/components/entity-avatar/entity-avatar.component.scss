@@ -7,5 +7,11 @@
   border-radius: 50%;
   border: 2px solid vars.$lcars-sunflower;
   object-fit: cover;
-  background: #0d0d0d;
+  background: vars.$lcars-black;
+
+  // Square, as the Character listing's images are, where a card sets the
+  // picture beside its details rather than above its name.
+  &--square {
+    border-radius: 0;
+  }
 }

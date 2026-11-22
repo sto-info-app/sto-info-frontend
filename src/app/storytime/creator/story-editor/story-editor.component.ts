@@ -11,6 +11,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   CompletionState,
   ContentRating,
@@ -69,6 +70,7 @@ import {
     ContentPolicyPanelComponent,
     EditorActionsComponent,
     ImageManagerComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class StoryEditorComponent implements OnInit {

@@ -1,0 +1,63 @@
+@if (tabs.length) {
+  <nav
+    class="lcars-tabs"
+    [attr.aria-label]="tabsAriaLabel">
+    @for (tab of tabs; track tab.link) {
+      @if (tab.lightsOn; as lightsOn) {
+        <a
+          class="lcars-tab"
+          [routerLink]="tab.link"
+          [class.active]="isLitByPath(lightsOn)"
+          [attr.aria-current]="isLitByPath(lightsOn) ? 'page' : null"
+          >{{ tab.label }}</a
+        >
+      } @else {
+        <a
+          class="lcars-tab"
+          [routerLink]="tab.link"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: tab.exact }"
+          #tabActive="routerLinkActive"
+          [attr.aria-current]="tabActive.isActive ? 'page' : null"
+          >{{ tab.label }}</a
+        >
+      }
+    }
+    <span
+      class="lcars-tabs-filler"
+      aria-hidden="true"></span>
+  </nav>
+}
+
+<div class="fleet-page-shell">
+  <div class="page-heading-row">
+    <h1>{{ heading }}</h1>
+    <app-settings-link [target]="settingsLink" />
+  </div>
+
+  @if (helpSlug) {
+    <app-help-link
+      [slug]="helpSlug"
+      [label]="helpLabel" />
+  }
+
+  @if (subject) {
+    <div class="page-subject-row">
+      <span class="fleet-page-shell__subject">{{ subject }}</span>
+    </div>
+  }
+
+  @if (isLoading) {
+    <app-loading-bar [loadingText]="loadingText" />
+  }
+
+  @if (errorMessage) {
+    <div class="error-container">
+      <app-lcars-error-message [message]="errorMessage" />
+    </div>
+  }
+
+  @if (showsContent) {
+    <ng-content />
+  }
+</div>

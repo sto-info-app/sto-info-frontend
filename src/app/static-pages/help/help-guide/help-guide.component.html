@@ -5,13 +5,13 @@
     </p>
 
     <app-feature-unavailable
-      [featureName]="storytimeFeatureName"
+      [featureName]="unavailableFeatureName"
       [reason]="unavailableReason" />
 
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.HELP)"
-        class="violet"
+        class="lcars-btn lcars-btn-auto"
         >All guides</a
       >
     </div>
@@ -23,15 +23,40 @@
     <p class="help-guide__breadcrumb">
       <a [routerLink]="getRouteLink(appRoutes.HELP)">Help</a>
       <span aria-hidden="true">&rsaquo;</span>
-      <span>{{ topicTitle }}</span>
+      <a [routerLink]="topicLink">{{ topicTitle }}</a>
     </p>
 
     <h1>{{ guide.title }}</h1>
 
     <p class="help-guide__summary">{{ guide.summary }}</p>
 
-    @for (section of guide.sections; track section.heading) {
+    @if (guide.video; as video) {
+      <app-help-video [video]="video" />
+    }
+
+    @if (unreachableFeatureName; as featureName) {
+      <app-feature-unavailable
+        [featureName]="featureName"
+        [reason]="unreachableReason" />
+    }
+
+    @if (switchedOff) {
+      <p
+        class="help-switched-off"
+        role="note">
+        {{ switchedOff }}
+      </p>
+    }
+
+    @for (section of sections; track section.heading; let index = $index) {
       <app-collapsible-section [heading]="section.heading">
+        @if (sectionNotes[index]; as note) {
+          <p
+            class="help-switched-off"
+            role="note">
+            {{ note }}
+          </p>
+        }
         @for (paragraph of section.paragraphs; track paragraph) {
           <p>{{ paragraph }}</p>
         }
@@ -51,7 +76,7 @@
         @for (link of guide.relatedLinks; track link.route) {
           <a
             [routerLink]="getRouteLink(link.route)"
-            class="sky"
+            class="lcars-btn lcars-btn-auto"
             >{{ link.label }}</a
           >
         }
@@ -76,12 +101,12 @@
     <div class="buttons-row">
       <a
         [routerLink]="getRouteLink(appRoutes.HELP)"
-        class="violet"
+        class="lcars-btn lcars-btn-auto"
         >All guides</a
       >
       <a
         [routerLink]="getRouteLink(appRoutes.CONTACT)"
-        class="ice"
+        class="lcars-btn lcars-btn-auto"
         >Contact us</a
       >
     </div>

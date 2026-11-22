@@ -21,6 +21,12 @@ export interface AccountCardDetail {
   variant?: 'primary' | 'secondary' | 'muted';
   /** Whether this detail is obscured while Privacy Mode is enabled. */
   private?: boolean;
+  /**
+   * Draws a copy button after the value, which puts the value on the
+   * clipboard; the button is named by the label (#1090). Still offered while
+   * Privacy Mode blurs the value, since copying shows nothing on screen.
+   */
+  copyable?: boolean;
 }
 
 /**

@@ -2,8 +2,11 @@ import { provideRouter, Router } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
-import { EMPTY, NEVER, of, throwError } from 'rxjs';
+import { BehaviorSubject, EMPTY, NEVER, of, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import { ChatService } from 'src/app/fleet/chat/chat.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { CommunityService } from '../../community.service';
 import { RelationshipStatus } from '../../models/community.models';
@@ -47,6 +50,10 @@ describe('RegistryListComponent', () => {
   };
   let authServiceSpy: { isLoggedIn: jest.Mock };
   let dialogSpy: { open: jest.Mock };
+  let chatSpy: { open: jest.Mock };
+  let presenceSpy: { watch: jest.Mock };
+  let online$: BehaviorSubject<ReadonlySet<string>>;
+  let chatEnabled: boolean;
   let routerNavigateSpy: jest.SpyInstance;
 
   /**
@@ -70,6 +77,10 @@ describe('RegistryListComponent', () => {
     };
     authServiceSpy = { isLoggedIn: jest.fn(() => false) };
     dialogSpy = { open: jest.fn(() => ({ afterClosed: () => of(true) })) };
+    chatSpy = { open: jest.fn(() => of({ id: 'conversation-1' })) };
+    online$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
+    presenceSpy = { watch: jest.fn(() => online$) };
+    chatEnabled = false;
 
     await TestBed.configureTestingModule({
       imports: [RegistryListComponent],
@@ -79,6 +90,15 @@ describe('RegistryListComponent', () => {
         { provide: CommunityService, useValue: communityServiceSpy },
         { provide: AuthService, useValue: authServiceSpy },
         { provide: MatDialog, useValue: dialogSpy },
+        { provide: ChatService, useValue: chatSpy },
+        { provide: ChatPresenceService, useValue: presenceSpy },
+        {
+          provide: FleetConfigurationService,
+          useValue: {
+            getFeatures: () => of({ chatEnabled }),
+            isOffered: () => of(true),
+          },
+        },
         {
           provide: RoutingService,
           useValue: { getLink: jest.fn((route: string) => `/${route}`) },
@@ -336,11 +356,11 @@ describe('RegistryListComponent', () => {
     it('should round the page count up', async () => {
       await setup();
       registryServiceSpy.getProfiles.mockReturnValue(
-        of(buildProfilePage({ total: 25 })),
+        of(buildProfilePage({ total: 22 })),
       );
       fixture.detectChanges();
 
-      expect(component.totalPages).toBe(3);
+      expect(component.totalPages).toBe(5);
     });
 
     it('should request the page it was asked for', async () => {
@@ -350,8 +370,26 @@ describe('RegistryListComponent', () => {
       component.loadPage(4);
 
       expect(registryServiceSpy.getProfiles).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 4, pageSize: 12 }),
+        expect.objectContaining({ page: 4, pageSize: 5 }),
       );
+    });
+
+    // The pagination sits beneath a page of cards, each a row of its own.
+    it('should scroll back to the top of the results on a page turn', async () => {
+      await setup();
+      fixture.detectChanges();
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      component.turnPage(2);
+
+      expect(registryServiceSpy.getProfiles).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 2 }),
+      );
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      expect(
+        fixture.nativeElement.querySelector('#personnel-records'),
+      ).not.toBeNull();
     });
   });
 
@@ -533,6 +571,79 @@ describe('RegistryListComponent', () => {
       component.acceptRequest(profile);
 
       expect(communityServiceSpy.acceptFriendRequest).not.toHaveBeenCalled();
+    });
+
+    // FC-033: chat with a friend from their card, while chat is switched on.
+    it('should offer Chat to a friend while chat is on, and open the conversation', async () => {
+      await setup();
+      chatEnabled = true;
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS);
+
+      const labels = [
+        ...fixture.nativeElement.querySelectorAll(
+          '.member-card__actions button',
+        ),
+      ].map((button: HTMLButtonElement) => button.textContent?.trim());
+
+      expect(labels).toEqual(['Chat', 'Unfriend', 'Block']);
+
+      component.onMemberCardAction(profile, 'chat');
+
+      expect(chatSpy.open).toHaveBeenCalledWith({
+        friendshipId: 'friendship-1',
+      });
+      expect(routerNavigateSpy).toHaveBeenCalledWith([
+        '/chat',
+        'direct',
+        'conversation-1',
+      ]);
+      expect(component.isActing).toBe(false);
+    });
+
+    it('should open nothing for a friend with no friendship to open it by', async () => {
+      await setup();
+      chatEnabled = true;
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS, null);
+
+      component.onMemberCardAction(profile, 'chat');
+
+      expect(chatSpy.open).not.toHaveBeenCalled();
+      expect(component.isActing).toBe(false);
+    });
+
+    it('should say so when the conversation cannot be opened', async () => {
+      await setup();
+      chatEnabled = true;
+      chatSpy.open.mockReturnValue(throwError(() => new Error('down')));
+      const profile = renderSignedIn(RelationshipStatus.FRIENDS);
+
+      component.onMemberCardAction(profile, 'chat');
+
+      expect(component.actionError).toBe(
+        'The conversation could not be opened.',
+      );
+      expect(component.isActing).toBe(false);
+      expect(routerNavigateSpy).not.toHaveBeenCalled();
+    });
+
+    // FC-034: the members shown who are online, read while signed in.
+    it('should mark a listed member who is online, and read nothing signed out', async () => {
+      await setup();
+      renderSignedIn(RelationshipStatus.NONE);
+
+      online$.next(new Set(['captain.picard']));
+      expect(component.profileVms[0].card.online).toBe(true);
+      expect(presenceSpy.watch).toHaveBeenCalledWith(['captain.picard']);
+
+      fixture.destroy();
+      expect(online$.observed).toBe(false);
+    });
+
+    it('should read nobody’s presence for an anonymous visitor', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(presenceSpy.watch).not.toHaveBeenCalled();
     });
 
     it('should offer Unfriend beside Block for an existing friend', async () => {

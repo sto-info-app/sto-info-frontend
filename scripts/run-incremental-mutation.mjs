@@ -5,6 +5,14 @@ import process from 'node:process';
 const NODE_PATH = process.execPath;
 
 /**
+ * Optional upper bound on how many mutatable source files a run will accept.
+ * Above it the diff is left to the scheduled full run, because a PR that wide
+ * is a full run in all but name and cannot finish inside the job's budget.
+ * Off (0) unless MUTATION_MAX_FILES is set; the workflow sets it.
+ */
+const DEFAULT_MAX_MUTATE_FILES = 0;
+
+/**
  * Executes a command with absolute paths and explicit environment to satisfy S4036.
  */
 function runCommand(command, args, options = {}) {
@@ -80,6 +88,24 @@ function computeChangedFiles(baseRef) {
     .filter(isRelevantMutationFile);
 }
 
+function resolveMaxFiles() {
+  const raw = process.env.MUTATION_MAX_FILES;
+  if (!raw) return DEFAULT_MAX_MUTATE_FILES;
+
+  const parsed = Number.parseInt(raw, 10);
+  if (!Number.isInteger(parsed) || parsed < 1) {
+    throw new Error(
+      `MUTATION_MAX_FILES must be a positive integer, received "${raw}".`,
+    );
+  }
+
+  return parsed;
+}
+
+function exceedsLimit(fileCount, maxFiles) {
+  return maxFiles > 0 && fileCount > maxFiles;
+}
+
 function main() {
   const baseRef = process.env.BASE_REF || 'origin/development';
 
@@ -91,8 +117,20 @@ function main() {
     process.exit(0);
   }
 
+  const maxFiles = resolveMaxFiles();
+  if (exceedsLimit(changedFiles.length, maxFiles)) {
+    process.stdout.write(
+      `${changedFiles.length} mutatable files changed, above the ` +
+        `MUTATION_MAX_FILES limit of ${maxFiles}. Leaving this diff to the ` +
+        'scheduled full run (Mutation Testing (Full)).\n',
+    );
+    process.exit(0);
+  }
+
   const mutateArg = changedFiles.join(',');
-  process.stdout.write(`Mutating files: ${mutateArg}\n`);
+  process.stdout.write(
+    `Mutating ${changedFiles.length} file(s): ${mutateArg}\n`,
+  );
 
   const strykerPath = join(
     process.cwd(),

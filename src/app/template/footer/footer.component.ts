@@ -1,9 +1,14 @@
+import { AsyncPipe } from '@angular/common';
 import { Component, Input, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+
+import { Observable } from 'rxjs';
+
 import {
   APP_ROUTE_TITLES,
   APP_ROUTES,
 } from 'src/app/shared/constants/app-routing.constants';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 
@@ -11,7 +16,7 @@ import { environment } from 'src/environments/environment';
   selector: 'app-footer',
   templateUrl: './footer.component.html',
   standalone: true,
-  imports: [RouterModule],
+  imports: [AsyncPipe, RouterModule],
 })
 export class FooterComponent {
   /**
@@ -31,15 +36,27 @@ export class FooterComponent {
    */
   @Input() isStorytimeOffered = false;
 
+  /**
+   * Whether to offer the Fleet section in the footer.
+   *
+   * Asked here rather than handed down, matching the sidebar: the Fleet
+   * configuration is fetched once and shared for the lifetime of the
+   * application, so depending on it is cheap wherever it is needed, and
+   * one mechanism serves every entry point rather than two.
+   */
+  readonly isFleetOffered$: Observable<boolean>;
+
   appTitle = environment.appTitle;
   currentYear: number;
   appRoutes = APP_ROUTES;
   appRouteTitles = APP_ROUTE_TITLES;
 
   private readonly _routingService = inject(RoutingService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
 
   constructor() {
     this.currentYear = new Date().getFullYear();
+    this.isFleetOffered$ = this._fleetConfiguration.isOffered();
   }
 
   getRouteLink(route: string): string {

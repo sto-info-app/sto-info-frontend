@@ -11,6 +11,7 @@ import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { StatsBaseComponent } from '../stats-base.component';
 import { CountItem, StatsData } from '../stats.models';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** Configuration for a single breakdown stat page. */
 interface StatConfig {
@@ -160,6 +161,7 @@ const SECTION_TITLES: Record<string, string> = {
   styleUrls: ['./stat-detail.component.scss'],
   standalone: true,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     RouterModule,
     LoadingBarComponent,

@@ -22,7 +22,6 @@ import {
   CustomTrackingTargetScope,
 } from 'src/app/models/custom-tracking.models';
 import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
-import { BASE_CLOUDFLARE_IMAGES_URL } from 'src/app/shared/constants/app-image-assets.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 
 import { CustomTrackingService } from '../../custom-tracking.service';
@@ -99,18 +98,13 @@ export class CustomTrackingImageValueComponent {
   /**
    * Where the stored picture is fetched from.
    *
-   * Built from the variant the server publishes for the shape rather than one
-   * written down here, so a renamed variant cannot leave a broken picture that
-   * reports no error at all.
+   * The address the API signed, in the shape's variant (FC-040). The
+   * browser never builds one: an unsigned address is refused.
    *
    * @returns The address, or an empty string where there is no picture.
    */
   get imageUrl(): string {
-    const spec = this.spec;
-
-    return this.image && spec
-      ? `${BASE_CLOUDFLARE_IMAGES_URL}/${this.image.imageId}/${spec.variant}`
-      : '';
+    return this.image?.imageUrl ?? '';
   }
 
   /** Opens the cropper to add or replace the picture. */

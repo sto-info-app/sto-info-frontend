@@ -1,6 +1,6 @@
 <div
   id="team-developers-container"
-  class="team-page">
+  class="team-page lcars-rotate">
   <h1>Developers</h1>
   <p>
     The developers keep the {{ appTitle }} moving forward by building features,
@@ -17,23 +17,22 @@
     [vms]="pastMemberVms"
     emptyMessage="No retired developers listed yet." />
 
-  <div class="lcars-text-bar">
-    <h2><span>Want to Join the Crew?</span></h2>
-  </div>
-  <p>
-    STO Info is an open, community-led project built with modern tooling and a
-    strong focus on security, accessibility, and maintainability. Contributions
-    range from frontend and backend development to documentation, testing,
-    automation, and review.
-  </p>
-  <p>
-    You do not need to know everything on day one. Clear guidance, documented
-    standards, and supportive collaboration are part of how this project
-    operates. Curiosity and care matter more than perfection.
-  </p>
-  <p>
-    Use the
-    <a [routerLink]="contactLink">{{ appRouteTitles.CONTACT }}</a>
-    page to get in touch.
-  </p>
+  <app-collapsible-section heading="Want to Join the Crew?">
+    <p>
+      STO Info is an open, community-led project built with modern tooling and a
+      strong focus on security, accessibility, and maintainability. Contributions
+      range from frontend and backend development to documentation, testing,
+      automation, and review.
+    </p>
+    <p>
+      You do not need to know everything on day one. Clear guidance, documented
+      standards, and supportive collaboration are part of how this project
+      operates. Curiosity and care matter more than perfection.
+    </p>
+    <p>
+      Use the
+      <a [routerLink]="contactLink">{{ appRouteTitles.CONTACT }}</a>
+      page to get in touch.
+    </p>
+  </app-collapsible-section>
 </div>

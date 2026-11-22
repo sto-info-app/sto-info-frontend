@@ -1,4 +1,6 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
 
 #spec-container {
   display: flex;
@@ -27,7 +29,7 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-evenly;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
   border-radius: 4px;
   padding: 0.75rem 1rem;
   margin-bottom: 0.5rem;
@@ -50,7 +52,7 @@
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
 }
 
 // -- Active loadout -----------------------------------------------------------
@@ -69,7 +71,7 @@
   gap: 0.6rem;
   padding: 0.4rem 0.8rem;
   border-radius: 6px;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
   border-left: 6px solid vars.$lcars-gold;
   min-width: 0;
 
@@ -87,7 +89,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
   flex: 0 0 auto;
 }
 
@@ -101,7 +103,7 @@
   border: 1px solid vars.$lcars-grey-border;
   border-radius: 6px;
   background: vars.$lcars-grey-bg;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='%23b3b3b3'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='#{mixins.url-colour(vars.$lcars-grey-light)}'%3E%3Cpath d='M0 0l5 6 5-6z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.6rem center;
   color: vars.$lcars-white;
@@ -123,7 +125,7 @@
   }
 
   option {
-    background: #1a1a2e;
+    background: vars.$lcars-panel-bg;
     color: vars.$lcars-white;
     font-weight: 400;
   }
@@ -158,7 +160,7 @@
 
   // border-left colour and background tint are bound inline per specialization
   border-left: 4px solid vars.$lcars-gold;
-  background: rgba(vars.$lcars-gold, 0.07);
+  background: color.change(vars.$lcars-gold, $alpha: 0.07);
   transition:
     border-color 0.15s,
     background 0.15s,
@@ -166,7 +168,7 @@
 
   // Rows holding an active captain slot are ringed so the loadout stands out.
   &.active-slot-row {
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 25%);
+    box-shadow: inset 0 0 0 1px vars.$white-a25;
   }
 }
 
@@ -185,7 +187,7 @@
   gap: 0.4rem;
   font-weight: 600;
   font-size: 0.9rem;
-  color: var(--lcars-text, #eee);
+  color: var(--lcars-text, vars.$lcars-text);
 }
 
 .spec-icon {
@@ -231,7 +233,7 @@
   border: none;
   padding: 0 0 0 0.25rem;
   cursor: pointer;
-  color: rgb(255 255 255 / 30%);
+  color: vars.$white-a30;
   font-size: 0.9rem;
   line-height: inherit;
   vertical-align: top;
@@ -248,7 +250,7 @@
   flex-direction: column;
   gap: 0.15rem;
   font-size: 0.75rem;
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
 }
 
 .spec-header-right {
@@ -281,7 +283,7 @@
   position: relative;
   height: 18px;
   border-radius: 999px;
-  background: rgb(255 255 255 / 12%);
+  background: vars.$white-a12;
   overflow: visible;
   cursor: pointer;
   transition:
@@ -335,12 +337,12 @@
   top: 50%;
   width: 1px;
   height: 55%;
-  background: rgb(255 255 255 / 30%);
+  background: vars.$white-a30;
   transform: translate(-50%, -50%);
   pointer-events: none;
 
   &.reached {
-    background: rgb(255 255 255 / 55%);
+    background: vars.$white-a55;
   }
 }
 
@@ -353,7 +355,7 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
   border: 2px solid vars.$lcars-green;
   transform: translate(-50%, -50%);
   pointer-events: none;
@@ -375,7 +377,7 @@
   padding: 0 1rem;
   font-size: 0.78rem;
   line-height: 1.4;
-  color: var(--lcars-text-muted, #aaa);
+  color: var(--lcars-text-muted, vars.$lcars-text-muted);
 
   p {
     margin: 0 0 0.6rem;

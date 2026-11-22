@@ -20,6 +20,8 @@ import { CustomTrackingImageValueComponent } from './custom-tracking-image-value
 describe('CustomTrackingImageValueComponent', () => {
   const picture = {
     imageId: 'image-1',
+    imageUrl:
+      'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
     altText: 'A ship at speed',
     shape: CustomTrackingImageShape.SQUARE,
   };
@@ -85,13 +87,15 @@ describe('CustomTrackingImageValueComponent', () => {
 
   // Built from the variant the server publishes for the shape, so a renamed
   // variant cannot leave a broken picture that reports no error at all.
-  it('fetches the picture through the variant the server named', () => {
+  it('draws the picture from the address the API signed', () => {
     build({ image: picture });
 
     expect(query<HTMLImageElement>('img').src).toContain('/image-1/square300');
   });
 
-  it('shows nothing where the field names a shape the server does not', () => {
+  // FC-040: the stored picture is drawn from the address the API signed,
+  // whatever the cropper can describe.
+  it('offers no cropper for a shape the server does not describe, but still shows the picture', () => {
     build({
       field: aField({
         fieldType: CustomTrackingFieldType.IMAGE,
@@ -101,6 +105,12 @@ describe('CustomTrackingImageValueComponent', () => {
     });
 
     expect(component.spec).toBeNull();
+    expect(component.imageUrl).toBe(picture.imageUrl);
+  });
+
+  it('draws nothing where there is no picture', () => {
+    build();
+
     expect(component.imageUrl).toBe('');
   });
 

@@ -59,6 +59,10 @@ export const TEST_SUPPORTERS: Supporter[] = [
     note: 'Steady support through navigation upgrades.',
   },
   {
+    name: 'Nyota Uhura',
+    status: currentStatus,
+  },
+  {
     name: 'Geordi La Forge',
     status: pastStatus,
     note: 'Early feedback on visual systems.',

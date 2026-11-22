@@ -1,7 +1,15 @@
 @use 'lcars-variables' as vars;
 
+// The theme styles a bare `button` as a fixed 200 px LCARS pill (size,
+// margin, alignment); the switch is a button, so it sets each of those back
+// and is sized by its label wherever it is used (FC-044).
 .lcars-toggle {
   display: inline-flex;
+  width: auto;
+  height: auto;
+  margin: 0;
+  text-align: left;
+  border-radius: 0;
   align-items: center;
   gap: 0.55rem;
   background: none;
@@ -12,7 +20,7 @@
   font-size: 1rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgb(255 255 255 / 30%);
+  color: vars.$white-a30;
   transition: color 0.25s ease;
 
   &:focus-visible {
@@ -22,7 +30,7 @@
   }
 
   &--on {
-    color: rgb(255 255 255 / 80%);
+    color: vars.$white-a80;
   }
 
   &--disabled {
@@ -37,7 +45,7 @@
 
 .lcars-toggle__delta {
   font-size: 1.3rem;
-  color: rgb(255 255 255 / 15%);
+  color: vars.$white-a15;
   transition:
     color 0.25s ease,
     filter 0.25s ease;

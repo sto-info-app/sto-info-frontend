@@ -544,7 +544,10 @@ describe('StorytimeLandingComponent', () => {
       stories?.querySelector('button')?.click();
       fixture.detectChanges();
 
-      expect(stories?.querySelector('.storytime-story-list')).toBeNull();
+      expect(
+        stories?.querySelector<HTMLElement>('.collapsible-section__content')
+          ?.hidden,
+      ).toBe(true);
     });
 
     it('offers search', () => {

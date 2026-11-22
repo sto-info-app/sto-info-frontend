@@ -41,6 +41,11 @@ and `E2E_REDIS_DB` have to name the database and Redis logical database the
 backend is actually using. The harness refuses a different database, a
 database that is not on this machine, and any site that is not on localhost.
 
+Rather than typing them on every command, the variables can be kept in
+`e2e/.env.local`, one `NAME=value` a line, which git ignores and the config
+loads before anything reads them. A variable set in the shell still wins over
+the file. Copy `e2e/.env.local.example` to start.
+
 | Variable              | Default                     | What it is                                      |
 | --------------------- | --------------------------- | ----------------------------------------------- |
 | `E2E_PASSWORD`        | _required_                  | The seed password.                              |
@@ -56,6 +61,21 @@ database that is not on this machine, and any site that is not on localhost.
 | `E2E_IMAGES`          | unset                       | `on` to include the external picture cases.     |
 | `E2E_OMIT`            | unset                       | Comma-separated ids for a labelled partial run. |
 
+### Recording the help videos
+
+`npx playwright test --project=video` records the help guides as 1920 by
+1080 WebM clips under `reports/recordings/`, one a guide, from `e2e/video/`. It is
+not part of `npm run e2e`. It needs what the Fleet journeys need: the local
+backend, `E2E_BACKEND_DIR`, and no password, since `fleet-setup` makes and
+signs in the people it records as; the clips that upload a picture or an
+export also need the local scan worker running, or they wait at Scanning.
+Each spec is one guide and runs on its own, so one clip is retaken with
+`npx playwright test --project=video e2e/video/<spec>`. The clips are silent,
+captioned, and paced for a viewer; `e2e/video/support/clip.ts` has the
+cursor, the caption bar and the slowed actions they share, and
+`e2e/video/support/prepare.ts` registers off camera what a clip needs in
+place first.
+
 `npm run e2e:ui` opens Playwright's interactive runner; `npm run e2e:report`
 opens the last report. The HTML report is written to
 `reports/playwright/html` on every run, including a run that fails.
@@ -65,6 +85,108 @@ config still starts `npm start` unless a server is already listening, and
 the support commands still use the backend checkout's own database.
 `E2E_API_URL` is only for the requests a journey makes itself. It does not
 change the API address the Angular application was started with.
+
+### Public pages, without the password
+
+`e2e/public` holds checks of pages a stranger sees, such as Help (FC-048).
+They sign in as nobody, so they need no password and run on their own:
+
+```bash
+npx playwright test --project=public
+```
+
+### Fleet Community, as people made for the run
+
+`e2e/fleet` (FC-044) drives Fleet Community as six people the backend makes
+for the run — an Owner, an applicant, a friend, an Officer, a stranger and a
+site admin — and removes, with everything they made, when it ends. Nobody's
+password is needed and no real member's data is touched:
+
+```bash
+npx playwright test --project=fleet-desktop --project=fleet-mobile
+```
+
+- `fleet-setup` runs the backend's `e2e:support fleet-begin`. It clears any
+  earlier run, switches Fleet Community on, and makes the people with
+  passwords generated there. It writes them to
+  `reports/playwright/.fleet-people.json`, which git ignores, and signs each
+  in through the login form. Their addresses are at `fc044.example`, a domain
+  the backend never mails, so signing in sends nobody anything.
+- `fleet-desktop` runs every journey at 1280px, then `fleet-mobile` runs them
+  again on a phone (Pixel 7), each on Communities of its own.
+- `fleet-teardown` runs `fleet-finish`, which removes the people and
+  everything they made and puts the switch back as it was found, and checks
+  that nothing of theirs is left.
+- Each journey file starts by removing the people's Communities
+  (`fleet-clear-communities`), keeping the people: an Owner may hold ten,
+  closed ones included, and desktop and phone together register more. It also
+  forgets this machine's rate limit counts, since every person writes from one
+  address and the write limit allows it 200 in fifteen minutes.
+- A few checks need the backend's help, through more `e2e:support` commands:
+  - `fleet-storytime on|off|restore` throws Storytime's switch for Storytime
+    Moderation, then puts it back as `fleet-begin` found it, since the Help
+    journeys count its section; `fleet-finish` does the same.
+  - `fleet-proposal-notices <email> hold|release` holds a roster proposal
+    notice from the outbox while its Character's owner answers first, then
+    lets it go and reports what the outbox did with it.
+  - `fleet-dm-notices <email>` counts a person's direct message notices
+    without opening a page of theirs, which would make them present.
+  - `fleet-review-holds <tag>` and `fleet-expire-export <importId>` move this
+    run's hold to its review date, or its held export to the end of its
+    retention, and run the scheduled job that acts on it (the 05:03 hold
+    review, the 04:11 roster file retention). They start the backend
+    application, with its own schedule stopped, so each takes a minute or two,
+    and like the scheduled runs they also act on anything else overdue on this
+    machine.
+- A test that refreshes a person's session saves it back to their file when
+  it ends. An access token lasts an hour and each refresh retires the refresh
+  token used, so without that every test after the first hour was signed
+  out. A session that was signed out or revoked is not saved.
+- `E2E_FLEET_KEEP=1` skips the teardown, leaving the people and what they
+  made to look at after a failed journey; the next run's setup removes them
+  first. `E2E_BACKEND_DIR` names the backend checkout when it is not a sibling
+  called `sto-info-backend`, as in a worktree.
+- Each Fleet project retries a failed test once: the local dev server now and
+  then refuses one script on a fresh page's first burst. A test that passes
+  only on its retry is reported as flaky, so it is still seen. A retry runs its
+  serial group again from the top, under names ending ` r1`.
+- Run the backend built (`npm run build`, then `npm start`) rather than with
+  `start:dev` for a long run: its watcher restarts the API on file events that
+  change nothing (antivirus scanning, on this machine), and twice stopped a
+  journey halfway. The scan worker and the frontend can stay as they are.
+- The teardown also removes the chat reports the people filed or were
+  reported in, the moderation holds placed by or on them, and the rescan
+  campaigns they started. The database only nulls a person on these, so each
+  run's records used to stay on the admin pages, named for nobody, until the
+  open chat reports filled the queue's first page and a later run could not
+  find its own.
+- Keep an axe sweep to eight pages or so a test. axe sends its whole script
+  and its findings through every check, so a page that checks many keeps a
+  large trace: the Owner's 29 in one page passed 200 MB on the phone, and the
+  runner could not save it when the page closed, so the test timed out after
+  every page had passed.
+- The Fleet projects trace without a screencast (`FLEET_TRACE` in
+  `playwright.config.ts`). A worker keeps every trace's frames until it
+  exits, passed tests' included, and the runner deletes them before it
+  counts the worker gone: an hour of phone frames took longer than the five
+  minutes it allows, and every full run ended "worker process did not exit".
+  A failure's trace still has the page at each step.
+- The checks for FC-035's transcripts, FC-038's erasure and FC-040's private
+  images need secrets the local stack does not hold, and are left out.
+
+The journeys:
+
+| File | What it covers |
+| --- | --- |
+| `01-registration-to-moderation` | A Community, a Fleet, an Armada and a Fleet nobody runs registered; a roster imported; an applicant accepted; an event answered; a chat; a report decided; a suspension |
+| `02-help-and-navigation` | Help to every section and guide, and every page a Fleet guide links to; Settings and its guide; Community and the Dashboard to Fleets; following nothing, several, signed out, switched off, and the systems not answering |
+| `03-accessibility` | axe (WCAG 2.1 A and AA) on every Fleet, chat, settings, Help and site admin page; tabs and a dialog by keyboard; nothing moving under reduced motion |
+| `04-owed-news-activity` | The signed-in checks FC-027, FC-029 and FC-049 left owed: a scoped post drafted, given a cover, published, found, kept from strangers and from the site's News and its API, renamed, unpublished and deleted with its cover taken down; an Armada's news; the Activity that posts, joining, roles, holdings, imports and an Armada placement make, and its Older page; a Fleet taken out of its Armada by keyboard, with the Armada's tree and history and its Community's Armadas and Fleets; a registered Character's owner asked once, and not when they answered first; Settings' help links and back |
+| `04-owed-events` | FC-028 and FC-030's: weekly and monthly events and their previews, audiences, places and the waiting line, each reminder, a moved and a cancelled occurrence, attendance once one is under way, the change log, the dashboard, and the attendance and recruitment reports with who sees each; answers by keyboard, and axe on the event, an occurrence with its sheet, and the report |
+| `04-owed-chat` | FC-031 to FC-035's: channels added, renamed, archived and refused, mentions and replies and their notices, direct messages and the one notice somebody away is sent until they read them, presence, typing, a block, toasts, and a report's evidence and removal |
+| `04-owed-admin` | FC-036, FC-037, FC-039 and FC-041's: suspensions, disputes and duplicate names, investigations, holds and their review, an expired held export, roles and overrides, disabled accounts, chat and member report decisions, Storytime Moderation, the Security Log and its pages, Scan Diagnostics and rescan campaigns |
+| `05-screenshots` | Representative pages at each size, written to `reports/screenshots/fc-044/` |
+| `06-feature-switches` | FC-045's release smoke test: the Admin page's Features panel and what the environment allows; Fleet Community switched off with a reason, gone for everybody and its Contact topic withdrawn, then on again and back; Storytime switched and put back; a switch thrown elsewhere first; each change in the Security Log; axe on the Admin page |
 
 ## Picture cases are opt-in
 

@@ -9,6 +9,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { catchError, of, switchMap } from 'rxjs';
+import { ModerationHoldAdminService } from 'src/app/admin/moderation-admin/moderation-hold-admin.service';
 import {
   STORYTIME_ADMIN_LINKS,
   StorytimeAdminLink,
@@ -34,6 +35,10 @@ import { RoutingService } from 'src/app/shared/services/routing.service';
  * Everything above it comes with the administrator role, while those three are
  * given out one at a time by permission, so they are filtered against what this
  * administrator actually holds rather than shown to every administrator.
+ *
+ * The publication pause (FC-042) and the feature switches (FC-045) used to
+ * sit beneath the Operations cards as controls of their own; since FC-054 they
+ * have a page, Site Settings, and a card here like every other.
  */
 @Component({
   selector: 'app-admin',
@@ -46,6 +51,7 @@ export class AdminComponent implements OnInit {
   private readonly _routingService = inject(RoutingService);
   private readonly _accessControlService = inject(AccessControlService);
   private readonly _storytimeService = inject(StorytimeService);
+  private readonly _holds = inject(ModerationHoldAdminService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -60,10 +66,25 @@ export class AdminComponent implements OnInit {
   storytimeLinks: StorytimeAdminLink[] = [];
 
   /**
-   * Works out which of Storytime's management pages to offer.
+   * How many member and chat reports wait on an administrator (FC-036), or
+   * null until known, or when it cannot be read.
+   */
+  openReports: number | null = null;
+
+  /**
+   * Works out which of Storytime's management pages to offer, and how many
+   * reports are open.
    */
   ngOnInit(): void {
     this.loadStorytimeLinks();
+    this._holds
+      .openCounts()
+      .pipe(
+        catchError(() => of(null)),
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(counts => (this.openReports = counts?.total ?? null));
   }
 
   /**

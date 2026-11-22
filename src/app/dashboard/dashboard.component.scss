@@ -1,3 +1,5 @@
+@use 'lcars-variables' as vars;
+
 #dashboard-container {
   display: flex;
   gap: 1rem;
@@ -30,13 +32,19 @@
           padding: 2rem 1rem;
           border-radius: 20px;
           min-width: 140px;
-          color: #000;
+          color: vars.$a11y-black;
+
+          // The tiles are links, so that a keyboard reaches them and a
+          // middle click opens one in its own tab. Undecorated, because
+          // the whole tile is the target and an underline across a
+          // coloured block says nothing a cursor does not.
+          text-decoration: none;
           cursor: pointer;
           transition:
             transform 0.2s ease,
             filter 0.2s ease;
           gap: 1rem;
-          box-shadow: 0 4px 6px rgb(0 0 0 / 20%);
+          box-shadow: 0 4px 6px vars.$black-a20;
 
           &:hover {
             transform: translateY(-4px);
@@ -65,22 +73,31 @@
               text-transform: uppercase;
               letter-spacing: 0.5px;
             }
+
+            // A second line beneath the name, for a tile that has a
+            // figure to give as well as a destination. Smaller and not
+            // shouted: the name is what is being chosen between.
+            .tile-sub {
+              font-size: 0.9rem;
+              font-weight: 600;
+              opacity: 0.75;
+            }
           }
 
           &.sunflower {
-            background-color: #fc6;
+            background-color: vars.$lcars-sunflower;
           }
 
           &.perano {
-            background-color: #9cf;
+            background-color: vars.$lcars-perano;
           }
 
           &.bahama {
-            background-color: #36c;
+            background-color: vars.$lcars-bahama;
           }
 
           &.atomic {
-            background-color: #f96;
+            background-color: vars.$lcars-butterscotch;
           }
         }
       }

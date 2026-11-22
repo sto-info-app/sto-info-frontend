@@ -30,6 +30,18 @@ describe('ResourcesComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('lists the STO Keybind Tool among the build tools (#1444)', () => {
+    const tools = component.resourceLinks.find(
+      section => section.heading === 'Build Tools & DPS Resources',
+    );
+
+    expect(tools?.links).toContainEqual({
+      label: 'STO Keybind Tool',
+      url: 'https://keybind.sto-tools.org/',
+      description: 'Build keybind files for Star Trek Online',
+    });
+  });
+
   it('should expose resource links', () => {
     expect(component.resourceLinks.length).toBeGreaterThan(0);
   });

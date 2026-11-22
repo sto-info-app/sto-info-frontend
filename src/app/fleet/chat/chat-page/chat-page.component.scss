@@ -1,0 +1,359 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+.chat-page {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.chat-page__banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+// Two panes, as in a chat app: the list in a slim column, the open place
+// beside it. The two are one screen tall together, and each scrolls inside
+// itself, so a long list never pushes the conversation off the screen and the
+// message box stays at the conversation's foot.
+.chat-page__layout {
+  display: grid;
+  grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr);
+  gap: 1rem;
+  height: clamp(28rem, calc(100dvh - 6rem), 64rem);
+
+  // Stacked below 720px: the list, or the open place with a way back. The
+  // list then runs at its own length, and the open place keeps a screen.
+  @media (width < 720px) {
+    grid-template-columns: minmax(0, 1fr);
+    height: auto;
+
+    .chat-page--open & .chat-page__list {
+      display: none;
+    }
+
+    .chat-page:not(.chat-page--open) & .chat-page__open {
+      display: none;
+    }
+
+    .chat-page__open {
+      height: calc(100dvh - 4rem);
+    }
+  }
+}
+
+// The theme lays a <nav> out from its foot (`justify-content: flex-end`, for
+// the side bar), which left a short list sitting at the bottom of its pane.
+.chat-page__toolbar {
+  display: flex;
+
+  @media (width < 720px) {
+    display: none;
+  }
+}
+
+.chat-page__list-toggle {
+  @include mixins.lcars-bare-button;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.2rem 0.75rem;
+  border: 1px solid vars.$lcars-perano;
+  border-radius: 1rem;
+  background: none;
+  color: vars.$lcars-perano;
+  font-size: 0.85rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: vars.$lcars-white;
+    color: vars.$lcars-white;
+  }
+}
+
+// Hidden, the open place takes the whole width. Only from 720px: below it
+// the list is the page whenever nothing is open, and must stay reachable.
+@media (width >= 720px) {
+  .chat-page__layout--list-hidden {
+    grid-template-columns: minmax(0, 1fr);
+
+    .chat-page__list {
+      display: none;
+    }
+  }
+}
+
+.chat-page__list {
+  display: flex;
+
+  // A column that never wraps: the theme lets a <nav> wrap, which turned a
+  // list taller than its pane into a second column beside the first rather
+  // than scrolling it.
+  flex-flow: column nowrap;
+  justify-content: flex-start;
+  gap: 1rem;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+// The theme draws every link in a <nav> as the sidebar's 210 px violet pill
+// (`nav a` in lcars-theme.scss). This list is navigation too, but a list of
+// names: each of its links sets back what that rule sets, so the names wrap
+// inside the column and read as text (FC-044).
+@mixin not-a-sidebar-pill {
+  width: auto;
+  height: auto;
+  margin: 0;
+  background-color: transparent;
+  text-align: left;
+  text-transform: none;
+  font-size: inherit;
+  font-weight: inherit;
+  user-select: text;
+}
+
+// Each part of the list takes the next colour of the list's rotation (it
+// carries `lcars-rotate`): a spine down its left and its heading in that
+// colour, so a Community and its Fleets read as neighbours.
+.chat-page__scope {
+  --chat-group-accent: var(--lcars-accent, #{vars.$lcars-sky});
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding-left: 0.5rem;
+  border-left: 4px solid var(--chat-group-accent);
+}
+
+.chat-page__scope-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.25rem;
+}
+
+// The name, with what kind of place it is above it. Not upper-cased: a
+// Fleet's name is exact, and its case is part of it.
+.chat-page__scope-name {
+  min-width: 0;
+  margin: 0;
+  color: var(--chat-group-accent);
+  font-family: vars.$font-antonio;
+  font-size: 1rem;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+
+  a {
+    @include not-a-sidebar-pill;
+
+    display: inline;
+    padding: 0;
+    border-radius: 0;
+    color: inherit;
+
+    &:hover,
+    &:focus-visible {
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid vars.$a11y-white;
+      outline-offset: 2px;
+    }
+  }
+}
+
+.chat-page__scope-kind {
+  display: block;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.chat-page__places {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-page__place-row {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+}
+
+.chat-page__place-link {
+  @include not-a-sidebar-pill;
+
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0.2rem 0.5rem;
+  border-radius: 0 1rem 1rem 0;
+  color: vars.$lcars-white;
+  font-size: 0.95rem;
+  text-decoration: none;
+  overflow-wrap: anywhere;
+
+  &:hover,
+  &:focus-visible {
+    background: vars.$lcars-card-surface-hover;
+  }
+
+  &--open {
+    background: var(--chat-group-accent);
+    color: vars.$lcars-black;
+
+    &:hover,
+    &:focus-visible {
+      background: var(--chat-group-accent);
+    }
+
+    .chat-page__place-note {
+      color: vars.$lcars-black;
+    }
+  }
+}
+
+.chat-page__place-note {
+  margin: 0;
+  font-size: 0.75rem;
+  color: vars.$lcars-grey-light;
+}
+
+.chat-page__group-note {
+  padding: 0.2rem 0.5rem;
+}
+
+// The + on a group's heading, a channel's ⋮ and the transcripts' refresh:
+// small icons in the group's colour.
+.chat-page__icon-button {
+  @include mixins.lcars-bare-button;
+
+  flex: 0 0 auto;
+  padding: 0.2rem 0.4rem;
+  border: 0;
+  background: none;
+  color: var(--chat-group-accent, #{vars.$lcars-sky});
+  font-size: 0.9rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible,
+  &[aria-expanded='true'] {
+    color: vars.$lcars-white;
+  }
+}
+
+// A channel's export, change and archive, beneath it once its ⋮ is pressed.
+.chat-page__manage {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.2rem 0.5rem 0.4rem;
+}
+
+.chat-page__manage-button {
+  @include mixins.lcars-bare-button;
+
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.15rem 0.6rem;
+  border: 1px solid var(--chat-group-accent, #{vars.$lcars-sky});
+  border-radius: 0.75rem;
+  background: none;
+  color: var(--chat-group-accent, #{vars.$lcars-sky});
+  font-size: 0.8rem;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    border-color: vars.$lcars-white;
+    color: vars.$lcars-white;
+  }
+}
+
+// The open place fills its pane, so the conversation inside it can hand the
+// height to its log and keep the message box at the foot.
+.chat-page__open {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+
+  // Each fills the pane, so whatever scrolls inside it has the height to.
+  > app-chat-conversation,
+  > app-chat-transcripts {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+}
+
+.chat-page__prompt {
+  color: vars.$lcars-grey-light;
+}
+
+.chat-page__friend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+// A friend's presence (FC-034): hollow when away, filled when online.
+.chat-presence {
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 2px solid vars.$lcars-grey-light;
+  border-radius: 50%;
+
+  &--online {
+    border-color: vars.$lcars-green;
+    background: vars.$lcars-green;
+  }
+}
+
+// The link to the transcripts, its name at the start and its count at the
+// end of one row, rather than the column a channel's name and note take.
+.chat-page__place-link--count {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+// How many transcripts are ready: the count badge every heading uses. That
+// rule is scoped to `.lcars-text-bar`, so it is restated for the list here,
+// as the friends page restates it for its side menu.
+.header-count-badge {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 26px;
+  height: 26px;
+  padding: 0 0.45rem;
+  border-radius: 999px;
+  background-color: vars.$lcars-tangerine;
+  color: vars.$a11y-black;
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+  white-space: nowrap;
+
+  // On the open link, which takes its group's colour, it is the black pill
+  // the friends page's coloured side buttons carry instead, so it never
+  // sinks into a colour close to its own.
+  .chat-page__place-link--open & {
+    background-color: vars.$lcars-black;
+    color: vars.$lcars-white;
+  }
+}

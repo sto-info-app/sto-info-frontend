@@ -9,9 +9,9 @@
         <form
           [formGroup]="registerForm"
           (ngSubmit)="onRegister()"
-          class="form"
+          class="form lcars-rotate"
           novalidate>
-          <div class="lcars-input-container cool">
+          <div class="lcars-input-container">
             <label for="firstName">First Name</label>
             <input
               type="text"
@@ -31,7 +31,7 @@
             }
           </div>
 
-          <div class="lcars-input-container cool">
+          <div class="lcars-input-container">
             <label for="lastName">Last Name</label>
             <input
               type="text"
@@ -51,7 +51,7 @@
             }
           </div>
 
-          <div class="lcars-input-container perano">
+          <div class="lcars-input-container">
             <label for="username">Username</label>
             <input
               type="text"
@@ -89,7 +89,7 @@
             }
           </div>
 
-          <div class="lcars-input-container sky">
+          <div class="lcars-input-container">
             <label for="email">Email</label>
             <input
               type="email"
@@ -126,7 +126,7 @@
           </div>
 
           <div
-            class="lcars-input-container violet"
+            class="lcars-input-container"
             data-private>
             <label for="password">Password</label>
             <input
@@ -160,7 +160,7 @@
           </div>
 
           <div
-            class="lcars-input-container violet"
+            class="lcars-input-container"
             data-private>
             <label for="confirmPassword">Confirm Password</label>
             <input
@@ -187,7 +187,7 @@
             [disabled]="!registerForm.valid || isSubmitting"
             [ngClass]="{ submitting: isSubmitting }"
             type="submit"
-            class="submit-button">
+            class="submit-button green">
             Register
           </button>
         </form>
@@ -201,7 +201,7 @@
         <div class="buttons">
           <a
             [routerLink]="getRouteLink(appRoutes.LOGIN)"
-            class="full-width-btn-link sunflower"
+            class="full-width-btn-link"
             >Login</a
           >
         </div>

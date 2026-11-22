@@ -156,8 +156,11 @@ describe('CommentThreadComponent', () => {
     toggle.click();
     fixture.detectChanges();
 
-    expect(element.querySelector('.storytime-comments')).toBeNull();
-    expect(element.textContent).not.toContain('A fine chapter.');
+    expect(
+      element
+        .querySelector('.storytime-comments')
+        ?.closest<HTMLElement>('.collapsible-section__content')?.hidden,
+    ).toBe(true);
   });
 
   // A comment that says neither who wrote it nor when reads as though it came

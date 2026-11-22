@@ -13,7 +13,7 @@ $news-category-colours: (
 );
 
 // Fallback edge colour for a card whose category has no mapping.
-$news-category-edge-default: #555;
+$news-category-edge-default: vars.$lcars-grey-dark;
 
 // Applies the category-tinted treatment shared by news cards: a colour-tinted
 // left edge plus a matching header bar (background + darker bottom border).

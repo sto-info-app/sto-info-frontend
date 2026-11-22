@@ -47,6 +47,20 @@ export function helpGuideSitemapPaths(slugs) {
 }
 
 /**
+ * Turns help section ids into sitemap entries (FC-048).
+ *
+ * @param {string[]} topics - The ids of the sections anybody may open.
+ * @returns {{ path: string, changefreq: string, priority: string }[]} The entries.
+ */
+export function helpTopicSitemapPaths(topics) {
+  return topics.map(topic => ({
+    path: `/help/topics/${topic}`,
+    changefreq: 'monthly',
+    priority: '0.4',
+  }));
+}
+
+/**
  * Escapes XML-significant characters.
  *
  * @param {string} value - The raw value.

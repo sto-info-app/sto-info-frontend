@@ -1,0 +1,79 @@
+<article
+  class="fleet-news-card"
+  [class.fleet-news-card--draft]="isDraft">
+  <div class="fleet-news-card__header">
+    <span class="fleet-news-card__header-left">
+      <i
+        class="fas fa-newspaper fleet-news-card__icon"
+        aria-hidden="true"></i>
+      <span class="fleet-news-card__audience">{{ audienceBadge }}</span>
+      @if (isDraft) {
+        <span class="fleet-news-card__draft">Draft</span>
+      }
+    </span>
+    <span class="fleet-news-card__date">
+      <i
+        class="fas fa-calendar-day"
+        aria-hidden="true"></i>
+      @if (post.publishedAt) {
+        <time [attr.datetime]="post.publishedAt">{{
+          post.publishedAt | appDate: 'mediumDate'
+        }}</time>
+      } @else {
+        <span>Last changed&ngsp;</span>
+        <time [attr.datetime]="post.updatedAt">{{
+          post.updatedAt | appDate: 'medium'
+        }}</time>
+      }
+    </span>
+  </div>
+
+  <div class="fleet-news-card__main">
+    @if (cover; as picture) {
+      <img
+        class="fleet-news-card__thumb"
+        [src]="picture.url"
+        [alt]="picture.alt"
+        loading="lazy" />
+    }
+
+    <div class="fleet-news-card__body">
+      <h2 class="fleet-news-card__title">
+        <a [routerLink]="link">{{ post.title }}</a>
+      </h2>
+      @if (post.summary) {
+        <p class="fleet-news-card__summary">{{ post.summary }}</p>
+      }
+      @if (post.author; as author) {
+        <p class="fleet-news-card__byline">
+          <i
+            class="fas fa-user"
+            aria-hidden="true"></i>
+          <span>Posted by&ngsp;</span>
+          @if (author.linksToProfile) {
+            <a [routerLink]="profileLinkOf(author)">{{ author.username }}</a>
+          } @else {
+            <span>{{ author.username }}</span>
+          }
+        </p>
+      }
+    </div>
+
+    <div class="fleet-news-card__readmore-col">
+      <a
+        class="lcars-btn lcars-btn-auto sunflower fleet-news-card__readmore"
+        [routerLink]="link"
+        >Read more</a
+      >
+    </div>
+
+    <a
+      class="fleet-news-card__action"
+      [routerLink]="link"
+      [attr.aria-label]="'Read ' + post.title">
+      <i
+        class="fas fa-chevron-right cta-icon"
+        aria-hidden="true"></i>
+    </a>
+  </div>
+</article>

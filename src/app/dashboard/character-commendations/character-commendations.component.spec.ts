@@ -13,6 +13,7 @@ import { CharacterCommendationService } from 'src/app/dashboard/services/charact
 import { CharacterService } from 'src/app/dashboard/services/character.service';
 import { StoAccountService } from 'src/app/dashboard/services/sto-account.service';
 import { CharacterCommendationsComponent } from './character-commendations.component';
+import { LCARS_COLOURS } from 'src/app/shared/constants/lcars-colours.constants';
 
 describe('CharacterCommendationsComponent', () => {
   let component: CharacterCommendationsComponent;
@@ -334,7 +335,7 @@ describe('CharacterCommendationsComponent', () => {
 
   it('should resolve accent colour and fall back when absent', () => {
     expect(component.accent(mockProgress[0])).toBe('#4b84c4');
-    expect(component.accent(mockProgress[1])).toBe('#fa0');
+    expect(component.accent(mockProgress[1])).toBe(LCARS_COLOURS.gold);
   });
 
   it('should track icon load failures and gate icon display', () => {

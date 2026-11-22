@@ -194,6 +194,7 @@ describe('ModerationService', () => {
         .updateReport('report-1', {
           status: ReportStatus.DISMISSED,
           moderatorNotes: 'No evidence found.',
+          reason: 'Nothing to act on',
         })
         .subscribe();
 
@@ -204,6 +205,7 @@ describe('ModerationService', () => {
       expect(req.request.body).toEqual({
         status: ReportStatus.DISMISSED,
         moderatorNotes: 'No evidence found.',
+        reason: 'Nothing to act on',
       });
       req.flush({ id: 'report-1' } as UserReport);
     });
@@ -288,23 +290,13 @@ describe('ModerationService', () => {
   });
 
   describe('disableUser', () => {
-    it('should post an empty reason by default', () => {
-      service.disableUser('member-1').subscribe();
-
-      const req = httpMock.expectOne(
-        `${API_URLS.MODERATION_ADMIN_USERS}/member-1/disable`,
-      );
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
-      req.flush(moderatedUser);
-    });
-
-    it('should post the reason when one is given', () => {
+    it('should post the reason (FC-039)', () => {
       service.disableUser('member-1', { reason: 'Spamming' }).subscribe();
 
       const req = httpMock.expectOne(
         `${API_URLS.MODERATION_ADMIN_USERS}/member-1/disable`,
       );
+      expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({ reason: 'Spamming' });
       req.flush(moderatedUser);
     });
@@ -313,20 +305,20 @@ describe('ModerationService', () => {
       signOut();
 
       await expect(
-        firstValueFrom(service.disableUser('member-1')),
+        firstValueFrom(service.disableUser('member-1', { reason: 'Spamming' })),
       ).rejects.toThrow('No token found');
     });
   });
 
   describe('enableUser', () => {
-    it('should post to the enable endpoint', () => {
-      service.enableUser('member-1').subscribe();
+    it('should post the reason to the enable endpoint (FC-039)', () => {
+      service.enableUser('member-1', 'Appeal upheld').subscribe();
 
       const req = httpMock.expectOne(
         `${API_URLS.MODERATION_ADMIN_USERS}/member-1/enable`,
       );
       expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
+      expect(req.request.body).toEqual({ reason: 'Appeal upheld' });
       req.flush(moderatedUser);
     });
 
@@ -334,7 +326,7 @@ describe('ModerationService', () => {
       signOut();
 
       await expect(
-        firstValueFrom(service.enableUser('member-1')),
+        firstValueFrom(service.enableUser('member-1', 'Appeal upheld')),
       ).rejects.toThrow('No token found');
     });
   });

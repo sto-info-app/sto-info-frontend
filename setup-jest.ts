@@ -88,3 +88,13 @@ console.warn = (...args: unknown[]): void => {
 
   passThroughWarn(...args);
 };
+
+// A folded section is remembered in the page's storage (SectionFoldService),
+// and jsdom keeps that storage for the whole of a spec file. Forget every fold
+// after each test, so one test folding a section never opens the next with it
+// already folded.
+afterEach(() => {
+  Object.keys(localStorage)
+    .filter(key => key.startsWith('lcars-folded-sections:'))
+    .forEach(key => localStorage.removeItem(key));
+});

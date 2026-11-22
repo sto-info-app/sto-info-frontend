@@ -1,3 +1,4 @@
+@use 'sass:color';
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
@@ -35,19 +36,16 @@
   margin: 1.5rem 0 2rem;
 }
 
-// ─── Section Bar ─────────────────────────────────────────────────────────────
-
-.stats-section-bar {
-  margin-bottom: 1rem;
-}
-
 // ─── Category Card Grid ───────────────────────────────────────────────────────
 
 .stat-category-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 1rem;
-  margin-bottom: 2rem;
+
+  // The space the section bar above used to keep beneath itself, now that
+  // the bar belongs to the shared section and this page's styles cannot reach it.
+  margin: 1rem 0 2rem;
 
   @media (width <= 700px) {
     grid-template-columns: repeat(2, 1fr);
@@ -61,10 +59,10 @@
     gap: 0.5rem;
     padding: 1.4rem 1rem;
     border-radius: 14px;
-    color: #000;
+    color: vars.$a11y-black;
     text-decoration: none;
     font-weight: 700;
-    box-shadow: 0 3px 7px rgb(0 0 0 / 25%);
+    box-shadow: 0 3px 7px vars.$black-a25;
     transition:
       transform 0.2s ease,
       filter 0.2s ease;
@@ -106,8 +104,9 @@
       background-color: vars.$lcars-violet;
     }
 
-    &.green {
-      background-color: vars.$lcars-green;
+    // Not green: green is kept for accepting, and a tile only goes somewhere.
+    &.orange {
+      background-color: vars.$lcars-orange;
     }
 
     &.tangerine {
@@ -129,7 +128,7 @@
 .no-characters-msg {
   padding: 2rem;
   text-align: center;
-  background: rgba(vars.$lcars-grey-bg, 0.5);
+  background: color.change(vars.$lcars-grey-bg, $alpha: 0.5);
   border: 1px dashed vars.$lcars-grey-border;
   border-radius: 8px;
   margin-top: 2rem;

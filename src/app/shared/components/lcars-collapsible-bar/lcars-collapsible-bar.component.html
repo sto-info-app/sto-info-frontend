@@ -1,0 +1,13 @@
+<div class="lcars-text-bar small-lcars-bar-gap">
+  <span>{{ label() }}</span>
+  <button
+    type="button"
+    class="cta-icon"
+    (click)="toggle()"
+    [title]="(collapsed() ? 'Show ' : 'Hide ') + label()">
+    <i
+      class="fas"
+      [class.fa-caret-down]="collapsed()"
+      [class.fa-caret-up]="!collapsed()"></i>
+  </button>
+</div>

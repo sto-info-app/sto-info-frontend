@@ -1,0 +1,182 @@
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ParamMap } from '@angular/router';
+
+import { Observable } from 'rxjs';
+
+import { armadaTabsVmOf } from 'src/app/fleet/armadas/armada-tabs/armada-tabs.component';
+import { FLEET_SCOPE_ARMADA } from 'src/app/fleet/constants/fleet-scope.constants';
+import {
+  bannerOf,
+  emblemOf,
+  FLEET_EMBLEM_SIZES,
+} from 'src/app/fleet/fleet-artwork';
+import { scopeStatusPill } from 'src/app/fleet/fleet-card.builders';
+import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
+import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { buildScopeArtworkVm } from 'src/app/fleet/scope/fleet-scope-artwork.builder';
+import { FleetScopePageDirective } from 'src/app/fleet/scope/fleet-scope-page.directive';
+import {
+  FleetScopeFact,
+  FleetScopeReadyState,
+} from 'src/app/fleet/scope/fleet-scope-page.models';
+import { FleetScopeViewComponent } from 'src/app/fleet/scope/fleet-scope-view/fleet-scope-view.component';
+import { ResolvedStoArmada } from 'src/app/models/fleet.models';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+
+/**
+ * One Armada's page, below the Community that registered it.
+ *
+ * No visibility fact and no recruitment pill: an Armada has neither. It is
+ * seen exactly as far as the Community holding it, and it groups Fleets
+ * rather than recruiting players.
+ *
+ * Which Fleets are in it, and where, is its tree (FC-026): a panel that
+ * reads the placements itself, so a Fleet can leave without this page's own
+ * record changing at all. Its history, its requests and who governs it are
+ * on its tabs.
+ */
+@Component({
+  selector: 'app-armada-page',
+  templateUrl: './armada-page.component.html',
+  styleUrls: ['./armada-page.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [AppDatePipe],
+  imports: [AsyncPipe, FleetScopeViewComponent],
+})
+export class ArmadaPageComponent extends FleetScopePageDirective<ResolvedStoArmada> {
+  private readonly _scopes = inject(FleetScopeService);
+
+  readonly missingMessage =
+    'No Armada answers to that address under that Community. There may be ' +
+    'no such Armada, or it may not be shown to you.';
+
+  /**
+   * Asks for the Armada the address names.
+   *
+   * @param params - The address, in segments.
+   * @returns The Armada, and the current form of every segment.
+   */
+  protected resolve(params: ParamMap): Observable<ResolvedStoArmada> {
+    return this._scopes.resolveArmada(
+      params.get('communitySlug') ?? '',
+      params.get('platformSegment') ?? '',
+      params.get('slug') ?? '',
+    );
+  }
+
+  /**
+   * Whether any segment the reader used has since been retired.
+   *
+   * @param resolved - The server's answer.
+   * @returns True when the address should be replaced.
+   */
+  protected hasMoved(resolved: ResolvedStoArmada): boolean {
+    return resolved.redirected;
+  }
+
+  /**
+   * Where this Armada now lives.
+   *
+   * @param resolved - The server's answer.
+   * @returns The router link.
+   */
+  protected canonicalLink(resolved: ResolvedStoArmada): string[] {
+    return FLEET_LINKS.armada(
+      resolved.communitySlug,
+      resolved.platformSegment,
+      resolved.armada.slug,
+    );
+  }
+
+  /**
+   * Turns the Armada into what the page draws.
+   *
+   * @param resolved - The server's answer.
+   * @returns The page's ready state.
+   */
+  protected present(resolved: ResolvedStoArmada): FleetScopeReadyState {
+    const armada = resolved.armada;
+
+    const facts: FleetScopeFact[] = [
+      { label: 'Platform', value: armada.platformName },
+      { label: 'Registered', value: this.formatInstant(armada.createdAt) },
+    ];
+
+    // Which Fleets may ask to join turns on it, so it is shown beside the
+    // platform, which decides the same thing.
+    if (resolved.allegianceName !== null) {
+      facts.splice(1, 0, {
+        label: 'Allegiance',
+        value: resolved.allegianceName,
+      });
+    }
+
+    // The exact game name is the heading, so a Community that prefers to
+    // call it something else gets its preference here, where it cannot be
+    // mistaken for the name the game holds.
+    if (
+      armada.displayName !== null &&
+      armada.displayName !== armada.exactGameName
+    ) {
+      facts.unshift({ label: 'Known as', value: armada.displayName });
+    }
+
+    if (armada.closedAt !== null) {
+      facts.push({
+        label: 'Closed',
+        value: this.formatInstant(armada.closedAt),
+      });
+    }
+
+    return {
+      kind: 'READY',
+      // What may be done to it is on its tabs and in its tree (FC-026).
+      actions: [],
+      armadaTabs: armadaTabsVmOf(resolved),
+      armada: {
+        communityId: armada.communityId,
+        armadaId: armada.id,
+        armadaName: armada.exactGameName,
+        communitySlug: resolved.communitySlug,
+        communityName: resolved.communityName ?? '',
+        requestsLink: FLEET_LINKS.armadaRequests(
+          resolved.communitySlug,
+          resolved.platformSegment,
+          armada.slug,
+        ),
+      },
+      header: {
+        scope: FLEET_SCOPE_ARMADA,
+        name: armada.exactGameName,
+        platform: armada.platformName,
+        communityName: resolved.communityName,
+        communityLink: FLEET_LINKS.community(resolved.communitySlug),
+        banner: bannerOf(armada),
+        emblem: emblemOf(armada, FLEET_EMBLEM_SIZES.PAGE),
+        // An Armada recruits nobody, so the pill speaks only when the
+        // record itself has stopped operating.
+        status: scopeStatusPill(armada.status, null),
+        facts,
+      },
+      notice: null,
+      // Armada surfaces are FC-024 to FC-026. Nothing here yet decides
+      // what following an Armada would even mean, and a control that
+      // followed its Community from an Armada page would be answering a
+      // question the reader did not ask.
+      following: null,
+      description: null,
+      artwork: buildScopeArtworkVm(
+        {
+          kind: 'ARMADA',
+          communityId: armada.communityId,
+          armadaId: armada.id,
+        },
+        armada.exactGameName,
+        armada,
+        resolved.viewer,
+      ),
+    };
+  }
+}

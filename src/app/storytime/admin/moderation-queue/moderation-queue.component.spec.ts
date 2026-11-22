@@ -142,7 +142,9 @@ describe('ModerationQueueComponent', () => {
     expect(fixture.componentInstance.errorMessage).toContain('word for word');
   });
 
-  it('removes the content and closes the report', () => {
+  // The server closes the report with the removal (FC-044), so nothing a
+  // reader leaving the page could cancel is sent after it.
+  it('removes the content, and leaves closing its reports to the server', () => {
     render();
     fixture.componentInstance.form.patchValue({
       message: 'This breaches the harassment policy.',
@@ -155,10 +157,7 @@ describe('ModerationQueueComponent', () => {
       reasonCode: StorytimeReportReason.HARASSMENT,
       message: 'This breaches the harassment policy.',
     });
-    expect(moderationService.resolveReport).toHaveBeenCalledWith('report-1', {
-      status: StorytimeReportStatus.ACTIONED,
-      resolution: 'This breaches the harassment policy.',
-    });
+    expect(moderationService.resolveReport).not.toHaveBeenCalled();
   });
 
   it('dismisses a report with a note for the record', () => {
@@ -174,27 +173,40 @@ describe('ModerationQueueComponent', () => {
     });
   });
 
-  it('dismisses a report without one', () => {
+  // FC-039: each decision's reason is kept in the site admin log.
+  it('will not dismiss a report without one', () => {
     render();
+    fixture.componentInstance.form.patchValue({ resolution: '   ' });
     fixture.componentInstance.dismiss(buildReport());
 
-    expect(moderationService.resolveReport).toHaveBeenCalledWith('report-1', {
-      status: StorytimeReportStatus.DISMISSED,
-      resolution: undefined,
-    });
+    expect(moderationService.resolveReport).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.errorMessage).toContain(
+      'Say why the report is dismissed',
+    );
   });
 
   it.each([
     ['uphold', true],
     ['reject', false],
-  ])('%ss an appeal', (method, uphold) => {
+  ])('%ss an appeal, saying why', (method, uphold) => {
     render();
+    fixture.componentInstance.form.patchValue({ message: ' Reviewed. ' });
     fixture.componentInstance[method as 'uphold' | 'reject'](buildAppeal());
 
     expect(moderationService.decideAppeal).toHaveBeenCalledWith('appeal-1', {
       uphold,
-      reviewNotes: undefined,
+      reviewNotes: 'Reviewed.',
     });
+  });
+
+  it('will not decide an appeal without saying why', () => {
+    render();
+    fixture.componentInstance.reject(buildAppeal());
+
+    expect(moderationService.decideAppeal).not.toHaveBeenCalled();
+    expect(fixture.componentInstance.errorMessage).toContain(
+      'Say what the creator is told about their appeal',
+    );
   });
 
   it('passes the administrator’s words on with a decision', () => {
@@ -234,6 +246,7 @@ describe('ModerationQueueComponent', () => {
     );
 
     render();
+    fixture.componentInstance.form.patchValue({ message: 'You are right.' });
     fixture.componentInstance.uphold(buildAppeal());
 
     expect(fixture.componentInstance.errorMessage).toContain(
@@ -247,6 +260,7 @@ describe('ModerationQueueComponent', () => {
     );
 
     render();
+    fixture.componentInstance.form.patchValue({ message: 'You are right.' });
     fixture.componentInstance.uphold(buildAppeal());
 
     expect(fixture.componentInstance.errorMessage).toContain(

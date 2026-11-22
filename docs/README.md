@@ -115,7 +115,7 @@ In GitHub Actions, most of these checks use **Smart Skip** logic. If your PR onl
 
 **Intentionally excluded (run separately when needed):**
 
-- Mutation testing: `npm run test:mutation` (very slow, 30+ minutes)
+- Mutation testing: `npm run test:mutation` (very slow: hours for the whole mutate set; CI splits it into shards, see [Weekly full run](github/QUALITY-AUTOMATION.md#weekly-full-run))
 - Incremental Mutation testing: `npm run test:mutation:incremental` (fast, CI-standard)
 - Lighthouse Audit: `npm run lighthouse` (Production build + Full audit)
 - Full fuzz tests: `npm run test:fuzz:full` (1000 iterations)
@@ -142,11 +142,13 @@ Key details:
 - **No npm packages or authentication required** - locally or in CI/CD
 - Icons are used via standard HTML `<i>` tags: `<i class="fas fa-icon-name"></i>`
 
-**Adding or removing icons:** change the kit on fontawesome.com, then refresh the copy and commit it:
+**Adding or removing icons:** change the kit on fontawesome.com, then refresh the copy and commit it. The kit ID is `5812c6b103`; it is not secret, because the kit only serves requests from the site's origin, and no environment variable holds it any more:
 
 ```sh
-FONT_AWESOME_KIT_ID=<kit id> npm run fa:update
+FONT_AWESOME_KIT_ID=5812c6b103 npm run fa:update
 ```
+
+Before committing, compare the icon classes in the old and new copies. A refresh should add or remove only the icons you changed in the kit.
 
 **Using icons:**
 

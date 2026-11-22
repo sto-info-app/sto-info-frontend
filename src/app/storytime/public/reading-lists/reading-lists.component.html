@@ -13,16 +13,14 @@
     </p>
   }
 
-  <section class="storytime-section">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Make a list</span>
-    </div>
-
+  <app-collapsible-section
+    heading="Make a list"
+    barClass="small-lcars-bar-gap">
     <form
       class="storytime-panel storytime-form"
       (ngSubmit)="create()">
       <div class="form-row">
-        <div class="lcars-input-container perano">
+        <div class="lcars-input-container">
           <label for="new-list-name">New list</label>
           <input
             id="new-list-name"
@@ -51,7 +49,7 @@
         </button>
       </div>
     </form>
-  </section>
+  </app-collapsible-section>
 
   @if (isLoading) {
     <p class="storytime-reading-lists__loading">Loading your lists…</p>

@@ -1,25 +1,27 @@
+@use 'lcars-variables' as vars;
+
 .lcars-warning-message-container {
   align-items: center;
   width: 100%;
   margin: 0 auto;
 
   .lcars-text-bar {
-    background-color: #fa4;
-    border-right: 28px solid #f70;
-    border-left: 28px solid #f70;
+    background-color: vars.$lcars-harvestgold;
+    border-right: 28px solid vars.$lcars-orange;
+    border-left: 28px solid vars.$lcars-orange;
   }
 
   .lcars-bar {
-    border-right: 28px solid #f70;
-    border-left: 28px solid #f70;
+    border-right: 28px solid vars.$lcars-orange;
+    border-left: 28px solid vars.$lcars-orange;
 
     .lcars-bar-inner {
-      background-color: #fa4;
+      background-color: vars.$lcars-harvestgold;
     }
   }
 
   .lcars-warning-message {
-    color: #f74;
+    color: vars.$lcars-pumpkinshade;
     padding: 0 40px;
     margin-top: 20px;
     text-align: left;

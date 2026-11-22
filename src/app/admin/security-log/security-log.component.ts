@@ -1,0 +1,289 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  DestroyRef,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
+import { take } from 'rxjs';
+
+import { AdminSideNavigationComponent } from 'src/app/admin/admin-side-navigation/admin-side-navigation.component';
+import { FAILED_JOB_QUEUE_LABELS } from 'src/app/models/failed-jobs.models';
+import {
+  FEATURE_SWITCH_LABELS,
+  SECURITY_LOG_SOURCE_LABELS,
+  SecurityLogEntry,
+  SecurityLogPerson,
+  SecurityLogSource,
+  SITE_ADMIN_ACTION_LABELS,
+  SYSTEM_SITE_ADMIN_ACTIONS,
+} from 'src/app/models/security-log.models';
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsPaginationComponent } from 'src/app/shared/components/lcars-pagination/lcars-pagination.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+
+import { HOLD_ACTION_LABELS } from '../moderation-admin/moderation-hold-list.component';
+import { SecurityLogAdminService } from './security-log-admin.service';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
+
+/** What the erasure and investigation logs call their entries. */
+const OTHER_ACTION_LABELS: Readonly<Record<string, string>> = {
+  LOOKED_INTO_FLEET: 'Looked into a Fleet',
+  ERASED: 'Erased roster data',
+  REPLAYED: 'Replayed an erasure after a restore',
+};
+
+/** What each read of Scan Diagnostics is logged against (FC-042). */
+const DIAGNOSTICS_SUBJECT_LABELS: Readonly<Record<string, string>> = {
+  DIAGNOSTICS: 'Scan Diagnostics',
+  REJECTIONS: 'Scan Diagnostics: refused uploads',
+  ASSET: 'Scan Diagnostics: an asset',
+  FAILED_JOBS: 'Scan Diagnostics: failed jobs',
+};
+
+/** The site admin actions on failed jobs, whose subject is a queue (FC-042). */
+const FAILED_JOB_ACTIONS: ReadonlySet<string> = new Set([
+  'SCAN_JOB_RETRIED',
+  'SCAN_JOB_DISCARDED',
+]);
+
+/**
+ * One value from an entry's detail, as it is shown. The detail arrives as
+ * JSON, so anything that is not text, a number or a flag is a nested object
+ * or list, and is shown as the JSON it came as.
+ *
+ * @param value - The value; never null, which is left out before this.
+ * @returns It, as text.
+ */
+function detailValueOf(value: unknown): string {
+  if (typeof value === 'number' || typeof value === 'boolean') {
+    return `${value}`;
+  }
+
+  return typeof value === 'string' ? value : JSON.stringify(value);
+}
+
+/**
+ * Says a code in words: `ROLE_WITHDRAWN` as "Role withdrawn".
+ *
+ * @param code - The code.
+ * @returns It, as a reader would say it.
+ */
+function inWords(code: string): string {
+  const words = code.toLowerCase().replaceAll('_', ' ');
+
+  return words.charAt(0).toUpperCase() + words.slice(1);
+}
+
+/**
+ * The site admins' Security Log (FC-039).
+ *
+ * One feed, newest first and filterable by source, of what site admins did
+ * and what the retention jobs did — who, when, what, to whom or what, and
+ * why — read from the logs that already hold each. Nothing in it is
+ * content: reasons and purposes are the admins' own words, and details are
+ * codes, counts and IDs.
+ */
+@Component({
+  selector: 'app-security-log',
+  templateUrl: './security-log.component.html',
+  styleUrls: ['../news-admin/news-admin.component.scss'],
+  standalone: true,
+  imports: [
+    AdminSideNavigationComponent,
+    AppDatePipe,
+    HelpLinkComponent,
+    LcarsErrorMessageComponent,
+    LcarsPaginationComponent,
+    LoadingBarComponent,
+    LcarsPanelComponent,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+export class SecurityLogComponent {
+  private readonly _log = inject(SecurityLogAdminService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  readonly sources = Object.values(SecurityLogSource);
+  readonly sourceLabels = SECURITY_LOG_SOURCE_LABELS;
+
+  readonly entries = signal<SecurityLogEntry[]>([]);
+  readonly total = signal(0);
+  readonly pageSize = signal(50);
+  readonly page = signal(1);
+  readonly source = signal<SecurityLogSource | null>(null);
+  readonly isLoading = signal(true);
+  readonly errorMessage = signal<string | null>(null);
+
+  /** How many pages the log holds. */
+  readonly pageCount = computed(() =>
+    Math.max(1, Math.ceil(this.total() / this.pageSize())),
+  );
+
+  constructor() {
+    this.load();
+  }
+
+  /**
+   * Shows one source only, or every one, from the first page.
+   *
+   * @param value - The source, or '' for every one.
+   */
+  protected filter(value: string): void {
+    this.source.set(value === '' ? null : (value as SecurityLogSource));
+    this.page.set(1);
+    this.load();
+  }
+
+  /**
+   * Moves to another page.
+   *
+   * @param step - One back or one on.
+   */
+  protected turn(step: -1 | 1): void {
+    this.page.update(page => page + step);
+    this.load();
+  }
+
+  /**
+   * What an entry says was done.
+   *
+   * @param entry - The entry.
+   * @returns It, in words.
+   */
+  protected actionOf(entry: SecurityLogEntry): string {
+    switch (entry.source) {
+      case SecurityLogSource.SITE_ADMIN:
+        return SITE_ADMIN_ACTION_LABELS[entry.action] ?? inWords(entry.action);
+      case SecurityLogSource.HOLD:
+        return HOLD_ACTION_LABELS[entry.action] ?? inWords(entry.action);
+      case SecurityLogSource.RETENTION:
+        return `Retention: ${inWords(entry.action).toLowerCase()}`;
+      default:
+        return OTHER_ACTION_LABELS[entry.action] ?? inWords(entry.action);
+    }
+  }
+
+  /**
+   * Names who did it.
+   *
+   * @param entry - The entry.
+   * @returns Their username, or what stands in for one.
+   */
+  protected actorOf(entry: SecurityLogEntry): string {
+    if (entry.actor !== null) {
+      return this.nameOf(entry.actor);
+    }
+
+    const byAnAdmin =
+      (entry.source === SecurityLogSource.SITE_ADMIN &&
+        !SYSTEM_SITE_ADMIN_ACTIONS.has(entry.action)) ||
+      entry.source === SecurityLogSource.FLEET;
+
+    return byAnAdmin ? 'An account since closed' : 'The system';
+  }
+
+  /**
+   * Names somebody an entry names.
+   *
+   * @param person - Them.
+   * @returns Their username, or what stands in for one.
+   */
+  protected nameOf(person: SecurityLogPerson): string {
+    return person.username ?? 'An account with no username';
+  }
+
+  /**
+   * What it acted on, other than an account.
+   *
+   * @param entry - The entry.
+   * @returns Its kind, in words, or null for none.
+   */
+  protected subjectOf(entry: SecurityLogEntry): string | null {
+    const kind = entry.subjectKind;
+
+    if (kind === null) {
+      return null;
+    }
+
+    if (entry.action === 'SCAN_DIAGNOSTICS_VIEWED') {
+      return DIAGNOSTICS_SUBJECT_LABELS[kind] ?? inWords(kind);
+    }
+
+    // A feature switch names the feature, which says it all (FC-045).
+    if (kind === 'FEATURE_SWITCH' && entry.subjectId !== null) {
+      return FEATURE_SWITCH_LABELS[entry.subjectId] ?? inWords(entry.subjectId);
+    }
+
+    if (FAILED_JOB_ACTIONS.has(entry.action)) {
+      const queue =
+        kind === 'ALL'
+          ? 'every queue'
+          : (FAILED_JOB_QUEUE_LABELS[kind] ?? kind);
+
+      return entry.subjectId === 'ALL' ? `Failed jobs in ${queue}` : queue;
+    }
+
+    return inWords(kind);
+  }
+
+  /**
+   * The ID of what it acted on, when there is one to show. The Scan
+   * Diagnostics reads and the bulk actions on failed jobs name `ALL`, which
+   * their subject already says in words (FC-042), and a feature switch's
+   * subject is its feature's name (FC-045).
+   *
+   * @param entry - The entry.
+   * @returns The ID, or null for none.
+   */
+  protected subjectIdOf(entry: SecurityLogEntry): string | null {
+    if (entry.subjectKind === 'FEATURE_SWITCH') {
+      return null;
+    }
+
+    const operations =
+      entry.action === 'SCAN_DIAGNOSTICS_VIEWED' ||
+      FAILED_JOB_ACTIONS.has(entry.action);
+
+    return operations && entry.subjectId === 'ALL' ? null : entry.subjectId;
+  }
+
+  /**
+   * An entry's detail, a line to each thing it records.
+   *
+   * @param entry - The entry.
+   * @returns Each, as `name: value`.
+   */
+  protected detailOf(entry: SecurityLogEntry): string[] {
+    return Object.entries(entry.detail ?? {})
+      .filter(([, value]) => value !== null && value !== undefined)
+      .map(([name, value]) => `${name}: ${detailValueOf(value)}`);
+  }
+
+  /** Reads the page asked for. */
+  private load(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this._log
+      .list(this.source(), this.page())
+      .pipe(take(1), takeUntilDestroyed(this._destroyRef))
+      .subscribe({
+        next: page => {
+          this.entries.set(page.items);
+          this.total.set(page.total);
+          this.pageSize.set(page.pageSize);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.entries.set([]);
+          this.errorMessage.set('The log could not be read.');
+          this.isLoading.set(false);
+        },
+      });
+  }
+}

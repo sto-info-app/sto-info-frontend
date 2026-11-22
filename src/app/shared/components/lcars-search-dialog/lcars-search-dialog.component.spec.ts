@@ -177,9 +177,9 @@ describe('LcarsSearchDialogComponent', () => {
     expect(dialogRef.close).toHaveBeenCalledWith(item1);
   });
 
-  it('closes the dialog with undefined on cancel', () => {
+  it('closes the dialog without a selection on cancel', () => {
     component.cancel();
-    expect(dialogRef.close).toHaveBeenCalledWith(undefined);
+    expect(dialogRef.close).toHaveBeenCalledWith();
   });
 
   describe('pagination', () => {

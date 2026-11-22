@@ -15,11 +15,15 @@ import {
   RippleGlobalOptions,
 } from '@angular/material/core';
 import { bootstrapApplication } from '@angular/platform-browser';
-import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { Router, RouterModule, provideRouter } from '@angular/router';
 import { JwtModule } from '@auth0/angular-jwt';
 
 import * as Sentry from '@sentry/angular';
+import {
+  scrubSentryBreadcrumb,
+  scrubSentryEvent,
+  SENTRY_REPLAY_PRIVACY,
+} from './app/shared/telemetry/sentry-privacy';
 import { routes } from './app/app-routing.module';
 import { AppComponent } from './app/app.component';
 import { authTokenInterceptor } from './app/core/auth/auth-token.interceptor';
@@ -47,7 +51,8 @@ if (
     release: `sto-info-frontend@${environment.version}`,
 
     // Integrations
-    integrations: [Sentry.replayIntegration()],
+    // Masked throughout (FC-038): no text, input or picture is recorded.
+    integrations: [Sentry.replayIntegration(SENTRY_REPLAY_PRIVACY)],
 
     // Error Sampling
     sampleRate: 1,
@@ -60,16 +65,16 @@ if (
     // Error Filtering
     ignoreErrors: ['ResizeObserver loop limit exceeded'],
 
-    // Error Processing
-    beforeSend(event) {
-      return event;
-    },
+    // Nothing a person sent leaves with an error (FC-038).
+    beforeSend: scrubSentryEvent,
+    beforeBreadcrumb: scrubSentryBreadcrumb,
   });
 }
 
 export const appConfig: ApplicationConfig = {
+  // No animations provider: Angular Material has run its own CSS animations
+  // since v20, and nothing here uses @angular/animations triggers.
   providers: [
-    provideAnimationsAsync(),
     provideZoneChangeDetection(),
     provideRouter(routes),
     importProvidersFrom(

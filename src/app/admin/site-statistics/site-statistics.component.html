@@ -1,0 +1,117 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Reading the numbers"></app-loading-bar>
+}
+
+<div
+  id="site-statistics-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Site Statistics</h1>
+    <app-help-link
+      slug="site-admin-site-statistics"
+      label="Help with Site Statistics" />
+    <p class="admin-page-intro">
+      How many members there are and how many are active, sign-ups, what
+      Storytime has published, how Fleet Communities and chat are growing, and
+      what is waiting on you. Every figure is a count as of now, and none names
+      anybody. Today runs from 00:00 UTC.
+    </p>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Not read"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    @if (statistics(); as statistics) {
+      <p class="site-statistics__as-of">
+        As of {{ statistics.generatedAt | appDate: 'medium' }}
+      </p>
+
+      <div class="site-statistics__hero">
+        @for (tile of heroTiles(); track tile.label; let i = $index) {
+          <app-stat-info-card
+            size="xl"
+            [label]="tile.label"
+            [value]="tile.value"
+            [icon]="tile.icon"
+            [color]="heroColours[i % heroColours.length]">
+          </app-stat-info-card>
+        }
+      </div>
+
+      <!-- The two series run the same twelve weeks, oldest first. -->
+      <app-collapsible-section
+        heading="Sign-ups by week"
+        barClass="small-lcars-bar-gap">
+        <p class="site-statistics__chart-note">
+          Accounts registered in each of the last twelve weeks, since-closed
+          ones included.
+        </p>
+        <app-smart-chart
+          mode="bar"
+          [data]="registrationsByWeek()"></app-smart-chart>
+      </app-collapsible-section>
+      <app-collapsible-section
+        heading="Members last seen, by week"
+        barClass="small-lcars-bar-gap">
+        <p class="site-statistics__chart-note">
+          Open accounts by the week they were last seen in. Each counts once,
+          in the latest week it was seen, so the nearest weeks hold everyone
+          still visiting and the earlier ones those who have drifted away.
+        </p>
+        <app-smart-chart
+          mode="bar"
+          [data]="lastSeenByWeek()"></app-smart-chart>
+      </app-collapsible-section>
+
+      <!--
+        One section a group. The grid rotates the palette across its panels,
+        so a row of them is varied rather than one colour repeated.
+      -->
+      @for (section of sections(); track section.key) {
+        <app-collapsible-section
+          [heading]="section.heading"
+          [sectionKey]="'site-statistics-' + section.key"
+          barClass="small-lcars-bar-gap">
+          <ul
+            class="site-statistics__panels lcars-rotate"
+            [attr.data-section]="section.key">
+            @for (card of section.cards; track card.key) {
+              <li
+                class="site-statistics__panel"
+                [attr.data-card]="card.key">
+                <div class="site-statistics__heading">
+                  <h3 class="site-statistics__name">{{ card.label }}</h3>
+                </div>
+                <div class="site-statistics__body">
+                  @if (card.windows; as windows) {
+                    <dl class="site-statistics__windows">
+                      @for (window of windowLabels; track window[0]) {
+                        <div class="site-statistics__window">
+                          <dt>{{ window[1] }}</dt>
+                          <dd class="lcars-number-highlight">
+                            {{ windows[window[0]] }}
+                          </dd>
+                        </div>
+                      }
+                    </dl>
+                  } @else {
+                    <p class="site-statistics__total lcars-number-highlight">
+                      {{ card.total }}
+                    </p>
+                  }
+                  @if (card.note) {
+                    <p class="site-statistics__note">{{ card.note }}</p>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+        </app-collapsible-section>
+      }
+    }
+  </div>
+
+  <app-admin-side-navigation />
+</div>

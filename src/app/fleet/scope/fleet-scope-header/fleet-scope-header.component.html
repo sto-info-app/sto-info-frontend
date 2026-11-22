@@ -1,0 +1,19 @@
+@if (vm.banner && !hasBannerFailed) {
+  <img
+    class="fleet-scope-header__banner"
+    [src]="vm.banner.url"
+    [alt]="vm.banner.alt"
+    (error)="onBannerError()" />
+}
+
+<!--
+  The record set out as a panel, in the
+  shape the directory draws it: its name, as the page's heading, and its kind
+  on a block of the rotation's colour; the emblem, and its facts label over
+  value, over the account list's art for its platform.
+-->
+<app-fleet-scope-card
+  class="fleet-scope-header__card"
+  [vm]="card"
+  [nameHeading]="true"
+  [showScope]="true" />

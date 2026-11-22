@@ -1,0 +1,26 @@
+@use 'lcars-tabs' as tabs;
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+// The reports, as a tab strip: each tab takes the next colour of the
+// rotation, and the one being read is filled with its own.
+@include tabs.lcars-tab-strip($min-width: 0);
+
+.fleet-reports__choice {
+  margin: 0 0 1rem;
+}
+
+.fleet-reports__about {
+  margin: 0 0 1rem;
+}
+
+.fleet-reports__coverage {
+  margin: 0.5rem 0;
+}
+
+.fleet-reports__failed {
+  color: vars.$lcars-red;
+}

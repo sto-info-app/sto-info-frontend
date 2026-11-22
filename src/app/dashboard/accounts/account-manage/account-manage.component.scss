@@ -29,6 +29,13 @@
   margin-top: 1rem;
 }
 
+// What one folding section of the form holds, spaced as the form itself is.
+.account-manage-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
 .form-row {
   display: flex;
   gap: 1rem;
@@ -74,7 +81,7 @@
   font-size: 0.9rem;
   font-weight: 700;
   font-stretch: condensed;
-  color: #000;
+  color: vars.$a11y-black;
   opacity: 0.75;
   line-height: 1.4;
 }

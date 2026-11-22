@@ -5,6 +5,7 @@ src/environments/environment.ts
 src/environments/environment.dev.ts
 src/environments/environment.prod.ts
 !src/environments/environment.template.ts
+/e2e/.env.local
 
 # Compiled output / Build files
 /dist
@@ -55,6 +56,9 @@ yarn-error.log
 /connect.lock
 /coverage
 /reports
+# Playwright outputs that once lived under docs
+/docs/screenshots
+/docs/recordings
 /.lighthouseci/
 /libpeerconnection.log
 testem.log

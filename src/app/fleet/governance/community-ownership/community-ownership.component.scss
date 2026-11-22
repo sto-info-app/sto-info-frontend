@@ -1,0 +1,28 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.community-ownership {
+  &__intro {
+    margin: 0 0 1rem;
+  }
+
+  &__notice {
+    color: vars.$lcars-green;
+    font-weight: 600;
+  }
+
+  // The offer's section runs the width of the page, as every section bar
+  // does; only the form is held narrower.
+  &__offer {
+    display: block;
+    margin-bottom: 1.5rem;
+  }
+
+  &__form {
+    max-width: 40rem;
+    margin-bottom: 1.5rem;
+  }
+}

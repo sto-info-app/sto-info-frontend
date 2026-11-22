@@ -25,7 +25,7 @@ describe('StoAccountService', () => {
     username: 'testuser',
     email: 'test@example.com',
     notes: 'Some notes',
-    accountCreatedDate: '2023-01-01T00:00:00Z',
+    accountCreatedDate: '2023-01-01',
     publiclyVisible: true,
     lifetimeSubscription: false,
     createdAt: '2023-01-01T00:00:00Z',
@@ -193,7 +193,10 @@ describe('StoAccountService', () => {
       httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER).flush([]);
 
       service.getSwitcherList().subscribe();
-      httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER).flush([]);
+      const second = httpMock.expectOne(API_URLS.STO_ACCOUNT_SWITCHER);
+
+      expect(second.request.method).toBe('GET');
+      second.flush([]);
     });
   });
 

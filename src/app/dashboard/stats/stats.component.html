@@ -40,23 +40,7 @@
           </div>
 
           <!-- Account breakdown tiles -->
-          <div class="lcars-text-bar stats-section-bar">
-            <span>Account Breakdowns</span>
-            <button
-              type="button"
-              class="cta-icon"
-              (click)="toggleAccountBreakdowns()"
-              [title]='accountBreakdownsExpanded ? "Collapse" : "Expand"'
-            >
-              <i
-                class="fas"
-                [class.fa-caret-up]="accountBreakdownsExpanded"
-                [class.fa-caret-down]="!accountBreakdownsExpanded"
-              >
-              </i>
-            </button>
-          </div>
-          @if (accountBreakdownsExpanded) {
+          <app-collapsible-section heading="Account Breakdowns">
             <div class="stat-category-grid">
               @for (tile of accountStatTiles; track tile.breakdownId) {
                 <a
@@ -68,27 +52,11 @@
                 </a>
               }
             </div>
-          }
+          </app-collapsible-section>
 
           <!-- Character breakdown tiles -->
           @if (stats.characterCount > 0) {
-            <div class="lcars-text-bar stats-section-bar">
-              <span>Character Breakdowns</span>
-              <button
-                type="button"
-                class="cta-icon"
-                (click)="toggleCharacterBreakdowns()"
-                [title]='characterBreakdownsExpanded ? "Collapse" : "Expand"'
-              >
-                <i
-                  class="fas"
-                  [class.fa-caret-up]="characterBreakdownsExpanded"
-                  [class.fa-caret-down]="!characterBreakdownsExpanded"
-                >
-                </i>
-              </button>
-            </div>
-            @if (characterBreakdownsExpanded) {
+            <app-collapsible-section heading="Character Breakdowns">
               <div class="stat-category-grid">
                 @for (tile of statTiles; track tile.breakdownId) {
                   <a
@@ -100,27 +68,11 @@
                   </a>
                 }
               </div>
-            }
+            </app-collapsible-section>
           }
 
           <!-- Endeavour breakdown tiles -->
-          <div class="lcars-text-bar stats-section-bar">
-            <span>Endeavours</span>
-            <button
-              type="button"
-              class="cta-icon"
-              (click)="toggleEndeavours()"
-              [title]='endeavoursExpanded ? "Collapse" : "Expand"'
-            >
-              <i
-                class="fas"
-                [class.fa-caret-up]="endeavoursExpanded"
-                [class.fa-caret-down]="!endeavoursExpanded"
-              >
-              </i>
-            </button>
-          </div>
-          @if (endeavoursExpanded) {
+          <app-collapsible-section heading="Endeavours">
             <div class="stat-category-grid">
               @for (tile of endeavourStatTiles; track tile.breakdownId) {
                 <a
@@ -132,7 +84,7 @@
                 </a>
               }
             </div>
-          }
+          </app-collapsible-section>
         } @else {
           <app-lcars-information-message
             title="No Data"
@@ -156,45 +108,49 @@
     class="col"
   >
     @if (accounts.length > 1) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Filters</span>
-      </div>
-      <div
-        id="stats-filters"
-        class="buttons"
+      <app-collapsible-section
+        heading="Filters"
+        barClass="small-lcars-bar-gap"
       >
-        <div class="lcars-select-container sunflower">
-          <label
-            class="select-label"
-            for="account-select"
-          >Select Account</label>
-          <select
-            id="account-select"
-            title="Select Account"
-            [(ngModel)]="selectedAccountId"
-            (change)="onAccountChange($any($event.target).value)"
-          >
-            <option value="all">All Accounts</option>
-            @for (account of accounts; track account.id) {
-              <option [value]="account.id">{{ account.handle }}</option>
-            }
-          </select>
+        <div
+          id="stats-filters"
+          class="buttons"
+        >
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="account-select"
+            >Select Account</label>
+            <select
+              id="account-select"
+              title="Select Account"
+              [(ngModel)]="selectedAccountId"
+              (change)="onAccountChange($any($event.target).value)"
+            >
+              <option value="all">All Accounts</option>
+              @for (account of accounts; track account.id) {
+                <option [value]="account.id">{{ account.handle }}</option>
+              }
+            </select>
+          </div>
         </div>
-      </div>
+      </app-collapsible-section>
     }
 
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
-      <a
-        [routerLink]="dashboardLink"
-        class="full-width-btn-link sunflower"
-      >{{ appRouteTitles.STO_DASHBOARD }}</a>
-      <a
-        [routerLink]="accountsLink"
-        class="full-width-btn-link sunflower"
-      >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a>
-    </div>
+    <app-collapsible-section
+      heading="Navigation"
+      barClass="small-lcars-bar-gap"
+    >
+      <div class="buttons">
+        <a
+          [routerLink]="dashboardLink"
+          class="full-width-btn-link"
+        >{{ appRouteTitles.STO_DASHBOARD }}</a>
+        <a
+          [routerLink]="accountsLink"
+          class="full-width-btn-link"
+        >{{ appRouteTitles.STO_DASHBOARD_ACCOUNTS }}</a>
+      </div>
+    </app-collapsible-section>
   </div>
 </div>

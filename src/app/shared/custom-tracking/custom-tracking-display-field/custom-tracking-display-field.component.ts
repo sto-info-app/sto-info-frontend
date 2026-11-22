@@ -6,7 +6,6 @@ import {
   CustomTrackingConfiguration,
   CustomTrackingEmptyMode,
 } from 'src/app/models/custom-tracking.models';
-import { BASE_CLOUDFLARE_IMAGES_URL } from 'src/app/shared/constants/app-image-assets.constants';
 import { trustedYouTubeEmbed } from 'src/app/shared/media/youtube-embed.utility';
 import { MarkdownPipe } from 'src/app/shared/pipes/markdown.pipe';
 
@@ -149,22 +148,13 @@ export class CustomTrackingDisplayFieldComponent {
   /**
    * The address the picture is fetched from.
    *
-   * Built from the delivery variant the server names for the shape, so a
-   * variant renamed in Cloudflare is corrected in one place. Empty until the
-   * configuration arrives, or where it names no such shape — a guessed variant
-   * yields a broken picture and no error anybody would notice.
+   * The address the API signed, in the shape's variant (FC-040). The
+   * browser never builds one: an unsigned address is refused.
    *
    * @returns The address, or an empty string.
    */
   get imageUrl(): string {
-    const image = this.field.image;
-    const spec = this.configuration?.imageShapes.find(
-      shape => shape.shape === image?.shape,
-    );
-
-    return image && spec
-      ? `${BASE_CLOUDFLARE_IMAGES_URL}/${image.imageId}/${spec.variant}`
-      : '';
+    return this.field.image?.imageUrl ?? '';
   }
 
   /**

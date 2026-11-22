@@ -85,7 +85,7 @@ export const STAT_TILES: StatTile[] = [
     label: 'Recruitment',
     breakdownId: 'recruitment',
     icon: 'fa-user-plus',
-    colour: 'green',
+    colour: 'orange',
     link: `/${APP_ROUTES.STO_DASHBOARD_STATS_DETAIL.replace(':breakdownId', 'recruitment')}`,
   },
   {

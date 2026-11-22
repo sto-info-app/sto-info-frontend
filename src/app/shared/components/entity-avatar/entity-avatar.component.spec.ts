@@ -87,6 +87,23 @@ describe('EntityAvatarComponent', () => {
     expect(component.displaySrc).toBe('https://cdn.example.com/pic/recovered');
   });
 
+  it('should be round unless asked to be square', () => {
+    const fixture = TestBed.createComponent(EntityAvatarComponent);
+
+    fixture.componentRef.setInput('alt', 'Picard');
+    fixture.detectChanges();
+    const image = fixture.nativeElement.querySelector(
+      'img',
+    ) as HTMLImageElement;
+
+    expect(image.classList.contains('entity-avatar--square')).toBe(false);
+
+    fixture.componentRef.setInput('shape', 'square');
+    fixture.detectChanges();
+
+    expect(image.classList.contains('entity-avatar--square')).toBe(true);
+  });
+
   it('should render the size as the width and height attributes', () => {
     component.size = 300;
     fixture.detectChanges();

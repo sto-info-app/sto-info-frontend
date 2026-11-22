@@ -1,0 +1,32 @@
+@let shown = report();
+@let cohort = shown.minimumCohort;
+
+@if (latest(); as last) {
+  <app-collapsible-section
+    sectionKey="last-active"
+    [heading]="
+      'Last active, as of ' + (last.export.exportedAt | appDate: 'medium')
+    ">
+    @if (chart().data.length > 0) {
+      <app-smart-chart
+        mode="bar"
+        [data]="chart().data" />
+    }
+    @if (chart().hidden > 0) {
+      <p class="fleet-report-notice">
+        {{ chart().hidden }}
+        {{ chart().hidden === 1 ? 'band’s count is' : 'bands’ counts are' }}
+        hidden, so not drawn.
+      </p>
+    }
+
+    <app-banded-exports-table
+      caption="Each export’s members, by how long before it their Last Active was"
+      [bands]="bands"
+      [bandLabels]="bandLabels"
+      [exports]="shown.exports"
+      [cohort]="cohort" />
+  </app-collapsible-section>
+} @else {
+  <p class="fleet-community-empty">No export was taken in this span.</p>
+}

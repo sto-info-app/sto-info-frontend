@@ -1,0 +1,15 @@
+@if (state$ | async; as state) {
+  <app-fleet-page-shell
+    heading="Fleet Directory"
+    loadingText="Reading Fleet status"
+    [tabs]="tabsFor(state)"
+    [isLoading]="state === 'LOADING'">
+    @if (state === 'OFFLINE' || state === 'DISABLED') {
+      <app-feature-unavailable
+        [featureName]="featureName"
+        [reason]="reasonFor(state)" />
+    } @else if (state === 'ENABLED') {
+      <router-outlet />
+    }
+  </app-fleet-page-shell>
+}

@@ -25,7 +25,7 @@
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
   border-radius: 4px;
-  background: var(--lcars-panel-bg, #1a1a2e);
+  background: var(--lcars-panel-bg, vars.$lcars-panel-bg);
 }
 
 .summary-stat {
@@ -42,7 +42,7 @@
 }
 
 .summary-label {
-  color: rgb(255 255 255 / 55%);
+  color: vars.$white-a55;
   font-size: 0.7rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
@@ -69,7 +69,8 @@
   display: flex;
   flex-direction: column;
   padding: 0;
-  border-left: 10px solid color-mix(in srgb, var(--accent) 82%, #000);
+  border-left: 10px solid
+    color-mix(in srgb, var(--accent) 82%, vars.$a11y-black);
   background: linear-gradient(
     180deg,
     color-mix(in srgb, var(--accent) 14%, transparent) 0%,
@@ -91,7 +92,8 @@
   justify-content: space-between;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  border-bottom: 2px solid color-mix(in srgb, var(--accent) 80%, #000);
+  border-bottom: 2px solid
+    color-mix(in srgb, var(--accent) 80%, vars.$a11y-black);
   background: var(--accent);
 }
 
@@ -120,7 +122,7 @@
   @include mixins.lcars-badge;
 
   flex: 0 0 auto;
-  background: rgb(0 0 0 / 55%);
+  background: vars.$black-a55;
   color: vars.$lcars-white;
   letter-spacing: 0.05em;
   white-space: nowrap;
@@ -139,8 +141,8 @@
   align-items: center;
   gap: 0.75rem;
   padding: 0.5rem 1rem;
-  border-top: 1px solid rgb(255 255 255 / 10%);
-  background: rgb(0 0 0 / 25%);
+  border-top: 1px solid vars.$white-a10;
+  background: vars.$black-a25;
 }
 
 // The icon says what the strip is instead of a caption.
@@ -205,10 +207,13 @@
   height: 30px;
   margin: 0;
   padding: 0;
-  border: 1px solid rgb(255 255 255 / 18%);
+  border: 1px solid vars.$white-a18;
   border-radius: 2px;
-  background: rgb(255 255 255 / 6%);
-  color: rgb(255 255 255 / 55%);
+
+  // Solid rather than see-through: the grey a 6% white wash made over the
+  // panel, so the pair's contrast (7.1:1) holds as written.
+  background: vars.$lcars-grey-raised;
+  color: vars.$lcars-grey-light;
   cursor: pointer;
   font-size: 0.7rem;
   line-height: 1;
@@ -218,7 +223,7 @@
 .segments button.filled {
   border-color: var(--accent);
   background: var(--accent);
-  color: #fff;
+  color: vars.$a11y-white;
   font-weight: 700;
 }
 

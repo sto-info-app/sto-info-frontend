@@ -17,7 +17,7 @@
       class="storytime-page-actions"
       aria-label="Back to the Story">
       <a
-        class="lcars-btn lcars-btn-auto sky"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="['/', appRoutes.STORYTIME, 'stories', storySlug]"
         >Back to the Story</a
       >
@@ -80,7 +80,7 @@
       <p class="storytime-chapter__resume">
         <button
           type="button"
-          class="lcars-btn lcars-btn-auto sunflower storytime-chapter__resume-button"
+          class="lcars-btn lcars-btn-auto storytime-chapter__resume-button"
           (click)="resume()">
           <i
             class="fa-solid fa-bookmark"
@@ -122,7 +122,6 @@
           type="button"
           class="lcars-btn lcars-btn-auto storytime-chapter__read-toggle"
           [class.green]="isRead"
-          [class.bluey]="!isRead"
           [attr.aria-pressed]="isRead"
           (click)="setRead(!isRead)">
           <i
@@ -147,7 +146,7 @@
       aria-label="Chapter navigation">
       @if (previous) {
         <a
-          class="lcars-btn lcars-btn-auto bluey storytime-chapter__previous"
+          class="lcars-btn lcars-btn-auto storytime-chapter__previous"
           [routerLink]="[
             '/',
             appRoutes.STORYTIME,
@@ -165,7 +164,7 @@
       }
       @if (next) {
         <a
-          class="lcars-btn lcars-btn-auto bluey storytime-chapter__next"
+          class="lcars-btn lcars-btn-auto storytime-chapter__next"
           [routerLink]="[
             '/',
             appRoutes.STORYTIME,

@@ -97,8 +97,11 @@ export class MarkdownFieldComponent {
   /** The control on the editor's form this field writes to. */
   @Input({ required: true }) controlName!: string;
 
-  /** The LCARS colour the textarea is dressed in. */
-  @Input({ required: true }) colour!: string;
+  /**
+   * An LCARS colour of the field's own. Left empty, the field takes the
+   * colour its section or row rotates to, as every other field does.
+   */
+  @Input() colour = '';
 
   /**
    * The class the published page puts this writing in.

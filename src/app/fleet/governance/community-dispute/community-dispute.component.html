@@ -1,0 +1,295 @@
+@if (state$ | async; as state) {
+  <app-fleet-page-shell
+    heading="Site administration"
+    helpSlug="site-admin-disputes-and-investigations"
+    helpLabel="Help with Fleet disputes"
+    [subject]="subjectOf(state)"
+    [isLoading]="state.kind === 'LOADING'"
+    loadingText="Reading the Community"
+    [errorMessage]="messageOf(state)">
+    @if (state.kind === 'READY') {
+      @let scope = state.scope;
+      @let view = state.data;
+
+      <app-fleet-back-link
+        [link]="scope.manageLink"
+        label="Back to Manage" />
+
+      <p class="community-dispute__intro">
+        For settling a dispute over who owns this Community. Everything here is
+        kept with its history, with your reason.
+      </p>
+
+      @if (notice(); as done) {
+        <p class="community-dispute__notice">
+          <output>{{ done }}</output>
+        </p>
+      }
+      @if (error(); as refusal) {
+        <app-lcars-error-message
+          title="Not changed"
+          [message]="refusal" />
+      }
+
+      <dl class="community-dispute__facts">
+        <dt>Owner</dt>
+        <dd>
+          @if (view.owner) {
+            {{ view.owner.username ?? unnamed }}
+          } @else {
+            None: its Owner’s account was erased
+          }
+        </dd>
+        <dt>Admins</dt>
+        <dd>
+          @for (admin of view.admins; track admin.userId; let last = $last) {
+            {{ admin.username ?? unnamed }}{{ last ? '' : ', ' }}
+          } @empty {
+            None
+          }
+        </dd>
+        <dt>Open offer</dt>
+        <dd>
+          @if (view.offer; as offer) {
+            To {{ offer.to.username ?? unnamed }}, lapsing
+            {{ offer.expiresAt | appDate: 'medium' }}
+          } @else {
+            None
+          }
+        </dd>
+        @if (view.status === closed) {
+          <dt>Status</dt>
+          <dd>Closed</dd>
+        } @else if (view.status === suspendedStatus) {
+          <dt>Status</dt>
+          <dd>Suspended</dd>
+        }
+      </dl>
+
+      <app-collapsible-section heading="Move ownership">
+
+        @if (view.admins.length === 0) {
+          <p class="fleet-community-empty">
+            Ownership can move only to one of its Admins, and it has none.
+          </p>
+        } @else {
+          <form
+            class="community-dispute__form lcars-rotate"
+            aria-label="Move ownership"
+            (submit)="$event.preventDefault(); onReassign(scope, view)">
+            <div class="lcars-input-container lcars-field--short">
+              <label for="dispute-recipient">New Owner</label>
+              <select
+                id="dispute-recipient"
+                [value]="recipient()"
+                [disabled]="busy()"
+                (change)="recipient.set($any($event.target).value)">
+                <option value="">Choose an Admin</option>
+                @for (admin of view.admins; track admin.userId) {
+                  <option [value]="admin.userId">
+                    {{ admin.username ?? unnamed }}
+                  </option>
+                }
+              </select>
+            </div>
+            <div class="lcars-input-container">
+              <label for="dispute-reason">Reason</label>
+              <textarea
+                id="dispute-reason"
+                rows="3"
+                [attr.maxlength]="reasonLimit"
+                [value]="reason()"
+                [disabled]="busy()"
+                (input)="reason.set($any($event.target).value)"></textarea>
+            </div>
+            <div class="fleet-community-form-actions">
+              <button
+                type="submit"
+                class="lcars-btn lcars-btn-auto"
+                [disabled]="
+                  busy() || recipient() === '' || reason().trim() === ''
+                ">
+                Move ownership…
+              </button>
+            </div>
+          </form>
+        }
+      </app-collapsible-section>
+
+      <app-collapsible-section heading="Its Fleets and Armadas">
+        <p class="fleet-report-notice">{{ unverified }}</p>
+
+        @for (registration of view.scopes; track registration.id) {
+          <article class="community-dispute__scope">
+            <h3 class="community-dispute__scope-name">
+              {{ registration.kind === 'FLEET' ? 'Fleet' : 'Armada' }}
+              {{ registration.exactGameName }}
+              <span class="fleet-report-note"
+                >{{ registration.platformName }} ·
+                {{ registration.status | titlecase }}</span
+              >
+            </h3>
+
+            <table class="fleet-community-table">
+              <caption>
+                Registrations of this name on
+                {{
+                  registration.platformName
+                }}, this one first
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Community</th>
+                  <th scope="col">Its Owner</th>
+                  <th scope="col">Registered</th>
+                  <th scope="col">Last import</th>
+                  <th
+                    scope="col"
+                    class="fleet-community-table__number">
+                    Members
+                  </th>
+                  <th scope="col">Seen by</th>
+                  <th scope="col">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of registrationsOf(registration); track row.id) {
+                  <tr>
+                    <td data-label="Community">
+                      {{ row.communityName ?? 'Not registered' }}
+                    </td>
+                    <td data-label="Its Owner">
+                      {{
+                        row.communityOwner
+                          ? (row.communityOwner.username ?? unnamed)
+                          : '—'
+                      }}
+                    </td>
+                    <td data-label="Registered">
+                      {{ row.registeredAt | appDate: 'mediumDate' }}
+                    </td>
+                    <td data-label="Last import">
+                      {{ (row.lastImportAt | appDate: 'mediumDate') ?? '—' }}
+                    </td>
+                    <td
+                      data-label="Members"
+                      class="fleet-community-table__number">
+                      {{ row.memberCount ?? '—' }}
+                    </td>
+                    <td data-label="Seen by">{{ seenBy(row) }}</td>
+                    <td data-label="Status">{{ row.status | titlecase }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            @if (registration.status !== closed) {
+              <div class="community-dispute__actions">
+                @if (registration.status === suspendedStatus) {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto green"
+                    [disabled]="busy()"
+                    (click)="
+                      onSuspension(
+                        scope,
+                        registration,
+                        registration.exactGameName,
+                        'reinstate'
+                      )
+                    ">
+                    Reinstate…
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto tangerine"
+                    [disabled]="busy()"
+                    (click)="
+                      onSuspension(
+                        scope,
+                        registration,
+                        registration.exactGameName,
+                        'suspend'
+                      )
+                    ">
+                    Suspend…
+                  </button>
+                }
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto red"
+                  [disabled]="busy()"
+                  (click)="onCloseScope(scope, registration)">
+                  Close…
+                </button>
+              </div>
+            }
+            @if (registration.kind === 'FLEET') {
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto"
+                [disabled]="busy()"
+                (click)="onInvestigate(scope, registration)">
+                Look into its imports…
+              </button>
+            }
+          </article>
+        } @empty {
+          <p class="fleet-community-empty">
+            It has no Fleets or Armadas registered.
+          </p>
+        }
+      </app-collapsible-section>
+
+      @if (view.status !== closed) {
+        <app-collapsible-section
+          class="community-dispute__suspend"
+          sectionKey="suspension"
+          [heading]="
+            view.status === suspendedStatus
+              ? 'Reinstate this Community'
+              : 'Suspend this Community'
+          ">
+          <p>
+            A suspended Community, and everything in it, can be read and cannot
+            change until it is reinstated. Nothing ends.
+          </p>
+          <button
+            type="button"
+            [class]="
+              'lcars-btn lcars-btn-auto ' +
+              (view.status === suspendedStatus ? 'green' : 'tangerine')
+            "
+            [disabled]="busy()"
+            (click)="
+              onSuspension(
+                scope,
+                null,
+                view.name,
+                view.status === suspendedStatus ? 'reinstate' : 'suspend'
+              )
+            ">
+            {{ view.status === suspendedStatus ? 'Reinstate…' : 'Suspend…' }}
+          </button>
+        </app-collapsible-section>
+
+        <app-collapsible-section
+          class="community-dispute__close"
+          heading="Close this Community">
+          <p>
+            Closing ends every role and delegated capability in it, and cannot
+            be undone. You will be asked for its name and a reason.
+          </p>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto red"
+            [disabled]="busy()"
+            (click)="onClose(scope, view)">
+            Close…
+          </button>
+        </app-collapsible-section>
+      }
+    }
+  </app-fleet-page-shell>
+}

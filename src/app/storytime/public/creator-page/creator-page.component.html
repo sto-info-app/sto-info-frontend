@@ -24,81 +24,87 @@
     </p>
   } @else {
     @if (stories.length > 0) {
-      <h2>Stories</h2>
-      <ul class="storytime-creator__stories">
-        @for (story of stories; track story.id) {
-          <li class="storytime-panel-card storytime-panel-card--story">
-            <a
-              class="storytime-panel-card__heading"
-              [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
-              [title]="story.title">
-              <span class="storytime-panel-card__name">{{ story.title }}</span>
-            </a>
+      <app-collapsible-section
+        heading="Stories"
+        barClass="small-lcars-bar-gap">
+        <ul class="storytime-creator__stories">
+          @for (story of stories; track story.id) {
+            <li class="storytime-panel-card storytime-panel-card--story">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="['/', appRoutes.STORYTIME, 'stories', story.slug]"
+                [title]="story.title">
+                <span class="storytime-panel-card__name">{{ story.title }}</span>
+              </a>
 
-            @if (story.shortDescription) {
-              <div class="storytime-panel-card__body">
-                <p class="storytime-creator__summary">
-                  {{ story.shortDescription }}
-                </p>
-              </div>
-            }
+              @if (story.shortDescription) {
+                <div class="storytime-panel-card__body">
+                  <p class="storytime-creator__summary">
+                    {{ story.shortDescription }}
+                  </p>
+                </div>
+              }
 
-            <app-storytime-tag-row [tags]="story.tags"></app-storytime-tag-row>
-          </li>
-        }
-      </ul>
+              <app-storytime-tag-row [tags]="story.tags"></app-storytime-tag-row>
+            </li>
+          }
+        </ul>
+      </app-collapsible-section>
     }
 
     @if (arcs.length > 0) {
-      <h2>Arcs</h2>
-      <ul class="storytime-creator__arcs">
-        @for (arc of arcs; track arc.id) {
-          <li class="storytime-panel-card storytime-panel-card--arc">
-            <a
-              class="storytime-panel-card__heading"
-              [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
-              [title]="arc.title">
-              <span class="storytime-panel-card__name">{{ arc.title }}</span>
-            </a>
+      <app-collapsible-section
+        heading="Arcs"
+        barClass="small-lcars-bar-gap">
+        <ul class="storytime-creator__arcs">
+          @for (arc of arcs; track arc.id) {
+            <li class="storytime-panel-card storytime-panel-card--arc">
+              <a
+                class="storytime-panel-card__heading"
+                [routerLink]="['/', appRoutes.STORYTIME, 'arcs', arc.slug]"
+                [title]="arc.title">
+                <span class="storytime-panel-card__name">{{ arc.title }}</span>
+              </a>
 
-            @if (arc.shortDescription) {
-              <div class="storytime-panel-card__body">
-                <p class="storytime-creator__summary">
-                  {{ arc.shortDescription }}
-                </p>
-              </div>
-            }
+              @if (arc.shortDescription) {
+                <div class="storytime-panel-card__body">
+                  <p class="storytime-creator__summary">
+                    {{ arc.shortDescription }}
+                  </p>
+                </div>
+              }
 
-            <app-storytime-tag-row [tags]="arc.tags"></app-storytime-tag-row>
-          </li>
-        }
-      </ul>
+              <app-storytime-tag-row [tags]="arc.tags"></app-storytime-tag-row>
+            </li>
+          }
+        </ul>
+      </app-collapsible-section>
     }
     @if (readingLists.length > 0) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>Reading lists</span>
-      </div>
-
-      <ul class="storytime-creator__lists">
-        @for (list of readingLists; track list.id) {
-          <li class="storytime-creator__list">
-            <a
-              [routerLink]="[
-                '/storytime',
-                'creators',
-                userId,
-                'reading-lists',
-                list.slug,
-              ]">
-              {{ list.name }}
-            </a>
-            <span class="storytime-creator__list-count">
-              {{ list.itemCount }}
-              {{ list.itemCount === 1 ? 'thing' : 'things' }}
-            </span>
-          </li>
-        }
-      </ul>
+      <app-collapsible-section
+        heading="Reading lists"
+        barClass="small-lcars-bar-gap">
+        <ul class="storytime-creator__lists">
+          @for (list of readingLists; track list.id) {
+            <li class="storytime-creator__list">
+              <a
+                [routerLink]="[
+                  '/storytime',
+                  'creators',
+                  userId,
+                  'reading-lists',
+                  list.slug,
+                ]">
+                {{ list.name }}
+              </a>
+              <span class="storytime-creator__list-count">
+                {{ list.itemCount }}
+                {{ list.itemCount === 1 ? 'thing' : 'things' }}
+              </span>
+            </li>
+          }
+        </ul>
+      </app-collapsible-section>
     }
   }
 </section>

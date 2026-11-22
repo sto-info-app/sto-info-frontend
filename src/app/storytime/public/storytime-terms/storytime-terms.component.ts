@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { PolicyHeaderComponent } from '../../shared/policy-header/policy-header.component';
@@ -26,7 +27,12 @@ import {
   selector: 'app-storytime-terms',
   templateUrl: './storytime-terms.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule, PolicyHeaderComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    PolicyHeaderComponent,
+    CollapsibleSectionComponent,
+  ],
 })
 export class StorytimeTermsComponent {
   /** What a creator confirms when they accept the terms for a Story. */

@@ -50,6 +50,7 @@ import {
   decodeStoHandle,
   encodeStoHandle,
 } from 'src/app/shared/utils/sto-handle.utils';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /**
  * The fields a link may ask to be taken straight to, by their ids: the pen on
@@ -69,6 +70,7 @@ const LINKABLE_FIELD_IDS: ReadonlySet<string> = new Set([
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     ReactiveFormsModule,
     MatButtonModule,

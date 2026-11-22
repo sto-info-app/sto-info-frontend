@@ -5,8 +5,11 @@
 <div
   id="news-admin-page"
   class="admin-layout">
-  <div class="admin-content admin-main-column">
+  <div class="admin-content">
     <h1>Manage News</h1>
+    <app-help-link
+      slug="site-admin-site-content"
+      label="Help with news" />
     <p class="admin-page-intro">
       Create, publish and maintain the public news feed using the same LCARS
       control surface used across account and character management.
@@ -18,20 +21,17 @@
         [message]="errorMessage"></app-lcars-error-message>
     }
 
-    <section class="admin-section">
-      <div class="lcars-text-bar small-lcars-bar-gap admin-section-header">
-        <span>Posts</span>
-        <div class="admin-section-actions">
-          <a
-            class="cta-icon"
-            [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
-            title="New post"
-            aria-label="New post"
-          ><i class="fas fa-plus"></i
-          ></a>
-        </div>
-      </div>
-
+    <app-collapsible-section
+      heading="Posts"
+      barClass="small-lcars-bar-gap">
+      <a
+        sectionActions
+        class="cta-icon"
+        [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
+        title="New post"
+        aria-label="New post"
+      ><i class="fas fa-plus"></i
+      ></a>
       @if (!isLoading && posts.length === 0) {
         <p class="records-empty">No posts yet. Create your first one.</p>
       }
@@ -60,7 +60,7 @@
                       <i
                         class="fas fa-calendar-day news-admin-timestamp-icon"
                         aria-hidden="true"></i>
-                      {{ post.publishedAt | date: 'fullDate' }}
+                      {{ post.publishedAt | appDate: 'fullDate' }}
                     </time>
                     <span
                       class="status-pill"
@@ -86,7 +86,7 @@
                   @if (post.status === newsStatus.DRAFT) {
                     <button
                       type="button"
-                      class="cta-icon"
+                      class="cta-icon approve-icon"
                       (click)="publish(post)"
                       title="Publish post"
                       aria-label="Publish post"
@@ -107,21 +107,18 @@
           }
         </div>
       }
-    </section>
-  </div>
 
-  <div class="admin-side-column col">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Navigation</span>
-    </div>
-    <div class="buttons">
+      @if (totalPages > 1) {
+        <app-lcars-pagination
+          [page]="page"
+          [pageCount]="totalPages"
+          (turn)="load(page + $event)" />
+      }
+    </app-collapsible-section>
+
+    <div class="admin-page-foot">
       <a
-        class="full-width-btn-link sunflower"
-        [routerLink]="'/' + appRoutes.ADMIN_NEWS_ADD"
-        >New post</a
-      >
-      <a
-        class="full-width-btn-link sunflower"
+        class="lcars-btn lcars-btn-auto"
         [routerLink]="'/' + appRoutes.ADMIN"
         >Admin home</a
       >

@@ -620,6 +620,8 @@ describe('the display formatter', () => {
         fieldType: CustomTrackingFieldType.IMAGE,
         image: {
           imageId: 'image-1',
+          imageUrl:
+            'https://cdn.test/cdn-cgi/imagedelivery/hash/image-1/square300?sig=1',
           altText: 'A ship at speed',
           shape: CustomTrackingImageShape.SQUARE,
         },

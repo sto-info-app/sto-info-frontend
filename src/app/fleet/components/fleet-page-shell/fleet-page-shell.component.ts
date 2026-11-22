@@ -1,0 +1,123 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  Input,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+
+import { filter, map } from 'rxjs';
+
+import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
+
+import { FleetShellTab } from './fleet-page-shell.model';
+
+/**
+ * The chrome every Fleet page sits in: its tab strip, its heading, the line
+ * naming what the page is about, and whichever of loading, failed or ready the
+ * page is currently in.
+ *
+ * Purely presentational. It is told what state to draw and never asks: the
+ * page owns the request, the retry and the decision about what an error means,
+ * which is the same division the shared cards already follow.
+ *
+ * Holding the three states here is the point of the component. A dozen Fleet
+ * pages each writing their own `@if (isLoading)` is a dozen chances for one of
+ * them to show a heading above an empty page while a request is in flight, or
+ * to leave a stale list on screen under an error.
+ */
+@Component({
+  selector: 'app-fleet-page-shell',
+  templateUrl: './fleet-page-shell.component.html',
+  styleUrls: ['./fleet-page-shell.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    RouterModule,
+    LoadingBarComponent,
+    LcarsErrorMessageComponent,
+    HelpLinkComponent,
+    SettingsLinkComponent,
+  ],
+})
+export class FleetPageShellComponent {
+  /** The cog beside every Fleet page's heading, to the Fleet settings. */
+  readonly settingsLink = SETTINGS_LINKS.fleet;
+
+  /** The page's heading, rendered as its `<h1>`. */
+  @Input({ required: true }) heading!: string;
+
+  /**
+   * The Community, Fleet or Armada the page is about, shown under the heading.
+   *
+   * A name rather than an identifier: a reader who has three Fleets open needs
+   * to know which one this tab is, and a UUID does not tell them.
+   */
+  @Input() subject: string | null = null;
+
+  /**
+   * The Help guide about this page, linked under the heading (FC-050), or
+   * null for none.
+   */
+  @Input() helpSlug: string | null = null;
+
+  /** What the Help link says, such as “Help with importing”. */
+  @Input() helpLabel = 'Help with this page';
+
+  /** The section tabs, or an empty strip when the page has no sections. */
+  @Input() tabs: readonly FleetShellTab[] = [];
+
+  /** Names the tab strip for a screen reader moving by landmark. */
+  @Input() tabsAriaLabel = 'Fleet sections';
+
+  /** Whether the page's own content is still on its way. */
+  @Input() isLoading = false;
+
+  /** What the loading bar says while it is. */
+  @Input() loadingText = 'Loading';
+
+  /**
+   * The message shown in place of the content when the page could not be
+   * built, or null when it could.
+   *
+   * Rendered as text by `<app-lcars-error-message>`. The warning component is
+   * deliberately not used here: it renders its message as HTML, and this input
+   * carries server and import text.
+   */
+  @Input() errorMessage: string | null = null;
+
+  /**
+   * Whether the projected content should be drawn.
+   *
+   * @returns True when the page is neither loading nor failed.
+   */
+  get showsContent(): boolean {
+    return !this.isLoading && this.errorMessage === null;
+  }
+
+  private readonly _router = inject(Router);
+
+  /** The address being shown, without its query or fragment. */
+  private readonly _path = toSignal(
+    this._router.events.pipe(
+      filter(event => event instanceof NavigationEnd),
+      map(event => (event as NavigationEnd).urlAfterRedirects),
+    ),
+    { initialValue: this._router.url },
+  );
+
+  /**
+   * Whether a tab that decides by path is lit on the page being shown.
+   *
+   * @param lightsOn - The tab's pattern.
+   * @returns True when the path matches it.
+   */
+  isLitByPath(lightsOn: RegExp): boolean {
+    return lightsOn.test(this._path().split(/[?#]/)[0]);
+  }
+}

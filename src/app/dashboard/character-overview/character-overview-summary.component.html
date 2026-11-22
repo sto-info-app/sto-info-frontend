@@ -3,12 +3,10 @@
 }
 
 @if (cards().length) {
-  <section
+  <app-collapsible-section
     class="overview-summary"
-    aria-label="Progress summary">
-    <div class="lcars-text-bar small-lcars-bar-gap">
-      <span>Progress Summary</span>
-    </div>
+    heading="Progress Summary"
+    barClass="small-lcars-bar-gap">
     <div class="overview-summary__cards">
       @for (card of cards(); track card.tab) {
         <!--
@@ -48,7 +46,7 @@
         </button>
       }
     </div>
-  </section>
+  </app-collapsible-section>
 } @else if (hasFailed()) {
   <output class="overview-summary__error">
     Progress summaries could not be loaded.

@@ -15,6 +15,7 @@ import {
 
 import { CustomTrackingReorderControlsComponent } from '../custom-tracking-reorder-controls/custom-tracking-reorder-controls.component';
 import { moveInList } from '../custom-tracking-reordering.utility';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** A rename of one option. */
 export interface CustomTrackingOptionRename {
@@ -48,7 +49,11 @@ let nextOptionsEditorId = 0;
   templateUrl: './custom-tracking-options-editor.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [ReactiveFormsModule, CustomTrackingReorderControlsComponent],
+  imports: [
+    LcarsPanelComponent,
+    ReactiveFormsModule,
+    CustomTrackingReorderControlsComponent,
+  ],
 })
 export class CustomTrackingOptionsEditorComponent {
   /** Every option the field has, withdrawn ones included. */

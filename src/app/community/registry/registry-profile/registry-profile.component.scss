@@ -1,3 +1,4 @@
+@use 'lcars-variables' as vars;
 @use 'registry-layout' as registry;
 @include registry.registry-two-column(
   'registry-profile-container',
@@ -31,4 +32,19 @@
   .registry-detail-grid {
     flex: 1 1 18rem;
   }
+}
+
+// Whether the member is online, to viewers in the audience they chose
+// (FC-034).
+.registry-online {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.7rem;
+  border-radius: 999px;
+  background: vars.$lcars-sky;
+  color: vars.$a11y-black;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  vertical-align: middle;
 }

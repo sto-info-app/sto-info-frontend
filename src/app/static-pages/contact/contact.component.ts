@@ -1,6 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
+import {
+  ChangeDetectorRef,
+  Component,
+  DestroyRef,
+  NgZone,
+  OnInit,
+  inject,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { finalize } from 'rxjs';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
@@ -27,7 +35,8 @@ import {
 } from 'src/app/shared/constants/forms.constants';
 import { EMAIL_PATTERN } from 'src/app/shared/constants/regex-patterns.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
-import { CONTACT_TOPICS } from './contact.constants';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
+import { ContactTopicOption, contactTopicsFor } from './contact.constants';
 import { ContactService } from './contact.service';
 import {
   ContactSubmissionRequest,
@@ -47,11 +56,12 @@ import {
     LcarsSuccessMessageComponent,
   ],
 })
-export class ContactComponent {
+export class ContactComponent implements OnInit {
   isSubmitting = false;
   errorMessage = '';
   successMessage = '';
-  topics = CONTACT_TOPICS;
+  /** The topics on offer: Fleet Communities only while it is on (FC-045). */
+  topics: readonly ContactTopicOption[] = contactTopicsFor(false);
 
   // Allow constants to be used in the HTML
   errorTextNameRequired: string = FORM_ERROR_NAME_REQUIRED;
@@ -67,6 +77,8 @@ export class ContactComponent {
   private readonly _contactService = inject(ContactService);
   private readonly _ngZone = inject(NgZone);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
+  private readonly _destroyRef = inject(DestroyRef);
 
   contactForm = this._formBuilder.nonNullable.group({
     name: ['', [Validators.required, Validators.maxLength(MAX_CHARS_NAMES)]],
@@ -87,6 +99,20 @@ export class ContactComponent {
 
   get formControls() {
     return this.contactForm.controls;
+  }
+
+  /**
+   * Offers the Fleet Communities topic once the server says Fleet is on. It
+   * stays hidden when the server cannot be asked, as it is while off.
+   */
+  ngOnInit(): void {
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(features => {
+        this.topics = contactTopicsFor(features.isEnabled);
+        this._cdr.markForCheck();
+      });
   }
 
   onSubmit(): void {

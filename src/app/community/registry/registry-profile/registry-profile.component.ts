@@ -1,19 +1,35 @@
 import { CommonModule } from '@angular/common';
 import { HttpErrorResponse, HttpStatusCode } from '@angular/common/http';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, take } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import {
+  FRIEND_CHAT_FAILED,
+  FriendChatService,
+} from 'src/app/community/friend-chat.service';
 import { AccountCardComponent } from 'src/app/shared/components/account-card/account-card.component';
 import { AccountCardVm } from 'src/app/shared/components/account-card/account-card.model';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { ConfirmPrompt } from 'src/app/shared/actions/confirm-prompt';
 import { EntityAvatarComponent } from 'src/app/shared/components/entity-avatar/entity-avatar.component';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsCollapsibleBarComponent } from 'src/app/shared/components/lcars-collapsible-bar/lcars-collapsible-bar.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LcarsSuccessMessageComponent } from 'src/app/shared/components/lcars-success-message/lcars-success-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { PageTitleService } from 'src/app/shared/services/page-title.service';
 import { SeoService } from 'src/app/shared/services/seo.service';
@@ -46,6 +62,9 @@ import {
 import { buildRegistryAccountCard } from '../registry-card.builders';
 import { RegistryPageBaseDirective } from '../registry-page-base.directive';
 import { RegistryService } from '../registry.service';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { SettingsLinkComponent } from 'src/app/shared/components/settings-link/settings-link.component';
+import { SETTINGS_LINKS } from 'src/app/shared/constants/settings-links.constants';
 
 /**
  * One public account, with the card and the values the controls work on.
@@ -83,14 +102,18 @@ export const REGISTRY_ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
   styleUrls: ['./registry-profile.component.scss'],
   standalone: true,
   imports: [
+    AppDatePipe,
     CommonModule,
     LoadingBarComponent,
+    LcarsCollapsibleBarComponent,
     LcarsErrorMessageComponent,
     LcarsSuccessMessageComponent,
     EntityAvatarComponent,
     AccountCardComponent,
     CommunityTabsComponent,
+    CollapsibleSectionComponent,
     FormsModule,
+    SettingsLinkComponent,
   ],
 })
 export class RegistryProfileComponent
@@ -102,11 +125,26 @@ export class RegistryProfileComponent
   private readonly _moderationService = inject(ModerationService);
   private readonly _authService = inject(AuthService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _confirmPrompt = new ConfirmPrompt();
   private readonly _route = inject(ActivatedRoute);
   private readonly _seoService = inject(SeoService);
   private readonly _pageTitleService = inject(PageTitleService);
+  private readonly _friendChat = inject(FriendChatService);
+  private readonly _fleetConfiguration = inject(FleetConfigurationService);
+  private readonly _destroyRef = inject(DestroyRef);
+
+  /** Whether chat is switched on, for the Message button (FC-033). */
+  isChatOffered = false;
+
+  /** Whether the member is online, as the viewer may know it (FC-034). */
+  isOnline = false;
+
+  private readonly _presence = inject(ChatPresenceService);
 
   relationshipStatus = RelationshipStatus;
+
+  /** The cog beside the reader's own record, to whether it is listed. */
+  readonly settingsLink = SETTINGS_LINKS.registry;
 
   username = '';
   profile: RegistryProfile | null = null;
@@ -219,8 +257,31 @@ export class RegistryProfileComponent
    */
   ngOnInit(): void {
     this.username = this._route.snapshot.paramMap.get('username') ?? '';
+    this._fleetConfiguration
+      .getFeatures()
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe(features => {
+        this.isChatOffered = features.chatEnabled;
+      });
 
     this.loadProfile();
+
+    if (this.username) {
+      this._presence
+        .watch([this.username])
+        .pipe(
+          takeUntilDestroyed(this._destroyRef),
+          observeInZone(this._ngZone, this._cdr),
+        )
+        .subscribe(online => {
+          this.isOnline = [...online].some(
+            name => name.toLowerCase() === this.username.toLowerCase(),
+          );
+        });
+    }
   }
 
   /**
@@ -300,6 +361,30 @@ export class RegistryProfileComponent
       'Friend request withdrawn.',
       'Something went wrong withdrawing that request.',
     );
+  }
+
+  /**
+   * Opens chat with this friend (FC-033), by the friendship, since the
+   * profile names nobody's ID.
+   */
+  message(): void {
+    const friendshipId = this.profile?.relationship?.friendshipId;
+    if (!friendshipId) {
+      return;
+    }
+
+    this.isActing = true;
+    this.actionError = '';
+    this._friendChat
+      .open(friendshipId)
+      .pipe(observeInZone(this._ngZone, this._cdr))
+      .subscribe({
+        next: () => (this.isActing = false),
+        error: () => {
+          this.isActing = false;
+          this.actionError = FRIEND_CHAT_FAILED;
+        },
+      });
   }
 
   /**
@@ -516,14 +601,8 @@ export class RegistryProfileComponent
     data: { title: string; message: string; confirmText: string },
     onConfirm: () => void,
   ): void {
-    const dialogRef = this._dialog.open(ConfirmDialogComponent, {
-      width: '75%',
-      data: { ...data, cancelText: 'Cancel' },
-    });
-
-    dialogRef
-      .afterClosed()
-      .pipe(take(1), observeInZone(this._ngZone, this._cdr))
+    this._confirmPrompt
+      .ask({ ...data, cancelText: 'Cancel' })
       .subscribe(confirmed => {
         if (confirmed) {
           onConfirm();

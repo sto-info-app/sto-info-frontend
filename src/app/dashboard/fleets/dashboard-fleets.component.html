@@ -1,0 +1,141 @@
+<div id="dashboard-fleets-container">
+  <div
+    id="dashboard-fleets-main-column"
+    class="col">
+    <h1>Communities You Follow</h1>
+    <app-help-link
+      slug="your-characters-and-fleets"
+      label="Help with your Fleets" />
+
+    @if (state$ | async; as state) {
+      @switch (state.kind) {
+        @case ('LOADING') {
+          <app-loading-bar loadingText="Reading what you follow" />
+        }
+
+        @case ('UNAVAILABLE') {
+          <app-feature-unavailable
+            [featureName]="featureName"
+            [reason]="state.reason" />
+        }
+
+        @case ('ERROR') {
+          <app-lcars-error-message
+            title="Transmission failed"
+            [message]="errorMessage" />
+        }
+
+        @case ('READY') {
+          @if (state.cards.length === 0) {
+            <app-collapsible-section heading="Nothing followed yet">
+              <div id="dashboard-fleets-discovery">
+                <p>
+                  Following a Community keeps what it publishes within reach from
+                  here. It is not membership of it, it tells the Community
+                  nothing, and it opens nobody's roster.
+                </p>
+                <p>
+                  Start with the directories. A
+                  <strong>Community</strong> is the group behind one or more
+                  fleets, often across several platforms; an
+                  <strong>Armada</strong> is a set of a Community’s fleets that have
+                  allied; and
+                  a <strong>Fleet</strong> can also be listed on its own.
+                </p>
+
+                <nav
+                  class="buttons-row"
+                  aria-label="Fleet directories">
+                  <a
+                    [routerLink]="fleetDirectoryLink"
+                    class="lcars-btn lcars-btn-auto"
+                    >Browse Fleets</a
+                  >
+                  <a
+                    [routerLink]="communityDirectoryLink"
+                    class="lcars-btn lcars-btn-auto"
+                    >Browse Communities</a
+                  >
+                  <a
+                    [routerLink]="armadaDirectoryLink"
+                    class="lcars-btn lcars-btn-auto"
+                    >Browse Armadas</a
+                  >
+                  <a
+                    [routerLink]="registerLink"
+                    class="lcars-btn lcars-btn-auto"
+                    >Register a Community</a
+                  >
+                </nav>
+              </div>
+            </app-collapsible-section>
+          } @else {
+            <app-collapsible-section
+              heading="Following"
+              [badge]="state.cards.length">
+              <div
+                id="dashboard-fleets-grid"
+                class="lcars-rotate">
+                @for (card of state.cards; track card.id) {
+                  <app-fleet-scope-card [vm]="card" />
+                }
+              </div>
+
+              <nav
+                class="buttons-row"
+                aria-label="Fleet directories">
+                <a
+                  [routerLink]="communityDirectoryLink"
+                  class="lcars-btn lcars-btn-auto"
+                  >Find more Communities</a
+                >
+              </nav>
+            </app-collapsible-section>
+          }
+
+          @if (state.chatEnabled) {
+            <app-collapsible-section
+              id="dashboard-fleets-chat"
+              heading="Chat">
+              <p class="fleet-community-field-hint">
+                The channels of your Fleets, their Armadas and Communities, and
+                your conversations with friends.
+              </p>
+              <nav
+                class="buttons-row"
+                aria-label="Chat">
+                <a
+                  routerLink="/chat"
+                  class="lcars-btn lcars-btn-auto"
+                  >Open chat</a
+                >
+              </nav>
+            </app-collapsible-section>
+          }
+
+          <app-collapsible-section
+            id="dashboard-fleets-events"
+            heading="Your upcoming events">
+            <p class="fleet-community-field-hint">
+              The next thirty days of what you answered Going or Maybe, are
+              waiting for, or asked to be reminded of.
+            </p>
+            <app-fleet-events-upcoming [source]="upcoming" />
+          </app-collapsible-section>
+
+          <app-collapsible-section
+            id="dashboard-fleets-activity"
+            heading="Your Fleet activity">
+            <p class="fleet-community-field-hint">
+              What has happened in the Communities you follow and the Fleets and
+              Armadas you belong to.
+            </p>
+            <app-fleet-activity-feed
+              [source]="personalFeed"
+              [showScope]="true" />
+          </app-collapsible-section>
+        }
+      }
+    }
+  </div>
+</div>

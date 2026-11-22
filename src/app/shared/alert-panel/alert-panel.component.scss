@@ -1,3 +1,6 @@
+@use 'sass:color';
+@use 'lcars-variables' as vars;
+
 :host {
   display: inline-block;
   width: 100%;
@@ -26,12 +29,12 @@
   --title-shadow: clamp(6px, 2cqi, 10px);
 
   /* Colours (red default) */
-  --c-alert-title: rgb(255 43 43 / 85%);
-  --cts-alert-title: rgb(255 43 43 / 10%);
-  --c-alert-sub-title: rgb(255 43 43 / 55%);
-  --c-main: #7b0000;
-  --c-bright: #ff2b2b;
-  --c-sub: #ff9b9b;
+  --c-alert-title: #{color.change(vars.$alert-red-bright, $alpha: 0.85)};
+  --cts-alert-title: #{color.change(vars.$alert-red-bright, $alpha: 0.1)};
+  --c-alert-sub-title: #{color.change(vars.$alert-red-bright, $alpha: 0.55)};
+  --c-main: #{vars.$alert-red-main};
+  --c-bright: #{vars.$alert-red-bright};
+  --c-sub: #{vars.$alert-red-sub};
 
   position: relative;
   text-align: center;
@@ -53,7 +56,7 @@
     .alert-panel__side {
       height: var(--side-h);
       background: var(--c-main);
-      box-shadow: inset 0 0 var(--shadow-inset) rgb(0 0 0 / 90%);
+      box-shadow: inset 0 0 var(--shadow-inset) vars.$black-a90;
     }
 
     .alert-panel__side--left {
@@ -124,39 +127,39 @@
 
 /* States */
 .alert-panel-container.is-yellow {
-  --c-alert-title: rgb(255 176 32 / 85%);
-  --cts-alert-title: rgb(255 176 32 / 10%);
-  --c-alert-sub-title: rgb(255 176 32 / 55%);
-  --c-main: #7a4a00;
-  --c-bright: #ffb020;
-  --c-sub: #ffe2a6;
+  --c-alert-title: #{color.change(vars.$alert-yellow-bright, $alpha: 0.85)};
+  --cts-alert-title: #{color.change(vars.$alert-yellow-bright, $alpha: 0.1)};
+  --c-alert-sub-title: #{color.change(vars.$alert-yellow-bright, $alpha: 0.55)};
+  --c-main: #{vars.$alert-yellow-main};
+  --c-bright: #{vars.$alert-yellow-bright};
+  --c-sub: #{vars.$alert-yellow-sub};
 }
 
 .alert-panel-container.is-green {
-  --c-alert-title: rgb(59 255 123 / 85%);
-  --cts-alert-title: rgb(59 255 123 / 10%);
-  --c-alert-sub-title: rgb(59 255 123 / 55%);
-  --c-main: #0b5f2a;
-  --c-bright: #3bff7b;
-  --c-sub: #b7ffd1;
+  --c-alert-title: #{color.change(vars.$alert-green-bright, $alpha: 0.85)};
+  --cts-alert-title: #{color.change(vars.$alert-green-bright, $alpha: 0.1)};
+  --c-alert-sub-title: #{color.change(vars.$alert-green-bright, $alpha: 0.55)};
+  --c-main: #{vars.$alert-green-main};
+  --c-bright: #{vars.$alert-green-bright};
+  --c-sub: #{vars.$alert-green-sub};
 }
 
 .alert-panel-container.is-blue {
-  --c-alert-title: rgb(30 107 255 / 92%);
-  --cts-alert-title: rgb(30 107 255 / 18%);
-  --c-alert-sub-title: rgb(30 107 255 / 66%);
-  --c-main: #061c45;
-  --c-bright: #1e6bff;
-  --c-sub: #b8d6ff;
+  --c-alert-title: #{color.change(vars.$alert-blue-bright, $alpha: 0.92)};
+  --cts-alert-title: #{color.change(vars.$alert-blue-bright, $alpha: 0.18)};
+  --c-alert-sub-title: #{color.change(vars.$alert-blue-bright, $alpha: 0.66)};
+  --c-main: #{vars.$alert-blue-main};
+  --c-bright: #{vars.$alert-blue-bright};
+  --c-sub: #{vars.$alert-blue-sub};
 }
 
 .alert-panel-container.is-grey {
-  --c-alert-title: rgb(230 230 230 / 90%);
-  --cts-alert-title: rgb(230 230 230 / 12%);
-  --c-alert-sub-title: rgb(230 230 230 / 60%);
-  --c-main: #2b2b2b;
-  --c-bright: #d9d9d9;
-  --c-sub: #f2f2f2;
+  --c-alert-title: #{color.change(vars.$alert-grey-title, $alpha: 0.9)};
+  --cts-alert-title: #{color.change(vars.$alert-grey-title, $alpha: 0.12)};
+  --c-alert-sub-title: #{color.change(vars.$alert-grey-title, $alpha: 0.6)};
+  --c-main: #{vars.$alert-grey-main};
+  --c-bright: #{vars.$alert-grey-bright};
+  --c-sub: #{vars.$alert-grey-sub};
 }
 
 @media (prefers-reduced-motion: reduce) {

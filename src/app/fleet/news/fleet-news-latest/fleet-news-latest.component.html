@@ -1,0 +1,32 @@
+@if (scope(); as vm) {
+  @if (page(); as latest) {
+    @if (latest.items.length === 0) {
+      <p class="fleet-community-empty">Nothing has been published here yet.</p>
+    } @else {
+      <ul class="fleet-news__list">
+        @for (post of latest.items; track post.id) {
+          <li>
+            <app-fleet-news-card
+              [post]="post"
+              [link]="postLinkOf(vm, post)" />
+          </li>
+        }
+      </ul>
+    }
+  }
+
+  <div class="buttons-row">
+    <a
+      class="lcars-btn lcars-btn-auto"
+      [routerLink]="vm.newsLink"
+      >All news</a
+    >
+    @if (page()?.mayWrite && page()?.isOpen) {
+      <a
+        class="lcars-btn lcars-btn-auto"
+        [routerLink]="writeLinkOf(vm)"
+        >Write a post</a
+      >
+    }
+  </div>
+}

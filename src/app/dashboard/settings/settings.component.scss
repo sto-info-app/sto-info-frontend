@@ -1,3 +1,9 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-tabs' as tabs;
+
+// The strip of tabs along the top of the page.
+@include tabs.lcars-tab-strip($min-width: 0);
+
 // `main` gives the page a left gutter but no right one, and the two columns
 // here sit directly against each other. Both gaps are the column stack's to
 // supply: without them a heading bar drawn to its column's full width would
@@ -21,8 +27,15 @@
     max-width: 400px;
   }
 
-  .settings-bar {
-    margin-top: 60px;
+  // On a phone the two columns stack, as on the dashboard's other pages: side
+  // by side, Navigation kept its pills' width and left the settings about
+  // 90px, a word to a line (FC-044).
+  @media (width <= 768px) {
+    flex-direction: column;
+
+    .settings-side-column {
+      max-width: none;
+    }
   }
 
   // An LCARS bar carries its name on a black cut-out that starts after the
@@ -47,13 +60,6 @@
     .lcars-btn {
       margin: 0;
     }
-
-    // An anchor wearing a button's clothes is still an anchor, and the global
-    // underline would show through the pill.
-    a.lcars-btn,
-    a.lcars-btn:hover {
-      text-decoration: none;
-    }
   }
 
   .settings-row {
@@ -62,34 +68,60 @@
     gap: 8px;
   }
 
+  // A chooser and the note that it saved, side by side while there is room
+  // and one above the other on a phone.
+  .settings-chooser {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+
+    .lcars-input-container {
+      flex: 1 1 240px;
+    }
+  }
+
+  // The word beside a control once its change has been kept: the success
+  // green the site's success messages use, and gone again after a moment.
+  // It fades in for those who have not asked for less motion.
+  .settings-saved {
+    align-self: center;
+    color: vars.$lcars-c60;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    @media (prefers-reduced-motion: no-preference) {
+      animation: settings-saved-in 200ms ease-out;
+    }
+  }
+
   .settings-field {
     display: flex;
     flex-direction: column;
     gap: 8px;
 
-    label {
-      color: #6cf;
-      font-weight: 700;
-      text-transform: uppercase;
+    // Two fields in one section: the second's label sat against the first's
+    // description, reading as part of it (FC-044).
+    & + .settings-field {
+      margin-top: 1.5rem;
     }
 
-    select {
+    // The chooser is the site's LCARS field, kept to the width a zone's
+    // name needs rather than stretched across the section.
+    .lcars-input-container {
       max-width: 360px;
-      padding: 8px 10px;
-      border: 1px solid #9de0ff;
-      border-radius: 4px;
-      background: #1d2d3e;
-      color: #f2f8ff;
+      margin-bottom: 0;
     }
   }
 
-  // One measure for every explanatory line on the page, so the note under the
-  // timeout chooser and the note under Custom Tracking wrap alike instead of
-  // one being squeezed to the width of the control above it.
+  // Every explanatory line on the page alike, running the width of its panel,
+  // so the note under the timeout chooser is not squeezed to the width of the
+  // control above it.
   .settings-description {
-    max-width: 70ch;
     margin: 0;
-    color: #b8e8ff;
+    color: vars.$lcars-help-note;
     font-size: 0.9rem;
   }
 
@@ -100,8 +132,8 @@
 
     &[open] {
       .settings-help-trigger {
-        background-color: #6fff8f;
-        color: #000;
+        background-color: vars.$lcars-public-green;
+        color: vars.$a11y-black;
       }
     }
   }
@@ -112,8 +144,8 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    color: #b8e8ff;
-    background: #1d2d3e;
+    color: vars.$lcars-help-note;
+    background: vars.$lcars-help-bg;
     border-radius: 3px;
     cursor: pointer;
     font-size: 16px;
@@ -125,11 +157,11 @@
     transition: background-color 120ms ease;
 
     &:hover {
-      background-color: #263e54;
+      background-color: vars.$lcars-help-bg-hover;
     }
 
     &:focus-visible {
-      outline: 2px solid #6cf;
+      outline: 2px solid vars.$lcars-c48;
       outline-offset: 2px;
     }
 
@@ -145,11 +177,11 @@
     z-index: 10;
     width: min(360px, calc(100vw - 80px));
     padding: 10px 12px;
-    border: 1px solid #9de0ff;
+    border: 1px solid vars.$lcars-help-border;
     border-radius: 8px;
-    background: #1d2d3e;
-    color: #f2f8ff;
-    box-shadow: 0 8px 20px rgb(0 0 0 / 45%);
+    background: vars.$lcars-help-bg;
+    color: vars.$lcars-help-text;
+    box-shadow: 0 8px 20px vars.$black-a45;
     font-size: 0.85rem;
     line-height: 1.4;
 
@@ -161,9 +193,37 @@
     }
 
     strong {
-      color: #6cf;
+      color: vars.$lcars-c48;
       font-weight: 700;
       text-transform: uppercase;
     }
+  }
+}
+
+// A setting a cog led to, ringed in the page's highlight for a moment so the
+// eye finds it among the rest. Kept still for those who asked for less motion.
+.settings-marked {
+  border-radius: 8px;
+  outline: 2px solid vars.$lcars-sunflower;
+  outline-offset: 6px;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: settings-marked-in 400ms ease-out;
+  }
+}
+
+@keyframes settings-marked-in {
+  from {
+    outline-color: transparent;
+  }
+}
+
+@keyframes settings-saved-in {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
   }
 }

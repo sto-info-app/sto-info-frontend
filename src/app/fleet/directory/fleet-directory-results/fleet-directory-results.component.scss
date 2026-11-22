@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+// One card to a line, the full width of the results, as the account and
+// captain lists are: the room lets a
+// card set its details out side by side rather than stacking them.
+.fleet-directory-results__grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}

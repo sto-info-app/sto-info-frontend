@@ -1,5 +1,13 @@
-@if (isSubmitting) {
+@if (isSubmitting && !scanState) {
   <app-loading-bar loadingText="Uploading"></app-loading-bar>
+}
+@if (scanState) {
+  <app-asset-scan-status [state]="scanState"></app-asset-scan-status>
+}
+@if (scanTookTooLong) {
+  <app-lcars-warning-message
+    title="Still Checking"
+    message="The check is taking longer than usual. Your picture has not been lost: it will appear once the check finishes. You can close this and come back to it."></app-lcars-warning-message>
 }
 
 <div id="storytime-image-dialog-container">
@@ -18,25 +26,15 @@
       class="storytime-image-crop__layout"
       [class.has-image]="imageChangedEvent">
       <div class="storytime-image-crop__main">
-        <input
-          type="file"
-          [title]="'Choose a picture for the ' + spec.label"
-          [attr.aria-label]="'Choose a picture for the ' + spec.label"
-          (change)="onFileChangeEvent($event)"
-          accept="image/jpg, image/jpeg, image/png"
+        <app-image-crop-picker
+          [label]="spec.label"
+          [imageChangedEvent]="imageChangedEvent"
+          [aspectRatio]="spec.aspectRatio"
+          [format]="spec.outputFormat"
           [disabled]="isSubmitting"
-          class="file-input" />
-
-        @if (imageChangedEvent) {
-          <image-cropper
-            [imageChangedEvent]="imageChangedEvent"
-            [maintainAspectRatio]="true"
-            [aspectRatio]="spec.aspectRatio"
-            [output]="'blob'"
-            [format]="spec.outputFormat"
-            (imageCropped)="onImageCropped($event)"
-            (loadImageFailed)="loadImageFailed()"></image-cropper>
-        }
+          (fileChange)="onFileChangeEvent($event)"
+          (imageCropped)="onImageCropped($event)"
+          (loadImageFailed)="loadImageFailed()"></app-image-crop-picker>
       </div>
 
       @if (imageChangedEvent) {
@@ -105,7 +103,7 @@
     class="storytime-image-crop__actions">
     <button
       type="button"
-      class="lcars-btn sunflower"
+      class="lcars-btn green"
       mat-button
       [disabled]="!canUpload"
       (click)="onUploadImageClick()">
@@ -113,7 +111,7 @@
     </button>
     <button
       type="button"
-      class="lcars-btn red"
+      class="lcars-btn"
       mat-button
       mat-dialog-close
       [disabled]="isSubmitting"

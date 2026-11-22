@@ -16,7 +16,7 @@
   text-transform: uppercase;
   white-space: nowrap;
   background-color: vars.$lcars-cardinal;
-  color: #fff;
+  color: vars.$a11y-white;
   transition:
     background-color 0.25s ease,
     color 0.25s ease,
@@ -29,7 +29,7 @@
 
   &--on {
     background-color: vars.$lcars-green;
-    color: #000;
+    color: vars.$a11y-black;
   }
 
   &:hover:not(.lcars-toggle-pill--disabled, :disabled) {

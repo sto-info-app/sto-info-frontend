@@ -1,17 +1,11 @@
 @if (isNeeded) {
-  <section class="storytime-section storytime-policy-acceptance">
-    <!--
-      Titled only where it stands as a block of the page in its own right,
-      alongside the Story's details, settings and tags. Inside a row of the
-      creator's own list it is one thing among several in a card that already
-      names the Story, and a heading bar there would announce it twice.
-    -->
-    @if (heading) {
-      <div class="lcars-text-bar small-lcars-bar-gap">
-        <span>{{ heading }}</span>
-      </div>
-    }
-
+  <!--
+    Untitled here. Where it stands as a block of the page in its own right the
+    editor puts it in a section of its own; inside a row of the creator's own
+    list it is one thing among several in a card that already names the Story,
+    and a heading there would announce it twice.
+  -->
+  <div class="storytime-policy-acceptance">
     <div class="storytime-panel">
       @if (errorMessage) {
         <app-lcars-error-message
@@ -27,16 +21,25 @@
         }
       </p>
 
-      <p class="storytime-policy-acceptance__links">
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']">
-          Content Policy </a
-        >·
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'terms']"> Terms of Use </a
-        >·
-        <a [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']">
-          Fan Content &amp; IP Notice
-        </a>
-      </p>
+      <nav
+        class="storytime-policy-acceptance__links"
+        aria-label="Storytime publishing documents">
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="['/', appRoutes.STORYTIME, 'content-policy']"
+          >Content Policy</a
+        >
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="['/', appRoutes.STORYTIME, 'terms']"
+          >Terms of Use</a
+        >
+        <a
+          class="lcars-btn lcars-btn-auto"
+          [routerLink]="['/', appRoutes.STORYTIME, 'fan-content']"
+          >Fan Content &amp; IP Notice</a
+        >
+      </nav>
 
       <p>By confirming, you are stating that:</p>
       <ul class="lcars-list">
@@ -54,5 +57,5 @@
         </button>
       </div>
     </div>
-  </section>
+  </div>
 }

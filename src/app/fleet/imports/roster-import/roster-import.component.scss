@@ -1,0 +1,173 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.roster-import__fleet,
+.roster-import__intro,
+.roster-import__hint {
+  margin: 1rem 0;
+}
+
+// Quieter than the copy around it: it explains a control rather than saying
+// anything a reader has to act on.
+.roster-import__hint {
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+// The file and the clock it was taken on sit side by side on a wide screen
+// and stack on a narrow one. A row laid out by the shared
+// `.lcars-field-columns` grid, two to a row, keeps only the margin here.
+.roster-import__form .form-row {
+  margin-bottom: 1rem;
+
+  &:not(.lcars-field-columns) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    align-items: flex-end;
+  }
+}
+
+// Each part of the check is a section the reader can fold away; the host is
+// an element of its own, so it is laid out as a block for its margin to tell.
+.roster-import__section {
+  display: block;
+  margin-top: 2rem;
+}
+
+// The two moments a stamp can name are the same wall-clock time, so each is
+// given a line of its own rather than being run together.
+.roster-import__moments {
+  margin: 1rem 0;
+  padding: 0;
+  border: 0;
+
+  legend {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+}
+
+.roster-import__moment,
+.roster-import__confirm {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.25rem 0;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+
+  // The global input rule is written for text boxes: full width and padded.
+  // A radio under it takes the whole row and pushes its label away.
+  input {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin: 0;
+    flex: none;
+  }
+}
+
+.roster-import__earlier {
+  margin: 1rem 0;
+}
+
+// Label and value in two columns on a wide screen, stacked on a narrow one.
+// `auto` rather than a fraction so a long value takes the room it needs
+// instead of wrapping beside a mostly empty label column.
+.roster-import__facts {
+  display: grid;
+
+  // The value column may shrink below its longest word: a timestamp read as
+  // UTC is one unbroken string, and held the card wider than a phone.
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  margin: 1rem 0;
+
+  dt {
+    font-weight: 600;
+    opacity: 0.8;
+  }
+
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+  }
+}
+
+// The instant a date was read as, beneath the local time the file wrote. On
+// its own line because the two are the same length and the whole point is
+// that they differ.
+.roster-import__instant {
+  display: block;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+.roster-import__problems {
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid vars.$white-a15;
+  }
+}
+
+.roster-import__line {
+  font-weight: 700;
+  color: vars.$lcars-red;
+}
+
+.roster-import__column {
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.roster-import__sample {
+  margin: 1rem 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+
+  // One column at phone width, two where there is room. The rows are read
+  // one at a time rather than compared down a column, so nothing is lost by
+  // letting them wrap.
+  // Never wider than the list itself, which a phone's column is not.
+  grid-template-columns: repeat(auto-fill, minmax(min(20rem, 100%), 1fr));
+}
+
+.roster-import__row {
+  padding: 0.75rem 1rem;
+  border-left: 4px solid var(--lcars-accent, #{vars.$lcars-sky});
+  background: vars.$white-a5;
+}
+
+.roster-import__member {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: baseline;
+  margin: 0;
+}
+
+.roster-import__name {
+  font-weight: 700;
+
+  // The game lets a name carry an edge space, and that space may be the only
+  // thing telling two members apart. Preserved so it is visible here.
+  white-space: pre-wrap;
+}
+
+.roster-import__handle {
+  font-size: 0.9rem;
+  opacity: 0.75;
+}

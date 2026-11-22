@@ -26,6 +26,7 @@ import { RD_UNLOCK_LEVEL } from '../models/character-rd.model';
 import { REPUTATION_UNLOCK_LEVEL } from '../models/character-reputation.model';
 import { SPECIALIZATION_UNLOCK_LEVEL } from '../models/character-specialization.model';
 import { CharacterOverviewService } from '../services/character-overview.service';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 /** One tracker's card: where it leads, what it is called, how far along. */
 export interface CharacterOverviewCard {
@@ -102,7 +103,7 @@ const TRACKERS: readonly TrackerDefinition[] = [
   templateUrl: './character-overview-summary.component.html',
   styleUrls: ['./character-overview-summary.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [LoadingBarComponent],
+  imports: [CollapsibleSectionComponent, LoadingBarComponent],
 })
 export class CharacterOverviewSummaryComponent
   implements OnInit, OnChanges, OnDestroy

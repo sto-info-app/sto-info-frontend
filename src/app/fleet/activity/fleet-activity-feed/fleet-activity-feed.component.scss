@@ -1,0 +1,41 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.fleet-activity {
+  &__list {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+  }
+
+  &__item {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.75rem;
+    align-items: baseline;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid vars.$lcars-bluey;
+  }
+
+  &__when {
+    color: vars.$lcars-sky;
+    white-space: nowrap;
+  }
+
+  &__scope {
+    font-weight: 600;
+  }
+
+  &__sentence {
+    flex: 1 1 16rem;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  &__problem {
+    color: vars.$lcars-red;
+  }
+}

@@ -33,9 +33,8 @@
     }
   }
 
+  // A row of pills that rotates, set to the form's right-hand edge.
   .form-actions {
-    display: flex;
-    gap: 1rem;
     margin-top: 1rem;
     justify-content: flex-end;
   }

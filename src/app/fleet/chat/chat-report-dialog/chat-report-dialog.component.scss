@@ -1,0 +1,20 @@
+@use 'lcars-variables' as vars;
+
+#chat-report-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  min-width: min(28rem, 90vw);
+
+  [mat-dialog-content] {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+}
+
+.chat-report-dialog__intro {
+  margin: 0;
+  color: vars.$white-a84;
+  line-height: 1.5;
+}

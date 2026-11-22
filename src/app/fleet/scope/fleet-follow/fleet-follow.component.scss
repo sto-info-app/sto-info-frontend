@@ -1,0 +1,28 @@
+@use 'lcars-variables' as vars;
+
+// The panel card draws the box; these are the lines inside it.
+.fleet-follow {
+  &__standing {
+    margin: 0 0 0.35rem;
+    font-weight: 600;
+  }
+
+  &__count {
+    margin: 0 0 0.6rem;
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  &__hint,
+  &__note {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    opacity: 0.8;
+  }
+
+  &__error {
+    margin: 0.5rem 0 0;
+    font-size: 0.85rem;
+    color: vars.$lcars-tangerine;
+  }
+}

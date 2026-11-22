@@ -1,7 +1,8 @@
 @use 'lcars-tabs' as tabs;
 
-// A narrower minimum than the default: the community strip carries up to six
-// tabs, so they are sized by their labels rather than padded out to match.
+// A narrower minimum than the default: the community strip carries up to
+// seven tabs, so they are sized by their labels rather than padded out to
+// match.
 @include tabs.lcars-tab-strip($min-width: 0);
 
 :host {

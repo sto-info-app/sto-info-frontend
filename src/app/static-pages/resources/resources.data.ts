@@ -116,6 +116,11 @@ export const RESOURCE_LINKS: ResourceSection[] = [
         url: 'https://sto-league.com/',
         description: 'DPS league charts and combat log analysis tools',
       },
+      {
+        label: 'STO Keybind Tool',
+        url: 'https://keybind.sto-tools.org/',
+        description: 'Build keybind files for Star Trek Online',
+      },
     ],
   },
   {

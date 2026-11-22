@@ -15,6 +15,7 @@ import {
   ENDEAVOUR_STAT_TILES,
   STAT_TILES,
 } from './stats.constants';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
 // Re-export for consumers that import these types from this file.
 export type { CountItem, StatsData, StatTile } from './stats.models';
@@ -29,6 +30,7 @@ export type { CountItem, StatsData, StatTile } from './stats.models';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    CollapsibleSectionComponent,
     CommonModule,
     RouterModule,
     LoadingBarComponent,
@@ -48,25 +50,6 @@ export class StatsComponent extends StatsBaseComponent implements OnInit {
   readonly accountStatTiles = ACCOUNT_STAT_TILES;
   readonly statTiles = STAT_TILES;
   readonly endeavourStatTiles = ENDEAVOUR_STAT_TILES;
-
-  accountBreakdownsExpanded = true;
-  characterBreakdownsExpanded = true;
-  endeavoursExpanded = true;
-
-  toggleAccountBreakdowns(): void {
-    this.accountBreakdownsExpanded = !this.accountBreakdownsExpanded;
-    this._cdr.markForCheck();
-  }
-
-  toggleCharacterBreakdowns(): void {
-    this.characterBreakdownsExpanded = !this.characterBreakdownsExpanded;
-    this._cdr.markForCheck();
-  }
-
-  toggleEndeavours(): void {
-    this.endeavoursExpanded = !this.endeavoursExpanded;
-    this._cdr.markForCheck();
-  }
 
   ngOnInit(): void {
     this.loadAccounts();

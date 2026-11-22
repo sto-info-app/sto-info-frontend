@@ -19,6 +19,7 @@ import {
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   ChapterAppearance,
   ChapterMedia,
@@ -70,6 +71,7 @@ import { StorytimeImageSlot } from '../../storytime-image.constants';
     MarkdownFieldComponent,
     EditorActionsComponent,
     ImageManagerComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class ChapterEditorComponent implements OnInit {

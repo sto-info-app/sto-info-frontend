@@ -1,0 +1,277 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Loading holds"></app-loading-bar>
+}
+
+<div
+  id="moderation-hold-page"
+  class="admin-layout">
+  <div class="admin-content admin-main-column">
+    <h1>Moderation Holds</h1>
+    <app-help-link
+      slug="site-admin-reports-and-holds"
+      label="Help with moderation holds" />
+    <p class="admin-page-intro">
+      Evidence kept past its ordinary deletion: a chat report's, or everything
+      one member wrote in chat. Each has a reason, an owner and a review date;
+      each reading asks why, and is logged. Nobody else sees what a hold keeps.
+    </p>
+
+    @if (errorMessage(); as error) {
+      <app-lcars-error-message
+        title="Action failed"
+        [message]="error"></app-lcars-error-message>
+    }
+
+    @if (successMessage(); as success) {
+      <app-lcars-success-message
+        title="Acknowledged"
+        [message]="success"></app-lcars-success-message>
+    }
+
+    <app-collapsible-section
+      heading="Holds"
+      barClass="small-lcars-bar-gap">
+      <app-lcars-panel
+        heading="Filters"
+        [collapsible]="true">
+        <div class="admin-fields lcars-rotate">
+          <div class="lcars-select-container">
+            <label
+              class="select-label"
+              for="hold-filter"
+              >Show</label
+            >
+            <select
+              id="hold-filter"
+              title="Show"
+              (change)="setFilter($any($event.target).value)">
+              @for (option of filters; track option.value) {
+                <option
+                  [value]="option.value"
+                  [selected]="option.value === filter()">
+                  {{ option.label }}
+                </option>
+              }
+            </select>
+          </div>
+        </div>
+      </app-lcars-panel>
+
+      @if (!isLoading() && holds().length === 0) {
+        <p class="records-empty">No holds match this filter.</p>
+      }
+
+      <div class="admin-records">
+        @for (hold of holds(); track hold.id) {
+          <article class="admin-record-card">
+            <header class="admin-record-header">
+              <div class="admin-record-title">
+                <strong>{{ nameOf(hold.subject) }}</strong>
+                <span>{{ kindLabels[hold.kind] }}</span>
+              </div>
+              <div class="admin-record-meta">
+                @if (hold.releasedAt) {
+                  <span class="status-pill draft">Released</span>
+                } @else if (hold.reviewDue) {
+                  <span class="status-pill warning">Review due</span>
+                } @else {
+                  <span class="status-pill success">In force</span>
+                }
+              </div>
+            </header>
+
+            <div class="admin-record-body">
+              <div class="moderation-record-main">
+                <p class="admin-record-summary">{{ hold.reason }}</p>
+                <dl class="admin-record-details">
+                  <div class="admin-record-detail">
+                    <dt class="label">Owner</dt>
+                    <dd class="value">{{ nameOf(hold.owner) }}</dd>
+                  </div>
+                  <div class="admin-record-detail">
+                    <dt class="label">Placed</dt>
+                    <dd class="value">{{
+                      hold.createdAt | appDate: 'medium'
+                    }}</dd>
+                  </div>
+                  <div class="admin-record-detail">
+                    <dt class="label">Review</dt>
+                    <dd class="value">{{
+                      hold.reviewAt | appDate: 'mediumDate'
+                    }}</dd>
+                  </div>
+                  @if (hold.releasesAt) {
+                    <div class="admin-record-detail">
+                      <dt class="label">Released automatically</dt>
+                      <dd class="value"
+                        >{{ hold.releasesAt | appDate: 'mediumDate' }}, unless
+                        extended</dd
+                      >
+                    </div>
+                  }
+                  @if (hold.releasedAt) {
+                    <div class="admin-record-detail">
+                      <dt class="label">Released</dt>
+                      <dd class="value">
+                        {{ hold.releasedAt | appDate: 'medium' }}
+                        @if (hold.releasedBy) {
+                          by {{ nameOf(hold.releasedBy) }}
+                        }
+                        — {{ hold.releaseReason }}
+                      </dd>
+                    </div>
+                  }
+                </dl>
+
+                @if (readings().get(hold.id); as reading) {
+                  <div class="chat-report-evidence">
+                    <div class="lcars-text-bar small-lcars-bar-gap">
+                      <span>What it keeps, newest first</span>
+                    </div>
+                    <p class="moderation-no-details">
+                      Read for: {{ reading.purpose }}
+                    </p>
+                    <ol class="chat-report-evidence__messages">
+                      @for (held of reading.messages; track held.id) {
+                        <li class="chat-report-evidence__message">
+                          <span class="chat-report-evidence__meta">
+                            {{ held.sentAt | appDate: 'medium' }} ·
+                            {{ placeOf(held) }} ·
+                            {{ nameOf(held.author) }}
+                            @if (held.deleted) {
+                              · Deleted
+                            }
+                          </span>
+                          @if (held.body !== null) {
+                            <span class="chat-report-evidence__body">{{
+                              held.body
+                            }}</span>
+                          } @else {
+                            <span class="moderation-no-details"
+                              >Deleted before it was reported</span
+                            >
+                          }
+                        </li>
+                      } @empty {
+                        <li class="moderation-no-details">
+                          Nothing is kept any more.
+                        </li>
+                      }
+                    </ol>
+                    <div class="admin-form-actions lcars-rotate">
+                      @if (reading.before) {
+                        <button
+                          type="button"
+                          class="lcars-btn"
+                          (click)="readEarlier(hold)">
+                          Earlier
+                        </button>
+                      }
+                      <button
+                        type="button"
+                        class="lcars-btn"
+                        (click)="closeReading(hold)">
+                        Put away
+                      </button>
+                    </div>
+                  </div>
+                }
+
+                @if (details().get(hold.id); as detail) {
+                  <div class="chat-report-evidence">
+                    <div class="lcars-text-bar small-lcars-bar-gap">
+                      <span>Its log</span>
+                    </div>
+                    <ol class="chat-report-evidence__messages">
+                      @for (entry of detail.actions; track $index) {
+                        <li class="chat-report-evidence__message">
+                          <span class="chat-report-evidence__meta">
+                            {{ entry.createdAt | appDate: 'medium' }} ·
+                            {{ actionLabels[entry.action] }}
+                            @if (entry.automatic) {
+                              (automatic)
+                            } @else {
+                              by {{ nameOf(entry.actor) }}
+                            }
+                          </span>
+                          <span class="chat-report-evidence__body">{{
+                            entry.reason
+                          }}</span>
+                        </li>
+                      }
+                    </ol>
+                  </div>
+                }
+              </div>
+
+              <div class="admin-record-actions moderation-record-actions">
+                <button
+                  type="button"
+                  class="cta-icon"
+                  title="Read what it keeps"
+                  aria-label="Read what it keeps"
+                  (click)="read(hold)">
+                  <i class="fas fa-eye"></i>
+                </button>
+                <button
+                  type="button"
+                  class="cta-icon"
+                  [attr.aria-expanded]="details().has(hold.id)"
+                  [title]="
+                    details().has(hold.id) ? 'Hide its log' : 'Show its log'
+                  "
+                  [attr.aria-label]="
+                    details().has(hold.id) ? 'Hide its log' : 'Show its log'
+                  "
+                  (click)="toggleLog(hold)">
+                  <i class="fas fa-file-lines"></i>
+                </button>
+                @if (!hold.releasedAt) {
+                  <button
+                    type="button"
+                    class="cta-icon approve-icon"
+                    title="Extend"
+                    aria-label="Extend"
+                    (click)="extend(hold)">
+                    <i class="fas fa-clock"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="cta-icon delete-icon"
+                    title="Release"
+                    aria-label="Release"
+                    (click)="release(hold)">
+                    <i class="fas fa-unlock"></i>
+                  </button>
+                }
+              </div>
+            </div>
+          </article>
+        }
+      </div>
+    </app-collapsible-section>
+  </div>
+
+  <div class="admin-side-column col">
+    <div class="lcars-text-bar small-lcars-bar-gap">
+      <span>Navigation</span>
+    </div>
+    <div class="buttons">
+      <a
+        class="full-width-btn-link"
+        [routerLink]="'/' + appRoutes.ADMIN_CHAT_REPORTS"
+        >Chat reports</a
+      >
+      <a
+        class="full-width-btn-link"
+        [routerLink]="'/' + appRoutes.ADMIN_REPORTS"
+        >Reported officers</a
+      >
+      <a
+        class="full-width-btn-link"
+        [routerLink]="'/' + appRoutes.ADMIN"
+        >Admin home</a
+      >
+    </div>
+  </div>
+</div>

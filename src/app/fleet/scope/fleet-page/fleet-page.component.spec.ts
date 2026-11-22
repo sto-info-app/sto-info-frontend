@@ -1,0 +1,794 @@
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ActivatedRoute,
+  convertToParamMap,
+  ParamMap,
+  Router,
+} from '@angular/router';
+
+import { BehaviorSubject, EMPTY, Observable, of } from 'rxjs';
+
+import { FleetReportService } from 'src/app/fleet/fleet-reports/fleet-report.service';
+import { FleetScopeService } from 'src/app/fleet/fleet-scope.service';
+import { FleetRecruitmentService } from 'src/app/fleet/recruitment/fleet-recruitment.service';
+import { FleetScopePageState } from 'src/app/fleet/scope/fleet-scope-page.models';
+import {
+  FleetAudience,
+  FleetRecruitmentState,
+  FleetScopeStatus,
+  FleetScopeRelationship,
+  FleetScopeViewer,
+  ResolvedStoFleet,
+  StoFleet,
+} from 'src/app/models/fleet.models';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { PageTitleService } from 'src/app/shared/services/page-title.service';
+
+import { FleetPageComponent } from './fleet-page.component';
+
+/**
+ * Builds a Fleet as the server would send it.
+ *
+ * @param overrides - Fields to override.
+ * @returns The Fleet.
+ */
+function fleet(overrides: Partial<StoFleet> = {}): StoFleet {
+  return {
+    id: 'fleet-1',
+    communityId: 'community-1',
+    platformId: 'platform-1',
+    platformName: 'PC',
+    platformSegment: 'pc',
+    platformProvidesRosterExport: true,
+    exactGameName: 'Starfleet Command ',
+    allegianceFactionId: null,
+    slug: 'starfleet-command',
+    recruitmentState: FleetRecruitmentState.OPEN,
+    visibility: FleetAudience.PUBLIC,
+    lastEffectiveImportAt: null,
+    status: FleetScopeStatus.ACTIVE,
+    closedAt: null,
+    bannerImageId: null,
+    bannerImageAlt: null,
+    bannerImageUrl: null,
+    emblemImageId: null,
+    emblemImageAlt: null,
+    emblemImageUrls: null,
+    revision: 1,
+    createdAt: '2026-01-02T03:04:05.000Z',
+    updatedAt: '2026-01-02T03:04:05.000Z',
+    ...overrides,
+  };
+}
+
+/** A viewer who may look and change nothing, which is most of them. */
+const READER: FleetScopeViewer = {
+  capabilities: [],
+  roles: [],
+  mayManageBanner: false,
+  mayManageEmblem: false,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
+};
+
+/** A viewer who may put a roster into the Fleet. */
+const ROSTER_IMPORTER: FleetScopeViewer = {
+  ...READER,
+  capabilities: ['roster.import'],
+};
+
+/** Somebody who may look into the Fleet's imports, and not make one. */
+const ROSTER_INVESTIGATOR: FleetScopeViewer = {
+  ...READER,
+  capabilities: ['roster.investigate'],
+};
+
+/** A viewer who may change the artwork. */
+const ARTWORK_KEEPER: FleetScopeViewer = {
+  capabilities: ['scope.images.manage'],
+  roles: [],
+  mayManageBanner: true,
+  mayManageEmblem: true,
+  relationship: FleetScopeRelationship.NONE,
+  isFollowingCommunity: false,
+  followerCount: 0,
+};
+
+/**
+ * Builds the server's answer for a Fleet address.
+ *
+ * @param overrides - Fields to override.
+ * @returns The resolved Fleet.
+ */
+function resolved(overrides: Partial<ResolvedStoFleet> = {}): ResolvedStoFleet {
+  return {
+    fleet: fleet(),
+    communitySlug: 'united-federation-alliance',
+    communityName: 'United Federation Alliance',
+    platformSegment: 'pc',
+    redirected: false,
+    viewer: READER,
+    ...overrides,
+  };
+}
+
+describe('FleetPageComponent', () => {
+  let fixture: ComponentFixture<FleetPageComponent>;
+  let params$: BehaviorSubject<ParamMap>;
+  let scopes: { resolveFleet: jest.Mock };
+  let router: {
+    navigate: jest.Mock;
+    events: Observable<unknown>;
+    isActive: jest.Mock;
+    createUrlTree: jest.Mock;
+    serializeUrl: jest.Mock;
+  };
+
+  beforeEach(async () => {
+    params$ = new BehaviorSubject<ParamMap>(
+      convertToParamMap({
+        communitySlug: 'united-federation-alliance',
+        platformSegment: 'pc',
+        slug: 'starfleet-command',
+      }),
+    );
+    scopes = { resolveFleet: jest.fn(() => of(resolved())) };
+    // Enough of a Router for the tab strip's links to draw.
+    router = {
+      navigate: jest.fn(),
+      events: EMPTY,
+      isActive: jest.fn(() => false),
+      createUrlTree: jest.fn(() => ({})),
+      serializeUrl: jest.fn(() => '/'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [FleetPageComponent],
+      providers: [
+        { provide: FleetReportService, useValue: { visible: () => of([]) } },
+        { provide: FleetScopeService, useValue: scopes },
+        // The recruitment panel reads its own answer; its spec covers it.
+        { provide: FleetRecruitmentService, useValue: { view: () => EMPTY } },
+        { provide: Router, useValue: router },
+        { provide: ActivatedRoute, useValue: { paramMap: params$ } },
+        { provide: PageTitleService, useValue: { setTitle: jest.fn() } },
+      ],
+    })
+      .overrideComponent(FleetPageComponent, {
+        set: {
+          providers: [
+            {
+              provide: AppDatePipe,
+              useValue: { transform: (): string => '4 March 2015' },
+            },
+          ],
+        },
+      })
+      .compileComponents();
+  });
+
+  /**
+   * Renders the page.
+   */
+  function render(): void {
+    fixture = TestBed.createComponent(FleetPageComponent);
+    fixture.detectChanges();
+  }
+
+  /**
+   * Reads the state the page is in.
+   *
+   * @returns The state.
+   */
+  const state = (): FleetScopePageState => {
+    let current: FleetScopePageState | undefined;
+    fixture.componentInstance.state$.subscribe(value => (current = value));
+
+    return current as FleetScopePageState;
+  };
+
+  // One request for the whole address. Fetching the Community, then the
+  // platform, then the Fleet would show three loading states for one page.
+  it('resolves all three segments in one request', () => {
+    render();
+
+    expect(scopes.resolveFleet).toHaveBeenCalledWith(
+      'united-federation-alliance',
+      'pc',
+      'starfleet-command',
+    );
+  });
+
+  it('asks with empty segments when the address is incomplete', () => {
+    params$.next(convertToParamMap({}));
+
+    render();
+
+    expect(scopes.resolveFleet).toHaveBeenLastCalledWith('', '', '');
+  });
+
+  // A closed Fleet keeps its address and is still read there, so "it may have
+  // been closed" would be untrue. Absent and hidden are one answer, so which
+  // it is stays unsaid.
+  it('says there may be no such Fleet, or that it is not shown, never closed', () => {
+    render();
+
+    expect(fixture.componentInstance.missingMessage).toContain(
+      'There may be no such Fleet, or it may not be shown to you.',
+    );
+    expect(fixture.componentInstance.missingMessage).not.toContain('closed');
+  });
+
+  it('heads the page with the name the game holds, spaces and all', () => {
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.name).toBe(
+      'Starfleet Command ',
+    );
+  });
+
+  it('names the Community holding it, and links to it', () => {
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.communityName).toBe(
+      'United Federation Alliance',
+    );
+    expect(drawn.kind === 'READY' && drawn.header.communityLink).toEqual([
+      '/fleets',
+      'communities',
+      'united-federation-alliance',
+    ]);
+  });
+
+  // Anybody may register a Fleet and nothing proves they run it, so how
+  // fresh the record is leads the facts.
+  it('leads with when a roster was last imported', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(resolved({ fleet: fleet({ lastEffectiveImportAt: '2015-03-04Z' }) })),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts[0]).toEqual({
+      label: 'Roster last imported',
+      value: '4 March 2015',
+    });
+  });
+
+  it('says Never rather than leaving the freshness line off', () => {
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts[0]).toEqual({
+      label: 'Roster last imported',
+      value: 'Never',
+    });
+  });
+
+  /*
+   * “Never” and “could not possibly” look identical on the line a reader
+   * judges a record by, and only one of them is somebody's neglect.
+   */
+  it('says why a console Fleet has no roster instead of saying Never', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({
+            platformName: 'Xbox',
+            platformProvidesRosterExport: false,
+          }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts[0]).toEqual({
+      label: 'Roster last imported',
+      value: 'The game provides no roster export on Xbox',
+    });
+  });
+
+  /*
+   * A Fleet can carry a date from before it moved platform, or from a
+   * console that has since lost the facility. The platform is the reason
+   * there is nothing to show, so it answers first.
+   */
+  it('says so even where a date was recorded before', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({
+            platformName: 'PlayStation',
+            platformProvidesRosterExport: false,
+            lastEffectiveImportAt: '2015-03-04Z',
+          }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts[0]?.value).toBe(
+      'The game provides no roster export on PlayStation',
+    );
+  });
+
+  // FC-050: a Fleet's own members are its approved members, never a
+  // sibling Fleet's.
+  it('reads back "Fleet members" as the Fleet’s own members', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({ visibility: FleetAudience.FLEET_MEMBERS }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts).toContainEqual({
+      label: 'Visible to',
+      value: 'Approved members of the Fleet',
+    });
+  });
+
+  it('says when a closed Fleet was closed', () => {
+    scopes.resolveFleet.mockReturnValue(
+      of(
+        resolved({
+          fleet: fleet({
+            status: FleetScopeStatus.CLOSED,
+            closedAt: '2026-05-06T07:08:09.000Z',
+          }),
+        }),
+      ),
+    );
+
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.header.facts).toContainEqual({
+      label: 'Closed',
+      value: '4 March 2015',
+    });
+  });
+
+  it('shows no description, a Fleet having none of its own', () => {
+    render();
+
+    expect(state()).toEqual(
+      expect.objectContaining({ kind: 'READY', description: null }),
+    );
+  });
+
+  describe('a Fleet no Community has registered', () => {
+    beforeEach(() => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communitySlug: 'standalone',
+            communityName: null,
+          }),
+        ),
+      );
+    });
+
+    // The two things that make such a record different — nobody stands
+    // behind it, and nobody can correct it — are the two a reader would
+    // otherwise assume the opposite of.
+    it('says plainly that nobody here runs it', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.notice).toContain(
+        'No Community here has registered this Fleet',
+      );
+      expect(drawn.kind === 'READY' && drawn.notice).toContain(
+        'nobody can change or close it',
+      );
+    });
+
+    it('names no Community and offers nothing to open', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.header.communityName).toBeNull();
+      expect(drawn.kind === 'READY' && drawn.header.communityLink).toBeNull();
+    });
+
+    /*
+     * Its artwork is addressed outside the Community collection, because
+     * there is no Community to nest it under and the rule it is held to is
+     * a different one.
+     */
+    it('addresses its artwork as a record nobody registered', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communitySlug: 'standalone',
+            communityName: null,
+            viewer: ARTWORK_KEEPER,
+          }),
+        ),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'STANDALONE_FLEET',
+        fleetId: 'fleet-1',
+      });
+    });
+
+    it('keeps the reserved segment when it corrects the address', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communitySlug: 'standalone',
+            communityName: null,
+            redirected: true,
+          }),
+        ),
+      );
+
+      render();
+
+      expect(router.navigate).toHaveBeenCalledWith(
+        [
+          '/fleets',
+          'communities',
+          'standalone',
+          'fleets',
+          'pc',
+          'starfleet-command',
+        ],
+        { replaceUrl: true, queryParamsHandling: 'preserve' },
+      );
+    });
+  });
+
+  describe('its artwork', () => {
+    /*
+     * A page is read far more often than it is edited, so a row of buttons
+     * nobody can press would be the ordinary case rather than the exception.
+     */
+    it('offers nothing to somebody who may change nothing', () => {
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork).toBeNull();
+    });
+
+    it('addresses a registered Fleet inside its Community', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ARTWORK_KEEPER })),
+      );
+
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.artwork?.target).toEqual({
+        kind: 'FLEET',
+        communityId: 'community-1',
+        fleetId: 'fleet-1',
+      });
+      expect(drawn.kind === 'READY' && drawn.artwork?.scopeName).toBe(
+        'Starfleet Command ',
+      );
+    });
+
+    /*
+     * Reading the record again is what turns a published picture into one
+     * the page can draw: its delivery address only came into existence when
+     * the scan cleared.
+     */
+    it('asks for the record again when something changes', () => {
+      render();
+
+      fixture.componentInstance.state$.subscribe();
+      const before = scopes.resolveFleet.mock.calls.length;
+
+      fixture.componentInstance.reload();
+
+      expect(scopes.resolveFleet.mock.calls.length).toBeGreaterThan(before);
+    });
+  });
+
+  it('carries no notice for a Fleet a Community registered', () => {
+    render();
+
+    const drawn = state();
+
+    expect(drawn.kind === 'READY' && drawn.notice).toBeNull();
+  });
+
+  it('replaces the address when any segment of it is out of date', () => {
+    scopes.resolveFleet.mockReturnValue(of(resolved({ redirected: true })));
+
+    render();
+
+    expect(router.navigate).toHaveBeenCalledWith(
+      [
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'fleets',
+        'pc',
+        'starfleet-command',
+      ],
+      { replaceUrl: true, queryParamsHandling: 'preserve' },
+    );
+  });
+
+  it('leaves a current address alone', () => {
+    render();
+
+    expect(router.navigate).not.toHaveBeenCalled();
+  });
+
+  describe('following it', () => {
+    /*
+     * The subscription lives at the Community, so a Fleet page follows the
+     * Community that holds it. The sentence about standing still names the
+     * Fleet, because that is what the page is about.
+     */
+    it('follows the Community that holds the Fleet', () => {
+      render();
+
+      const drawn = state();
+
+      if (drawn.kind !== 'READY') {
+        throw new Error('expected a ready page');
+      }
+
+      expect(drawn.following?.communityId).toBe('community-1');
+      expect(drawn.following?.scopeNoun).toBe('Fleet');
+    });
+  });
+
+  describe('its section tabs', () => {
+    /**
+     * Reads the tab strip the page draws.
+     *
+     * @returns The strip's view model.
+     */
+    function tabs(): unknown {
+      const drawn = state();
+
+      return drawn.kind === 'READY' ? drawn.tabs : undefined;
+    }
+
+    it('draws the strip for a Fleet a Community holds, with what the reader may do', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_INVESTIGATOR })),
+      );
+      render();
+
+      expect(tabs()).toEqual({
+        communityId: 'community-1',
+        fleetId: 'fleet-1',
+        communitySlug: 'united-federation-alliance',
+        platformSegment: 'pc',
+        fleetSlug: 'starfleet-command',
+        providesRoster: true,
+        capabilities: ROSTER_INVESTIGATOR.capabilities,
+        roles: [],
+      });
+    });
+
+    // Nobody imports into it, so it has no roster to have sections about.
+    it('draws none for a Fleet no Community has registered', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communityName: null,
+          }),
+        ),
+      );
+      render();
+
+      expect(tabs()).toBeNull();
+    });
+
+    // A console Fleet still recruits, so it keeps a strip for that (FC-021).
+    it('draws one with no roster on a platform the game exports none from', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ platformProvidesRosterExport: false }),
+          }),
+        ),
+      );
+      render();
+
+      expect(tabs()).toEqual(
+        expect.objectContaining({ providesRoster: false }),
+      );
+    });
+  });
+
+  describe('its recruitment panel', () => {
+    /**
+     * Reads the recruitment panel the page draws.
+     *
+     * @returns The panel's view model.
+     */
+    function recruitment(): unknown {
+      const drawn = state();
+
+      return drawn.kind === 'READY' ? drawn.recruitment : undefined;
+    }
+
+    it('draws one for an active Fleet a Community holds', () => {
+      render();
+
+      expect(recruitment()).toEqual({
+        communityId: 'community-1',
+        fleetId: 'fleet-1',
+        fleetName: 'Starfleet Command ',
+        platformName: 'PC',
+        communitySlug: 'united-federation-alliance',
+        platformSegment: 'pc',
+        fleetSlug: 'starfleet-command',
+      });
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-fleet-recruitment-panel',
+        ),
+      ).not.toBeNull();
+    });
+
+    it('draws none for a Fleet no Community has registered', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communityName: null,
+          }),
+        ),
+      );
+      render();
+
+      expect(recruitment()).toBeNull();
+    });
+
+    it.each([FleetScopeStatus.CLOSED, FleetScopeStatus.SUSPENDED])(
+      'draws none for a Fleet that is %s',
+      status => {
+        scopes.resolveFleet.mockReturnValue(
+          of(resolved({ fleet: fleet({ status }) })),
+        );
+        render();
+
+        expect(recruitment()).toBeNull();
+      },
+    );
+  });
+
+  describe('checking a roster export', () => {
+    /**
+     * Reads the actions the page offers.
+     *
+     * @returns Their labels.
+     */
+    function actionLabels(): string[] {
+      const drawn = state();
+
+      if (drawn.kind !== 'READY') {
+        throw new Error('expected a ready page');
+      }
+
+      return drawn.actions.map(action => action.label);
+    }
+
+    it('offers the import to somebody who may import', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_IMPORTER })),
+      );
+      render();
+
+      expect(actionLabels()).toEqual(['Import a roster export']);
+    });
+
+    // FC-020: following the imports and deciding renames moved to the
+    // Investigate tab, so an investigator who does not import is offered
+    // nothing here.
+    it('leaves the imports and renames to the Investigate tab', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_INVESTIGATOR })),
+      );
+      render();
+
+      expect(actionLabels()).toEqual([]);
+    });
+
+    it('links to the page below the Fleet’s own address', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(resolved({ viewer: ROSTER_IMPORTER })),
+      );
+      render();
+
+      const drawn = state();
+
+      expect(drawn.kind === 'READY' && drawn.actions[0].link).toEqual([
+        '/fleets',
+        'communities',
+        'united-federation-alliance',
+        'fleets',
+        'pc',
+        'starfleet-command',
+        'import',
+      ]);
+    });
+
+    // Anybody may read a Fleet page, and most readers have no business
+    // importing anything. A control they cannot use tells them about a
+    // permission they did not ask about.
+    it('offers nothing to a reader who may not import', () => {
+      render();
+
+      expect(actionLabels()).toEqual([]);
+    });
+
+    // Nobody runs a Fleet no Community has registered, so there is nothing
+    // for a roster to be imported into.
+    it('offers nothing where no Community has registered the Fleet', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({ communityId: null }),
+            communityName: null,
+            viewer: ROSTER_IMPORTER,
+          }),
+        ),
+      );
+      render();
+
+      expect(actionLabels()).toEqual([]);
+    });
+
+    // The game writes no export on a console, so there is no file to check.
+    it('offers nothing on a platform the game exports no roster from', () => {
+      scopes.resolveFleet.mockReturnValue(
+        of(
+          resolved({
+            fleet: fleet({
+              platformProvidesRosterExport: false,
+              platformName: 'PlayStation',
+            }),
+            viewer: ROSTER_IMPORTER,
+          }),
+        ),
+      );
+      render();
+
+      expect(actionLabels()).toEqual([]);
+    });
+  });
+});

@@ -10,6 +10,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { finalize, switchMap } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   Arc,
   FollowTargetKind,
@@ -46,6 +47,7 @@ import { StorytimeTagRowComponent } from '../../shared/tag-row/tag-row.component
     LcarsErrorMessageComponent,
     FollowButtonComponent,
     StorytimeTagRowComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class CreatorPageComponent implements OnInit {

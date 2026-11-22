@@ -1,0 +1,44 @@
+@if (duplicates !== null) {
+  @if (duplicates.length === 0) {
+    <p class="scope-duplicate-warning__none">
+      Nothing else answers to that name on that platform.
+    </p>
+  } @else {
+    <div class="scope-duplicate-warning">
+      <p class="scope-duplicate-warning__lead">
+        {{ duplicates.length }}
+        {{ duplicates.length === 1 ? 'record' : 'records' }} already
+        {{ duplicates.length === 1 ? 'answers' : 'answer' }} to that name on
+        that platform. You can still register yours — nobody's record of
+        {{ scopeWithArticle }} is the authoritative one — but it is worth
+        checking that one of these is not already yours.
+      </p>
+
+      <ul class="scope-duplicate-warning__list">
+        @for (duplicate of duplicates; track duplicate.id) {
+          <li class="scope-duplicate-warning__item">
+            <span class="scope-duplicate-warning__name">
+              <app-fleet-exact-name [name]="duplicate.name" />
+            </span>
+
+            <span class="scope-duplicate-warning__held">
+              {{ duplicate.heldBy }} · {{ duplicate.platform }}
+            </span>
+
+            @if (duplicate.freshness) {
+              <span class="scope-duplicate-warning__freshness">
+                {{ duplicate.freshness }}
+              </span>
+            }
+
+            @if (duplicate.lifecycle) {
+              <span class="scope-duplicate-warning__lifecycle">
+                {{ duplicate.lifecycle }}
+              </span>
+            }
+          </li>
+        }
+      </ul>
+    </div>
+  }
+}

@@ -14,8 +14,9 @@ import {
   ReportStatus,
   UserReport,
 } from 'src/app/models/moderation.models';
-import { ConfirmDialogComponent } from 'src/app/shared/components/confirm-dialog/confirm-dialog.component';
+import { GovernanceReasonDialogComponent } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
+import { ModerationHoldAdminService } from './moderation-hold-admin.service';
 import { ReportAdminListComponent } from './report-admin-list.component';
 
 const REPORTED_ID = 'reported-1';
@@ -48,6 +49,7 @@ function buildReport(overrides: Partial<UserReport> = {}): UserReport {
     reviewedBy: null,
     reviewedAt: null,
     createdAt: '2026-08-01T00:00:00.000Z',
+    openChatReportCount: 0,
     ...overrides,
   };
 }
@@ -76,15 +78,18 @@ describe('ReportAdminListComponent', () => {
     >
   >;
   let dialogSpy: jest.Mocked<MatDialog>;
+  let holds: { place: jest.Mock };
 
   /**
-   * Stubs the confirm dialog to close with the given result.
+   * Stubs the reason dialog to close with a reason, or with none (FC-039).
    *
-   * @param confirmed - Whether the administrator confirmed.
+   * @param confirmed - Whether the administrator gave a reason.
    */
   const stubDialog = (confirmed: boolean): void => {
     dialogSpy.open.mockReturnValue({
-      afterClosed: jest.fn().mockReturnValue(of(confirmed)),
+      afterClosed: jest
+        .fn()
+        .mockReturnValue(of(confirmed ? 'Spamming' : undefined)),
     } as unknown as MatDialogRef<unknown>);
   };
 
@@ -112,12 +117,14 @@ describe('ReportAdminListComponent', () => {
     };
 
     dialogSpy = { open: jest.fn() } as unknown as jest.Mocked<MatDialog>;
+    holds = { place: jest.fn(() => of({})) };
 
     await TestBed.configureTestingModule({
       imports: [ReportAdminListComponent, HttpClientTestingModule],
       providers: [
         provideRouter([]),
         { provide: ModerationService, useValue: serviceSpy },
+        { provide: ModerationHoldAdminService, useValue: holds },
       ],
     })
       .overrideComponent(ReportAdminListComponent, {
@@ -251,28 +258,42 @@ describe('ReportAdminListComponent', () => {
     expect(component.successMessage).toContain('under review');
   });
 
-  it('closes a report as actioned', () => {
+  it('closes a report as actioned once a reason is given', () => {
     fixture.detectChanges();
+    stubDialog(true);
 
     component.markActioned(buildReport());
 
     expect(serviceSpy.updateReport).toHaveBeenCalledWith('report-1', {
       status: ReportStatus.ACTIONED,
+      reason: 'Spamming',
     });
   });
 
-  it('dismisses a report after confirmation', () => {
+  it('does not close a report as actioned without a reason', () => {
+    fixture.detectChanges();
+    stubDialog(false);
+
+    component.markActioned(buildReport());
+
+    expect(serviceSpy.updateReport).not.toHaveBeenCalled();
+  });
+
+  it('dismisses a report once a reason is given', () => {
     fixture.detectChanges();
     stubDialog(true);
 
     component.dismiss(buildReport());
 
     expect(dialogSpy.open).toHaveBeenCalledWith(
-      ConfirmDialogComponent,
-      expect.anything(),
+      GovernanceReasonDialogComponent,
+      expect.objectContaining({
+        data: expect.objectContaining({ label: 'Reason', max: 500 }),
+      }),
     );
     expect(serviceSpy.updateReport).toHaveBeenCalledWith('report-1', {
       status: ReportStatus.DISMISSED,
+      reason: 'Spamming',
     });
   });
 
@@ -291,7 +312,7 @@ describe('ReportAdminListComponent', () => {
       throwError(() => ({ status: 500 })),
     );
 
-    component.markActioned(buildReport());
+    component.claim(buildReport());
 
     expect(component.errorMessage).toBe('Failed to update that report.');
   });
@@ -303,7 +324,9 @@ describe('ReportAdminListComponent', () => {
 
     component.disableReported(buildReport());
 
-    expect(serviceSpy.disableUser).toHaveBeenCalledWith(REPORTED_ID);
+    expect(serviceSpy.disableUser).toHaveBeenCalledWith(REPORTED_ID, {
+      reason: 'Spamming',
+    });
     expect(serviceSpy.getReports).toHaveBeenCalled();
     expect(component.successMessage).toContain('disabled');
   });
@@ -344,7 +367,7 @@ describe('ReportAdminListComponent', () => {
       }),
     );
 
-    expect(serviceSpy.enableUser).toHaveBeenCalledWith(REPORTED_ID);
+    expect(serviceSpy.enableUser).toHaveBeenCalledWith(REPORTED_ID, 'Spamming');
     expect(component.successMessage).toContain('restored');
   });
 
@@ -459,6 +482,79 @@ describe('ReportAdminListComponent', () => {
     fixture.detectChanges();
 
     expect(fixture.nativeElement.textContent).toContain('Disabled');
+  });
+
+  describe('linked queues and holds (FC-036)', () => {
+    /**
+     * Stubs the reason dialog to close with the given answer.
+     *
+     * @param answer - The reason, or undefined when cancelled.
+     */
+    const stubReason = (answer: string | undefined): void => {
+      dialogSpy.open.mockReturnValue({
+        afterClosed: jest.fn().mockReturnValue(of(answer)),
+      } as unknown as MatDialogRef<unknown>);
+    };
+
+    it('links to the open chat reports about the reported member', () => {
+      serviceSpy.getReports.mockReturnValue(
+        of(
+          buildPage([
+            buildReport({ openChatReportCount: 2 }),
+            buildReport({ id: 'report-2', openChatReportCount: 1 }),
+          ]),
+        ),
+      );
+      fixture.detectChanges();
+
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+
+      expect(text).toContain('2 open chat reports');
+      expect(text).toContain('1 open chat report ');
+    });
+
+    it('holds the reported member’s chat messages with a reason', () => {
+      fixture.detectChanges();
+
+      stubReason(undefined);
+      component.holdMessages(buildReport());
+      expect(holds.place).not.toHaveBeenCalled();
+
+      stubReason('Harassment case');
+      component.holdMessages(buildReport());
+
+      expect(dialogSpy.open).toHaveBeenLastCalledWith(
+        GovernanceReasonDialogComponent,
+        expect.objectContaining({
+          data: expect.objectContaining({ title: 'Hold reported’s messages' }),
+        }),
+      );
+      expect(holds.place).toHaveBeenCalledWith({
+        kind: 'MEMBER_MESSAGES',
+        subjectUserId: REPORTED_ID,
+        reason: 'Harassment case',
+      });
+      expect(component.successMessage).toBe('reported’s messages are held.');
+    });
+
+    it('says why the messages could not be held', () => {
+      fixture.detectChanges();
+      stubReason('Case');
+
+      holds.place.mockReturnValue(
+        throwError(() => ({
+          error: { message: 'A hold on that is already in force.' },
+        })),
+      );
+      component.holdMessages(buildReport());
+      expect(component.errorMessage).toBe(
+        'A hold on that is already in force.',
+      );
+
+      holds.place.mockReturnValue(throwError(() => ({})));
+      component.holdMessages(buildReport());
+      expect(component.errorMessage).toBe('Their messages could not be held.');
+    });
   });
 
   it('reports an empty queue', () => {

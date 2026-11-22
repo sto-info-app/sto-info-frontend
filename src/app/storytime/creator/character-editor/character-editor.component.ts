@@ -18,6 +18,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
+import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   CharacterRequest,
   ManagedCharacter,
@@ -57,6 +58,7 @@ export const MAX_CHARACTER_TRAITS = 20;
     MarkdownFieldComponent,
     EditorActionsComponent,
     ImageManagerComponent,
+    CollapsibleSectionComponent,
   ],
 })
 export class CharacterEditorComponent implements OnInit {

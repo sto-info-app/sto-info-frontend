@@ -1,0 +1,15 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+.import-rows__notice {
+  color: vars.$lcars-green;
+}
+
+// Said in words as well as dimmed, since dimming alone tells some readers
+// nothing.
+.import-rows__excluded {
+  opacity: 0.6;
+}

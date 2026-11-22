@@ -4,6 +4,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of, throwError } from 'rxjs';
 import { MSG_ERROR_HTTP_STATUS_0_DISPLAY_TEXT } from 'src/app/shared/constants/error-messages.constants';
+import { AssetScanService } from 'src/app/shared/services/asset-scan.service';
 import { StorytimeImageSlot } from '../../storytime-image.constants';
 import { StorytimeImageService } from '../../storytime-image.service';
 import {
@@ -15,7 +16,12 @@ describe('StorytimeImageCropDialogComponent', () => {
   let fixture: ComponentFixture<StorytimeImageCropDialogComponent>;
   let component: StorytimeImageCropDialogComponent;
   let dialogRef: { close: jest.Mock };
-  let imageService: { upload: jest.Mock; remove: jest.Mock };
+  let imageService: {
+    upload: jest.Mock;
+    remove: jest.Mock;
+    reload: jest.Mock;
+  };
+  let assetScan: { watch: jest.Mock };
 
   const updatedWork = { id: 'work-1' };
 
@@ -66,8 +72,18 @@ describe('StorytimeImageCropDialogComponent', () => {
   beforeEach(() => {
     dialogRef = { close: jest.fn() };
     imageService = {
-      upload: jest.fn().mockReturnValue(of(updatedWork)),
+      upload: jest
+        .fn()
+        .mockReturnValue(of({ assetId: 'asset-1', status: 'SCANNING' })),
       remove: jest.fn(),
+      reload: jest.fn().mockReturnValue(of(updatedWork)),
+    };
+    assetScan = {
+      watch: jest
+        .fn()
+        .mockReturnValue(
+          of({ state: 'AVAILABLE', settled: true, gaveUp: false }),
+        ),
     };
 
     TestBed.configureTestingModule({
@@ -75,6 +91,7 @@ describe('StorytimeImageCropDialogComponent', () => {
       providers: [
         { provide: MatDialogRef, useValue: dialogRef },
         { provide: StorytimeImageService, useValue: imageService },
+        { provide: AssetScanService, useValue: assetScan },
         { provide: MAT_DIALOG_DATA, useValue: {} },
       ],
       schemas: [NO_ERRORS_SCHEMA],
@@ -149,7 +166,7 @@ describe('StorytimeImageCropDialogComponent', () => {
   });
 
   describe('uploading', () => {
-    it('sends the crop and its description, and closes with the work', () => {
+    it('sends the crop and its description, and waits for the scanner', () => {
       render();
       withCrop(2400, 480);
       component.altText = '  The USS Ares at warp  ';
@@ -162,9 +179,51 @@ describe('StorytimeImageCropDialogComponent', () => {
         component.croppedImageBlob,
         'The USS Ares at warp',
       );
-      // Closed with the work rather than with `true`, so the editor behind
-      // shows the picture the server actually stored.
+      expect(assetScan.watch).toHaveBeenCalledWith('asset-1', 'SCANNING');
+    });
+
+    // The address Cloudflare gave the picture came into existence when the
+    // scan cleared, so the work is fetched rather than guessed at.
+    it('fetches the work and closes with it once the picture is in use', () => {
+      render();
+      withCrop(2400, 480);
+      component.altText = 'A ship';
+
+      component.onUploadImageClick();
+
+      expect(imageService.reload).toHaveBeenCalledWith(
+        StorytimeImageSlot.STORY_BANNER,
+        'work-1',
+      );
       expect(dialogRef.close).toHaveBeenCalledWith(updatedWork);
+    });
+
+    // The picture is published either way, so the editor is told to reload
+    // rather than told the upload failed.
+    it('closes for a reload when the work cannot be fetched', () => {
+      render();
+      withCrop(2400, 480);
+      component.altText = 'A ship';
+      imageService.reload.mockReturnValue(throwError(() => ({ status: 500 })));
+
+      component.onUploadImageClick();
+
+      expect(dialogRef.close).toHaveBeenCalledWith(true);
+    });
+
+    it('stays open, showing the refusal, when the picture is rejected', () => {
+      render();
+      withCrop(2400, 480);
+      component.altText = 'A ship';
+      assetScan.watch.mockReturnValue(
+        of({ state: 'REJECTED', settled: true, gaveUp: false }),
+      );
+
+      component.onUploadImageClick();
+
+      expect(component.scanState).toBe('REJECTED');
+      expect(imageService.reload).not.toHaveBeenCalled();
+      expect(dialogRef.close).not.toHaveBeenCalled();
     });
 
     it('refuses a crop below the smallest the slot delivers', () => {

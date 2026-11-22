@@ -1,4 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ChatPresenceService } from 'src/app/fleet/chat/chat-presence.service';
+import { ChatService } from 'src/app/fleet/chat/chat.service';
+import { FleetConfigurationService } from 'src/app/shared/services/fleet-configuration.service';
 import { MatDialog } from '@angular/material/dialog';
 import {
   ActivatedRoute,
@@ -138,8 +141,15 @@ describe('FriendsPageComponent', () => {
    *
    * @param params - The initial query parameters.
    */
+  let online$: BehaviorSubject<ReadonlySet<string>>;
+  let chatSpy: { open: jest.Mock };
+  let chatEnabled: boolean;
+
   async function setup(params: Record<string, string> = {}) {
     queryParams = new BehaviorSubject(convertToParamMap(params));
+    online$ = new BehaviorSubject<ReadonlySet<string>>(new Set());
+    chatSpy = { open: jest.fn(() => of({ id: 'conversation-1' })) };
+    chatEnabled = false;
 
     communityServiceSpy = {
       getSummary: jest.fn(() => of(summary)),
@@ -165,6 +175,18 @@ describe('FriendsPageComponent', () => {
           provide: ActivatedRoute,
           useValue: { queryParamMap: queryParams.asObservable() },
         },
+        {
+          provide: ChatPresenceService,
+          useValue: { watch: jest.fn(() => online$) },
+        },
+        { provide: ChatService, useValue: chatSpy },
+        {
+          provide: FleetConfigurationService,
+          useValue: {
+            getFeatures: () => of({ chatEnabled }),
+            isOffered: () => of(true),
+          },
+        },
       ],
     }).compileComponents();
 
@@ -174,6 +196,75 @@ describe('FriendsPageComponent', () => {
     const router = TestBed.inject(Router);
     routerNavigateSpy = jest.spyOn(router, 'navigate').mockResolvedValue(true);
   }
+
+  describe('presence (FC-034)', () => {
+    it('marks a friend who is online, and unmarks them once they go', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      const username = component.friends[0].member.username;
+
+      online$.next(new Set([username]));
+      expect(component.friendVms[0].card.online).toBe(true);
+
+      online$.next(new Set());
+      expect(component.friendVms[0].card.online).toBe(false);
+    });
+
+    it('stops reading presence with the page, and when it reads the list again', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(online$.observed).toBe(true);
+      fixture.destroy();
+      expect(online$.observed).toBe(false);
+    });
+  });
+
+  // FC-033: chat with a friend from their card, while chat is switched on.
+  describe('chat', () => {
+    it('offers Chat on each friend while chat is on, and opens the conversation', async () => {
+      await setup();
+      chatEnabled = true;
+      fixture.detectChanges();
+
+      const friend = component.friends[0];
+
+      expect(component.friendVms[0].card.actions[0].label).toBe('Chat');
+
+      component.onMemberCardAction(friend, 'chat');
+
+      expect(chatSpy.open).toHaveBeenCalledWith({ friendshipId: friend.id });
+      expect(routerNavigateSpy).toHaveBeenCalledWith([
+        '/chat',
+        'direct',
+        'conversation-1',
+      ]);
+    });
+
+    it('offers no Chat while chat is off', async () => {
+      await setup();
+      fixture.detectChanges();
+
+      expect(
+        component.friendVms[0].card.actions.map(action => action.label),
+      ).toEqual(['Unfriend']);
+    });
+
+    it('says so when the conversation cannot be opened', async () => {
+      await setup();
+      chatEnabled = true;
+      chatSpy.open.mockReturnValue(throwError(() => new Error('down')));
+      fixture.detectChanges();
+
+      component.onMemberCardAction(component.friends[0], 'chat');
+
+      expect(component.errorMessage).toBe(
+        'The conversation could not be opened.',
+      );
+      expect(routerNavigateSpy).not.toHaveBeenCalled();
+    });
+  });
 
   describe('tab selection', () => {
     it('should default to the friends tab', async () => {
@@ -377,6 +468,25 @@ describe('FriendsPageComponent', () => {
       );
     });
 
+    // The pagination sits beneath a page of cards, each a row of its own.
+    it('should scroll back to the top of the friends on a page turn', async () => {
+      await setup();
+      queryParams.next(convertToParamMap({}));
+      fixture.detectChanges();
+      const scrollIntoView = jest.fn();
+      Element.prototype.scrollIntoView = scrollIntoView;
+
+      component.turnPage(2);
+
+      expect(communityServiceSpy.getFriends).toHaveBeenLastCalledWith(
+        expect.objectContaining({ page: 2 }),
+      );
+      expect(scrollIntoView).toHaveBeenCalledWith({ block: 'start' });
+      expect(
+        fixture.nativeElement.querySelector('#crew-manifest'),
+      ).not.toBeNull();
+    });
+
     it('should page through the friend list', async () => {
       await setup();
       communityServiceSpy.getFriends.mockReturnValue(
@@ -385,12 +495,12 @@ describe('FriendsPageComponent', () => {
       queryParams.next(convertToParamMap({}));
       fixture.detectChanges();
 
-      expect(component.totalPages).toBe(3);
+      expect(component.totalPages).toBe(6);
 
       component.loadPage(2);
 
       expect(communityServiceSpy.getFriends).toHaveBeenLastCalledWith(
-        expect.objectContaining({ page: 2 }),
+        expect.objectContaining({ page: 2, pageSize: 5 }),
       );
     });
   });
