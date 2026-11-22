@@ -98,6 +98,8 @@ We use [Stryker Mutator](https://stryker-mutator.io/) to measure the effectivene
 npm run test:mutation
 ```
 
+In CI the weekly full run is split into four shards that run in parallel, each keeping its results between weeks, and a final job merges them into one report. See [Weekly full run](docs/github/QUALITY-AUTOMATION.md#weekly-full-run) for how, and for running a single shard locally.
+
 **Incremental run (CI / local PRs):**
 
 This script analyse your Git history to only mutate files that have changed compared to the base branch (`development` or `production`), making the process significantly faster.

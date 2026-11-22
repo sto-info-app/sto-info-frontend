@@ -115,7 +115,7 @@ In GitHub Actions, most of these checks use **Smart Skip** logic. If your PR onl
 
 **Intentionally excluded (run separately when needed):**
 
-- Mutation testing: `npm run test:mutation` (very slow, 30+ minutes)
+- Mutation testing: `npm run test:mutation` (very slow: hours for the whole mutate set; CI splits it into shards, see [Weekly full run](github/QUALITY-AUTOMATION.md#weekly-full-run))
 - Incremental Mutation testing: `npm run test:mutation:incremental` (fast, CI-standard)
 - Lighthouse Audit: `npm run lighthouse` (Production build + Full audit)
 - Full fuzz tests: `npm run test:fuzz:full` (1000 iterations)

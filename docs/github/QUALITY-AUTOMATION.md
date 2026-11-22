@@ -27,12 +27,39 @@ SonarCloud acts as a final gatekeeper for code quality.
 
 ## Mutation Testing
 
-Property-based mutation testing measures the effectiveness of our unit tests by introducing deliberate faults (mutations) into the code.
+Mutation testing measures the effectiveness of our unit tests by introducing deliberate faults (mutations) into the code.
 
 - **Tool**: [Stryker Mutator](https://stryker-mutator.io/)
-- **Full Analysis**: Runs weekly on a schedule.
-- **Incremental Analysis**: Runs on every Pull Request to `development` or `production`. Only mutates files that have changed in the PR, providing fast quality feedback without the overhead of a full run.
-- **Reporting**: Full reports are available as workflow artifacts.
+- **Full Analysis**: Runs weekly on a schedule, split into shards. See [Weekly full run](#weekly-full-run).
+- **Incremental Analysis**: Runs on every pull request to `development` or an `epic/*` branch. Only mutates files that have changed in the PR, providing fast quality feedback without the overhead of a full run. A PR that changes more than 100 mutatable files (`MUTATION_MAX_FILES` in `mutation-testing-incremental.yml`) skips it and is left to the weekly run: a diff that wide is a full run in all but name and cannot finish inside the job's 240 minutes.
+- **Reporting**: Reports are available as workflow artifacts: `stryker-incremental-report` for a PR, and `stryker-full-report` (the merged HTML and JSON) for the weekly run.
+
+### Weekly full run
+
+`.github/workflows/mutation-testing.yml` runs every Sunday at midnight UTC, and can be started by hand from the Actions tab.
+
+**Why it is split.** A GitHub-hosted job is stopped at 6 hours, whatever its `timeout-minutes` says. As a single job the run took 4 to 5.6 hours for 16,724 mutants, and was cancelled at 6 hours one week in three. The Fleet Community merge takes the mutate set from ~265 to ~480 files (about 30,000 mutants, roughly 10 hours in one job).
+
+**How it is split.**
+
+- `scripts/mutation-shards.mjs` expands the `mutate` globs in `stryker.config.json` and puts each file in one of `SHARD_TOTAL` shards (4) by a hash of its path. A file stays in the same shard as other files are added or removed, so its saved results stay with it.
+- Each shard is a matrix job (`Full Mutation Analysis (shard N)`), with its own 6-hour limit and 16 GB runner. It runs Stryker on its files with `stryker.shard.config.mjs`, which is the base config without the `break` threshold, at `--concurrency 2` for the dry run's memory. From cold a shard takes about 2.5 to 3 hours. The Stryker step stops at 330 minutes, so the upload steps still run if it overruns.
+- The `Full Mutation Analysis` job then merges the shard reports into one `mutation.json` and `mutation.html`, writes the score and mutant counts to the run summary, and fails if a shard's report is missing or the combined score is below the `break` threshold (50%).
+
+**Incremental results.** Each shard runs Stryker with `--incremental` and keeps its results file (`reports/stryker-incremental/shard-N-of-T.json`) in the Actions cache. The next run re-tests only mutants whose source or covering tests changed, so a quiet week is quick. The cache is saved only when the shard's Stryker step succeeds. To test every mutant again, for example after changing mutators or Stryker's version, start the workflow by hand with **force** ticked.
+
+**Changing the shard count.** Change `SHARD_TOTAL` and the matrix's `shard` list together; a matrix cannot read `env`. The cache key includes the total, so every shard starts afresh and the next run is a cold one. Keep each shard comfortably under 330 minutes from cold.
+
+**Locally.**
+
+```bash
+npm run test:mutation:shard -- list 2 4   # files in shard 2 of 4
+npm run test:mutation:shard -- run 2 4    # run shard 2 of 4 (add --force to ignore saved results)
+npm run test:mutation:shard -- merge <dir with shard reports> reports/mutation 4
+npm run test:scripts                      # tests for the shard script
+```
+
+`scripts/mutation-shards.mjs` and its tests are the same in the backend and the frontend. Change them in both.
 
 ## Lighthouse
 
