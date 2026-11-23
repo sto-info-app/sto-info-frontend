@@ -126,6 +126,54 @@
         </div>
       </app-collapsible-section>
 
+      @if (isEdit) {
+        <app-collapsible-section
+          heading="Cover"
+          barClass="small-lcars-bar-gap">
+          <div class="admin-section-body news-admin-cover">
+            @if (coverError) {
+              <app-lcars-error-message
+                title="Cover"
+                [message]="coverError"></app-lcars-error-message>
+            }
+            @if (post) {
+              @if (cover; as shown) {
+                <img
+                  class="news-admin-cover__image"
+                  [src]="shown.url"
+                  [alt]="shown.alt" />
+              } @else {
+                <p class="news-admin-cover__hint">This post has no cover.</p>
+              }
+              <div class="buttons-row">
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto"
+                  (click)="onSetCover(post)">
+                  {{ post.coverImageId ? 'Replace the cover' : 'Set the cover' }}
+                </button>
+                @if (post.coverImageId) {
+                  <button
+                    type="button"
+                    class="lcars-btn lcars-btn-auto red"
+                    (click)="onRemoveCover(post)">
+                    Remove the cover
+                  </button>
+                }
+              </div>
+            }
+            <p class="news-admin-cover__hint">
+              A new cover is checked for safety before it appears. It heads the
+              post and is shown on its card in News and on the home page.
+            </p>
+          </div>
+        </app-collapsible-section>
+      } @else {
+        <p class="news-admin-cover__hint">
+          Save the post first; its cover can be added then.
+        </p>
+      }
+
       <div class="admin-form-actions">
         <button
           type="submit"

@@ -1,18 +1,60 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { NEVER, of, throwError } from 'rxjs';
 import { NewsCategory, NewsPost, NewsStatus } from 'src/app/models/news.models';
 import { NewsService } from 'src/app/news/news.service';
-import { NewsAdminFormComponent } from './news-admin-form.component';
+import {
+  NEWS_COVER_REMOVE_FAILED,
+  NewsAdminFormComponent,
+} from './news-admin-form.component';
+import { NewsCoverDialogComponent } from './news-cover-dialog/news-cover-dialog.component';
+
+/**
+ * A saved draft with no cover.
+ *
+ * @returns The post.
+ */
+const basePost = (): NewsPost => ({
+  id: '1',
+  slug: 's',
+  title: 'T',
+  summary: null,
+  body: 'b',
+  category: NewsCategory.GENERAL,
+  status: NewsStatus.DRAFT,
+  publishedAt: null,
+  authorId: null,
+  coverImageId: null,
+  coverImageAlt: null,
+  coverImageUrls: null,
+  createdAt: '',
+  updatedAt: '',
+});
+
+/** A post's cover, as the API hands it out. */
+const COVERED: Partial<NewsPost> = {
+  coverImageId: 'cover',
+  coverImageAlt: 'The new shipyard',
+  coverImageUrls: {
+    cover640x360: 'https://images.example/cover/cover640x360',
+    cover1920x1080: 'https://images.example/cover/cover1920x1080',
+  },
+};
 
 describe('NewsAdminFormComponent', () => {
   let component: NewsAdminFormComponent;
   let fixture: ComponentFixture<NewsAdminFormComponent>;
   let serviceSpy: jest.Mocked<
-    Pick<NewsService, 'getNewsByIdForAdmin' | 'createNews' | 'updateNews'>
+    Pick<
+      NewsService,
+      'getNewsByIdForAdmin' | 'createNews' | 'updateNews' | 'removeCover'
+    >
   >;
   let routeId: string | null;
+  let dialogAnswer: unknown;
+  let dialogSpy: { open: jest.Mock };
 
   beforeEach(() => {
     jest.useFakeTimers();
@@ -23,19 +65,7 @@ describe('NewsAdminFormComponent', () => {
   });
 
   const configure = async () => {
-    const post: NewsPost = {
-      id: '1',
-      slug: 's',
-      title: 'T',
-      summary: null,
-      body: 'b',
-      category: NewsCategory.GENERAL,
-      status: NewsStatus.DRAFT,
-      publishedAt: null,
-      authorId: null,
-      createdAt: '',
-      updatedAt: '',
-    };
+    const post = basePost();
 
     serviceSpy = {
       getNewsByIdForAdmin: jest.fn<
@@ -50,6 +80,14 @@ describe('NewsAdminFormComponent', () => {
         ReturnType<NewsService['updateNews']>,
         Parameters<NewsService['updateNews']>
       >(() => of(post)),
+      removeCover: jest.fn<
+        ReturnType<NewsService['removeCover']>,
+        Parameters<NewsService['removeCover']>
+      >(() => of(undefined)),
+    };
+    dialogAnswer = true;
+    dialogSpy = {
+      open: jest.fn(() => ({ afterClosed: () => of(dialogAnswer) })),
     };
 
     await TestBed.configureTestingModule({
@@ -57,6 +95,7 @@ describe('NewsAdminFormComponent', () => {
       providers: [
         provideRouter([]),
         { provide: NewsService, useValue: serviceSpy },
+        { provide: MatDialog, useValue: dialogSpy },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: { get: () => routeId } } },
@@ -68,13 +107,148 @@ describe('NewsAdminFormComponent', () => {
     component = fixture.componentInstance;
   };
 
-  it('creates a post in add mode', async () => {
+  it('creates a post in add mode, then opens it for its cover', async () => {
     routeId = null;
     await configure();
+    const navigateSpy = jest.spyOn(TestBed.inject(Router), 'navigate');
     fixture.detectChanges();
     component.form.patchValue({ title: 'New', body: 'Body' });
     component.save();
     expect(serviceSpy.createNews).toHaveBeenCalled();
+    expect(navigateSpy).toHaveBeenCalledWith(['/admin/news', '1', 'edit'], {
+      replaceUrl: true,
+    });
+  });
+
+  it('offers no cover until the post has been saved', async () => {
+    routeId = null;
+    await configure();
+    fixture.detectChanges();
+
+    const page: HTMLElement = fixture.nativeElement;
+    expect(page.textContent).toContain(
+      'Save the post first; its cover can be added then.',
+    );
+    expect(page.querySelector('.news-admin-cover')).toBeNull();
+  });
+
+  it('shows a saved post has no cover, and offers to set one', async () => {
+    routeId = '1';
+    await configure();
+    fixture.detectChanges();
+
+    const section: HTMLElement =
+      fixture.nativeElement.querySelector('.news-admin-cover');
+    expect(section.textContent).toContain('This post has no cover.');
+    const buttons = Array.from(section.querySelectorAll('button')).map(button =>
+      button.textContent?.trim(),
+    );
+    expect(buttons).toEqual(['Set the cover']);
+  });
+
+  it('shows the cover card-sized, with Replace and Remove', async () => {
+    routeId = '1';
+    await configure();
+    serviceSpy.getNewsByIdForAdmin.mockReturnValueOnce(
+      of({ ...basePost(), ...COVERED }),
+    );
+    fixture.detectChanges();
+
+    const section: HTMLElement =
+      fixture.nativeElement.querySelector('.news-admin-cover');
+    const image = section.querySelector('img');
+    expect(image?.getAttribute('src')).toBe(
+      'https://images.example/cover/cover640x360',
+    );
+    expect(image?.getAttribute('alt')).toBe('The new shipyard');
+    const buttons = Array.from(section.querySelectorAll('button')).map(button =>
+      button.textContent?.trim(),
+    );
+    expect(buttons).toEqual(['Replace the cover', 'Remove the cover']);
+  });
+
+  it('opens the cover dialogue for the post, and reads the cover again once it closes', async () => {
+    routeId = '1';
+    await configure();
+    fixture.detectChanges();
+    component.form.patchValue({ title: 'Typed but not saved' });
+    serviceSpy.getNewsByIdForAdmin.mockReturnValueOnce(
+      of({ ...basePost(), ...COVERED }),
+    );
+
+    const setButton: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '.news-admin-cover button',
+    );
+    setButton.click();
+    fixture.detectChanges();
+
+    expect(dialogSpy.open).toHaveBeenCalledWith(
+      NewsCoverDialogComponent,
+      expect.objectContaining({
+        data: { postId: '1', scopeName: 'T', currentAlt: null },
+      }),
+    );
+    expect(component.post?.coverImageId).toBe('cover');
+    // Reading the cover again leaves what has been typed alone.
+    expect(component.form.controls.title.value).toBe('Typed but not saved');
+  });
+
+  it('leaves the cover as it was when the dialogue is cancelled', async () => {
+    routeId = '1';
+    await configure();
+    fixture.detectChanges();
+    dialogAnswer = false;
+
+    component.onSetCover(component.post as NewsPost);
+
+    expect(serviceSpy.getNewsByIdForAdmin).toHaveBeenCalledTimes(1);
+  });
+
+  it('removes the cover once asked, then reads the post again', async () => {
+    routeId = '1';
+    await configure();
+    serviceSpy.getNewsByIdForAdmin.mockReturnValueOnce(
+      of({ ...basePost(), ...COVERED }),
+    );
+    fixture.detectChanges();
+
+    const removeButton: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '.news-admin-cover button.red',
+    );
+    removeButton.click();
+    fixture.detectChanges();
+
+    expect(serviceSpy.removeCover).toHaveBeenCalledWith('1');
+    expect(serviceSpy.getNewsByIdForAdmin).toHaveBeenCalledTimes(2);
+    expect(component.post?.coverImageId).toBeNull();
+  });
+
+  it('removes nothing when the removal is not confirmed', async () => {
+    routeId = '1';
+    await configure();
+    fixture.detectChanges();
+    dialogAnswer = false;
+
+    component.onRemoveCover(component.post as NewsPost);
+
+    expect(serviceSpy.removeCover).not.toHaveBeenCalled();
+  });
+
+  it('says so when the cover could not be removed', async () => {
+    routeId = '1';
+    await configure();
+    serviceSpy.removeCover.mockReturnValueOnce(
+      throwError(() => new Error('remove failed')),
+    );
+    fixture.detectChanges();
+
+    component.onRemoveCover(component.post as NewsPost);
+    fixture.detectChanges();
+
+    expect(component.coverError).toBe(NEWS_COVER_REMOVE_FAILED);
+    expect(fixture.nativeElement.textContent).toContain(
+      NEWS_COVER_REMOVE_FAILED,
+    );
   });
 
   it('loads and updates a post in edit mode', async () => {

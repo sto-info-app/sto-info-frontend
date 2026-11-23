@@ -197,6 +197,43 @@ describe('NewsService', () => {
     req.flush(null);
   });
 
+  it('uploads a cover with its description as multipart form data', () => {
+    const image = new Blob(['data'], { type: 'image/jpeg' });
+
+    service
+      .uploadCover('1', image, 'The new shipyard')
+      .subscribe(result =>
+        expect(result).toEqual({ assetId: 'asset-1', status: 'SCANNING' }),
+      );
+
+    const req = httpMock.expectOne(`${API_URLS.NEWS}/1/cover-image`);
+    expect(req.request.method).toBe('POST');
+    const body = req.request.body as FormData;
+    expect(body.get('altText')).toBe('The new shipyard');
+    expect((body.get('image') as File).name).toBe('cover-image.jpeg');
+    req.flush({ assetId: 'asset-1', status: 'SCANNING' });
+  });
+
+  it('removes a cover', () => {
+    service.removeCover('1').subscribe();
+    const req = httpMock.expectOne(`${API_URLS.NEWS}/1/cover-image`);
+    expect(req.request.method).toBe('DELETE');
+    req.flush(null);
+  });
+
+  it('errors without a token for the cover routes', () => {
+    authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(null);
+    const failures: unknown[] = [];
+
+    service
+      .uploadCover('1', new Blob(), 'A')
+      .subscribe({ error: err => failures.push(err) });
+    service.removeCover('1').subscribe({ error: err => failures.push(err) });
+
+    expect(failures).toHaveLength(2);
+    httpMock.expectNone(`${API_URLS.NEWS}/1/cover-image`);
+  });
+
   it('errors when no token for deleteNews', () => {
     authServiceSpy.getHttpOptionsWithAccessToken.mockReturnValue(null);
     service.deleteNews('1').subscribe({

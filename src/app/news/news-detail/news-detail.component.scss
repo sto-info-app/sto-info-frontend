@@ -21,6 +21,16 @@
     }
   }
 
+  // The cover heads the post (sc-1447), in the 16:9 it was cropped to.
+  .news-cover {
+    display: block;
+    width: 100%;
+    max-width: 60rem;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 0.75rem;
+  }
+
   h1 {
     margin: 0;
     color: var(--news-colour);

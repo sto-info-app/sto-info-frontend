@@ -61,6 +61,16 @@
     }
   }
 
+  // The cover, when there is one, across the card under its header
+  // (sc-1447), in the 16:9 it was cropped to.
+  .news-cover {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-bottom: 2px solid vars.$white-a10;
+  }
+
   .news-main-area {
     display: flex;
     align-items: stretch;

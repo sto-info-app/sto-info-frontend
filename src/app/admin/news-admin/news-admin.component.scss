@@ -59,6 +59,24 @@
   gap: 1rem;
 }
 
+// A post's cover on its edit page (sc-1447): card-sized, as News shows it.
+.news-admin-cover {
+  &__image {
+    display: block;
+    width: 100%;
+    max-width: 24rem;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 0.75rem;
+  }
+
+  &__hint {
+    margin: 0;
+    color: vars.$white-a76;
+    font-size: 0.9rem;
+  }
+}
+
 // A form's or a filter's fields, two to a line, taking successive colours of
 // the palette (`lcars-rotate` beside this class). One container rather than a
 // row per pair, because the rotation counts the fields themselves: a field

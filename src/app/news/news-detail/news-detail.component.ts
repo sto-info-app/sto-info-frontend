@@ -25,6 +25,7 @@ import {
   NewsCategory,
   PublishedNewsPost,
 } from 'src/app/models/news.models';
+import { NewsCover, newsCoverOf } from '../news-cover.constants';
 import { NewsService } from '../news.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 
@@ -159,6 +160,15 @@ export class NewsDetailComponent implements OnInit {
       post.summary ?? undefined,
       ogImageUrl,
     );
+  }
+
+  /**
+   * The post's cover, at its full size (sc-1447).
+   *
+   * @returns The cover, or null when there is no post or it has none.
+   */
+  get cover(): NewsCover | null {
+    return this.post ? newsCoverOf(this.post, 'page') : null;
   }
 
   /**
