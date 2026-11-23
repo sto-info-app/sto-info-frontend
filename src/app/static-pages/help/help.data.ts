@@ -767,6 +767,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         guideSection('Write a Chapter', [
           'Open your Story and go to Chapters, then Add a Chapter. Give it a title, an optional synopsis, and the writing itself. A Chapter needs some content before it can be published.',
           'Chapters are published one at a time, and each has its own state. A Story needs at least one published Chapter before it can be published itself.',
+          'Chapters appear in the order they are listed on the Chapters page. To change it, use Move up and Move down on a Chapter. Readers see the new order straight away, and nothing they have already read is lost.',
         ]),
         guideSection('Confirm the content policy, then publish', [
           'Before a Story can be published you are asked to confirm it meets the Storytime publishing terms. This is a single confirmation, not a review queue — nobody has to approve your Story before it appears. If the terms are ever materially changed you will be asked once more, and told that is why.',

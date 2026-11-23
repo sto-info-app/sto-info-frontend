@@ -24,6 +24,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { ChapterService } from '../../chapter.service';
 import { PUBLICATION_STATUS_LABELS } from '../../storytime.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { moveInList } from 'src/app/dashboard/settings/custom-tracking/definitions/custom-tracking-reordering.utility';
 
 /**
  * The Chapters of one of the creator's Stories, with the actions on each.
@@ -103,6 +104,24 @@ export class ChapterListComponent implements OnInit {
   }
 
   /**
+   * Moves a Chapter one place earlier in the Story.
+   *
+   * @param index - The Chapter's current position.
+   */
+  moveUp(index: number): void {
+    this.move(index, index - 1);
+  }
+
+  /**
+   * Moves a Chapter one place later in the Story.
+   *
+   * @param index - The Chapter's current position.
+   */
+  moveDown(index: number): void {
+    this.move(index, index + 1);
+  }
+
+  /**
    * Whether publishing is a sensible next action for a Chapter.
    *
    * @param chapter - The Chapter to test.
@@ -148,6 +167,30 @@ export class ChapterListComponent implements OnInit {
           this.runAction(this._chapterService.deleteChapter(chapter.id));
         }
       });
+  }
+
+  /**
+   * Moves one Chapter to a new position and saves the new order.
+   *
+   * The whole order is sent, because that is what the server accepts: a
+   * partial list would leave the other Chapters at positions that no longer
+   * mean anything relative to the one that moved.
+   *
+   * @param from - The position moving.
+   * @param to - Where it is moving to.
+   */
+  private move(from: number, to: number): void {
+    if (to < 0 || to >= this.chapters.length) {
+      return;
+    }
+
+    const chapterIds = moveInList(this.chapters, from, to).map(
+      chapter => chapter.id,
+    );
+
+    this.runAction(
+      this._chapterService.reorderChapters(this.storyId, chapterIds),
+    );
   }
 
   /**
