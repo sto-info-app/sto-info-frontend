@@ -10,9 +10,29 @@ import {
 import { RoutingService } from 'src/app/shared/services/routing.service';
 import { environment } from 'src/environments/environment';
 import { MemberVm } from './models/member-vm.model';
+import { TeamCrossLink } from './models/team-cross-link.model';
 import { TeamGroup } from './models/team-group.model';
 import { TeamMember } from './models/team-member.model';
 import { TEAM_MEMBERS } from './team.data';
+
+/**
+ * Where each list page's Navigation button leads: Developers to Volunteers
+ * and back. Held here, beside the lists themselves, so the pairing is decided
+ * once rather than in each page.
+ */
+const TEAM_CROSS_LINK_ROUTES: Record<
+  TeamGroup,
+  { route: string; label: string }
+> = {
+  developers: {
+    route: APP_ROUTES.ABOUT_VOLUNTEERS,
+    label: APP_ROUTE_TITLES.ABOUT_VOLUNTEERS,
+  },
+  volunteers: {
+    route: APP_ROUTES.ABOUT_DEVELOPERS,
+    label: APP_ROUTE_TITLES.ABOUT_DEVELOPERS,
+  },
+};
 
 @Directive()
 export abstract class TeamListBaseComponent {
@@ -26,6 +46,9 @@ export abstract class TeamListBaseComponent {
   readonly pastMembers: TeamMember[];
   readonly currentMemberVms: MemberVm[];
   readonly pastMemberVms: MemberVm[];
+
+  /** The side column's button to the other team list. */
+  readonly crossLink: TeamCrossLink;
 
   protected readonly _routingService = inject(RoutingService);
   private readonly _memberRoute: string;
@@ -43,6 +66,9 @@ export abstract class TeamListBaseComponent {
       this._buildMemberVm(m),
     );
     this.pastMemberVms = this.pastMembers.map(m => this._buildMemberVm(m));
+
+    const { route, label } = TEAM_CROSS_LINK_ROUTES[group];
+    this.crossLink = { link: this.getRouteLink(route), label };
   }
 
   getMemberLink(member: TeamMember): string {

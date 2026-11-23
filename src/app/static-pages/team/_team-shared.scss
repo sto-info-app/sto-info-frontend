@@ -7,6 +7,26 @@
   gap: 1rem;
 }
 
+// The Developers and Volunteers lists sit beside a side column, in the
+// proportions a member's own page uses, and stack on a phone with the
+// Navigation panel after the list.
+.team-page-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+}
+
+.team-page-main-column {
+  flex: 2;
+  flex-basis: 69%;
+  min-width: 0;
+}
+
+.team-page-side-column {
+  flex: 1;
+  flex-basis: 30%;
+}
+
 // Two to a row, stacking on a phone. The grid rotates the palette across the
 // cards it holds, so a row of them is varied rather than one colour repeated;
 // a card alone in its grid takes its section's colour instead.
@@ -124,6 +144,10 @@
 }
 
 @media (width <= 768px) {
+  .team-page-layout {
+    flex-direction: column;
+  }
+
   .team-grid {
     grid-template-columns: 1fr;
   }

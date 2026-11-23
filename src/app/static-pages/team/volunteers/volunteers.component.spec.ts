@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from 'src/app/shared/constants/app-routing.constants';
 import { TEST_SUPPORTERS, TEST_TEAM_MEMBERS } from '../testing/team-test-data';
 
 import { TeamVolunteersComponent } from './volunteers.component';
@@ -69,5 +72,20 @@ describe('TeamVolunteersComponent', () => {
 
   it('should have a precomputed contact link', () => {
     expect(component.contactLink).toBe(`/${APP_ROUTES.CONTACT}`);
+  });
+
+  it('should lead to the Developers list from the side column', () => {
+    expect(component.crossLink).toEqual({
+      link: `/${APP_ROUTES.ABOUT_DEVELOPERS}`,
+      label: APP_ROUTE_TITLES.ABOUT_DEVELOPERS,
+    });
+
+    const element = fixture.nativeElement as HTMLElement;
+    const link = element.querySelector<HTMLAnchorElement>(
+      '.team-page-side-column app-team-navigation a.full-width-btn-link',
+    );
+
+    expect(link?.getAttribute('href')).toBe(`/${APP_ROUTES.ABOUT_DEVELOPERS}`);
+    expect(link?.textContent?.trim()).toBe('Developers');
   });
 });
