@@ -137,7 +137,7 @@
                 [message]="coverError"></app-lcars-error-message>
             }
             @if (post) {
-              @if (cover; as shown) {
+              @if (coverOf(post); as shown) {
                 <img
                   class="news-admin-cover__image"
                   [src]="shown.url"

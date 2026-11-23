@@ -223,6 +223,29 @@ describe('NewsAdminFormComponent', () => {
     expect(component.post?.coverImageId).toBeNull();
   });
 
+  // The cover changed either way, so a failed re-read is not reported as a
+  // failed change: the page keeps what it last read, and says nothing.
+  it('keeps the post it had when reading it again after a cover change fails', async () => {
+    routeId = '1';
+    await configure();
+    serviceSpy.getNewsByIdForAdmin
+      .mockReturnValueOnce(of({ ...basePost(), ...COVERED }))
+      .mockReturnValueOnce(throwError(() => new Error('read failed')));
+    fixture.detectChanges();
+
+    const removeButton: HTMLButtonElement = fixture.nativeElement.querySelector(
+      '.news-admin-cover button.red',
+    );
+    removeButton.click();
+    fixture.detectChanges();
+
+    expect(serviceSpy.removeCover).toHaveBeenCalledWith('1');
+    expect(serviceSpy.getNewsByIdForAdmin).toHaveBeenCalledTimes(2);
+    expect(component.post?.coverImageId).toBe('cover');
+    expect(component.coverError).toBe('');
+    expect(component.errorMessage).toBe('');
+  });
+
   it('removes nothing when the removal is not confirmed', async () => {
     routeId = '1';
     await configure();

@@ -123,12 +123,13 @@ export class NewsAdminFormComponent implements OnInit {
   }
 
   /**
-   * The post's cover as an administrator sees it here, card-sized.
+   * A post's cover as an administrator sees it here, card-sized.
    *
+   * @param post - The post.
    * @returns The cover, or null when it has none.
    */
-  get cover(): NewsCover | null {
-    return this.post ? newsCoverOf(this.post, 'card') : null;
+  coverOf(post: NewsPost): NewsCover | null {
+    return newsCoverOf(post, 'card');
   }
 
   /**

@@ -163,12 +163,13 @@ export class NewsDetailComponent implements OnInit {
   }
 
   /**
-   * The post's cover, at its full size (sc-1447).
+   * A post's cover, at its full size (sc-1447).
    *
-   * @returns The cover, or null when there is no post or it has none.
+   * @param post - The post.
+   * @returns The cover, or null when it has none.
    */
-  get cover(): NewsCover | null {
-    return this.post ? newsCoverOf(this.post, 'page') : null;
+  coverOf(post: PublishedNewsPost): NewsCover | null {
+    return newsCoverOf(post, 'page');
   }
 
   /**

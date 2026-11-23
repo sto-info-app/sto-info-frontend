@@ -1,6 +1,5 @@
 import {
   describeFleetImageRequirement,
-  FLEET_IMAGE_ALT_MAX_LENGTH,
   FLEET_IMAGE_SPECS,
   FleetImageSpec,
   FleetImageSlot,
@@ -26,8 +25,8 @@ export const NEWS_COVER_REQUIREMENT = describeFleetImageRequirement(
   FleetImageSlot.COVER,
 );
 
-/** The longest description the server accepts. */
-export const NEWS_COVER_ALT_MAX_LENGTH = FLEET_IMAGE_ALT_MAX_LENGTH;
+/** The longest description the server accepts: a Fleet cover's. */
+export { FLEET_IMAGE_ALT_MAX_LENGTH as NEWS_COVER_ALT_MAX_LENGTH } from 'src/app/fleet/fleet-image.constants';
 
 /** Where a cover is drawn: on a card, or at the head of its post. */
 export type NewsCoverSize = 'card' | 'page';
