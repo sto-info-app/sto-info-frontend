@@ -14,6 +14,7 @@ import { RouterLink } from '@angular/router';
 import { Observable, catchError, map, of } from 'rxjs';
 
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -32,7 +33,10 @@ import {
 import { CharacterFleetService } from '../../character-fleet.service';
 import { FleetScopeCardComponent } from '../../components/fleet-scope-card/fleet-scope-card.component';
 import { FleetScopeCardVm } from '../../components/fleet-scope-card/fleet-scope-card.model';
-import { buildCharacterFleetCardVm } from '../../fleet-card.builders';
+import {
+  buildCharacterFleetCardVm,
+  buildFleetCardVm,
+} from '../../fleet-card.builders';
 import { RECRUITED_BY_LINES } from '../../recruitment/recruitment.constants';
 import { FleetDirectoryService } from '../../fleet-directory.service';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
@@ -106,6 +110,7 @@ export const PROPOSALS_MIXED_NOTE =
     HelpLinkComponent,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
     FleetScopeCardComponent,
     SettingsLinkComponent,
   ],
@@ -200,6 +205,27 @@ export class CharacterFleetPanelComponent implements OnInit {
           `${this.deadline(proposal)}.`,
         ],
       ),
+    })),
+  );
+
+  /**
+   * Each search result as the directory draws a Fleet (#1469), with a button
+   * to choose it in place of a bare line of text.
+   */
+  protected pickerCards = computed(() =>
+    this.pickerResults().map(result => ({
+      result,
+      card: {
+        ...buildFleetCardVm(result, value => this.instant(value)),
+        actions: [
+          {
+            key: 'choose',
+            label: 'Choose',
+            colourClass: '',
+            ariaLabel: `Choose ${result.exactGameName}`,
+          },
+        ],
+      },
     })),
   );
 

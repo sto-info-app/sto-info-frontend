@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { provideRouter } from '@angular/router';
 
 import { of, throwError } from 'rxjs';
@@ -684,6 +685,64 @@ describe('CharacterFleetPanelComponent', () => {
         search: 'starfleet',
         pageSize: 8,
       });
+    });
+
+    it('draws each result as a Fleet card, and picks the one chosen', () => {
+      directory.listFleets.mockReturnValue(
+        of(
+          page([{ ...card(), lastEffectiveImportAt: '2026-03-01T10:00:00Z' }]),
+        ),
+      );
+      render();
+      component['toggleRecording']();
+      component['form'].controls.search.setValue('starfleet');
+      component['search']();
+      fixture.detectChanges();
+
+      const result = (fixture.nativeElement as HTMLElement).querySelector(
+        'app-fleet-scope-card.character-fleet__result',
+      );
+      const choose = [...(result?.querySelectorAll('button') ?? [])].find(
+        button => button.textContent?.trim() === 'Choose',
+      );
+
+      // The roster's last import is written out in the reader's own way.
+      expect(result?.textContent).toContain(
+        fixture.debugElement.injector
+          .get(AppDatePipe)
+          .transform('2026-03-01T10:00:00Z'),
+      );
+      expect(choose?.getAttribute('aria-label')).toBe(
+        `Choose ${card().exactGameName}`,
+      );
+
+      choose?.click();
+      fixture.detectChanges();
+
+      expect(component['pickedFleet']()?.id).toBe('fleet-1');
+      expect(text()).toContain('Record it');
+    });
+
+    it('keeps the way out with the form, in place of Record a Fleet', () => {
+      render();
+      const buttons = (): string[] =>
+        [
+          ...(fixture.nativeElement as HTMLElement).querySelectorAll(
+            '.character-fleet__actions button',
+          ),
+        ].map(button => button.textContent?.trim() ?? '');
+
+      expect(buttons()).toContain('Record a Fleet');
+
+      component['toggleRecording']();
+      fixture.detectChanges();
+
+      expect(buttons()).not.toContain('Record a Fleet');
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelector(
+          'app-lcars-panel form .character-fleet__actions',
+        )?.textContent,
+      ).toContain('Cancel');
     });
 
     it('does not search on an empty box', () => {

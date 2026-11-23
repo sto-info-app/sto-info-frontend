@@ -424,7 +424,7 @@ const FLEET_MEMBERSHIP_GUIDES: HelpGuide[] = [
         ],
         points: [
           'Choose “Record a Fleet”, type the Fleet’s name under “Find the Fleet”, and choose “Search”.',
-          'Pick the Fleet from the results. Each shows its platform, and the Community holding it or “no Community”.',
+          'Each result is the Fleet’s card from the directory, with its platform and Community. Choose “Choose” on the right one.',
           'Fill in “Joined on”, and choose “Who can see this”. It starts at “Only me”.',
           'Choose “Record it”.',
         ],
