@@ -51,7 +51,7 @@ describe('FleetRecruitmentHubComponent', () => {
   function offered(): [string, string | null][] {
     return Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll(
-        '.fleet-recruitment-hub__item a',
+        '.fleet-action-list__item a',
       ),
     ).map(link => [String(link.textContent).trim(), link.getAttribute('href')]);
   }

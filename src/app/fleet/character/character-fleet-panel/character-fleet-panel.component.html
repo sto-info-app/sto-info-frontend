@@ -148,114 +148,113 @@
       </p>
     }
 
-    <div class="character-fleet__actions lcars-rotate">
-      <button
-        type="button"
-        class="lcars-btn"
-        [disabled]="busy()"
-        (click)="toggleRecording()">
-        {{ recording() ? 'Cancel' : 'Record a Fleet' }}
-      </button>
-    </div>
-
-    <!-- Recording one. -->
+    <!-- Recording one, in a panel of its own with its own way out. -->
     @if (recording()) {
-      <form
-        class="character-fleet__form"
-        [formGroup]="form"
-        (ngSubmit)="submit()">
-        <div class="character-fleet__row">
-          <div class="lcars-input-container sky">
-            <label for="character-fleet-search">Find the Fleet</label>
-            <input
-              id="character-fleet-search"
-              type="text"
-              autocomplete="off"
-              formControlName="search" />
-          </div>
-          <button
-            type="button"
-            class="lcars-btn"
-            [disabled]="busy()"
-            (click)="search()">
-            Search
-          </button>
-        </div>
-
-        @if (pickerResults().length > 0) {
-          <ul class="character-fleet__results">
-            @for (result of pickerResults(); track result.id) {
-              <li>
-                <button
-                  type="button"
-                  class="character-fleet__result"
-                  (click)="pick(result)">
-                  {{ result.exactGameName }}
-                  <span class="character-fleet__muted">
-                    on {{ result.platformName }}
-                    @if (result.communityName) {
-                      · {{ result.communityName }}
-                    } @else {
-                      · no Community
-                    }
-                  </span>
-                </button>
-              </li>
-            }
-          </ul>
-        } @else if (pickerSearched() && pickedFleet() === null) {
-          <p class="character-fleet__note">
-            No Fleet here answers to that. A Fleet has to have a record on this
-            site before a Captain can be recorded in it — the Fleet pages are
-            where one is made.
-          </p>
-        }
-
-        @if (pickedFleet(); as picked) {
-          <p class="character-fleet__picked">
-            Recording <strong>{{ picked.exactGameName }}</strong> on
-            {{ picked.platformName }}.
-          </p>
-
-          <div class="character-fleet__row lcars-field-columns">
-            <div class="lcars-input-container sky">
-              <label for="character-fleet-from">Joined on</label>
+      <app-lcars-panel heading="Record a Fleet">
+        <form
+          class="character-fleet__form"
+          [formGroup]="form"
+          (ngSubmit)="submit()">
+          <div class="character-fleet__search">
+            <div class="lcars-input-container">
+              <label for="character-fleet-search">Find the Fleet</label>
               <input
-                id="character-fleet-from"
-                type="date"
-                formControlName="validFrom" />
+                id="character-fleet-search"
+                type="text"
+                autocomplete="off"
+                formControlName="search" />
             </div>
-
-            <div class="lcars-input-container sky">
-              <label for="character-fleet-visibility">Who can see this</label>
-              <select
-                id="character-fleet-visibility"
-                formControlName="visibility">
-                @for (choice of audienceChoices; track choice[0]) {
-                  <option [value]="choice[0]">{{ choice[1] }}</option>
-                }
-              </select>
-            </div>
+            <button
+              type="button"
+              class="lcars-btn lcars-btn-auto"
+              [disabled]="busy()"
+              (click)="search()">
+              Search
+            </button>
           </div>
 
-          @if (
-            form.controls.validFrom.touched && form.controls.validFrom.invalid
-          ) {
-            <p class="character-fleet__field-error">
-              Please say when this Captain joined.
+          @if (pickerCards().length > 0) {
+            <div class="character-fleet__cards lcars-rotate">
+              @for (item of pickerCards(); track item.result.id) {
+                <app-fleet-scope-card
+                  class="character-fleet__result"
+                  [vm]="item.card"
+                  (action)="pick(item.result)" />
+              }
+            </div>
+          } @else if (pickerSearched() && pickedFleet() === null) {
+            <p class="character-fleet__note">
+              No Fleet here answers to that. A Fleet has to have a record on
+              this site before a Captain can be recorded in it — the Fleet pages
+              are where one is made.
             </p>
           }
 
+          @if (pickedFleet(); as picked) {
+            <p class="character-fleet__picked">
+              Recording <strong>{{ picked.exactGameName }}</strong> on
+              {{ picked.platformName }}.
+            </p>
+
+            <div class="character-fleet__row lcars-field-columns">
+              <div class="lcars-input-container">
+                <label for="character-fleet-from">Joined on</label>
+                <input
+                  id="character-fleet-from"
+                  type="date"
+                  formControlName="validFrom" />
+              </div>
+
+              <div class="lcars-input-container">
+                <label for="character-fleet-visibility">Who can see this</label>
+                <select
+                  id="character-fleet-visibility"
+                  formControlName="visibility">
+                  @for (choice of audienceChoices; track choice[0]) {
+                    <option [value]="choice[0]">{{ choice[1] }}</option>
+                  }
+                </select>
+              </div>
+            </div>
+
+            @if (
+              form.controls.validFrom.touched && form.controls.validFrom.invalid
+            ) {
+              <p class="character-fleet__field-error">
+                Please say when this Captain joined.
+              </p>
+            }
+          }
+
           <div class="character-fleet__actions lcars-rotate">
+            @if (pickedFleet()) {
+              <button
+                type="submit"
+                class="lcars-btn green"
+                [disabled]="busy()">
+                Record it
+              </button>
+            }
             <button
-              type="submit"
-              class="lcars-btn green"
-              [disabled]="busy()">
-              Record it
+              type="button"
+              class="lcars-btn"
+              [disabled]="busy()"
+              (click)="toggleRecording()">
+              Cancel
             </button>
           </div>
-        }
-      </form>
+        </form>
+      </app-lcars-panel>
+    } @else {
+      <div class="character-fleet__actions lcars-rotate">
+        <button
+          type="button"
+          class="lcars-btn"
+          [disabled]="busy()"
+          (click)="toggleRecording()">
+          Record a Fleet
+        </button>
+      </div>
     }
 
     <!-- What has ended. -->

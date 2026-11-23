@@ -1,4 +1,5 @@
 @use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
 
 // Each section's figures are drawn in that section's colour, which comes from
 // its place in the page's rotation.
@@ -112,22 +113,45 @@ $scan-diagnostics-colour: var(--lcars-accent, #{vars.$lcars-sunflower});
   }
 }
 
+// Label-and-figure readouts: compact tiles, each a small label in the
+// section's colour over its figure in Antonio, sized to their content rather
+// than stretched across the row, so two figures sit together instead of half
+// a page apart.
 .scan-diagnostics__details {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
-  gap: 0.75rem 1.5rem;
-  margin: 1rem 0 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(min(12rem, 100%), 1fr));
+  gap: 0.5rem;
+  margin: 0.75rem 0 1rem;
+
+  > div {
+    min-width: 0;
+    padding: 0.4rem 0.75rem 0.5rem;
+    border-left: 4px solid $scan-diagnostics-colour;
+    border-radius: 0 0.5rem 0.5rem 0;
+    background: vars.$lcars-card-surface;
+  }
 
   dt {
     font-family: vars.$font-antonio;
+    font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: $scan-diagnostics-colour;
   }
 
   dd {
-    margin: 0.25rem 0 0;
+    margin: 0.15rem 0 0;
+    font-family: vars.$font-antonio;
+    font-size: 1.35rem;
+    line-height: 1.15;
+    color: vars.$lcars-white;
     font-variant-numeric: tabular-nums;
+    overflow-wrap: anywhere;
+  }
+
+  // An ID keeps its own monospace face, at a size that fits a tile.
+  code {
+    font-size: 0.9rem;
   }
 }
 
@@ -151,28 +175,37 @@ $scan-diagnostics-colour: var(--lcars-accent, #{vars.$lcars-sunflower});
   margin: 1.5rem 0 0;
 }
 
-// The open alerts and the worker processes (FC-042): one bordered item each,
-// as the rescan campaigns are, so each reads as a thing of its own. An alert
-// takes red, because somebody is waiting on it.
-.scan-diagnostics__alerts,
-.scan-diagnostics__workers {
+// The open alerts, the worker processes, the rescan campaigns and the
+// delivery runs (FC-042, FC-041, FC-040): each an LCARS panel card of its own,
+// one to a line. An alert takes red, because somebody is waiting on it.
+.scan-diagnostics__cards {
   display: grid;
-  gap: 1rem;
+
+  // One column that may shrink below its content, so a panel's one-line name
+  // shortens on a phone rather than pushing the panel past the page's edge.
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.75rem;
   margin: 1rem 0 1.5rem;
   padding: 0;
   list-style: none;
 
-  > li {
-    padding: 0.75rem 1rem;
-    border-left: 0.5rem solid $scan-diagnostics-colour;
-    border-radius: 0.5rem;
+  app-lcars-panel {
+    margin-bottom: 0;
   }
 }
 
-.scan-diagnostics__alerts > li {
-  display: grid;
-  gap: 0.25rem;
-  border-left-color: vars.$lcars-red;
+// A panel's own controls end its body, with no gap left beneath them.
+.scan-diagnostics__card-body > :last-child {
+  margin-bottom: 0;
+}
+
+.scan-diagnostics__card-body > :first-child {
+  margin-top: 0;
+}
+
+// What a panel's heading block says of the thing's state: Running, Finished.
+.scan-diagnostics__mark {
+  @include mixins.lcars-panel-card-badge;
 }
 
 .scan-diagnostics__alert-when {
@@ -182,7 +215,7 @@ $scan-diagnostics-colour: var(--lcars-accent, #{vars.$lcars-sunflower});
 .scan-diagnostics__worker-state {
   margin: 0;
   font-family: vars.$font-antonio;
-  font-weight: normal;
+  font-size: 1.1rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: $scan-diagnostics-colour;

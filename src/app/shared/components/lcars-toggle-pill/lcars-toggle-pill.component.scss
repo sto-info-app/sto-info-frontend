@@ -1,22 +1,39 @@
 @use 'lcars-variables' as vars;
 
+// Never wider than the row it sits in, so the pill inside can wrap its label.
+:host {
+  display: inline-block;
+  max-width: 100%;
+}
+
 .lcars-toggle-pill {
   display: inline-flex;
   align-items: flex-end;
   justify-content: flex-end;
-  height: 44px;
+  height: auto;
+  min-height: 44px;
   border-radius: 22px;
   padding: 0 22px 6px 28px;
-  width: max-content;
+  width: auto;
+
+  // The theme's global button rule gives every button a margin; a pill in a
+  // row of them takes its spacing from the row. A label longer than a phone's
+  // column wraps inside the pill rather than running past the page's edge.
+  margin: 0;
+  max-width: 100%;
+  text-align: right;
+  white-space: normal;
   border: none;
   cursor: pointer;
   font-family: vars.$font-antonio;
   font-size: 0.95rem;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  white-space: nowrap;
-  background-color: vars.$lcars-cardinal;
-  color: vars.$a11y-white;
+
+  // Off is not a refusal, so it takes the page's rotation like any other
+  // pill; only on takes a meaning of its own, green for chosen.
+  background-color: var(--lcars-accent, #{vars.$lcars-c43});
+  color: vars.$a11y-black;
   transition:
     background-color 0.25s ease,
     color 0.25s ease,

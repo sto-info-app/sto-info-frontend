@@ -1,0 +1,48 @@
+@use 'lcars-variables' as vars;
+
+:host {
+  display: block;
+}
+
+// Two columns shared by every line: the pills, as wide as the widest of
+// them, and the descriptions, which therefore all start at one edge.
+.fleet-action-list {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 1rem 1.25rem;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.fleet-action-list__item {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: center;
+}
+
+// Stretched to its column, so every pill is the widest one's size. The
+// shared pill sizes itself to its label with `!important`, so this has to
+// say so as well.
+.fleet-action-list__button.lcars-btn-auto {
+  width: 100% !important;
+}
+
+.fleet-action-list__description {
+  margin: 0;
+  color: var(--lcars-accent, #{vars.$lcars-sky});
+}
+
+// On a phone there is no room beside the pill, so each description goes
+// under its own pill instead, and the pills run the column's full width.
+@media (width <= 600px) {
+  .fleet-action-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .fleet-action-list__item {
+    gap: 0.5rem;
+  }
+}

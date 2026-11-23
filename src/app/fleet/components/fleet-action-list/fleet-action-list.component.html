@@ -1,0 +1,14 @@
+<ul class="fleet-action-list lcars-rotate">
+  @for (action of actions(); track action.label) {
+    <li class="fleet-action-list__item">
+      <a
+        class="lcars-btn lcars-btn-auto fleet-action-list__button"
+        [routerLink]="action.link"
+        >{{ action.label }}</a
+      >
+      <p class="fleet-action-list__description">
+        {{ action.description }}
+      </p>
+    </li>
+  }
+</ul>

@@ -25,6 +25,7 @@ import {
 } from 'src/app/models/scan-diagnostics.models';
 import { HelpLinkComponent } from 'src/app/shared/components/help-link/help-link.component';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -421,6 +422,7 @@ export function formatDuration(ms: number | null): string {
     ImageEstatePanelComponent,
     HelpLinkComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
     LoadingBarComponent,
     RescanPanelComponent,
     RouterModule,

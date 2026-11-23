@@ -1,9 +1,9 @@
 import { AsyncPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { RouterLink } from '@angular/router';
 
 import { Observable, of } from 'rxjs';
 
+import { FleetActionListComponent } from 'src/app/fleet/components/fleet-action-list/fleet-action-list.component';
 import { FleetPageShellComponent } from 'src/app/fleet/components/fleet-page-shell/fleet-page-shell.component';
 import { FleetTabsComponent } from 'src/app/fleet/components/fleet-tabs/fleet-tabs.component';
 import { FLEET_LINKS } from 'src/app/fleet/fleet-links';
@@ -37,7 +37,12 @@ export const FLEET_RECRUITMENT_NOT_PERMITTED =
   styleUrls: ['./fleet-recruitment-hub.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AsyncPipe, RouterLink, FleetPageShellComponent, FleetTabsComponent],
+  imports: [
+    AsyncPipe,
+    FleetActionListComponent,
+    FleetPageShellComponent,
+    FleetTabsComponent,
+  ],
 })
 export class FleetRecruitmentHubComponent extends FleetSectionPageDirective<
   FleetScopeAction[]
