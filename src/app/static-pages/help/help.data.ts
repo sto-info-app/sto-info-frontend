@@ -588,7 +588,7 @@ const STORYTIME_TOPIC: HelpTopic = {
   id: 'storytime',
   title: 'STO Storytime',
   intro:
-    'Storytime is where the community writes and reads Star Trek Online fan fiction. These guides cover reading, writing and sharing.',
+    'Storytime is where the community writes and reads Star Trek and Star Trek Online fan fiction. These guides cover reading, writing and sharing.',
   requiresFeature: 'STORYTIME',
   guides: [
     {
@@ -597,10 +597,13 @@ const STORYTIME_TOPIC: HelpTopic = {
       summary:
         'A short introduction to the feature and the handful of words it uses.',
       sections: [
-        guideSection('A home for your Star Trek Online fan fiction', [
-          'Storytime is a permanent home for stories set in the Star Trek Online universe, written and shared by the people who play it. Anybody can read. Anybody with an STO Info account can write.',
-          'Nothing here is official. Stories are fan-created work, and they belong to the members who wrote them.',
-        ]),
+        guideSection(
+          'A home for your Star Trek and Star Trek Online fan fiction',
+          [
+            'Storytime is a permanent home for stories set in the Star Trek and Star Trek Online universes, written and shared by the Star Trek Online community. Anybody can read. Anybody with an STO Info account can write.',
+            'Nothing here is official. Stories are fan-created work, and they belong to the members who wrote them.',
+          ],
+        ),
         guideSection(
           'The words used here',
           [

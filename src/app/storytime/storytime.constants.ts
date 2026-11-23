@@ -21,7 +21,7 @@ export const STORYTIME_COPY = {
   FEATURE_NAME: 'Storytime',
   LANDING_TITLE: 'STO Storytime',
   LANDING_INTRO:
-    'A permanent home for Star Trek Online fan stories, written and shared by the community.',
+    'A permanent home for Star Trek and Star Trek Online fan stories, written and shared by the community.',
   LANDING_EMPTY:
     'There are no published Stories yet. Check back soon, or write the first one.',
   /**
