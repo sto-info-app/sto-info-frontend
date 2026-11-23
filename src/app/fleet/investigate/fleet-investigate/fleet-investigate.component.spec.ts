@@ -120,7 +120,7 @@ describe('FleetInvestigateComponent', () => {
   function offered(): [string, string | null][] {
     return Array.from(
       (fixture.nativeElement as HTMLElement).querySelectorAll(
-        '.fleet-investigate__list a',
+        '.fleet-action-list__item a',
       ),
     ).map(link => [link.textContent?.trim() ?? '', link.getAttribute('href')]);
   }

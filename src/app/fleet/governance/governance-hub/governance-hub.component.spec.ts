@@ -70,7 +70,7 @@ describe('GovernanceHubComponent', () => {
     return Object.fromEntries(
       Array.from(
         (fixture.nativeElement as HTMLElement).querySelectorAll(
-          '.governance-hub__item a',
+          '.fleet-action-list__item a',
         ),
       ).map(link => [
         String(link.textContent).trim(),

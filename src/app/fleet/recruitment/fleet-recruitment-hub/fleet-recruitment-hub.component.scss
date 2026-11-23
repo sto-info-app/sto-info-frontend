@@ -1,29 +1,3 @@
-@use 'lcars-variables' as vars;
-
 :host {
   display: block;
-}
-
-.fleet-recruitment-hub__list {
-  display: grid;
-  gap: 1rem;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-// The button and what it is for side by side where there is room, stacked
-// on a phone.
-.fleet-recruitment-hub__item {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem 1rem;
-  align-items: center;
-}
-
-// In the colour of the pill beside it, so each line reads as one entry.
-.fleet-recruitment-hub__description {
-  flex: 1 1 18rem;
-  margin: 0;
-  color: var(--lcars-accent, #{vars.$lcars-sky});
 }
