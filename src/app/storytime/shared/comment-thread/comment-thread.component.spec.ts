@@ -12,6 +12,7 @@ import {
 import { AccessControlService } from 'src/app/shared/services/access-control.service';
 import { CommentService } from '../../comment.service';
 import { CommentThreadComponent } from './comment-thread.component';
+import { SPOILER_HINT } from '../comment-text/spoiler.utility';
 import {
   ConfirmPromptDouble,
   stubConfirmPrompt,
@@ -863,6 +864,88 @@ describe('CommentThreadComponent', () => {
       create();
 
       expect(component.hasControls(buildComment(THEIRS))).toBe(false);
+    });
+  });
+
+  // A comment can keep back a spoiler, and every box a comment is typed into
+  // says how.
+  describe('spoilers', () => {
+    it('keeps a spoiler in a comment back behind a button', () => {
+      commentService.getComments.mockReturnValue(
+        of([buildComment({ body: 'I did not see ||the twist|| coming.' })]),
+      );
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(element.querySelector('button.storytime-spoiler')).not.toBeNull();
+      expect(element.textContent).not.toContain('the twist');
+    });
+
+    it('keeps a spoiler back in a silenced comment its author can still see', () => {
+      commentService.getComments.mockReturnValue(
+        of([
+          buildComment({
+            status: StorytimeCommentStatus.HIDDEN_BY_OWNER,
+            body: 'It was ||all a dream||.',
+          }),
+        ]),
+      );
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+
+      expect(element.textContent).toContain(
+        'This comment was hidden by the owner of this page.',
+      );
+      expect(element.textContent).not.toContain('all a dream');
+    });
+
+    it('says how to mark a spoiler under the comment box', () => {
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+      const box = element.querySelector('#comment-draft') as HTMLElement;
+      const hint = element.querySelector(
+        `#${box.getAttribute('aria-describedby')}`,
+      );
+
+      expect(hint?.textContent?.trim()).toBe(SPOILER_HINT);
+    });
+
+    it('says how to mark a spoiler under the reply box', () => {
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+
+      (
+        element.querySelector(
+          '[aria-label="Reply to this comment"]',
+        ) as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      const box = element.querySelector('#reply-comment-1') as HTMLElement;
+
+      expect(box.getAttribute('aria-describedby')).toBe('reply-hint-comment-1');
+      expect(
+        element.querySelector('#reply-hint-comment-1')?.textContent?.trim(),
+      ).toBe(SPOILER_HINT);
+    });
+
+    it('says how to mark a spoiler under the edit box', () => {
+      create();
+      const element = fixture.nativeElement as HTMLElement;
+
+      (
+        element.querySelector(
+          '[aria-label="Edit comment"]',
+        ) as HTMLButtonElement
+      ).click();
+      fixture.detectChanges();
+
+      const box = element.querySelector('#edit-comment-1') as HTMLElement;
+
+      expect(box.getAttribute('aria-describedby')).toBe('edit-hint-comment-1');
+      expect(
+        element.querySelector('#edit-hint-comment-1')?.textContent?.trim(),
+      ).toBe(SPOILER_HINT);
     });
   });
 

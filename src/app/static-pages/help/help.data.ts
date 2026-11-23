@@ -730,6 +730,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         guideSection('Comments', [
           'Comments sit at the bottom of a Story, a Chapter or an Arc. You can reply to a comment, but only once deep — a reply cannot itself be replied to, which keeps a thread readable rather than letting it fork.',
           'You can edit or delete your own comments. A Story owner can hide a comment on their own Story, and an administrator can remove one that breaks the content policy.',
+          'To keep a spoiler from somebody who has not read that far, wrap it in double bars, ||like this||. It shows as a Spoiler button until a reader chooses to see it, and stays revealed once they have.',
           'A comment that has been deleted, hidden or removed keeps its place in the thread but loses its words, so a reply underneath it does not become nonsense.',
         ]),
         guideSection('Following', [

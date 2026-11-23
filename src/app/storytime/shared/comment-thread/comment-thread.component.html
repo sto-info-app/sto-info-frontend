@@ -64,8 +64,14 @@
                       class="storytime-comments__input"
                       rows="3"
                       maxlength="2000"
+                      [attr.aria-describedby]="'reply-hint-' + node.comment.id"
                       [(ngModel)]="replyDraft"
                       name="replyDraft"></textarea>
+                    <p
+                      class="storytime-comments__hint"
+                      [id]="'reply-hint-' + node.comment.id">
+                      {{ spoilerHint }}
+                    </p>
                   </div>
                   <div class="storytime-comments__actions">
                     <button
@@ -99,8 +105,14 @@
               class="storytime-comments__input"
               rows="4"
               maxlength="2000"
+              aria-describedby="comment-draft-hint"
               [(ngModel)]="draft"
               name="draft"></textarea>
+            <p
+              class="storytime-comments__hint"
+              id="comment-draft-hint">
+              {{ spoilerHint }}
+            </p>
           </div>
           <div class="storytime-comments__actions">
             <button
@@ -181,8 +193,14 @@
                   class="storytime-comments__input"
                   rows="3"
                   maxlength="2000"
+                  [attr.aria-describedby]="'edit-hint-' + comment.id"
                   [(ngModel)]="editDraft"
                   name="editDraft"></textarea>
+                <p
+                  class="storytime-comments__hint"
+                  [id]="'edit-hint-' + comment.id">
+                  {{ spoilerHint }}
+                </p>
               </div>
               <div class="storytime-comments__actions">
                 <button
@@ -200,7 +218,7 @@
               </div>
             </form>
           } @else {
-            <p class="storytime-comments__text">{{ comment.body }}</p>
+            <app-storytime-comment-text [body]="comment.body" />
             @if (comment.editedAt) {
               <p class="storytime-comments__edited">Edited.</p>
             }
@@ -210,7 +228,7 @@
             {{ silencedText(comment) }}
           </p>
           @if (comment.body) {
-            <p class="storytime-comments__text">{{ comment.body }}</p>
+            <app-storytime-comment-text [body]="comment.body" />
           }
         }
       </div>
