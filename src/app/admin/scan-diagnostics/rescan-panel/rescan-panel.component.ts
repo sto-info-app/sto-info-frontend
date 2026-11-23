@@ -5,6 +5,7 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FormsModule } from '@angular/forms';
 
 import { take } from 'rxjs';
 
@@ -26,6 +27,8 @@ import { ScanDiagnosticsPanelDirective } from '../scan-diagnostics-panel.directi
 
 import { RescanAdminService } from './rescan-admin.service';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
+import { LcarsTogglePillComponent } from 'src/app/shared/components/lcars-toggle-pill/lcars-toggle-pill.component';
 
 /** What the panel is showing. */
 export type RescanPanelState =
@@ -113,7 +116,13 @@ const DECISIONS = {
     './rescan-panel.component.scss',
   ],
   standalone: true,
-  imports: [AppDatePipe, CollapsibleSectionComponent],
+  imports: [
+    AppDatePipe,
+    CollapsibleSectionComponent,
+    FormsModule,
+    LcarsPanelComponent,
+    LcarsTogglePillComponent,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RescanPanelComponent extends ScanDiagnosticsPanelDirective {

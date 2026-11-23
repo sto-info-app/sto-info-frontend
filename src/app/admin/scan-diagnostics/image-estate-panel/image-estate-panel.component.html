@@ -3,9 +3,9 @@
   barClass="small-lcars-bar-gap">
   <p>
     Every picture becomes private, reachable only by an address the site signs
-    while the picture may be shown. Take an inventory, copy every public
-    picture to a private one, check the site, then retire the old copies. Until
-    then a copy can be undone.
+    while the picture may be shown. Take an inventory, copy every public picture
+    to a private one, check the site, then retire the old copies. Until then a
+    copy can be undone.
   </p>
 
   @if (message(); as done) {
@@ -58,26 +58,32 @@
     </dl>
 
     @if (status.run; as run) {
-      <h3 class="image-estate__heading">
-        {{ runLabels[run.kind] }}: {{ stateLabels[run.state] }}
-      </h3>
-      <p>
-        Started {{ run.createdAt | appDate: 'medium' }}
-        @if (run.finishedAt) {
-          · finished {{ run.finishedAt | appDate: 'medium' }}
-        }
-      </p>
-      <dl class="scan-diagnostics__details">
-        @for (count of runCounts(); track count.label) {
-          <div>
-            <dt>{{ count.label }}</dt>
-            <dd>{{ count.count }}</dd>
-          </div>
-        }
-      </dl>
-      @if (run.lastError) {
-        <p class="scan-diagnostics__unavailable">{{ run.lastError }}</p>
-      }
+      <app-lcars-panel [heading]="runLabels[run.kind]">
+        <span
+          panelMarks
+          class="scan-diagnostics__mark"
+          >{{ stateLabels[run.state] }}</span
+        >
+        <div class="scan-diagnostics__card-body">
+          <p>
+            Started {{ run.createdAt | appDate: 'medium' }}
+            @if (run.finishedAt) {
+              · finished {{ run.finishedAt | appDate: 'medium' }}
+            }
+          </p>
+          <dl class="scan-diagnostics__details">
+            @for (count of runCounts(); track count.label) {
+              <div>
+                <dt>{{ count.label }}</dt>
+                <dd>{{ count.count }}</dd>
+              </div>
+            }
+          </dl>
+          @if (run.lastError) {
+            <p class="scan-diagnostics__unavailable">{{ run.lastError }}</p>
+          }
+        </div>
+      </app-lcars-panel>
     }
 
     <div class="image-estate__actions lcars-rotate">
@@ -136,98 +142,104 @@
     </div>
 
     @if (status.inventory; as inventory) {
-      <h3 class="image-estate__heading">
-        Inventory, {{ inventory.createdAt | appDate: 'medium' }}
-      </h3>
-      @if (inventory.state === 'RUNNING') {
-        <p>Being taken. Refresh in a moment.</p>
-      }
-      @if (inventory.error) {
-        <p class="scan-diagnostics__unavailable">
-          Cloudflare's listing could not be read: {{ inventory.error }}
-        </p>
-      }
-      @if (inventory.report; as report) {
-        <table class="fleet-community-table">
-          <caption>
-            Where each picture is referenced
-          </caption>
-          <thead>
-            <tr>
-              <th scope="col">Column</th>
-              <th scope="col">Rows</th>
-              <th scope="col">Registered</th>
-              <th scope="col">R2 keys</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (
-              reference of report.references;
-              track reference.table + reference.column
-            ) {
-              <tr>
-                <th
-                  scope="row"
-                  data-label="Column">
-                  <code>{{ reference.table }}.{{ reference.column }}</code>
-                </th>
-                <td data-label="Rows">{{ reference.rows }}</td>
-                <td data-label="Registered">{{ reference.registered }}</td>
-                <td data-label="R2 keys">{{ reference.r2 }}</td>
-              </tr>
-            }
-          </tbody>
-        </table>
+      <app-lcars-panel heading="Inventory">
+        <span
+          panelMarks
+          class="scan-diagnostics__mark"
+          >{{ inventory.createdAt | appDate: 'medium' }}</span
+        >
+        <div class="scan-diagnostics__card-body">
+          @if (inventory.state === 'RUNNING') {
+            <p>Being taken. Refresh in a moment.</p>
+          }
+          @if (inventory.error) {
+            <p class="scan-diagnostics__unavailable">
+              Cloudflare's listing could not be read: {{ inventory.error }}
+            </p>
+          }
+          @if (inventory.report; as report) {
+            <table class="fleet-community-table">
+              <caption>
+                Where each picture is referenced
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col">Column</th>
+                  <th scope="col">Rows</th>
+                  <th scope="col">Registered</th>
+                  <th scope="col">R2 keys</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (
+                  reference of report.references;
+                  track reference.table + reference.column
+                ) {
+                  <tr>
+                    <th
+                      scope="row"
+                      data-label="Column">
+                      <code>{{ reference.table }}.{{ reference.column }}</code>
+                    </th>
+                    <td data-label="Rows">{{ reference.rows }}</td>
+                    <td data-label="Registered">{{ reference.registered }}</td>
+                    <td data-label="R2 keys">{{ reference.r2 }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
 
-        @if (report.cloudflare; as cloudflare) {
-          <dl class="scan-diagnostics__details">
-            <div>
-              <dt>In Cloudflare for this site</dt>
-              <dd>{{ cloudflare.listed }}</dd>
-            </div>
-            <div>
-              <dt>Private</dt>
-              <dd>{{ cloudflare.private }}</dd>
-            </div>
-            <div>
-              <dt>Public</dt>
-              <dd>{{ cloudflare.public }}</dd>
-            </div>
-            <div>
-              <dt>Old copies to retire</dt>
-              <dd>{{ cloudflare.awaitingRetirement }}</dd>
-            </div>
-            <div>
-              <dt>Nothing points at them</dt>
-              <dd>{{ cloudflare.orphans }}</dd>
-            </div>
-            <div>
-              <dt>Shown but missing</dt>
-              <dd>{{ cloudflare.missing }}</dd>
-            </div>
-            <div>
-              <dt>Elsewhere in the account</dt>
-              <dd>{{ cloudflare.elsewhere }}</dd>
-            </div>
-          </dl>
-          @if (cloudflare.orphanIds.length > 0) {
-            <p>
-              Nothing points at:
-              @for (id of cloudflare.orphanIds; track id) {
-                <code class="image-estate__id">{{ id }}</code>
+            @if (report.cloudflare; as cloudflare) {
+              <dl class="scan-diagnostics__details">
+                <div>
+                  <dt>In Cloudflare for this site</dt>
+                  <dd>{{ cloudflare.listed }}</dd>
+                </div>
+                <div>
+                  <dt>Private</dt>
+                  <dd>{{ cloudflare.private }}</dd>
+                </div>
+                <div>
+                  <dt>Public</dt>
+                  <dd>{{ cloudflare.public }}</dd>
+                </div>
+                <div>
+                  <dt>Old copies to retire</dt>
+                  <dd>{{ cloudflare.awaitingRetirement }}</dd>
+                </div>
+                <div>
+                  <dt>Nothing points at them</dt>
+                  <dd>{{ cloudflare.orphans }}</dd>
+                </div>
+                <div>
+                  <dt>Shown but missing</dt>
+                  <dd>{{ cloudflare.missing }}</dd>
+                </div>
+                <div>
+                  <dt>Elsewhere in the account</dt>
+                  <dd>{{ cloudflare.elsewhere }}</dd>
+                </div>
+              </dl>
+              @if (cloudflare.orphanIds.length > 0) {
+                <p>
+                  Nothing points at:
+                  @for (id of cloudflare.orphanIds; track id) {
+                    <code class="image-estate__id">{{ id }}</code>
+                  }
+                </p>
               }
-            </p>
-          }
-          @if (cloudflare.missingAssetIds.length > 0) {
-            <p>
-              Missing from Cloudflare (asset IDs):
-              @for (id of cloudflare.missingAssetIds; track id) {
-                <code class="image-estate__id">{{ id }}</code>
+              @if (cloudflare.missingAssetIds.length > 0) {
+                <p>
+                  Missing from Cloudflare (asset IDs):
+                  @for (id of cloudflare.missingAssetIds; track id) {
+                    <code class="image-estate__id">{{ id }}</code>
+                  }
+                </p>
               }
-            </p>
+            }
           }
-        }
-      }
+        </div>
+      </app-lcars-panel>
     }
   }
 </app-collapsible-section>

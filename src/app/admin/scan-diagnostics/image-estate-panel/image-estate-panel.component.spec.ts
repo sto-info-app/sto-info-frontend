@@ -118,7 +118,12 @@ describe('ImageEstatePanelComponent (FC-040)', () => {
     estate.status.mockReturnValue(of(statusOf({ run: RUN })));
     await show();
 
-    expect(text()).toContain('Copy to private: Running');
+    expect(text()).toMatch(/Copy to private\s+Running/);
+    expect(
+      element()
+        .querySelector('.lcars-panel__heading .scan-diagnostics__mark')
+        ?.textContent?.trim(),
+    ).toBe('Running');
     expect(text()).toMatch(/Registered as unverified\s*1/);
     expect(text()).toMatch(/Copied\s*5/);
     expect(text()).toMatch(/mystery\s*2/);
@@ -166,7 +171,7 @@ describe('ImageEstatePanelComponent (FC-040)', () => {
     );
     await show();
 
-    expect(text()).toContain('Retire old copies: Finished');
+    expect(text()).toMatch(/Retire old copies\s+Finished/);
     expect(text()).toContain('finished');
     expect(button('Copy to private')?.disabled).toBe(false);
   });

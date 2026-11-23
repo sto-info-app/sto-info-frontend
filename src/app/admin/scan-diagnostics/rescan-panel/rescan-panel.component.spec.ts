@@ -118,7 +118,12 @@ describe('RescanPanelComponent (FC-041)', () => {
     rescans.overview.mockReturnValue(of(overviewOf({ campaigns: [CAMPAIGN] })));
     await show();
 
-    expect(text()).toContain('Chosen by a site admin: Running');
+    expect(text()).toMatch(/Chosen by a site admin\s+Running/);
+    expect(
+      element()
+        .querySelector('.lcars-panel__heading .scan-diagnostics__mark')
+        ?.textContent?.trim(),
+    ).toBe('Running');
     expect(text()).toMatch(/Asked for\s*4/);
     expect(text()).toMatch(/Clean\s*2/);
     expect(text()).toMatch(/mystery\s*1/);
@@ -148,8 +153,8 @@ describe('RescanPanelComponent (FC-041)', () => {
     );
     await show();
 
-    expect(text()).toContain(
-      'Pictures from before scanning: Stopped by an error',
+    expect(text()).toMatch(
+      /Pictures from before scanning\s+Stopped by an error/,
     );
     expect(text()).toContain('The quarantine bucket is down');
     expect(button('Pause')).toBeUndefined();
@@ -187,8 +192,8 @@ describe('RescanPanelComponent (FC-041)', () => {
     );
     await show();
 
-    expect(text()).toContain('Chosen by a site admin: Finished');
-    expect(text()).toContain('Chosen by a site admin: Cancelled');
+    expect(text()).toMatch(/Chosen by a site admin\s+Finished/);
+    expect(text()).toMatch(/Chosen by a site admin\s+Cancelled/);
     expect(text()).toContain('finished');
     expect(button('Pause')).toBeUndefined();
     expect(button('Resume')).toBeUndefined();
@@ -327,8 +332,8 @@ describe('RescanPanelComponent (FC-041)', () => {
     await show();
 
     const kinds = [
-      ...element().querySelectorAll<HTMLInputElement>(
-        '.rescan__kinds input[type="checkbox"]',
+      ...element().querySelectorAll<HTMLButtonElement>(
+        '.rescan__kinds button[role="switch"]',
       ),
     ];
 
@@ -343,11 +348,9 @@ describe('RescanPanelComponent (FC-041)', () => {
       element().querySelector('#rescan-priority') as HTMLSelectElement,
       'HIGH',
     );
-    const checks = element().querySelectorAll<HTMLInputElement>(
-      '.rescan__check input',
-    );
-
-    checks[checks.length - 1].click();
+    element()
+      .querySelector<HTMLButtonElement>('.rescan__only button[role="switch"]')!
+      .click();
 
     element()
       .querySelector('form')!

@@ -53,20 +53,23 @@
             will be told again when it clears.
           </p>
           <ul
-            class="scan-diagnostics__alerts"
+            class="scan-diagnostics__cards scan-diagnostics__alerts"
             aria-label="Open alerts, oldest first">
             @for (alert of diagnostics.alerts; track alert.kind) {
               <li>
-                <strong>{{ alertTitleOf(alert) }}</strong>
-                @if (alertDetailOf(alert); as detail) {
-                  <span class="scan-diagnostics__alert-detail">{{
-                    detail
-                  }}</span>
-                }
-                <span class="scan-diagnostics__alert-when"
-                  >Opened {{ alert.openedAt | appDate: 'medium' }} · last seen
-                  {{ alert.lastSeenAt | appDate: 'medium' }}</span
-                >
+                <app-lcars-panel
+                  class="accent-red"
+                  [heading]="alertTitleOf(alert)">
+                  <div class="scan-diagnostics__card-body">
+                    @if (alertDetailOf(alert); as detail) {
+                      <p class="scan-diagnostics__alert-detail">{{ detail }}</p>
+                    }
+                    <p class="scan-diagnostics__alert-when">
+                      Opened {{ alert.openedAt | appDate: 'medium' }} · last
+                      seen {{ alert.lastSeenAt | appDate: 'medium' }}
+                    </p>
+                  </div>
+                </app-lcars-panel>
               </li>
             }
           </ul>
@@ -86,51 +89,59 @@
 
           @if (workers.live.length > 0) {
             <ul
-              class="scan-diagnostics__workers"
+              class="scan-diagnostics__cards scan-diagnostics__workers"
               aria-label="Worker processes, latest heartbeat first">
               @for (worker of workers.live; track worker.workerId) {
                 <li>
-                  <h3 class="scan-diagnostics__worker-state">
-                    {{ workerStateOf(worker) }}
-                  </h3>
-                  <dl class="scan-diagnostics__details">
-                    <div>
-                      <dt>Process</dt>
-                      <dd>
-                        <code class="scan-diagnostics__id">{{
-                          worker.workerId
-                        }}</code>
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Signature version</dt>
-                      <dd>{{ worker.definitionsVersion ?? 'Not reported' }}</dd>
-                    </div>
-                    <div>
-                      <dt>Signature age</dt>
-                      <dd>
-                        @if (worker.signatureAgeHours !== null) {
-                          {{ worker.signatureAgeHours }} hours
-                        } @else {
-                          Unknown
+                  <app-lcars-panel heading="Worker process">
+                    <div class="scan-diagnostics__card-body">
+                      <p class="scan-diagnostics__worker-state">
+                        {{ workerStateOf(worker) }}
+                      </p>
+                      <dl class="scan-diagnostics__details">
+                        <div>
+                          <dt>Process</dt>
+                          <dd>
+                            <code class="scan-diagnostics__id">{{
+                              worker.workerId
+                            }}</code>
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Signature version</dt>
+                          <dd>
+                            {{ worker.definitionsVersion ?? 'Not reported' }}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Signature age</dt>
+                          <dd>
+                            @if (worker.signatureAgeHours !== null) {
+                              {{ worker.signatureAgeHours }} hours
+                            } @else {
+                              Unknown
+                            }
+                          </dd>
+                        </div>
+                        <div>
+                          <dt>Jobs in hand</dt>
+                          <dd>{{ worker.jobsInHand }}</dd>
+                        </div>
+                        <div>
+                          <dt>Last heartbeat</dt>
+                          <dd>
+                            {{ formatSecondsAgo(worker.secondsSinceBeat) }}
+                          </dd>
+                        </div>
+                        @if (worker.pausedSince; as pausedSince) {
+                          <div>
+                            <dt>Paused since</dt>
+                            <dd>{{ pausedSince | appDate: 'medium' }}</dd>
+                          </div>
                         }
-                      </dd>
+                      </dl>
                     </div>
-                    <div>
-                      <dt>Jobs in hand</dt>
-                      <dd>{{ worker.jobsInHand }}</dd>
-                    </div>
-                    <div>
-                      <dt>Last heartbeat</dt>
-                      <dd>{{ formatSecondsAgo(worker.secondsSinceBeat) }}</dd>
-                    </div>
-                    @if (worker.pausedSince; as pausedSince) {
-                      <div>
-                        <dt>Paused since</dt>
-                        <dd>{{ pausedSince | appDate: 'medium' }}</dd>
-                      </div>
-                    }
-                  </dl>
+                  </app-lcars-panel>
                 </li>
               }
             </ul>
@@ -195,16 +206,17 @@
           <p>
             <strong>Publication is running.</strong>
             @if (publication.queuePaused === null) {
-              The job queues can’t be reached just now, so nothing is
-              published until they answer.
+              The job queues can’t be reached just now, so nothing is published
+              until they answer.
             } @else {
               Uploads are published as soon as the scanner clears them.
             }
           </p>
         }
         <p>
-          <a [routerLink]="siteSettingsLink">Pause or resume publication on
-            the Site Settings page</a>, under Operations on the Admin page.
+          <a [routerLink]="siteSettingsLink"
+            >Pause or resume publication on the Site Settings page</a
+          >, under Operations on the Admin page.
         </p>
 
         @let owed = diagnostics.owedPurges;
@@ -212,8 +224,10 @@
           <p>Every withdrawn picture has been deleted from Cloudflare.</p>
         } @else {
           <p>
-            <strong>{{ owedPicturesOf(owed.owed) }} still to be deleted from
-              Cloudflare.</strong>
+            <strong
+              >{{ owedPicturesOf(owed.owed) }} still to be deleted from
+              Cloudflare.</strong
+            >
             Until it is, a withdrawn picture can still be reached at its old
             address. The site asks Cloudflare again every hour.
           </p>

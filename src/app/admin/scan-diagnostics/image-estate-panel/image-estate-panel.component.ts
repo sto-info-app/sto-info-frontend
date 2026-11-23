@@ -22,6 +22,7 @@ import { ScanDiagnosticsPanelDirective } from '../scan-diagnostics-panel.directi
 
 import { ImageEstateAdminService } from './image-estate-admin.service';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 
 /** What the panel is showing. */
 export type ImageEstatePanelState =
@@ -76,7 +77,7 @@ export const IMAGE_ESTATE_COUNT_LABELS: Readonly<Record<string, string>> = {
     './image-estate-panel.component.scss',
   ],
   standalone: true,
-  imports: [AppDatePipe, CollapsibleSectionComponent],
+  imports: [AppDatePipe, CollapsibleSectionComponent, LcarsPanelComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ImageEstatePanelComponent extends ScanDiagnosticsPanelDirective {
