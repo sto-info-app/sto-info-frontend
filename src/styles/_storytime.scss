@@ -2972,3 +2972,42 @@ app-storytime-tag-row {
     gap: 1rem;
   }
 }
+
+// The picker of Characters to copy from another Story (sc-1483): each Story's
+// cast as a list of names, with the copy button at the end of each row.
+.storytime-copy-picker {
+  display: block;
+  margin-top: 1.5rem;
+}
+
+.storytime-copy-picker__story > h3 {
+  margin-bottom: 0.5rem;
+}
+
+.storytime-copy-picker__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.storytime-copy-picker__character {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.storytime-copy-picker__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+// The offer, on a copy's editor, of the portrait the copy left behind.
+.storytime-original-portrait {
+  display: block;
+  margin-top: 1.5rem;
+}

@@ -1,4 +1,4 @@
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectorRef,
@@ -21,13 +21,17 @@ import { Observable } from 'rxjs';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import {
   CharacterRequest,
+  CopiedCharacterNavigationState,
   ManagedCharacter,
+  OriginalPortrait,
 } from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { LcarsToggleComponent } from 'src/app/shared/components/lcars-toggle/lcars-toggle.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
+import { saveFile } from 'src/app/shared/utils/save-file.utils';
 import { CharacterService } from '../../character.service';
 import { ImageManagerComponent } from '../../shared/image-manager/image-manager.component';
 import { StorytimeImageSlot } from '../../storytime-image.constants';
@@ -36,6 +40,15 @@ import { MarkdownFieldComponent } from '../../shared/markdown-field/markdown-fie
 
 /** How many traits one Character may carry, matching the server. */
 export const MAX_CHARACTER_TRAITS = 20;
+
+/** The file extension for each picture type the CDN may answer with. */
+const PORTRAIT_EXTENSIONS: Readonly<Record<string, string>> = {
+  'image/png': 'png',
+  'image/jpeg': 'jpg',
+  'image/webp': 'webp',
+  'image/avif': 'avif',
+  'image/gif': 'gif',
+};
 
 /**
  * Creating and editing a Character.
@@ -59,6 +72,7 @@ export const MAX_CHARACTER_TRAITS = 20;
     EditorActionsComponent,
     ImageManagerComponent,
     CollapsibleSectionComponent,
+    LcarsPanelComponent,
   ],
 })
 export class CharacterEditorComponent implements OnInit {
@@ -85,6 +99,24 @@ export class CharacterEditorComponent implements OnInit {
 
   /** The most traits the form will offer. */
   readonly maxTraits = MAX_CHARACTER_TRAITS;
+
+  /**
+   * The portrait of the Character this one was copied from, which the copy
+   * did not take with it (sc-1483). Handed over by the cast page that made
+   * the copy, so it is offered on arriving from there, and again on a reload,
+   * but not on a later visit to the same Character.
+   */
+  originalPortrait: OriginalPortrait | null = null;
+
+  /** Whether the original portrait is being fetched. */
+  isDownloadingPortrait = false;
+
+  /** A message to show when the original portrait could not be fetched. */
+  portraitDownloadError = '';
+
+  private readonly _navigationState = inject(
+    Location,
+  ).getState() as CopiedCharacterNavigationState | null;
 
   private readonly _route = inject(ActivatedRoute);
   private readonly _router = inject(Router);
@@ -149,6 +181,10 @@ export class CharacterEditorComponent implements OnInit {
       return;
     }
 
+    if (this._navigationState?.copiedCharacterId === characterId) {
+      this.originalPortrait = this._navigationState.originalPortrait ?? null;
+    }
+
     this._characterService
       .getMyCharacter(characterId)
       .pipe(
@@ -168,6 +204,59 @@ export class CharacterEditorComponent implements OnInit {
               ? 'That Character could not be found.'
               : 'This Character could not be loaded. Please try again shortly.';
           this.isLoading = false;
+        },
+      });
+  }
+
+  /**
+   * Whether to offer the original's portrait: only to a copy that has none of
+   * its own yet.
+   *
+   * @returns True when there is an original portrait to offer.
+   */
+  get offersOriginalPortrait(): boolean {
+    return (
+      this.originalPortrait !== null &&
+      this.character !== null &&
+      !this.character.portraitImageUrl
+    );
+  }
+
+  /**
+   * Saves the original's portrait as a file, for the creator to upload again.
+   *
+   * Fetched straight from the CDN, which serves it to any origin, and named
+   * for this Character.
+   */
+  downloadOriginalPortrait(): void {
+    const portrait = this.originalPortrait;
+
+    if (!portrait || !this.character || this.isDownloadingPortrait) {
+      return;
+    }
+
+    const name = this.character.slug;
+
+    this.isDownloadingPortrait = true;
+    this.portraitDownloadError = '';
+
+    this._characterService
+      .downloadOriginalPortrait(portrait.url)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+      )
+      .subscribe({
+        next: file => {
+          const extension = PORTRAIT_EXTENSIONS[file.type] ?? 'png';
+
+          saveFile(file, `${name}-portrait.${extension}`);
+          this.isDownloadingPortrait = false;
+        },
+        error: () => {
+          this.portraitDownloadError =
+            'The original portrait could not be downloaded. Please try again shortly.';
+          this.isDownloadingPortrait = false;
         },
       });
   }

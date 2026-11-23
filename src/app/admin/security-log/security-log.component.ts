@@ -36,6 +36,12 @@ const OTHER_ACTION_LABELS: Readonly<Record<string, string>> = {
   LOOKED_INTO_FLEET: 'Looked into a Fleet',
   ERASED: 'Erased roster data',
   REPLAYED: 'Replayed an erasure after a restore',
+  CHARACTER_COPIED: 'Copied a Character into another Story',
+};
+
+/** What the subjects with a name of their own are called. */
+const SUBJECT_LABELS: Readonly<Record<string, string>> = {
+  STORYTIME_CHARACTER: 'Storytime Character',
 };
 
 /** What each read of Scan Diagnostics is logged against (FC-042). */
@@ -180,12 +186,14 @@ export class SecurityLogComponent {
       return this.nameOf(entry.actor);
     }
 
-    const byAnAdmin =
+    // A Character copy is a creator's, never the system's (sc-1483).
+    const byAPerson =
       (entry.source === SecurityLogSource.SITE_ADMIN &&
         !SYSTEM_SITE_ADMIN_ACTIONS.has(entry.action)) ||
-      entry.source === SecurityLogSource.FLEET;
+      entry.source === SecurityLogSource.FLEET ||
+      entry.source === SecurityLogSource.STORYTIME;
 
-    return byAnAdmin ? 'An account since closed' : 'The system';
+    return byAPerson ? 'An account since closed' : 'The system';
   }
 
   /**
@@ -229,7 +237,7 @@ export class SecurityLogComponent {
       return entry.subjectId === 'ALL' ? `Failed jobs in ${queue}` : queue;
     }
 
-    return inWords(kind);
+    return SUBJECT_LABELS[kind] ?? inWords(kind);
   }
 
   /**

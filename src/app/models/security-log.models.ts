@@ -6,6 +6,8 @@ export enum SecurityLogSource {
   INVESTIGATION = 'INVESTIGATION',
   ERASURE = 'ERASURE',
   RETENTION = 'RETENTION',
+  /** A creator copying a Character between their Stories (sc-1483). */
+  STORYTIME = 'STORYTIME',
 }
 
 /** How each source is named on the page. */
@@ -18,6 +20,7 @@ export const SECURITY_LOG_SOURCE_LABELS: Readonly<
   [SecurityLogSource.INVESTIGATION]: 'Fleet investigations',
   [SecurityLogSource.ERASURE]: 'Roster erasures',
   [SecurityLogSource.RETENTION]: 'Retention runs',
+  [SecurityLogSource.STORYTIME]: 'Character copies',
 };
 
 /** What each site admin action is called. */

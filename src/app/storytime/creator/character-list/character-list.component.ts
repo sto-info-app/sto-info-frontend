@@ -9,10 +9,17 @@ import {
   inject,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize } from 'rxjs';
-import { ManagedCharacter } from 'src/app/models/storytime.models';
+import {
+  CopiedCharacter,
+  CopiedCharacterNavigationState,
+  CopyableCharacter,
+  CopyableCharacterStory,
+  ManagedCharacter,
+} from 'src/app/models/storytime.models';
 import { LcarsErrorMessageComponent } from 'src/app/shared/components/lcars-error-message/lcars-error-message.component';
+import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
 import { LoadingBarComponent } from 'src/app/shared/components/loading-bar/loading-bar.component';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
@@ -37,6 +44,7 @@ import { ManagedActionRunner } from 'src/app/shared/actions/managed-action.runne
     RouterModule,
     LoadingBarComponent,
     LcarsErrorMessageComponent,
+    LcarsPanelComponent,
     StorytimeCastEntryComponent,
   ],
 })
@@ -65,7 +73,23 @@ export class CharacterListComponent implements OnInit {
   /** Route constants. */
   readonly appRoutes = APP_ROUTES;
 
+  /** Whether the picker of Characters to copy is open (sc-1483). */
+  isPickerOpen = false;
+
+  /** Whether the picker is still loading. */
+  isPickerLoading = false;
+
+  /** The creator's other Stories, each with the Characters it offers. */
+  copyable: CopyableCharacterStory[] = [];
+
+  /** A message to show when the picker or a copy failed. */
+  pickerError = '';
+
+  /** The Character being copied, while the copy is in flight. */
+  copyingId: string | null = null;
+
   private readonly _route = inject(ActivatedRoute);
+  private readonly _router = inject(Router);
   private readonly _characterService = inject(CharacterService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _ngZone = inject(NgZone);
@@ -122,6 +146,114 @@ export class CharacterListComponent implements OnInit {
           );
         }
       });
+  }
+
+  /**
+   * Opens the picker of Characters to copy from another Story, or closes it.
+   *
+   * What it offers is asked for each time it opens, so a Character added in
+   * another tab since is there to pick.
+   */
+  togglePicker(): void {
+    this.isPickerOpen = !this.isPickerOpen;
+
+    if (!this.isPickerOpen) {
+      return;
+    }
+
+    this.isPickerLoading = true;
+    this.pickerError = '';
+
+    this._characterService
+      .getCopyableCharacters(this.storyId)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+        finalize(() => {
+          this.isPickerLoading = false;
+        }),
+      )
+      .subscribe({
+        next: stories => {
+          this.copyable = stories;
+        },
+        error: () => {
+          this.copyable = [];
+          this.pickerError =
+            'Your other Stories could not be loaded. Please try again shortly.';
+        },
+      });
+  }
+
+  /**
+   * Copies a Character into this Story, then opens the copy's editor.
+   *
+   * The editor is told about the original's portrait, which the copy does not
+   * take with it, so it can offer the picture for downloading and uploading
+   * again.
+   *
+   * @param character - The Character to copy.
+   */
+  copy(character: CopyableCharacter): void {
+    if (this.copyingId !== null) {
+      return;
+    }
+
+    this.copyingId = character.id;
+    this.pickerError = '';
+
+    this._characterService
+      .copyCharacter(this.storyId, character.id)
+      .pipe(
+        takeUntilDestroyed(this._destroyRef),
+        observeInZone(this._ngZone, this._cdr),
+        finalize(() => {
+          this.copyingId = null;
+        }),
+      )
+      .subscribe({
+        next: copied => this.openCopy(copied),
+        error: (error: HttpErrorResponse) => {
+          this.pickerError = this.copyFailureMessage(error);
+        },
+      });
+  }
+
+  /**
+   * Opens the editor of a fresh copy.
+   *
+   * @param copied - The copy, and the portrait it left behind.
+   */
+  private openCopy(copied: CopiedCharacter): void {
+    const state: CopiedCharacterNavigationState = {
+      copiedCharacterId: copied.character.id,
+      originalPortrait: copied.originalPortrait,
+    };
+
+    void this._router.navigate(
+      ['/', APP_ROUTES.STORYTIME, 'manage', 'characters', copied.character.id],
+      { state },
+    );
+  }
+
+  /**
+   * Says why a copy failed.
+   *
+   * @param error - What the server answered.
+   * @returns The message to show.
+   */
+  private copyFailureMessage(error: HttpErrorResponse): string {
+    const said = (error.error as { message?: unknown } | null)?.message;
+
+    if (error.status === 400 && typeof said === 'string') {
+      return said;
+    }
+
+    if (error.status === 403) {
+      return 'You may no longer manage the cast of one of those Stories.';
+    }
+
+    return 'That Character could not be copied. Please try again shortly.';
   }
 
   /**

@@ -1,8 +1,11 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { ManagedCharacter } from 'src/app/models/storytime.models';
+import {
+  CopyableCharacterStory,
+  ManagedCharacter,
+} from 'src/app/models/storytime.models';
 import { CharacterService } from '../../character.service';
 import {
   ConfirmPromptDouble,
@@ -16,6 +19,8 @@ describe('CharacterListComponent', () => {
     getMyCharacters: jest.Mock;
     reorderCharacters: jest.Mock;
     deleteCharacter: jest.Mock;
+    getCopyableCharacters: jest.Mock;
+    copyCharacter: jest.Mock;
   };
   let confirm: ConfirmPromptDouble;
 
@@ -60,6 +65,8 @@ describe('CharacterListComponent', () => {
         ),
       reorderCharacters: jest.fn().mockReturnValue(of([])),
       deleteCharacter: jest.fn().mockReturnValue(of(undefined)),
+      getCopyableCharacters: jest.fn().mockReturnValue(of([])),
+      copyCharacter: jest.fn(),
     };
 
     confirm = stubConfirmPrompt();
@@ -77,6 +84,195 @@ describe('CharacterListComponent', () => {
           },
         },
       ],
+    });
+  });
+
+  // sc-1483: copying a Character from another of the creator's Stories.
+  describe('copying from another Story', () => {
+    const stories: CopyableCharacterStory[] = [
+      {
+        storyId: 'story-2',
+        storyTitle: 'Another Story',
+        characters: [
+          {
+            id: 'source-1',
+            name: 'Jhamel',
+            shortBio: 'An Aenar telepath.',
+            portraitImageThumbnailUrl: null,
+            portraitImageAlt: null,
+          },
+        ],
+      },
+    ];
+
+    /**
+     * Finds a button by what it says.
+     *
+     * @param element - The rendered page.
+     * @param text - Its text.
+     * @returns The button, or undefined.
+     */
+    const buttonSaying = (
+      element: HTMLElement,
+      text: string,
+    ): HTMLButtonElement | undefined =>
+      [...element.querySelectorAll<HTMLButtonElement>('button')].find(
+        button => button.textContent?.trim() === text,
+      );
+
+    /**
+     * Opens the picker through its button.
+     *
+     * @returns The rendered page.
+     */
+    const openPicker = (): HTMLElement => {
+      const element = render();
+      buttonSaying(element, 'Copy from another Story')?.click();
+      fixture.detectChanges();
+      return element;
+    };
+
+    it('keeps the picker closed until asked', () => {
+      const element = render();
+      const toggle = buttonSaying(element, 'Copy from another Story');
+
+      expect(toggle?.getAttribute('aria-expanded')).toBe('false');
+      expect(
+        element.querySelector('#storytime-character-copy-picker'),
+      ).toBeNull();
+      expect(characterService.getCopyableCharacters).not.toHaveBeenCalled();
+    });
+
+    it('lists the Characters of the creator’s other Stories', () => {
+      characterService.getCopyableCharacters.mockReturnValue(of(stories));
+
+      const element = openPicker();
+      const picker = element.querySelector('#storytime-character-copy-picker');
+
+      expect(characterService.getCopyableCharacters).toHaveBeenCalledWith(
+        'story-1',
+      );
+      expect(
+        buttonSaying(element, 'Copy from another Story')?.getAttribute(
+          'aria-expanded',
+        ),
+      ).toBe('true');
+      expect(picker?.textContent).toContain('Another Story');
+      expect(picker?.textContent).toContain('Jhamel');
+      expect(picker?.textContent).toContain('An Aenar telepath.');
+      expect(
+        picker?.querySelector('button[aria-label="Copy Jhamel"]'),
+      ).toBeTruthy();
+    });
+
+    it('says so when there is nothing to copy', () => {
+      const element = openPicker();
+
+      expect(element.textContent).toContain(
+        'None of your other Stories has a Character to copy.',
+      );
+    });
+
+    it('says so when the other Stories could not be loaded', () => {
+      characterService.getCopyableCharacters.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 500 })),
+      );
+
+      const element = openPicker();
+
+      expect(element.textContent).toContain(
+        'Your other Stories could not be loaded.',
+      );
+      expect(element.textContent).not.toContain(
+        'None of your other Stories has a Character to copy.',
+      );
+    });
+
+    it('closes the picker again', () => {
+      const element = openPicker();
+
+      buttonSaying(element, 'Copy from another Story')?.click();
+      fixture.detectChanges();
+
+      expect(
+        element.querySelector('#storytime-character-copy-picker'),
+      ).toBeNull();
+    });
+
+    it('copies the Character, then opens the copy with the original portrait', () => {
+      const router = TestBed.inject(Router);
+      const navigate = jest.spyOn(router, 'navigate').mockResolvedValue(true);
+      const originalPortrait = {
+        url: 'https://cdn.example.test/portrait-1/public',
+        alt: 'Jhamel in the ice caves',
+      };
+      characterService.getCopyableCharacters.mockReturnValue(of(stories));
+      characterService.copyCharacter.mockReturnValue(
+        of({
+          character: buildCharacter('copy-1', 'Jhamel'),
+          originalPortrait,
+        }),
+      );
+
+      const element = openPicker();
+      element
+        .querySelector<HTMLButtonElement>('button[aria-label="Copy Jhamel"]')
+        ?.click();
+
+      expect(characterService.copyCharacter).toHaveBeenCalledWith(
+        'story-1',
+        'source-1',
+      );
+      expect(navigate).toHaveBeenCalledWith(
+        ['/', 'storytime', 'manage', 'characters', 'copy-1'],
+        { state: { copiedCharacterId: 'copy-1', originalPortrait } },
+      );
+      expect(fixture.componentInstance.copyingId).toBeNull();
+    });
+
+    it('does not start a second copy while one is in flight', () => {
+      characterService.getCopyableCharacters.mockReturnValue(of(stories));
+      openPicker();
+      fixture.componentInstance.copyingId = 'source-1';
+
+      fixture.componentInstance.copy(stories[0].characters[0]);
+
+      expect(characterService.copyCharacter).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      [
+        400,
+        {
+          message: 'A Character an administrator has removed cannot be copied.',
+        },
+        'A Character an administrator has removed cannot be copied.',
+      ],
+      [403, null, 'You may no longer manage the cast of one of those Stories.'],
+      [
+        400,
+        null,
+        'That Character could not be copied. Please try again shortly.',
+      ],
+      [
+        500,
+        null,
+        'That Character could not be copied. Please try again shortly.',
+      ],
+    ])('says why a copy failed (%s)', (status, error, message) => {
+      characterService.getCopyableCharacters.mockReturnValue(of(stories));
+      characterService.copyCharacter.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status, error })),
+      );
+
+      const element = openPicker();
+      element
+        .querySelector<HTMLButtonElement>('button[aria-label="Copy Jhamel"]')
+        ?.click();
+      fixture.detectChanges();
+
+      expect(element.textContent).toContain(message);
+      expect(fixture.componentInstance.copyingId).toBeNull();
     });
   });
 

@@ -279,7 +279,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     summary:
       'What site administrators and the retention jobs did, when, to whom and why — and why every action asks you for a reason.',
     whatItIsFor: [
-      'The Security Log is one feed of what site administrators did, and of what the site’s retention jobs did on their own: who, when, what, to whom or what, and why. It is the record a site administrator answers to.',
+      'The Security Log is one feed of what site administrators did, and of what the site’s retention jobs did on their own: who, when, what, to whom or what, and why. It is the record a site administrator answers to. It also records each Storytime Character a creator copies from one of their Stories into another.',
       'It keeps nothing of its own. Each entry is read from the log that already holds it, and lasts as long as that log keeps it.',
     ],
     whoCanUseIt: ['Site administrators only.'],
@@ -290,7 +290,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       'How to read it': {
         paragraphs: [
           'Entries are newest first, fifty to a page; Newer and Older turn the pages. Each has When, Who, What, To whom or what, and Why, with its source under What.',
-          'Who reads “The system” for what STO Info did on its own. A site admin action or Fleet dispute whose administrator’s account has since gone reads “An account since closed”.',
+          'Who reads “The system” for what STO Info did on its own. A site admin action, Fleet dispute or Character copy whose account has since gone reads “An account since closed”.',
           'Show narrows the feed to one source, or Everything:',
         ],
         points: [
@@ -300,6 +300,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Fleet investigations — each look into a Fleet, with its purpose.',
           'Roster erasures — each erasure, and each one the site made again by itself after a restore.',
           'Retention runs — each run of the Fleet retention jobs, what it removed, and any failure.',
+          'Character copies — each Storytime Character a creator copied from one of their Stories into another. To whom or what names the copy; the details give the original Character and both Stories by ID. A copy asks for no reason, so Why is empty.',
         ],
       },
       'How reasons work': [
@@ -315,7 +316,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     },
     whoCanSeeIt: [
       'The Security Log is for site administrators alone. Some entries also live elsewhere: a Fleet dispute action is in the history of the Community, Fleet or Armada too, where its Owner and Admins can read your reason.',
-      'How long an entry lasts depends on its source. The site admin log is kept under the site’s audit policy, a Fleet’s history for as long as the Fleet exists, and retention runs for a year.',
+      'How long an entry lasts depends on its source. The site admin log and Character copies are kept under the site’s audit policy, a Fleet’s history for as long as the Fleet exists, and retention runs for a year.',
     ],
     whenSomethingGoesWrong: [
       'An entry you expected is missing? Check Show is on Everything. A change that failed was never logged, because an entry is only written with the change it records.',

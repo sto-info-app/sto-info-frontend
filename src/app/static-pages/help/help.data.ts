@@ -841,6 +841,8 @@ const STORYTIME_TOPIC: HelpTopic = {
       sections: [
         guideSection('Your cast', [
           'A Story keeps its own list of Characters — your captain, your crew, the antagonist you keep bringing back. Each gets a name, a short biography and a picture if you have one.',
+          'A Character can be copied from another of your Stories: choose Copy from another Story on the cast page, then Copy beside them. The list shows the Characters of every other Story whose cast you can manage, whether you own it or collaborate on it with Manage Characters. Characters an administrator has removed are not offered.',
+          'The copy is separate from the original: editing or deleting one leaves the other as it is. It takes their details, biography, traits and tags, and goes to the end of the cast. It does not take their Chapter appearances, credits or portrait. When the original has a portrait, the copy’s editor offers Download the original portrait, so you can upload it again through Add, or choose a different picture, or none.',
           'You can record which Chapters a Character appears in. Readers then get a Character page showing who they are and where to find them, which is how somebody joining a long Story catches up without spoiling it for themselves.',
         ]),
         guideSection('Crew credits', [
