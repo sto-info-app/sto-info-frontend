@@ -161,7 +161,9 @@ describe('CharacterListComponent', () => {
       expect(picker?.textContent).toContain('Jhamel');
       expect(picker?.textContent).toContain('An Aenar telepath.');
       expect(
-        picker?.querySelector('button[aria-label="Copy Jhamel"]'),
+        picker?.querySelector(
+          'button[aria-label="Copy Jhamel from Another Story"]',
+        ),
       ).toBeTruthy();
     });
 
@@ -216,7 +218,9 @@ describe('CharacterListComponent', () => {
 
       const element = openPicker();
       element
-        .querySelector<HTMLButtonElement>('button[aria-label="Copy Jhamel"]')
+        .querySelector<HTMLButtonElement>(
+          'button[aria-label="Copy Jhamel from Another Story"]',
+        )
         ?.click();
 
       expect(characterService.copyCharacter).toHaveBeenCalledWith(
@@ -267,7 +271,9 @@ describe('CharacterListComponent', () => {
 
       const element = openPicker();
       element
-        .querySelector<HTMLButtonElement>('button[aria-label="Copy Jhamel"]')
+        .querySelector<HTMLButtonElement>(
+          'button[aria-label="Copy Jhamel from Another Story"]',
+        )
         ?.click();
       fixture.detectChanges();
 

@@ -80,7 +80,9 @@
                     <button
                       class="lcars-btn lcars-btn-auto"
                       type="button"
-                      [attr.aria-label]="'Copy ' + character.name"
+                      [attr.aria-label]="
+                        'Copy ' + character.name + ' from ' + story.storyTitle
+                      "
                       [disabled]="copyingId !== null"
                       (click)="copy(character)">
                       {{ copyingId === character.id ? 'Copying' : 'Copy' }}
