@@ -1,10 +1,21 @@
+import { Location } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ActivatedRoute, Router, provideRouter } from '@angular/router';
 import { of, throwError } from 'rxjs';
-import { ManagedCharacter } from 'src/app/models/storytime.models';
+import {
+  CopiedCharacterNavigationState,
+  ManagedCharacter,
+} from 'src/app/models/storytime.models';
+import { ImageManagerComponent } from 'src/app/storytime/shared/image-manager/image-manager.component';
+import { saveFile } from 'src/app/shared/utils/save-file.utils';
+import { By } from '@angular/platform-browser';
 import { CharacterService } from '../../character.service';
 import { CharacterEditorComponent } from './character-editor.component';
+
+jest.mock('src/app/shared/utils/save-file.utils', () => ({
+  saveFile: jest.fn(),
+}));
 
 describe('CharacterEditorComponent', () => {
   let fixture: ComponentFixture<CharacterEditorComponent>;
@@ -12,9 +23,11 @@ describe('CharacterEditorComponent', () => {
     getMyCharacter: jest.Mock;
     createCharacter: jest.Mock;
     updateCharacter: jest.Mock;
+    downloadOriginalPortrait: jest.Mock;
   };
   let router: { navigate: jest.Mock };
   let params: Map<string, string>;
+  let navigationState: CopiedCharacterNavigationState | null;
 
   /**
    * Builds a Character.
@@ -63,8 +76,11 @@ describe('CharacterEditorComponent', () => {
       getMyCharacter: jest.fn().mockReturnValue(of(buildCharacter())),
       createCharacter: jest.fn().mockReturnValue(of(buildCharacter())),
       updateCharacter: jest.fn().mockReturnValue(of(buildCharacter())),
+      downloadOriginalPortrait: jest.fn(),
     };
     router = { navigate: jest.fn().mockResolvedValue(true) };
+    navigationState = null;
+    (saveFile as jest.Mock).mockReset();
 
     TestBed.configureTestingModule({
       imports: [CharacterEditorComponent],
@@ -72,6 +88,7 @@ describe('CharacterEditorComponent', () => {
         provideRouter([]),
         { provide: CharacterService, useValue: characterService },
         { provide: Router, useValue: router },
+        { provide: Location, useValue: { getState: () => navigationState } },
         {
           provide: ActivatedRoute,
           useValue: { snapshot: { paramMap: params } },
@@ -156,6 +173,168 @@ describe('CharacterEditorComponent', () => {
         'story-1',
         'characters',
       ]);
+    });
+  });
+
+  // sc-1483: a copy's editor offers the portrait the copy left behind.
+  describe('after copying from another Story', () => {
+    const originalPortrait = {
+      url: 'https://cdn.example.test/portrait-1/public',
+      alt: 'Shran on the bridge',
+    };
+
+    /**
+     * The download button, when it is offered.
+     *
+     * @param element - The rendered editor.
+     * @returns The button, or undefined.
+     */
+    const downloadButton = (
+      element: HTMLElement,
+    ): HTMLButtonElement | undefined =>
+      [...element.querySelectorAll<HTMLButtonElement>('button')].find(
+        button =>
+          button.textContent?.trim() === 'Download the original portrait',
+      );
+
+    beforeEach(() => {
+      params.clear();
+      params.set('characterId', 'character-1');
+      navigationState = { copiedCharacterId: 'character-1', originalPortrait };
+    });
+
+    it('offers the original portrait for downloading', () => {
+      const element = render();
+
+      expect(element.textContent).toContain('Original portrait');
+      expect(downloadButton(element)).toBeDefined();
+    });
+
+    it('saves the original portrait under the copy’s name', () => {
+      const file = new Blob(['png'], { type: 'image/png' });
+      characterService.downloadOriginalPortrait.mockReturnValue(of(file));
+      const element = render();
+
+      downloadButton(element)?.click();
+
+      expect(characterService.downloadOriginalPortrait).toHaveBeenCalledWith(
+        originalPortrait.url,
+      );
+      expect(saveFile).toHaveBeenCalledWith(file, 'captain-shran-portrait.png');
+      expect(fixture.componentInstance.isDownloadingPortrait).toBe(false);
+    });
+
+    it('names the file for the type the CDN answered with', () => {
+      const file = new Blob(['webp'], { type: 'image/webp' });
+      characterService.downloadOriginalPortrait.mockReturnValue(of(file));
+      const element = render();
+
+      downloadButton(element)?.click();
+
+      expect(saveFile).toHaveBeenCalledWith(
+        file,
+        'captain-shran-portrait.webp',
+      );
+    });
+
+    it('calls a file of a type it does not know a PNG', () => {
+      const file = new Blob(['?']);
+      characterService.downloadOriginalPortrait.mockReturnValue(of(file));
+      const element = render();
+
+      downloadButton(element)?.click();
+
+      expect(saveFile).toHaveBeenCalledWith(file, 'captain-shran-portrait.png');
+    });
+
+    it('says so when the download fails', () => {
+      characterService.downloadOriginalPortrait.mockReturnValue(
+        throwError(() => new HttpErrorResponse({ status: 0 })),
+      );
+      const element = render();
+
+      downloadButton(element)?.click();
+      fixture.detectChanges();
+
+      expect(saveFile).not.toHaveBeenCalled();
+      expect(element.textContent).toContain(
+        'The original portrait could not be downloaded.',
+      );
+      expect(fixture.componentInstance.isDownloadingPortrait).toBe(false);
+    });
+
+    it('waits in the upload with the original’s description', () => {
+      render();
+
+      const manager = fixture.debugElement.query(
+        By.directive(ImageManagerComponent),
+      ).componentInstance as ImageManagerComponent;
+
+      expect(manager.imageAlt).toBe('Shran on the bridge');
+      // Not in the form: the server refuses a description with no picture.
+      expect(
+        fixture.componentInstance.form.getRawValue().portraitImageAlt,
+      ).toBe('');
+    });
+
+    it('stops offering it once the copy has a portrait of its own', () => {
+      characterService.getMyCharacter.mockReturnValue(
+        of(
+          buildCharacter({
+            portraitImageUrl: 'https://cdn.example.test/portrait-2/large',
+            portraitImageAlt: 'A new picture',
+          }),
+        ),
+      );
+      const element = render();
+
+      expect(downloadButton(element)).toBeUndefined();
+    });
+
+    it('offers nothing when the original had no portrait', () => {
+      navigationState = {
+        copiedCharacterId: 'character-1',
+        originalPortrait: null,
+      };
+      const element = render();
+
+      expect(downloadButton(element)).toBeUndefined();
+      expect(fixture.componentInstance.originalPortrait).toBeNull();
+    });
+
+    // The cast page names the copy it opened, so the offer cannot follow the
+    // creator to another Character's editor.
+    it('offers nothing to a different Character', () => {
+      navigationState = { copiedCharacterId: 'character-2', originalPortrait };
+      const element = render();
+
+      expect(downloadButton(element)).toBeUndefined();
+    });
+
+    it('offers nothing to an editor reached any other way', () => {
+      navigationState = null;
+      const element = render();
+
+      expect(downloadButton(element)).toBeUndefined();
+    });
+
+    it('does nothing when asked to download with nothing to download', () => {
+      navigationState = null;
+      render();
+
+      fixture.componentInstance.downloadOriginalPortrait();
+
+      expect(characterService.downloadOriginalPortrait).not.toHaveBeenCalled();
+    });
+
+    it('does not start a second download while one is in flight', () => {
+      characterService.downloadOriginalPortrait.mockReturnValue(of(new Blob()));
+      render();
+      fixture.componentInstance.isDownloadingPortrait = true;
+
+      fixture.componentInstance.downloadOriginalPortrait();
+
+      expect(characterService.downloadOriginalPortrait).not.toHaveBeenCalled();
     });
   });
 

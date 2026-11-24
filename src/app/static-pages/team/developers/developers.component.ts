@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { TeamListBaseComponent } from '../team-list-base.component';
 import { TeamMemberSectionComponent } from '../team-member-section/team-member-section.component';
+import { TeamNavigationComponent } from '../team-navigation/team-navigation.component';
 
 export type { MemberVm } from '../models/member-vm.model';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
@@ -16,6 +17,7 @@ import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsib
   imports: [
     RouterModule,
     TeamMemberSectionComponent,
+    TeamNavigationComponent,
     CollapsibleSectionComponent,
   ],
 })

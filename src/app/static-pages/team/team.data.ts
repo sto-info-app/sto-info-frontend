@@ -69,6 +69,63 @@ export const TEAM_MEMBERS: TeamMember[] = [
       'Shapes the LCARS-inspired interface and overall player experience.',
     ],
   },
+  {
+    slug: 'winters',
+    name: 'Winters',
+    title: 'Beta Tester',
+    group: 'volunteers',
+    status: 'current',
+    photoUrl: `${BASE_CLOUDFLARE_IMAGES_URL}/770fb19c-7daf-409a-c51d-66cdb78ea300`,
+    bio: `<p>Fleet Admiral Winters is the founder and leader of the Priority One Armada Gaming Community. Winters also serves as Executive Producer for all Priority One Productions.</p><p>As with most trekkies, Winters has had an interest or been into Star Trek from a very young age and grew up watching TNG and never looked back. Winters has been playing STO since 2013 and in that time has continued to lead and build one of the biggest and longest running communities in STO.</p><p>Winters is retired military, having served in the Irish Army and been deployed on several occasions on overseas service.</p>`,
+    info: [
+      { label: 'Location', value: 'Ireland' },
+      {
+        label: 'PC handle',
+        value: '@winters83',
+      },
+      {
+        label: 'PC Armada',
+        value: 'Priority One Armada',
+      },
+    ],
+    highlights: ['Fleet Community Beta Tester.'],
+  },
+  {
+    slug: 'dragon',
+    name: 'Dragon',
+    title: 'Beta Tester',
+    group: 'volunteers',
+    status: 'current',
+    photoUrl: '',
+    bio: ``,
+    info: [],
+    highlights: ['General Beta Tester.'],
+  },
+  {
+    slug: 'bazag',
+    name: 'Bazag',
+    title: 'Beta Tester',
+    group: 'volunteers',
+    status: 'current',
+    photoUrl: '',
+    bio: ``,
+    info: [{ label: 'Also Known As', value: 'Baz' }],
+    highlights: ['STO Storytime Beta Tester.'],
+  },
+  {
+    slug: 'tharryn-lachman',
+    name: 'Tharryn Lachman',
+    title: 'Beta Tester',
+    group: 'volunteers',
+    status: 'current',
+    photoUrl: '',
+    bio: `<p>Tharryn is most often known to the Star Trek Online community as being a Chat Moderator for Cryptic Studios' Ten Forward Weekly streams on Twitch.</p>`,
+    info: [
+      { label: 'Also Known As', value: 'Tharryn' },
+      { label: 'PC handle', value: '@nissh#6278' },
+    ],
+    highlights: ['STO Storytime Beta Tester.'],
+  },
 ];
 
 export const SUPPORTERS: Supporter[] = [];

@@ -1,0 +1,39 @@
+<div class="reported-log-entry">
+  <p class="reported-log-entry__label">Reported Captain's Log entry</p>
+  @if (errorMessage()) {
+    <p class="reported-log-entry__error">{{ errorMessage() }}</p>
+  }
+  @if (entry(); as shown) {
+    <app-log-entry-card
+      [entry]="shown"
+      [level]="4">
+      <span
+        entryMarks
+        class="status-pill">
+        {{ typeLabels[shown.type] }}
+      </span>
+      @if (shown.removedAt) {
+        <span
+          entryMarks
+          class="status-pill draft">
+          Removed
+        </span>
+      }
+      @if (shown.removedAt) {
+        <p
+          entryNotes
+          class="reported-log-entry__reason">
+          Removed: {{ shown.removedReason }}
+        </p>
+      } @else {
+        <button
+          entryActions
+          type="button"
+          class="lcars-btn lcars-btn-auto red"
+          (click)="remove(shown)">
+          Remove entry
+        </button>
+      }
+    </app-log-entry-card>
+  }
+</div>

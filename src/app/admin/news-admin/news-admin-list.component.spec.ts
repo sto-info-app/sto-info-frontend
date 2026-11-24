@@ -30,6 +30,9 @@ describe('NewsAdminListComponent', () => {
     status: NewsStatus.DRAFT,
     publishedAt: null,
     authorId: null,
+    coverImageId: null,
+    coverImageAlt: null,
+    coverImageUrls: null,
     createdAt: '',
     updatedAt: '',
   };

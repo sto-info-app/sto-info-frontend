@@ -17,6 +17,7 @@ describe('ChapterListComponent', () => {
     publishChapter: jest.Mock;
     unpublishChapter: jest.Mock;
     deleteChapter: jest.Mock;
+    reorderChapters: jest.Mock;
   };
   let confirm: ConfirmPromptDouble;
 
@@ -57,6 +58,7 @@ describe('ChapterListComponent', () => {
       publishChapter: jest.fn().mockReturnValue(of(buildChapter())),
       unpublishChapter: jest.fn().mockReturnValue(of(buildChapter())),
       deleteChapter: jest.fn().mockReturnValue(of(undefined)),
+      reorderChapters: jest.fn().mockReturnValue(of([])),
     };
 
     confirm = stubConfirmPrompt();
@@ -197,6 +199,145 @@ describe('ChapterListComponent', () => {
       expect(
         element.querySelector('[aria-label="Delete this Chapter"]'),
       ).not.toBeNull();
+    });
+  });
+
+  describe('reordering', () => {
+    const first = buildChapter({ id: 'chapter-1', title: 'Chapter One' });
+    const second = buildChapter({ id: 'chapter-2', title: 'Chapter Two' });
+    const third = buildChapter({ id: 'chapter-3', title: 'Chapter Three' });
+
+    /**
+     * Finds the named control on each card, in card order.
+     *
+     * @param element - The rendered page.
+     * @param label - The control's accessible name.
+     * @returns Whether each card has one.
+     */
+    const controlsOnEachCard = (
+      element: HTMLElement,
+      label: string,
+    ): boolean[] =>
+      Array.from(
+        element.querySelectorAll('.storytime-chapter-list > li'),
+        card => card.querySelector(`button[aria-label="${label}"]`) !== null,
+      );
+
+    /**
+     * Clicks the named control on one card.
+     *
+     * @param element - The rendered page.
+     * @param position - The card's position.
+     * @param label - The control's accessible name.
+     */
+    const click = (
+      element: HTMLElement,
+      position: number,
+      label: string,
+    ): void => {
+      const cards = element.querySelectorAll('.storytime-chapter-list > li');
+
+      cards
+        .item(position)
+        .querySelector<HTMLButtonElement>(`button[aria-label="${label}"]`)
+        ?.click();
+    };
+
+    beforeEach(() => {
+      chapterService.getMyChapters.mockReturnValue(of([first, second, third]));
+    });
+
+    it('offers Move up on every Chapter but the first', () => {
+      expect(controlsOnEachCard(render(), 'Move up')).toEqual([
+        false,
+        true,
+        true,
+      ]);
+    });
+
+    it('offers Move down on every Chapter but the last', () => {
+      expect(controlsOnEachCard(render(), 'Move down')).toEqual([
+        true,
+        true,
+        false,
+      ]);
+    });
+
+    it('names the controls for screen readers and pointers alike', () => {
+      const button = render().querySelector<HTMLButtonElement>(
+        'button[aria-label="Move up"]',
+      );
+
+      expect(button?.type).toBe('button');
+      expect(button?.title).toBe('Move up');
+    });
+
+    it('moves a Chapter up, sending the whole new order', () => {
+      const element = render();
+
+      click(element, 1, 'Move up');
+
+      expect(chapterService.reorderChapters).toHaveBeenCalledWith('story-1', [
+        'chapter-2',
+        'chapter-1',
+        'chapter-3',
+      ]);
+    });
+
+    it('moves a Chapter down, sending the whole new order', () => {
+      const element = render();
+
+      click(element, 1, 'Move down');
+
+      expect(chapterService.reorderChapters).toHaveBeenCalledWith('story-1', [
+        'chapter-1',
+        'chapter-3',
+        'chapter-2',
+      ]);
+    });
+
+    // The server settles the order, so the list shows what it saved rather
+    // than what the page guessed.
+    it('reloads the list once the new order is saved', () => {
+      const element = render();
+      chapterService.getMyChapters.mockReturnValue(of([second, first, third]));
+
+      click(element, 1, 'Move up');
+      fixture.detectChanges();
+
+      const titles = Array.from(
+        element.querySelectorAll('.storytime-record__name'),
+        title => title.textContent?.trim(),
+      );
+      expect(titles).toEqual(['Chapter Two', 'Chapter One', 'Chapter Three']);
+    });
+
+    it('sends nothing when asked to move past either end', () => {
+      render();
+
+      fixture.componentInstance.moveUp(0);
+      fixture.componentInstance.moveDown(2);
+
+      expect(chapterService.reorderChapters).not.toHaveBeenCalled();
+    });
+
+    it('shows the reason the server gave for a refused reorder', () => {
+      chapterService.reorderChapters.mockReturnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({
+              status: 403,
+              error: { message: 'You may not manage these Chapters' },
+            }),
+        ),
+      );
+      const element = render();
+
+      click(element, 1, 'Move up');
+
+      expect(fixture.componentInstance.errorMessage).toContain(
+        'may not manage these Chapters',
+      );
     });
   });
 

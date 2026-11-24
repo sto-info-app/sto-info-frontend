@@ -1,0 +1,107 @@
+@use 'lcars-variables' as vars;
+
+// Writing or editing a Captain's Log entry (sc-1450).
+#log-entry-editor-page {
+  .log-entry-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .log-entry-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .log-entry-types {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 2rem;
+    margin: 0;
+    padding: 0;
+    border: 0;
+
+    legend {
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+  }
+
+  .log-entry-type {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0 0.5rem;
+    align-items: center;
+    cursor: pointer;
+
+    &__name {
+      font-weight: 700;
+    }
+
+    &__hint {
+      grid-column: 2;
+      font-size: 0.85rem;
+      color: vars.$white-a70;
+    }
+  }
+
+  .log-entry-hint {
+    font-size: 0.85rem;
+    color: vars.$white-a70;
+  }
+
+  .field-footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .char-count {
+    margin-left: auto;
+    color: vars.$white-a70;
+  }
+
+  .markdown-preview {
+    padding: 1rem;
+    border: 1px solid vars.$white-a70;
+    border-radius: 0.5rem;
+  }
+
+  .preview-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+  }
+
+  .log-entry-picture {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    &__image {
+      display: block;
+      width: 100%;
+      max-width: 40rem;
+      aspect-ratio: 16 / 9;
+      object-fit: cover;
+      border-radius: 0.75rem;
+    }
+  }
+
+  .buttons-row,
+  .log-entry-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .log-entry-actions {
+    justify-content: flex-end;
+  }
+
+  .log-entry-foot {
+    margin-top: 1.5rem;
+  }
+}

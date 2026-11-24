@@ -109,6 +109,10 @@
                     </p>
                   }
 
+                  @if (report.logEntryId) {
+                    <app-reported-log-entry [entryId]="report.logEntryId" />
+                  }
+
                   @if (report.openChatReportCount > 0) {
                     <p class="moderation-no-details">
                       Also

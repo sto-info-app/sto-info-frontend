@@ -24,6 +24,13 @@
   }
 
   @if (post) {
+    @if (coverOf(post); as shown) {
+      <img
+        class="news-cover"
+        [src]="shown.url"
+        [alt]="shown.alt" />
+    }
+
     <h1>{{ post.title }}</h1>
 
     <div class="news-meta">

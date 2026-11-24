@@ -1,3 +1,8 @@
+import {
+  EmailFrequency,
+  NotificationEmailType,
+} from './notification-email.model';
+
 export interface User {
   id: string;
   email: string;
@@ -61,6 +66,12 @@ export interface UserSettings {
   notifyDirectMessage: boolean;
   notifyRosterAssociation: boolean;
   notifyEventReminder: boolean;
+  /** The notification emails opted in to (sc-1067). */
+  emailNotificationTypes: NotificationEmailType[];
+  /** How often notification emails go out. */
+  emailFrequency: EmailFrequency;
+  /** Whether SES paused emails to the address after a bounce or complaint. */
+  emailsPaused: boolean;
 }
 
 /**
@@ -70,5 +81,10 @@ export interface UserSettings {
  * alone, which is what lets an older client keep working rather than quietly
  * resetting settings it has never heard of.
  */
-export type UserSettingsUpdate = Partial<UserSettings> &
-  Pick<UserSettings, 'privacyMode'>;
+export type UserSettingsUpdate = Partial<
+  Omit<UserSettings, 'emailNotificationTypes' | 'emailsPaused'>
+> &
+  Pick<UserSettings, 'privacyMode'> & {
+    /** Email switches to change, by type; others are left alone. */
+    emailNotifications?: Partial<Record<NotificationEmailType, boolean>>;
+  };

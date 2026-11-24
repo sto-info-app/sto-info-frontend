@@ -22,7 +22,10 @@ import { AuthService } from '../core/auth/auth.service';
 import { CommunitySubscriptionService } from '../fleet/community-subscription.service';
 import { LoadingBarComponent } from '../shared/components/loading-bar/loading-bar.component';
 import { SRC_PHOTO_UNAVAILABLE_300PX } from '../shared/constants/app-image-assets.constants';
-import { APP_ROUTES } from '../shared/constants/app-routing.constants';
+import {
+  APP_ROUTE_TITLES,
+  APP_ROUTES,
+} from '../shared/constants/app-routing.constants';
 import { FleetConfigurationService } from '../shared/services/fleet-configuration.service';
 import { RoutingService } from '../shared/services/routing.service';
 import { randomInt } from '../shared/utils/random.utils';
@@ -47,6 +50,7 @@ import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsib
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   appRoutes = APP_ROUTES;
+  appRouteTitles = APP_ROUTE_TITLES;
   unavailablePhotoSrc = SRC_PHOTO_UNAVAILABLE_300PX;
 
   user: User | undefined;

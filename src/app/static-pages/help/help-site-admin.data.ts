@@ -49,6 +49,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Hold their chat messages — places a moderation hold on everything they wrote in chat.',
           'Disable this account — signs them out at once, keeps them from signing in again, takes their record out of the registry, and closes every open report about them, member and chat alike, as actioned. They are not told why. Restore this account undoes it; reports already closed stay closed.',
           'All but Mark as under review ask for a Reason, up to 500 characters. A closed report keeps only the hold and account buttons.',
+          'A report about one of their Captain’s Log entries shows the entry under Reported Captain’s Log entry. Remove entry asks for a Reason, up to 500 characters: the entry leaves their profile, stays in their own Log marked Removed by moderators, and they are sent a notification with your reason. It appears in the Security Log as Removed a Captain’s Log entry. The report itself stays open until you close it.',
         ],
       },
       'How to work Chat Reports': {
@@ -82,7 +83,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       ],
     },
     whoCanSeeIt: [
-      'Neither the reporter nor the reported member is told what happens to a member report. Somebody who reports a chat message is thanked, and never told the outcome. A member whose account you disable is not told why, and a removed message’s author is not shown your reason.',
+      'Neither the reporter nor the reported member is told what happens to a member report, except that the author of a Captain’s Log entry you remove is told it was removed, and why. Somebody who reports a chat message is thanked, and never told the outcome. A member whose account you disable is not told why, and a removed message’s author is not shown your reason.',
       'What a hold keeps is read on Moderation Holds alone. Closing a report, removing a message, disabling or restoring an account, and every hold placed, extended, released or read all appear in the Security Log with your reason or purpose.',
     ],
     whenSomethingGoesWrong: [
@@ -279,7 +280,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     summary:
       'What site administrators and the retention jobs did, when, to whom and why — and why every action asks you for a reason.',
     whatItIsFor: [
-      'The Security Log is one feed of what site administrators did, and of what the site’s retention jobs did on their own: who, when, what, to whom or what, and why. It is the record a site administrator answers to.',
+      'The Security Log is one feed of what site administrators did, and of what the site’s retention jobs did on their own: who, when, what, to whom or what, and why. It is the record a site administrator answers to. It also records each Storytime Character a creator copies from one of their Stories into another.',
       'It keeps nothing of its own. Each entry is read from the log that already holds it, and lasts as long as that log keeps it.',
     ],
     whoCanUseIt: ['Site administrators only.'],
@@ -290,7 +291,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       'How to read it': {
         paragraphs: [
           'Entries are newest first, fifty to a page; Newer and Older turn the pages. Each has When, Who, What, To whom or what, and Why, with its source under What.',
-          'Who reads “The system” for what STO Info did on its own. A site admin action or Fleet dispute whose administrator’s account has since gone reads “An account since closed”.',
+          'Who reads “The system” for what STO Info did on its own. A site admin action, Fleet dispute or Character copy whose account has since gone reads “An account since closed”.',
           'Show narrows the feed to one source, or Everything:',
         ],
         points: [
@@ -300,6 +301,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Fleet investigations — each look into a Fleet, with its purpose.',
           'Roster erasures — each erasure, and each one the site made again by itself after a restore.',
           'Retention runs — each run of the Fleet retention jobs, what it removed, and any failure.',
+          'Character copies — each Storytime Character a creator copied from one of their Stories into another. To whom or what names the copy; the details give the original Character and both Stories by ID. A copy asks for no reason, so Why is empty.',
         ],
       },
       'How reasons work': [
@@ -315,7 +317,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
     },
     whoCanSeeIt: [
       'The Security Log is for site administrators alone. Some entries also live elsewhere: a Fleet dispute action is in the history of the Community, Fleet or Armada too, where its Owner and Admins can read your reason.',
-      'How long an entry lasts depends on its source. The site admin log is kept under the site’s audit policy, a Fleet’s history for as long as the Fleet exists, and retention runs for a year.',
+      'How long an entry lasts depends on its source. The site admin log and Character copies are kept under the site’s audit policy, a Fleet’s history for as long as the Fleet exists, and retention runs for a year.',
     ],
     whenSomethingGoesWrong: [
       'An entry you expected is missing? Check Show is on Everything. A change that failed was never logged, because an entry is only written with the change it records.',
@@ -541,7 +543,8 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       'How to write and publish news': [
         'Manage News lists every post, five to a page, drafts first and then the published newest first, with its category, date, status, title and summary. New post asks for a Title, a Slug, which is made from the title when left empty, a Summary, shown in the list and at the head of the post, a Category — Release notes, Announcement or General — and a Status, Draft or Published. The post itself goes under “Markdown Content”, and Show preview renders it as readers will see it.',
         'A post saved as Published is dated from that moment, and so is a draft published later, by Publish post in the list or by changing its Status. Editing a published post keeps its date. Taking a post back to Draft removes it from News, and publishing it again dates it afresh.',
-        'Edit post opens the form again, and Delete post asks you to confirm. A deleted post cannot be put back.',
+        'A post can carry one cover picture, which heads the post and is shown on its card in News and on the home page. A new post is saved first and then opens again for editing, where Cover offers Set the cover. Choose a picture, crop it — the selection is locked to 16:9, ideally 1920 by 1080 pixels or larger (640 by 360 at the smallest) — and say under “What does this picture show?” what it shows, then Upload. The picture is checked for safety before it appears, and the post keeps its old cover, or none, until then; publishing never waits for it. Replace the cover swaps it the same way, and Remove the cover asks you to confirm and takes it down straight away.',
+        'Edit post opens the form again, and Delete post asks you to confirm. A deleted post cannot be put back, and its cover is taken down with it.',
       ],
       'How banners work': [
         'Manage Banners lists each banner with its Severity, title, message, Status, whether it is Dismissible, its window and its link. New banner asks for a Severity — Info, Success, Warning or Critical, which sets its colour and icon — a Title, a Message of up to 2,000 characters, an optional Link URL and Link Label, Starts At and Ends At, and the Active and Dismissible switches.',

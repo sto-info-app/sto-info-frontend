@@ -119,6 +119,68 @@
   // Every explanatory line on the page alike, running the width of its panel,
   // so the note under the timeout chooser is not squeezed to the width of the
   // control above it.
+  // The frequency chooser sat against the paragraph above it (sc-1067).
+  .settings-description + .settings-field,
+  .settings-email-paused + .settings-field {
+    margin-top: 1rem;
+  }
+
+  // The email switches under their headings (sc-1067).
+  .settings-email-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1.5rem;
+  }
+
+  // A fieldset for each heading, so the switches are grouped by the browser
+  // itself, with none of its frame.
+  .settings-email-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+
+  .settings-email-heading {
+    margin: 0 0 4px;
+    padding: 0;
+    font-weight: 700;
+    color: vars.$lcars-gold;
+    font-size: 1rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  // The mark beside Login alerts: a word, not a colour alone.
+  .settings-recommended {
+    align-self: center;
+    padding: 2px 10px;
+    border-radius: 999px;
+    background-color: vars.$lcars-gold;
+    color: vars.$a11y-black;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  // Said once, above the switches it overrides.
+  .settings-email-paused {
+    display: block;
+    margin: 1rem 0 0;
+    padding: 8px 12px;
+    border-left: 6px solid vars.$alert-yellow-bright;
+    color: vars.$alert-yellow-sub;
+
+    a {
+      color: vars.$lcars-help-note;
+    }
+  }
+
   .settings-description {
     margin: 0;
     color: vars.$lcars-help-note;

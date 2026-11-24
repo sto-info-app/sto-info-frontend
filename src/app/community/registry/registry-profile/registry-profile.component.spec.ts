@@ -672,6 +672,34 @@ describe('RegistryProfileComponent', () => {
       expect(component.actionMessage).toContain('sent to the administrators');
     });
 
+    it('should name the Captain’s Log entry being reported (sc-1450)', async () => {
+      await setup();
+      signedInWith(RelationshipStatus.NONE);
+      stubReportDialog({ reason: ReportReason.INAPPROPRIATE_CONTENT });
+
+      component.reportMember({
+        id: 'entry-1',
+        headline: 'Arrival',
+        body: 'We reached the Azure Nebula.',
+        stardate: 104502.57,
+        pictureUrls: null,
+        pictureAlt: null,
+        createdAt: '2026-11-24T10:30:00.000Z',
+        editedAt: null,
+      });
+
+      expect(dialogSpy.open.mock.lastCall[1].data).toEqual({
+        username: 'captain.picard',
+        entryHeadline: 'Arrival',
+      });
+      expect(moderationServiceSpy.reportMember).toHaveBeenCalledWith({
+        username: 'captain.picard',
+        reason: ReportReason.INAPPROPRIATE_CONTENT,
+        details: undefined,
+        logEntryId: 'entry-1',
+      });
+    });
+
     it('should send nothing when the reporter cancels', async () => {
       await setup();
       signedInWith(RelationshipStatus.NONE);

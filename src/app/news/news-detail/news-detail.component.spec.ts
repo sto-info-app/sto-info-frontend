@@ -50,6 +50,9 @@ describe('NewsDetailComponent', () => {
     status: NewsStatus.PUBLISHED,
     publishedAt: '2026-01-01T00:00:00Z',
     authorId: null,
+    coverImageId: null,
+    coverImageAlt: null,
+    coverImageUrls: null,
     createdAt: '',
     updatedAt: '',
     previous: null,
@@ -150,6 +153,44 @@ describe('NewsDetailComponent', () => {
     expect(container.querySelector('.news-nav')?.classList).toContain(
       'lcars-rotate',
     );
+  });
+
+  // The cover heads the post at its full size, described for a reader who
+  // cannot see it (sc-1447).
+  it('heads the post with its full-size cover', async () => {
+    slug = 'my-slug';
+    await configure();
+    serviceSpy.getNewsBySlug.mockReturnValueOnce(
+      of(
+        buildPost({
+          coverImageId: 'cover',
+          coverImageAlt: 'The new shipyard at dawn',
+          coverImageUrls: {
+            cover640x360: 'https://images.example/cover/cover640x360',
+            cover1920x1080: 'https://images.example/cover/cover1920x1080',
+          },
+        }),
+      ),
+    );
+
+    fixture.detectChanges();
+
+    const cover: HTMLImageElement | null = fixture.nativeElement.querySelector(
+      '#news-detail-container img.news-cover',
+    );
+    expect(cover?.getAttribute('src')).toBe(
+      'https://images.example/cover/cover1920x1080',
+    );
+    expect(cover?.getAttribute('alt')).toBe('The new shipyard at dawn');
+  });
+
+  it('shows no cover when the post has none', async () => {
+    slug = 'my-slug';
+    await configure();
+
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('img.news-cover')).toBeNull();
   });
 
   it('shows no summary when the post has none', async () => {

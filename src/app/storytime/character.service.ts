@@ -8,6 +8,8 @@ import {
   CharacterRequest,
   CharacterWithAppearances,
   ChapterAppearance,
+  CopiedCharacter,
+  CopyableCharacterStory,
   ManagedCharacter,
 } from 'src/app/models/storytime.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
@@ -104,6 +106,54 @@ export class CharacterService {
         options,
       ),
     );
+  }
+
+  /**
+   * Lists the Characters the caller could copy into a Story (sc-1483).
+   *
+   * @param storyId - The Story the copy would join.
+   * @returns An observable of the caller's other Stories and their casts.
+   */
+  getCopyableCharacters(storyId: string): Observable<CopyableCharacterStory[]> {
+    return this.authenticated(options =>
+      this._http.get<CopyableCharacterStory[]>(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${storyId}/characters/copyable`,
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Copies a Character from another of the caller's Stories into this one.
+   *
+   * @param storyId - The Story to copy into.
+   * @param sourceCharacterId - The Character to copy.
+   * @returns An observable of the copy, and the portrait it left behind.
+   */
+  copyCharacter(
+    storyId: string,
+    sourceCharacterId: string,
+  ): Observable<CopiedCharacter> {
+    return this.authenticated(options =>
+      this._http.post<CopiedCharacter>(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${storyId}/characters/copy`,
+        { sourceCharacterId },
+        options,
+      ),
+    );
+  }
+
+  /**
+   * Fetches an original portrait from the CDN, to save as a file.
+   *
+   * Asked for without the access token: the picture is public, and the CDN
+   * serves it to any origin.
+   *
+   * @param url - The portrait as it was uploaded.
+   * @returns An observable of the picture.
+   */
+  downloadOriginalPortrait(url: string): Observable<Blob> {
+    return this._http.get(url, { responseType: 'blob' });
   }
 
   /**

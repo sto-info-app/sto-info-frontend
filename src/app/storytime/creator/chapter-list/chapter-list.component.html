@@ -44,7 +44,7 @@
   }
 
   <ol class="storytime-chapter-list">
-    @for (chapter of chapters; track chapter.id) {
+    @for (chapter of chapters; track chapter.id; let index = $index) {
       <li
         class="storytime-record"
         [ngClass]="'storytime-record--' + chapter.status.toLowerCase()"
@@ -116,6 +116,30 @@
                 class="fa-solid fa-user-pen"
                 aria-hidden="true"></i>
             </a>
+            @if (index > 0) {
+              <button
+                class="cta-icon"
+                type="button"
+                title="Move up"
+                aria-label="Move up"
+                (click)="moveUp(index)">
+                <i
+                  class="fa-solid fa-circle-caret-up"
+                  aria-hidden="true"></i>
+              </button>
+            }
+            @if (index < chapters.length - 1) {
+              <button
+                class="cta-icon"
+                type="button"
+                title="Move down"
+                aria-label="Move down"
+                (click)="moveDown(index)">
+                <i
+                  class="fa-solid fa-circle-caret-down"
+                  aria-hidden="true"></i>
+              </button>
+            }
             @if (canPublish(chapter)) {
               <button
                 type="button"

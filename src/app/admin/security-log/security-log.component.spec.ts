@@ -190,6 +190,48 @@ describe('SecurityLogComponent (FC-039)', () => {
     expect(rows()[1]).toContain('Disabled an account');
   });
 
+  // sc-1483: a creator's Character copy, and one whose creator has since gone.
+  it('says a Character copy in words, naming the creator or a closed account', async () => {
+    const copy = {
+      source: SecurityLogSource.STORYTIME,
+      action: 'CHARACTER_COPIED',
+      target: null,
+      subjectKind: 'STORYTIME_CHARACTER',
+      subjectId: 'copy-1',
+      reason: null,
+      detail: {
+        sourceCharacterId: 'original-1',
+        sourceStoryId: 'story-1',
+        targetStoryId: 'story-2',
+      },
+    };
+    log.list.mockReturnValue(
+      of({
+        items: [
+          entryOf({
+            ...copy,
+            actor: { userId: 'writer-1', username: 'Garak' },
+          }),
+          entryOf({ ...copy, id: 'entry-2', actor: null }),
+        ],
+        total: 2,
+        page: 1,
+        pageSize: 50,
+      }),
+    );
+    await show();
+
+    expect(rows()[0]).toContain('Copied a Character into another Story');
+    expect(rows()[0]).toContain('Character copies');
+    expect(rows()[0]).toContain('Garak');
+    expect(rows()[0]).toContain('Storytime Character');
+    expect(rows()[0]).toContain('copy-1');
+    expect(rows()[0]).toContain('sourceCharacterId: original-1');
+    expect(rows()[0]).toContain('targetStoryId: story-2');
+    expect(rows()[1]).toContain('An account since closed');
+    expect(rows()[1]).not.toContain('The system');
+  });
+
   it.each([
     ['SCAN_DIAGNOSTICS_VIEWED', 'Read Scan Diagnostics'],
     ['SCAN_JOB_RETRIED', 'Retried failed jobs'],
@@ -198,6 +240,7 @@ describe('SecurityLogComponent (FC-039)', () => {
     ['PUBLICATION_RESUMED', 'Resumed publication'],
     ['FEATURE_SWITCHED_ON', 'Switched a feature on'],
     ['FEATURE_SWITCHED_OFF', 'Switched a feature off'],
+    ['LOG_ENTRY_REMOVED', "Removed a Captain's Log entry"],
   ])('names %s as “%s” (FC-042, FC-045)', async (action, label) => {
     log.list.mockReturnValue(
       of({

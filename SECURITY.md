@@ -39,7 +39,7 @@ Automated security testing is performed on every pull request and on a regular s
 
 ## Known Dependency Advisory Follow-up
 
-Both the production audit gate (`npm audit --audit-level=high --omit=dev`) and the full dependency audit (`npm audit`) report **zero advisories at any severity** (last verified 2026-11-22). The `deepmerge` advisory (GHSA-gcqx-w48m-w2h4), which Jest still brings in through `jest-config`, was withdrawn on 2026-11-16. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is not reported, although `braces@3.0.3` is still installed. See `docs/security.md` for both.
+Both the production audit gate (`npm audit --audit-level=high --omit=dev`) and the full dependency audit (`npm audit`) report **zero advisories at any severity** (last verified 2026-11-24). The `deepmerge` advisory (GHSA-gcqx-w48m-w2h4), which Jest still brings in through `jest-config`, was withdrawn on 2026-11-16. `braces` via `stylelint` (GHSA-vfj7-8cjw-p6xm) is not reported, although `braces@3.0.3` is still installed. See `docs/security.md` for both.
 
 Active overrides are intentionally limited to advisories that still require forced transitive versions, all of them in the development tree:
 

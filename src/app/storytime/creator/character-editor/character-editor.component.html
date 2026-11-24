@@ -146,9 +146,45 @@
           [slot]="imageSlots.CHARACTER_PORTRAIT"
           [targetId]="character.id"
           [imageUrl]="character.portraitImageUrl"
-          [imageAlt]="character.portraitImageAlt"
+          [imageAlt]="
+            character.portraitImageAlt ?? originalPortrait?.alt ?? null
+          "
           altControlName="portraitImageAlt"
           (changed)="onImageChanged($event)"></app-storytime-image-manager>
+      }
+
+      <!--
+        A copy starts without a portrait, so the two never share a picture.
+        The original's is offered for downloading, to come back through the
+        usual upload and check, with its description waiting in the upload.
+      -->
+      @if (offersOriginalPortrait) {
+        <app-lcars-panel
+          class="storytime-original-portrait"
+          heading="Original portrait"
+          [level]="3">
+          <div class="storytime-panel storytime-panel--bare">
+            <p>
+              This Character was copied from another Story without its portrait.
+              Download the original to upload it here, or choose a different
+              picture, or none.
+            </p>
+
+            @if (portraitDownloadError) {
+              <app-lcars-error-message
+                title="Could not download that"
+                [message]="portraitDownloadError"></app-lcars-error-message>
+            }
+
+            <button
+              class="lcars-btn lcars-btn-auto"
+              type="button"
+              [disabled]="isDownloadingPortrait"
+              (click)="downloadOriginalPortrait()">
+              Download the original portrait
+            </button>
+          </div>
+        </app-lcars-panel>
       }
 
       <app-collapsible-section

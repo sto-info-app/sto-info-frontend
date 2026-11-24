@@ -2,6 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, throwError } from 'rxjs';
 import { AuthService } from 'src/app/core/auth/auth.service';
+import { NEWS_COVER_SPEC } from 'src/app/news/news-cover.constants';
 import {
   CreateNewsPostRequest,
   NewsPost,
@@ -11,6 +12,7 @@ import {
   UpdateNewsPostRequest,
 } from 'src/app/models/news.models';
 import { API_URLS } from 'src/app/shared/constants/api-routing.constants';
+import { AcceptedAsset } from 'src/app/shared/services/asset-scan.service';
 
 /**
  * Service for reading public news posts and (for admins) managing them.
@@ -144,6 +146,57 @@ export class NewsService {
       return throwError(() => new Error('No token found'));
     }
     return this._http.delete<void>(`${API_URLS.NEWS}/${id}`, httpOptions);
+  }
+
+  /**
+   * Sends a post's cropped cover, with what it shows, to be scanned (admin).
+   * The post keeps its old cover, or none, until the scanner clears it.
+   *
+   * @param id - The post ID.
+   * @param image - The cropped picture.
+   * @param altText - What it shows.
+   * @returns An observable of the upload to ask about.
+   */
+  uploadCover(
+    id: string,
+    image: Blob,
+    altText: string,
+  ): Observable<AcceptedAsset> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    const formData = new FormData();
+
+    formData.append(
+      'image',
+      image,
+      `${NEWS_COVER_SPEC.endpoint}.${NEWS_COVER_SPEC.outputFormat}`,
+    );
+    formData.append('altText', altText);
+
+    return this._http.post<AcceptedAsset>(
+      `${API_URLS.NEWS}/${id}/${NEWS_COVER_SPEC.endpoint}`,
+      formData,
+      httpOptions,
+    );
+  }
+
+  /**
+   * Takes a post's cover down (admin).
+   *
+   * @param id - The post ID.
+   * @returns An observable that completes when it has gone.
+   */
+  removeCover(id: string): Observable<void> {
+    const httpOptions = this._authService.getHttpOptionsWithAccessToken();
+    if (!httpOptions) {
+      return throwError(() => new Error('No token found'));
+    }
+    return this._http.delete<void>(
+      `${API_URLS.NEWS}/${id}/${NEWS_COVER_SPEC.endpoint}`,
+      httpOptions,
+    );
   }
 
   /**

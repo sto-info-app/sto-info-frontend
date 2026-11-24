@@ -27,6 +27,8 @@ import {
 import { APP_ROUTES } from 'src/app/shared/constants/app-routing.constants';
 import { CommentService } from '../../comment.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
+import { CommentTextComponent } from '../comment-text/comment-text.component';
+import { SPOILER_HINT } from '../comment-text/spoiler.utility';
 
 /**
  * How many colours a thread cycles through before starting again.
@@ -74,6 +76,7 @@ export const SILENCED_TEXT: Record<StorytimeCommentStatus, string> = {
     FormsModule,
     RouterModule,
     CollapsibleSectionComponent,
+    CommentTextComponent,
   ],
 })
 export class CommentThreadComponent implements OnInit {
@@ -137,6 +140,9 @@ export class CommentThreadComponent implements OnInit {
 
   /** The statuses, so the template does not spell out the enum. */
   readonly statuses = StorytimeCommentStatus;
+
+  /** How to mark a spoiler, under every box a comment is typed into. */
+  readonly spoilerHint = SPOILER_HINT;
 
   private readonly _commentService = inject(CommentService);
   private readonly _authService = inject(AuthService);

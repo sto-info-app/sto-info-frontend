@@ -46,6 +46,66 @@ describe('CharacterService', () => {
     expect(service).toBeTruthy();
   });
 
+  // sc-1483: copying a Character from another of the creator's Stories.
+  describe('copying', () => {
+    it('lists the Characters that could be copied into the Story', async () => {
+      const stories = firstValueFrom(service.getCopyableCharacters(STORY_ID));
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${STORY_ID}/characters/copyable`,
+      );
+      expect(request.request.method).toBe('GET');
+      expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
+      request.flush([]);
+
+      await expect(stories).resolves.toEqual([]);
+    });
+
+    it('copies a Character into the Story', async () => {
+      const copied = firstValueFrom(
+        service.copyCharacter(STORY_ID, CHARACTER_ID),
+      );
+
+      const request = httpMock.expectOne(
+        `${API_URLS.STORYTIME_MANAGE_STORIES}/${STORY_ID}/characters/copy`,
+      );
+      expect(request.request.method).toBe('POST');
+      expect(request.request.body).toEqual({ sourceCharacterId: CHARACTER_ID });
+      expect(request.request.headers.get('Authorization')).toBe(AUTH_HEADER);
+      request.flush({ character: { id: 'copy-1' }, originalPortrait: null });
+
+      await expect(copied).resolves.toEqual({
+        character: { id: 'copy-1' },
+        originalPortrait: null,
+      });
+    });
+
+    // The CDN serves the picture to anybody; the token stays with the API.
+    it('fetches the original portrait without the access token', async () => {
+      const url = 'https://cdn.example.test/portrait-1/public';
+      const file = firstValueFrom(service.downloadOriginalPortrait(url));
+
+      const request = httpMock.expectOne(url);
+      expect(request.request.responseType).toBe('blob');
+      expect(request.request.headers.has('Authorization')).toBe(false);
+      request.flush(new Blob(['png'], { type: 'image/png' }));
+
+      await expect(file).resolves.toBeInstanceOf(Blob);
+      expect(authService.getHttpOptionsWithAccessToken).not.toHaveBeenCalled();
+    });
+
+    it('refuses to list or copy without a token', async () => {
+      authService.getHttpOptionsWithAccessToken.mockReturnValue(null);
+
+      await expect(
+        firstValueFrom(service.getCopyableCharacters(STORY_ID)),
+      ).rejects.toThrow('No token found');
+      await expect(
+        firstValueFrom(service.copyCharacter(STORY_ID, CHARACTER_ID)),
+      ).rejects.toThrow('No token found');
+    });
+  });
+
   describe('reading', () => {
     // A Character is only reachable through a Story that is itself readable,
     // and the URL mirrors that.

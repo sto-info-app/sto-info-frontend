@@ -1,0 +1,35 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// A member's own Captain's Log (sc-1450): the entries, and beside them the
+// way to write one and to choose which to show.
+#captains-log-page {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+
+  #captains-log-main-column {
+    flex: 3 1 32rem;
+    min-width: 0;
+  }
+
+  #captains-log-side-column {
+    flex: 1 1 16rem;
+  }
+
+  .captains-log-entries {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    margin-top: 1rem;
+  }
+}
+
+.log-entry-badge {
+  @include mixins.lcars-panel-card-badge;
+
+  &--removed {
+    background: vars.$lcars-red;
+    color: vars.$a11y-black;
+  }
+}

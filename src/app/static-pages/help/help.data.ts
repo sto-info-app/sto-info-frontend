@@ -356,6 +356,9 @@ const COMMUNITY_TOPIC: HelpTopic = {
           ],
           REPORT_REASON_POINTS,
         ),
+        guideSection('Reporting a Captain’s Log entry', [
+          'To report one of the Captain’s Log entries on somebody’s record, choose Report beneath it. It is reported in the same way, and the administrators are shown which entry you meant.',
+        ]),
         guideSection('Which one to use', [
           'Block somebody you simply want out of your way; it takes effect immediately and needs nobody’s agreement. Report somebody who is breaking the rules, so it can be dealt with for everybody rather than only for you.',
           'The two are not exclusive. Blocking somebody you have reported is often the right thing to do while it is looked at.',
@@ -730,6 +733,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         guideSection('Comments', [
           'Comments sit at the bottom of a Story, a Chapter or an Arc. You can reply to a comment, but only once deep — a reply cannot itself be replied to, which keeps a thread readable rather than letting it fork.',
           'You can edit or delete your own comments. A Story owner can hide a comment on their own Story, and an administrator can remove one that breaks the content policy.',
+          'To keep a spoiler from somebody who has not read that far, wrap it in double bars, ||like this||. It shows as a Spoiler button until a reader chooses to see it, and stays revealed once they have.',
           'A comment that has been deleted, hidden or removed keeps its place in the thread but loses its words, so a reply underneath it does not become nonsense.',
         ]),
         guideSection('Following', [
@@ -767,6 +771,7 @@ const STORYTIME_TOPIC: HelpTopic = {
         guideSection('Write a Chapter', [
           'Open your Story and go to Chapters, then Add a Chapter. Give it a title, an optional synopsis, and the writing itself. A Chapter needs some content before it can be published.',
           'Chapters are published one at a time, and each has its own state. A Story needs at least one published Chapter before it can be published itself.',
+          'Chapters appear in the order they are listed on the Chapters page. To change it, use Move up and Move down on a Chapter. Readers see the new order straight away, and nothing they have already read is lost.',
         ]),
         guideSection('Confirm the content policy, then publish', [
           'Before a Story can be published you are asked to confirm it meets the Storytime publishing terms. This is a single confirmation, not a review queue — nobody has to approve your Story before it appears. If the terms are ever materially changed you will be asked once more, and told that is why.',
@@ -839,6 +844,8 @@ const STORYTIME_TOPIC: HelpTopic = {
       sections: [
         guideSection('Your cast', [
           'A Story keeps its own list of Characters — your captain, your crew, the antagonist you keep bringing back. Each gets a name, a short biography and a picture if you have one.',
+          'A Character can be copied from another of your Stories: choose Copy from another Story on the cast page, then Copy beside them. The list shows the Characters of every other Story whose cast you can manage, whether you own it or collaborate on it with Manage Characters. Characters an administrator has removed are not offered.',
+          'The copy is separate from the original: editing or deleting one leaves the other as it is. It takes their details, biography, traits and tags, and goes to the end of the cast. It does not take their Chapter appearances, credits or portrait. When the original has a portrait, the copy’s editor offers Download the original portrait, so you can upload it again through Add, or choose a different picture, or none.',
           'You can record which Chapters a Character appears in. Readers then get a Character page showing who they are and where to find them, which is how somebody joining a long Story catches up without spoiling it for themselves.',
         ]),
         guideSection('Crew credits', [
@@ -1139,7 +1146,7 @@ const SETTINGS_TOPIC: HelpTopic = {
       sections: [
         guideSection('Where to find them', [
           'Sign in, open your Dashboard and choose Settings. Everything on the page is about how STO Info behaves for you, and nobody else sees any of it.',
-          'The page has a tab for each part of the site: Account, Chat, Fleet, Notifications and Custom Tracking. Chat’s tab is there while chat is switched on, and Fleet’s and Notifications’ while Fleet Community is. The arrow keys move between the tabs.',
+          'The page has a tab for each part of the site: Account, Chat, Fleet, Notifications and Custom Tracking. Chat’s tab is there while chat is switched on, and Fleet’s while Fleet Community is. Notifications is always there, for its emails; its Fleet notices show while Fleet Community is on. The arrow keys move between the tabs.',
           'Each section has a help link under its heading, leading to the guide for that section.',
         ]),
         guideSection('Going straight to a setting', [
@@ -1187,6 +1194,7 @@ const SETTINGS_TOPIC: HelpTopic = {
         guideSection('What it does not do', [
           'It changes nothing anybody else sees. It does not make your record private, take you out of the registry, or change who may see your accounts, captains or Custom Tracking. Those are decided by the visibility choices on each, and Privacy Mode leaves them as they were.',
           'It is a blur, not a removal. The details are still on the page, so anybody who copies the text, or uses a screen reader, still gets them.',
+          'It does not hide your Captain’s Log. While it is on, the Log asks before it opens, because your Personal entries are shown there in full.',
         ]),
         guideSection('Turning it on', [
           'It is off until you turn it on. Switch on Privacy Mode under Privacy, on the Account tab of Settings; it is saved as soon as you do.',
@@ -1198,6 +1206,55 @@ const SETTINGS_TOPIC: HelpTopic = {
         {
           label: 'Your Personnel Record',
           route: APP_ROUTES.STO_DASHBOARD_PROFILE,
+        },
+      ],
+    },
+    {
+      slug: 'captains-log',
+      title: 'The Captain’s Log',
+      summary:
+        'Keeping a journal of Captain’s entries for your profile and Personal entries for yourself.',
+      sections: [
+        guideSection(
+          'Two kinds of entry',
+          [
+            'The Captain’s Log tile on your Dashboard opens your Captain’s Log, a journal of your entries, newest first. Each entry is one of two types:',
+          ],
+          [
+            'Captain’s Log: shown on your public profile while your profile is publicly visible.',
+            'Personal Log: only ever shown to you.',
+          ],
+        ),
+        guideSection('Where Captain’s entries are shown', [
+          'Your Captain’s entries appear in a Captain’s Log section on your record in the Galactic Personnel Registry, newest first, 20 to a page. While your profile is not publicly visible, nobody sees them, and members on either side of a block never do.',
+        ]),
+        guideSection('Writing an entry', [
+          'Choose New entry, pick the Type, and write the Entry: up to 10,000 characters, with Markdown. Show preview shows how it will look.',
+          'The Headline (optional) takes up to 120 characters. Left blank, the entry is headed by its type and the stardate it was written on, such as “Captain’s Log stardate 104502.6”. The stardate is worked out in UTC when you first save the entry, and never changes.',
+          'The Log panel beside your entries has New entry, and All entries, Captain’s entries and Personal entries to choose which are shown.',
+        ]),
+        guideSection('Adding a picture', [
+          'Save the entry first; a picture can be added then. Choose Add a picture, crop it to 16:9 and describe what it shows in up to 300 characters.',
+          'A new picture is checked for safety before it appears. A Captain’s entry’s picture is shown on your profile with it; a Personal entry’s picture is only ever shown to you.',
+        ]),
+        guideSection('Editing and deleting', [
+          'Choose Edit to change an entry’s type, headline, words or picture; its stardate stays as it was, and it shows Edited with the time.',
+          'Turning a Personal entry into a Captain’s one asks first, because it will then be shown on your profile.',
+          'Delete removes an entry for good, with its picture. It cannot be recovered.',
+        ]),
+        guideSection('With Privacy Mode on', [
+          'Privacy Mode does not hide your entries, so while it is on the Log asks before it opens. Choose Open the Log to go on, or Back to the Dashboard.',
+        ]),
+        guideSection('If an entry is reported', [
+          'Signed-in members can report a Captain’s entry with the Report button beneath it on your record.',
+          'If moderators remove an entry, it leaves your profile and stays in your Log marked Removed by moderators, with their reason. It can no longer be changed, though you can still delete it, and you are sent a notification saying why.',
+        ]),
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        {
+          label: 'Your Captain’s Log',
+          route: APP_ROUTES.STO_DASHBOARD_LOG,
         },
       ],
     },
@@ -1293,9 +1350,10 @@ const SETTINGS_TOPIC: HelpTopic = {
       requiresFeature: 'FLEET',
       sections: [
         guideSection('Where notices arrive', [
-          'Notices arrive in STO Info only, under Notifications, never by email. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
+          'Notices arrive in STO Info, under Notifications. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
+          'Any of them can also come by email, if you switch that on under Email notifications on the same tab. The email switches are separate from the ones here: switching a notice off here does not stop its email, and the guide to email notifications explains them.',
           'Notifications shows five at a time, newest first. Each can be marked read or unread, or deleted, and Delete all read clears every one you have read; a deleted notice is gone from your inbox for good, though it changes nothing it told you about.',
-          'Each switch on the Notifications tab of Settings stops that kind of notice as soon as it is switched off; the cog beside the Notifications heading goes there. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
+          'Each switch on the Notifications tab of Settings stops that kind of notice in STO Info as soon as it is switched off; the cog beside the Notifications heading goes there. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none in STO Info, though each has an email switch.',
         ]),
         {
           heading: 'Mentions, replies and direct messages',
@@ -1316,7 +1374,7 @@ const SETTINGS_TOPIC: HelpTopic = {
         {
           heading: 'Notices no switch stops',
           paragraphs: [
-            'These are sent because somebody decided something about you or what you run, so they cannot be switched off:',
+            'These are sent because somebody decided something about you or what you run, so they cannot be switched off in STO Info. Each can also be emailed, if you switch that on, except a picture being removed and what the administrators send:',
           ],
           points: [
             'Your Fleet membership being suspended or reinstated.',
@@ -1332,6 +1390,74 @@ const SETTINGS_TOPIC: HelpTopic = {
       relatedLinks: [
         SETTINGS_LINK,
         { label: 'Notifications', route: APP_ROUTES.NOTIFICATIONS },
+      ],
+    },
+    {
+      slug: 'email-notifications',
+      title: 'Email notifications',
+      summary:
+        'Which notices can also come by email, how often, and how to stop them.',
+      sections: [
+        guideSection('Switching them on', [
+          'Email notifications, on the Notifications tab of Settings, has a switch for each kind of notice that can come by email. Emails go to the address you signed up with.',
+          'Each is off until you switch it on, except Login alerts, which are marked Recommended and are on unless you switch them off. A Login alert tells you somebody has signed in to your account, so you can act if it was not you.',
+          'The email switches are separate from the notices in STO Info: an email can be on for a notice you have switched off in STO Info, and the other way round. Each is saved the moment you change it, with a Saved note beside it.',
+        ]),
+        guideSection(
+          'Account and Friends',
+          ['Under Account and Friends:'],
+          [
+            'Login alerts — somebody signed in to your account.',
+            'Friend requests — somebody asked to be your friend.',
+            'Accepted friend requests — somebody accepted yours.',
+          ],
+        ),
+        guideSection(
+          'Storytime',
+          ['Under Storytime:'],
+          [
+            'Invitations to help write a Story, and Invitations to help with an Arc.',
+            'Moderation of my work — a site administrator acted on something of yours — and Appeal decisions.',
+            'Storytime Spotlight — your work was chosen for the Spotlight.',
+            'New followers — somebody followed you, or a Story or Arc of yours.',
+            'Comments on my work — somebody commented on your Story, Chapter or Arc.',
+            'Replies to my comments — somebody answered a comment of yours.',
+            'Reactions to my work — somebody reacted to your Story, Chapter or Arc.',
+            'New Stories and Chapters I follow — a creator or Story you follow published something new.',
+          ],
+        ),
+        {
+          heading: 'Fleet',
+          paragraphs: [
+            'Under Fleet, while Fleet Community is on. The chat ones show while chat is on as well:',
+          ],
+          points: [
+            'Chat mentions, Chat replies and Direct messages.',
+            'Roster association proposals.',
+            'Event reminders, Cancelled events, Moved events and Places freed for me at events.',
+            'Community ownership, Suspensions and reinstatements, Fleet membership changes and Armada changes.',
+            'Chat transcripts ready.',
+          ],
+          requiresFeature: 'FLEET',
+        },
+        guideSection('How often', [
+          'Send notification emails chooses Instantly, In a daily digest or In a weekly digest, for every notification email at once.',
+          'A digest gathers everything into one email at 08:00 in the zone your dates are shown in: every day, or on Mondays for the weekly one. Sent instantly, everything that came at once arrives in one email, and Reactions to my work and New followers come at most once an hour. Login alerts always come at once.',
+          'An email says what the notice says, with a link to it on STO Info. It never quotes a chat message or a comment.',
+        ]),
+        guideSection('Stopping them', [
+          'Every notification email ends with a link for each kind of email in it, “Stop emails about …”. It opens a page saying what it stops, and stops it when you confirm, without signing in. Many email apps also show an Unsubscribe button, which does the same at once.',
+          'Manage email notifications, at the foot of every email, comes back here. A Login alert has only that link, so it can only be switched off from Settings.',
+        ]),
+        guideSection('When emails are paused', [
+          'If an email to your address bounces for good or is reported as spam, nothing more is sent to it, whatever is switched on, and Email notifications says so. Contact us to have emails resumed once the address works again.',
+          'Nobody is emailed about anything the site’s administrators send to everybody, or to you alone, and no notification email goes to an account whose address has not been verified.',
+        ]),
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        { label: 'Notifications', route: APP_ROUTES.NOTIFICATIONS },
+        { label: 'Privacy policy', route: APP_ROUTES.PRIVACY_POLICY },
       ],
     },
   ],

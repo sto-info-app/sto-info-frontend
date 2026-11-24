@@ -14,6 +14,7 @@ import {
   AbstractControl,
   FormBuilder,
   FormControl,
+  FormGroup,
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -58,23 +59,77 @@ import {
   UserSettings,
   UserSettingsUpdate,
 } from '../models/user.model';
+import {
+  EMAIL_FREQUENCY_LABEL,
+  EMAIL_FREQUENCY_OPTIONS,
+  EmailFrequency,
+  NOTIFICATION_EMAIL_GROUP_LABELS,
+  NOTIFICATION_EMAIL_OPTIONS,
+  NotificationEmailGroup,
+  NotificationEmailOption,
+  NotificationEmailType,
+  RECOMMENDED_LABEL,
+} from '../models/notification-email.model';
 import { DEFAULT_USER_SETTINGS } from '../services/user-settings.service';
 import {
   PRESENCE_OPTIONS,
   REGISTRY_LABEL,
   SETTING_LABELS,
   SETTINGS_TAB_LABELS,
+  emailLabelOf,
 } from './settings.constants';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 
-/** One setting on the page. */
-export type SettingKey = keyof UserSettings;
+/**
+ * One setting on the page with a control of its own. The email switches are
+ * one list on the server and a switch each here, so they have their own form.
+ */
+export type SettingKey = Exclude<
+  keyof UserSettings,
+  'emailNotificationTypes' | 'emailsPaused'
+>;
 
 /** The registry switch, which is the profile's rather than a setting. */
 export const REGISTRY_KEY = 'publiclyVisible';
 
+/** An email switch's "Saved" note, by type (sc-1067). */
+export type EmailSavedKey = `email:${NotificationEmailType}`;
+
 /** Anything on the page that can say it saved. */
-export type SavedKey = SettingKey | typeof REGISTRY_KEY;
+export type SavedKey = SettingKey | typeof REGISTRY_KEY | EmailSavedKey;
+
+/**
+ * The settings the page's own controls hold, without the email list.
+ *
+ * @param settings - The settings as loaded.
+ * @returns One value for each of the form's controls.
+ */
+export function formValueOf(
+  settings: UserSettings,
+): Pick<UserSettings, SettingKey> {
+  const kept = new Set<string>(Object.keys(SETTING_LABELS));
+
+  return Object.fromEntries(
+    Object.entries(settings).filter(([key]) => kept.has(key)),
+  ) as Pick<UserSettings, SettingKey>;
+}
+
+/**
+ * Each email switch, on or off, from the list the server keeps.
+ *
+ * @param settings - The settings as loaded.
+ * @returns One value for each type.
+ */
+export function emailSwitchesOf(
+  settings: Pick<UserSettings, 'emailNotificationTypes'>,
+): Record<NotificationEmailType, boolean> {
+  return Object.fromEntries(
+    NOTIFICATION_EMAIL_OPTIONS.map(option => [
+      option.type,
+      settings.emailNotificationTypes.includes(option.type),
+    ]),
+  ) as Record<NotificationEmailType, boolean>;
+}
 
 /** How long the "Saved" note stays beside a control, in milliseconds. */
 export const SAVED_NOTE_DURATION_MS = 3000;
@@ -89,6 +144,12 @@ export const SETTING_MARK_CLASS = 'settings-marked';
 interface SettingChange {
   key: SettingKey;
   value: UserSettings[SettingKey];
+}
+
+/** An email switch flipped, waiting its turn with the rest (sc-1067). */
+interface EmailChange {
+  email: NotificationEmailType;
+  value: boolean;
 }
 
 /** Where the registry switch stands. */
@@ -153,7 +214,26 @@ export class SettingsComponent implements OnInit, OnDestroy {
     notifyDirectMessage: true,
     notifyRosterAssociation: true,
     notifyEventReminder: true,
+    emailFrequency: 'INSTANT' as EmailFrequency,
   });
+
+  /** One switch for each kind of notification email (sc-1067). */
+  readonly emailForm = new FormGroup(
+    Object.fromEntries(
+      NOTIFICATION_EMAIL_OPTIONS.map(option => [
+        option.type,
+        new FormControl(option.type === 'LOGIN', { nonNullable: true }),
+      ]),
+    ) as Record<NotificationEmailType, FormControl<boolean>>,
+  );
+
+  readonly emailFrequencyOptions = EMAIL_FREQUENCY_OPTIONS;
+  readonly emailFrequencyLabel = EMAIL_FREQUENCY_LABEL;
+  readonly recommendedLabel = RECOMMENDED_LABEL;
+  readonly contactLink = `/${APP_ROUTES.CONTACT}`;
+
+  /** Whether SES has paused emails to the account's address. */
+  emailsPaused = false;
 
   /** "Show me in the Galactic Personnel Registry". */
   readonly registryControl = new FormControl(false, { nonNullable: true });
@@ -205,7 +285,7 @@ export class SettingsComponent implements OnInit, OnDestroy {
   announcement = '';
 
   private readonly _destroy$ = new Subject<void>();
-  private readonly _changes$ = new Subject<SettingChange>();
+  private readonly _changes$ = new Subject<SettingChange | EmailChange>();
   private readonly _registryChanges$ = new Subject<boolean>();
   private readonly _privacyModeService = inject(PrivacyModeService);
   private readonly _dashboardService = inject(DashboardService);
@@ -247,17 +327,59 @@ export class SettingsComponent implements OnInit, OnDestroy {
     afterEveryRender(() => this._goToSetting());
   }
 
-  /** The tabs shown, in order. */
+  /**
+   * The tabs shown, in order. Notifications is shown to everybody, since its
+   * emails are not all Fleet's (sc-1067); its Fleet parts wait on the switch.
+   */
   get tabs(): SettingsTab[] {
     return SETTINGS_TABS.filter(tab => {
       if (tab === 'chat') {
         return this.isChatOffered;
       }
 
-      return tab === 'fleet' || tab === 'notifications'
-        ? this.isFleetOffered
-        : true;
+      return tab === 'fleet' ? this.isFleetOffered : true;
     });
+  }
+
+  /**
+   * The email switches under each heading, Fleet's only while Fleet
+   * Community is on, and chat's only while chat is.
+   *
+   * @returns Each heading with its switches.
+   */
+  get emailGroups(): {
+    label: string;
+    options: readonly NotificationEmailOption[];
+  }[] {
+    const chat: ReadonlySet<NotificationEmailType> = new Set([
+      'FLEET_MENTION',
+      'FLEET_REPLY',
+      'FLEET_DIRECT_MESSAGE',
+      'FLEET_TRANSCRIPT',
+    ]);
+
+    return (
+      Object.keys(NOTIFICATION_EMAIL_GROUP_LABELS) as NotificationEmailGroup[]
+    )
+      .filter(group => group !== 'FLEET' || this.isFleetOffered)
+      .map(group => ({
+        label: NOTIFICATION_EMAIL_GROUP_LABELS[group],
+        options: NOTIFICATION_EMAIL_OPTIONS.filter(
+          option =>
+            option.group === group &&
+            (this.isChatOffered || !chat.has(option.type)),
+        ),
+      }));
+  }
+
+  /**
+   * Where an email switch is, for a link straight to it.
+   *
+   * @param type - The type.
+   * @returns The ID of its row.
+   */
+  emailAnchor(type: NotificationEmailType): string {
+    return `setting-email-${type.toLowerCase().replaceAll('_', '-')}`;
   }
 
   /** The tab showing. */
@@ -292,7 +414,9 @@ export class SettingsComponent implements OnInit, OnDestroy {
 
     this._changes$
       .pipe(
-        concatMap(change => this._save(change)),
+        concatMap(change =>
+          'email' in change ? this._saveEmail(change) : this._save(change),
+        ),
         takeUntil(this._destroy$),
       )
       .subscribe();
@@ -303,6 +427,12 @@ export class SettingsComponent implements OnInit, OnDestroy {
         takeUntil(this._destroy$),
       )
       .subscribe();
+
+    for (const option of NOTIFICATION_EMAIL_OPTIONS) {
+      this.emailForm.controls[option.type].valueChanges
+        .pipe(takeUntil(this._destroy$))
+        .subscribe(value => this._changes$.next({ email: option.type, value }));
+    }
 
     for (const key of Object.keys(this.settingsForm.controls) as SettingKey[]) {
       // Each control's own type is lost in the union; the key says which.
@@ -322,7 +452,13 @@ export class SettingsComponent implements OnInit, OnDestroy {
       next: settings => {
         this._stored = settings;
         // Silently: filling the form in is not the reader changing it.
-        this.settingsForm.setValue(settings, { emitEvent: false });
+        this.settingsForm.setValue(formValueOf(settings), {
+          emitEvent: false,
+        });
+        this.emailForm.setValue(emailSwitchesOf(settings), {
+          emitEvent: false,
+        });
+        this.emailsPaused = settings.emailsPaused;
         this.isLoading = false;
         this._cdr.markForCheck();
       },
@@ -514,6 +650,46 @@ export class SettingsComponent implements OnInit, OnDestroy {
         return EMPTY;
       }),
     );
+  }
+
+  /**
+   * Saves one email switch, naming only that type so that two switches
+   * flipped in quick succession cannot undo each other (sc-1067).
+   *
+   * @param change - The type and whether it is now on.
+   * @returns Completes once the change has been saved or put back.
+   */
+  private _saveEmail(change: EmailChange): Observable<unknown> {
+    const previous = this._stored;
+    const control = this.emailForm.controls[change.email];
+    const label = emailLabelOf(change.email);
+
+    return this._privacyModeService
+      .update({
+        privacyMode: previous.privacyMode,
+        emailNotifications: { [change.email]: change.value },
+      })
+      .pipe(
+        tap(settings => {
+          this._stored = settings;
+          control.setValue(
+            settings.emailNotificationTypes.includes(change.email),
+            { emitEvent: false },
+          );
+          this.errorMessage = '';
+          this._showSaved(`email:${change.email}`, label);
+          this._cdr.markForCheck();
+        }),
+        catchError(() => {
+          control.setValue(
+            previous.emailNotificationTypes.includes(change.email),
+            { emitEvent: false },
+          );
+          this._showFailed(label);
+
+          return EMPTY;
+        }),
+      );
   }
 
   /**

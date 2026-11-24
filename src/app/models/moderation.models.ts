@@ -41,6 +41,8 @@ export interface UserReport {
   reported: ReportParty;
   reason: ReportReason;
   details: string | null;
+  /** The Captain's Log entry the report is about, or null (sc-1450). */
+  logEntryId: string | null;
   status: ReportStatus;
   moderatorNotes: string | null;
   reviewedBy: string | null;
@@ -77,6 +79,8 @@ export interface CreateUserReportRequest {
   username: string;
   reason: ReportReason;
   details?: string;
+  /** The Captain's entry on their profile the report is about (sc-1450). */
+  logEntryId?: string;
 }
 
 /**

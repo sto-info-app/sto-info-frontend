@@ -16,6 +16,8 @@ import { SignedImageRenewalService } from './shared/services/signed-image-renewa
 import { UserSettingsService } from './dashboard/services/user-settings.service';
 
 describe('AppComponent', () => {
+  let originalCookieYesUrl: string | undefined;
+
   let component: AppComponent;
   let fixture: ComponentFixture<AppComponent>;
 
@@ -225,9 +227,17 @@ describe('AppComponent', () => {
 
     jest.spyOn(console, 'info').mockImplementation(() => {});
     jest.spyOn(console, 'warn').mockImplementation(() => {});
+
+    // A local environment may leave CookieYes unset, which the app reports
+    // as an error; every test but those about that starts with it set.
+    originalCookieYesUrl = environment.cookieYesUrl;
+    (environment as { cookieYesUrl: string | undefined }).cookieYesUrl =
+      'https://cookies.test/script.js';
   });
 
   afterEach(() => {
+    (environment as { cookieYesUrl: string | undefined }).cookieYesUrl =
+      originalCookieYesUrl;
     jest.restoreAllMocks();
   });
 

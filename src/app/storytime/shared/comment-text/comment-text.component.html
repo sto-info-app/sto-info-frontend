@@ -1,0 +1,31 @@
+<!--
+  The text is white-space: pre-wrap, so every piece sits in an element of its
+  own: the gaps between elements and blocks are dropped when the template is
+  compiled, where a loose line break would be printed into the comment.
+-->
+<p class="storytime-comments__text">
+  @for (segment of segments; track $index; let index = $index) {
+    @if (!segment.isSpoiler) {
+      <span>{{ segment.text }}</span>
+    } @else if (isRevealed(index)) {
+      <span
+        class="storytime-spoiler storytime-spoiler--revealed"
+        tabindex="-1"
+        [attr.data-spoiler]="index"
+        >{{ segment.text }}</span
+      >
+    } @else {
+      <button
+        class="storytime-spoiler"
+        type="button"
+        title="Show the spoiler"
+        aria-label="Spoiler, hidden. Press to reveal."
+        (click)="reveal(index)">
+        <i
+          class="fa-solid fa-eye-slash"
+          aria-hidden="true"></i>
+        <span>Spoiler</span>
+      </button>
+    }
+  }
+</p>

@@ -1084,6 +1084,52 @@ export interface CharacterRequest {
 }
 
 /**
+ * A Character the creator could copy into one of their Stories (sc-1483).
+ */
+export interface CopyableCharacter {
+  id: string;
+  name: string;
+  shortBio: string | null;
+  portraitImageThumbnailUrl: string | null;
+  portraitImageAlt: string | null;
+}
+
+/**
+ * One of the creator's other Stories, with the Characters it offers to copy.
+ */
+export interface CopyableCharacterStory {
+  storyId: string;
+  storyTitle: string;
+  characters: CopyableCharacter[];
+}
+
+/**
+ * The original's portrait, which a copy does not take with it.
+ */
+export interface OriginalPortrait {
+  /** The portrait as it was uploaded, at full size, from the CDN. */
+  url: string;
+  /** What it shows. */
+  alt: string | null;
+}
+
+/**
+ * A Character copied from another Story, and the portrait it left behind.
+ */
+export interface CopiedCharacter {
+  character: ManagedCharacter;
+  originalPortrait: OriginalPortrait | null;
+}
+
+/**
+ * What the cast page hands the editor it opens after a copy.
+ */
+export interface CopiedCharacterNavigationState {
+  copiedCharacterId?: string;
+  originalPortrait?: OriginalPortrait | null;
+}
+
+/**
  * A Chapter a Character appears in, as a reader can reach it.
  */
 export interface CharacterAppearanceLink {

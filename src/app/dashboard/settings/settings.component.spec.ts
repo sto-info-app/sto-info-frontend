@@ -15,8 +15,11 @@ import { DashboardService } from '../services/dashboard.service';
 import { PrivacyModeService } from '../services/privacy-mode.service';
 import { DEFAULT_USER_SETTINGS } from '../services/user-settings.service';
 import { findHelpGuide } from 'src/app/static-pages/help/help.data';
+import { NOTIFICATION_EMAIL_OPTIONS } from 'src/app/dashboard/models/notification-email.model';
 import { SETTINGS_FORM_LABELS } from 'src/app/static-pages/help/help.testing';
 import {
+  emailSwitchesOf,
+  formValueOf,
   SAVED_NOTE_DURATION_MS,
   SETTING_MARK_CLASS,
   SETTING_MARK_DURATION_MS,
@@ -123,7 +126,13 @@ describe('SettingsComponent', () => {
     expect(privacyModeService.load).toHaveBeenCalled();
     expect(component.isLoading).toBe(false);
     expect(component.errorMessage).toBe('');
-    expect(component.settingsForm.getRawValue()).toEqual(settings());
+    expect(component.settingsForm.getRawValue()).toEqual(
+      formValueOf(settings()),
+    );
+    // The email list is a switch each (sc-1067).
+    expect(component.emailForm.getRawValue()).toEqual(
+      emailSwitchesOf(settings()),
+    );
   });
 
   it('shows help for privacy mode', () => {
@@ -177,7 +186,7 @@ describe('SettingsComponent', () => {
     createComponent();
 
     expect(component.settingsForm.getRawValue()).toEqual(
-      settings({ privacyMode: true, sessionTimeoutMinutes: 60 }),
+      formValueOf(settings({ privacyMode: true, sessionTimeoutMinutes: 60 })),
     );
     expect(privacyModeService.update).not.toHaveBeenCalled();
   });
@@ -625,16 +634,22 @@ describe('SettingsComponent', () => {
     const panelShown = (page: HTMLElement, tab: string): boolean =>
       !(page.querySelector(`#settings-panel-${tab}`) as HTMLElement).hidden;
 
-    it('shows Account and Custom Tracking alone while Fleet Community is off', async () => {
+    // Notifications holds the emails, which are not all Fleet's (sc-1067).
+    it('shows Account, Notifications and Custom Tracking while Fleet Community is off', async () => {
       const page = await openAt('/dashboard/settings');
 
       expect(
         page.querySelector('[role="tablist"]')?.getAttribute('aria-label'),
       ).toBe('Settings');
-      expect(tabNames(page)).toEqual(['Account', 'Custom Tracking']);
+      expect(tabNames(page)).toEqual([
+        'Account',
+        'Notifications',
+        'Custom Tracking',
+      ]);
       expect(selected(page)).toBe('Account');
       expect(tabs(page).map(tab => tab.getAttribute('tabindex'))).toEqual([
         '0',
+        '-1',
         '-1',
       ]);
       expect(panelShown(page, 'account')).toBe(true);
@@ -951,6 +966,7 @@ describe('SettingsComponent', () => {
         ['/help/chat-settings', 'Help with chat settings'],
         ['/help/fleet-settings', 'Help with Fleet settings'],
         ['/help/what-you-are-notified-about', 'Help with notifications'],
+        ['/help/email-notifications', 'Help with email notifications'],
         ['/help/what-custom-tracking-is', 'Help with Custom Tracking'],
       ]);
     });
@@ -973,6 +989,8 @@ describe('SettingsComponent', () => {
         '/help/listing-your-own-record',
         '/help/staying-signed-in',
         '/help/dates-and-times',
+        // Emails are not all Fleet's (sc-1067).
+        '/help/email-notifications',
         '/help/what-custom-tracking-is',
       ]);
     });
@@ -991,5 +1009,189 @@ describe('SettingsComponent', () => {
         expect(fixture.nativeElement.textContent).toContain(label);
       },
     );
+  });
+  // sc-1067.
+  describe('its email notifications', () => {
+    const panel = (): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        '#settings-panel-notifications',
+      ) as HTMLElement;
+    const row = (type: string): HTMLElement =>
+      fixture.nativeElement.querySelector(
+        `#setting-email-${type.toLowerCase().replaceAll('_', '-')}`,
+      ) as HTMLElement;
+    const switchOf = (type: string): HTMLButtonElement =>
+      row(type).querySelector('[role="switch"]') as HTMLButtonElement;
+    const headings = (): string[] =>
+      Array.from(
+        panel().querySelectorAll<HTMLElement>('.settings-email-heading'),
+      ).map(heading => heading.textContent?.trim() ?? '');
+    const withFleet = (chatEnabled: boolean): void => {
+      fleetConfigurationService.getFeatures.mockReturnValue(
+        of({ ...FLEET_FEATURES_DISABLED, isEnabled: true, chatEnabled }),
+      );
+    };
+
+    it('lists every switch under its heading, with Login alerts on and Recommended', () => {
+      withFleet(true);
+      createComponent();
+
+      expect(headings()).toEqual(['Account', 'Storytime', 'Friends', 'Fleet']);
+      for (const option of NOTIFICATION_EMAIL_OPTIONS) {
+        expect(row(option.type).textContent).toContain(option.label);
+      }
+      expect(switchOf('LOGIN').getAttribute('aria-checked')).toBe('true');
+      expect(switchOf('FRIEND_REQUEST').getAttribute('aria-checked')).toBe(
+        'false',
+      );
+      expect(
+        row('LOGIN').querySelector('.settings-recommended')?.textContent,
+      ).toBe('Recommended');
+      expect(panel().querySelectorAll('.settings-recommended')).toHaveLength(1);
+    });
+
+    it('leaves out Fleet’s switches, and its in-app notices, while Fleet Community is off', () => {
+      createComponent();
+
+      expect(headings()).toEqual(['Account', 'Storytime', 'Friends']);
+      expect(row('FLEET_EVENT_REMINDER')).toBeNull();
+      expect(panel().textContent).not.toContain('Roster association proposals');
+    });
+
+    it('leaves out chat’s while chat is off', () => {
+      withFleet(false);
+      createComponent();
+
+      expect(row('FLEET_EVENT_REMINDER')).not.toBeNull();
+      expect(row('FLEET_MENTION')).toBeNull();
+      expect(row('FLEET_TRANSCRIPT')).toBeNull();
+    });
+
+    it('shows the switches the server has on', () => {
+      privacyModeService.load.mockReturnValue(
+        of(settings({ emailNotificationTypes: ['STORYTIME_COMMENT'] })),
+      );
+      createComponent();
+
+      expect(switchOf('STORYTIME_COMMENT').getAttribute('aria-checked')).toBe(
+        'true',
+      );
+      expect(switchOf('LOGIN').getAttribute('aria-checked')).toBe('false');
+    });
+
+    it('saves a switch naming only its own type, and says so', () => {
+      privacyModeService.update.mockReturnValue(
+        of(settings({ emailNotificationTypes: ['LOGIN', 'FRIEND_REQUEST'] })),
+      );
+      createComponent();
+
+      switchOf('FRIEND_REQUEST').click();
+      fixture.detectChanges();
+
+      expect(privacyModeService.update).toHaveBeenCalledWith({
+        privacyMode: false,
+        emailNotifications: { FRIEND_REQUEST: true },
+      });
+      expect(switchOf('FRIEND_REQUEST').getAttribute('aria-checked')).toBe(
+        'true',
+      );
+      expect(
+        row('FRIEND_REQUEST').querySelector('.settings-saved'),
+      ).not.toBeNull();
+      expect(component.announcement).toBe('Friend requests emails saved.');
+    });
+
+    it('can switch Login alerts off', () => {
+      privacyModeService.update.mockReturnValue(
+        of(settings({ emailNotificationTypes: [] })),
+      );
+      createComponent();
+
+      switchOf('LOGIN').click();
+      fixture.detectChanges();
+
+      expect(privacyModeService.update).toHaveBeenCalledWith({
+        privacyMode: false,
+        emailNotifications: { LOGIN: false },
+      });
+      expect(switchOf('LOGIN').getAttribute('aria-checked')).toBe('false');
+    });
+
+    it('puts a switch back, naming it, when it cannot be saved', () => {
+      privacyModeService.update.mockReturnValue(
+        throwError(() => new Error('nope')),
+      );
+      createComponent();
+
+      switchOf('STORYTIME_REACTION').click();
+      fixture.detectChanges();
+
+      expect(switchOf('STORYTIME_REACTION').getAttribute('aria-checked')).toBe(
+        'false',
+      );
+      expect(component.errorMessage).toBe(
+        'Unable to save Reactions to my work emails. It has been put back.',
+      );
+    });
+
+    it('saves the frequency like any other chooser', () => {
+      privacyModeService.update.mockReturnValue(
+        of(settings({ emailFrequency: 'WEEKLY' })),
+      );
+      createComponent();
+
+      const select = panel().querySelector(
+        '#email-frequency',
+      ) as HTMLSelectElement;
+
+      expect(
+        Array.from(select.options).map(option => option.textContent?.trim()),
+      ).toEqual(['Instantly', 'In a daily digest', 'In a weekly digest']);
+      select.value = select.options[2].value;
+      select.dispatchEvent(new Event('change'));
+      fixture.detectChanges();
+
+      expect(privacyModeService.update).toHaveBeenCalledWith({
+        privacyMode: false,
+        emailFrequency: 'WEEKLY',
+      });
+      expect(component.announcement).toBe('Send notification emails saved.');
+    });
+
+    it('says when emails to the address are paused', () => {
+      privacyModeService.load.mockReturnValue(
+        of(settings({ emailsPaused: true })),
+      );
+      createComponent();
+
+      const notice = panel().querySelector(
+        '.settings-email-paused',
+      ) as HTMLElement;
+
+      expect(notice.textContent).toContain('Emails to your address are paused');
+      expect(notice.querySelector('a')?.getAttribute('href')).toBe('/contact');
+    });
+
+    it('says nothing of a pause while emails go', () => {
+      createComponent();
+
+      expect(panel().querySelector('.settings-email-paused')).toBeNull();
+    });
+
+    it('leads a link straight to a switch', async () => {
+      const harness = await RouterTestingHarness.create();
+
+      component = await harness.navigateByUrl(
+        '/dashboard/settings?tab=notifications#setting-email-friend-request',
+        SettingsComponent,
+      );
+      harness.detectChanges();
+
+      const page = harness.routeNativeElement as HTMLElement;
+
+      expect(page.ownerDocument.activeElement).toBe(
+        page.querySelector('#setting-email-friend-request [role="switch"]'),
+      );
+    });
   });
 });

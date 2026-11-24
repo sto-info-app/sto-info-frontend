@@ -1,4 +1,6 @@
-<article class="news-card" [ngClass]="'category-' + post.category">
+<article
+  class="news-card"
+  [ngClass]="'category-' + post.category">
   <div class="news-header-row">
     <span class="news-header-left">
       <i
@@ -8,11 +10,21 @@
     </span>
     @if (post.publishedAt) {
       <time class="news-date">
-        <i class="fas fa-calendar-day news-date-icon" aria-hidden="true"></i>
+        <i
+          class="fas fa-calendar-day news-date-icon"
+          aria-hidden="true"></i>
         {{ post.publishedAt | appDate: 'mediumDate' }}
       </time>
     }
   </div>
+
+  @if (cover; as shown) {
+    <img
+      class="news-cover"
+      [src]="shown.url"
+      [alt]="shown.alt"
+      loading="lazy" />
+  }
 
   <div class="news-main-area">
     <div class="news-body-content">
@@ -36,7 +48,9 @@
       class="news-actions"
       [routerLink]="getDetailLink(post.slug)"
       [attr.aria-label]="'Read ' + post.title">
-      <i class="fas fa-chevron-right cta-icon" aria-hidden="true"></i>
+      <i
+        class="fas fa-chevron-right cta-icon"
+        aria-hidden="true"></i>
     </a>
   </div>
 </article>

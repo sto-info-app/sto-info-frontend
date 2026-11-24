@@ -1,0 +1,174 @@
+@if (isLoading()) {
+  <app-loading-bar loadingText="Loading the entry"></app-loading-bar>
+}
+
+<div id="log-entry-editor-page">
+  <h1>{{ entryId() ? 'Edit entry' : 'New entry' }}</h1>
+  <app-help-link
+    slug="captains-log"
+    label="Help with the Captain's Log" />
+
+  @if (errorMessage()) {
+    <app-lcars-error-message
+      title="Log entry"
+      [message]="errorMessage()"></app-lcars-error-message>
+  }
+
+  @if (entry(); as current) {
+    @if (current.removedAt) {
+      <app-lcars-warning-message
+        title="Removed by moderators"
+        [message]="
+          'This entry is no longer shown on your profile and can no longer be changed. ' +
+          current.removedReason
+        "></app-lcars-warning-message>
+    }
+  }
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="save()"
+    class="log-entry-form">
+    <app-collapsible-section
+      heading="Entry"
+      barClass="small-lcars-bar-gap">
+      <div class="log-entry-fields lcars-rotate">
+        <fieldset class="log-entry-types">
+          <legend>Type</legend>
+          @for (type of types; track type) {
+            <label class="log-entry-type">
+              <input
+                type="radio"
+                formControlName="type"
+                [value]="type" />
+              <span class="log-entry-type__name"
+                >{{ typeLabels[type] }} Log</span
+              >
+              <span class="log-entry-type__hint">{{ typeHints[type] }}</span>
+            </label>
+          }
+        </fieldset>
+
+        <div class="lcars-input-container">
+          <label for="log-headline-input">Headline (optional)</label>
+          <input
+            id="log-headline-input"
+            type="text"
+            formControlName="headline"
+            [maxlength]="headlineMaxLength"
+            [placeholder]="stardateHeadline()"
+            aria-describedby="log-headline-hint" />
+          <small
+            id="log-headline-hint"
+            class="log-entry-hint"
+            >Left blank, the entry is headed “{{ stardateHeadline() }}”.</small
+          >
+        </div>
+
+        <div class="lcars-input-container">
+          <label for="log-body-input">Entry</label>
+          <textarea
+            id="log-body-input"
+            formControlName="body"
+            rows="14"
+            [maxlength]="bodyMaxLength"></textarea>
+          <div class="field-footer">
+            @if (form.controls.body.touched && form.controls.body.invalid) {
+              <small class="field-error">Please write the entry.</small>
+            }
+            <small class="char-count"
+              >{{ bodyLength() }}/{{ bodyMaxLength }}</small
+            >
+          </div>
+        </div>
+
+        @if (showPreview()) {
+          <div class="markdown-preview">
+            <span class="preview-label">Preview</span>
+            <div [innerHTML]="bodyValue() | markdown"></div>
+          </div>
+        }
+
+        <div>
+          <button
+            type="button"
+            class="lcars-btn lcars-btn-auto"
+            (click)="togglePreview()">
+            {{ showPreview() ? 'Hide preview' : 'Show preview' }}
+          </button>
+        </div>
+      </div>
+    </app-collapsible-section>
+
+    @if (entry(); as current) {
+      <app-collapsible-section
+        heading="Picture"
+        barClass="small-lcars-bar-gap">
+        <div class="log-entry-picture">
+          @if (picture(); as shown) {
+            <img
+              class="log-entry-picture__image"
+              [src]="shown.url"
+              [alt]="shown.alt" />
+          } @else {
+            <p class="log-entry-hint">This entry has no picture.</p>
+          }
+          @if (!isRemoved()) {
+            <div class="buttons-row">
+              <button
+                type="button"
+                class="lcars-btn lcars-btn-auto"
+                (click)="onSetPicture(current)">
+                {{ current.pictureUrls ? 'Replace the picture' : 'Add a picture' }}
+              </button>
+              @if (current.pictureUrls) {
+                <button
+                  type="button"
+                  class="lcars-btn lcars-btn-auto red"
+                  (click)="onRemovePicture(current)">
+                  Remove the picture
+                </button>
+              }
+            </div>
+          }
+          <p class="log-entry-hint">
+            A new picture is checked for safety before it appears. A Captain's
+            entry's picture is shown on your profile with it; a Personal
+            entry's picture is only ever shown to you.
+          </p>
+        </div>
+      </app-collapsible-section>
+    } @else if (!entryId()) {
+      <p class="log-entry-hint">
+        Save the entry first; a picture can be added then.
+      </p>
+    }
+
+    <div class="log-entry-actions">
+      @if (entry(); as current) {
+        <button
+          type="button"
+          class="lcars-btn lcars-btn-auto red"
+          (click)="onDelete(current)">
+          Delete
+        </button>
+      }
+      @if (!isRemoved()) {
+        <button
+          type="submit"
+          class="lcars-btn lcars-btn-auto green"
+          [disabled]="isSaving()">
+          {{ isSaving() ? 'Saving…' : 'Save' }}
+        </button>
+      }
+    </div>
+  </form>
+
+  <div class="log-entry-foot">
+    <a
+      class="lcars-btn lcars-btn-auto"
+      [routerLink]="logLink"
+      >Back to the Log</a
+    >
+  </div>
+</div>

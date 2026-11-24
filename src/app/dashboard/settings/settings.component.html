@@ -323,100 +323,184 @@
               </div>
             </app-collapsible-section>
           </div>
+        }
 
           <div
             id="settings-panel-notifications"
             role="tabpanel"
             aria-labelledby="settings-tab-notifications"
             [hidden]="activeTab !== 'notifications'">
-            <app-collapsible-section heading="Notifications">
-              <div class="settings-content">
-                <app-help-link
-                  slug="what-you-are-notified-about"
-                  label="Help with notifications" />
-                <p class="settings-description">
-                  These arrive in STO Info only. Everything else a Fleet does
-                  &mdash; news, imports, events being scheduled &mdash; stays in
-                  the activity feed rather than your inbox.
-                </p>
-                @if (isChatOffered) {
+            @if (isFleetOffered) {
+              <app-collapsible-section heading="Notifications">
+                <div class="settings-content">
+                  <app-help-link
+                    slug="what-you-are-notified-about"
+                    label="Help with notifications" />
+                  <p class="settings-description">
+                    These arrive in STO Info, under Notifications. Everything else
+                    a Fleet does &mdash; news, imports, events being scheduled
+                    &mdash; stays in the activity feed rather than your inbox.
+                    Emails are switched on separately, below.
+                  </p>
+                  @if (isChatOffered) {
+                    <div
+                      class="settings-row"
+                      [id]="anchors.mentions">
+                      <app-lcars-toggle
+                        formControlName="notifyMention"
+                        label="Mentions"
+                        ariaLabel="Notify me about mentions"
+                      ></app-lcars-toggle>
+                      @if (savedKey === 'notifyMention') {
+                        <span class="settings-saved">Saved</span>
+                      }
+                    </div>
+                    <div
+                      class="settings-row"
+                      [id]="anchors.replies">
+                      <app-lcars-toggle
+                        formControlName="notifyReply"
+                        label="Replies"
+                        ariaLabel="Notify me about replies"
+                      ></app-lcars-toggle>
+                      @if (savedKey === 'notifyReply') {
+                        <span class="settings-saved">Saved</span>
+                      }
+                    </div>
+                    <div
+                      class="settings-row"
+                      [id]="anchors.directMessages">
+                      <app-lcars-toggle
+                        formControlName="notifyDirectMessage"
+                        label="Direct messages"
+                        ariaLabel="Notify me about direct messages"
+                      ></app-lcars-toggle>
+                      @if (savedKey === 'notifyDirectMessage') {
+                        <span class="settings-saved">Saved</span>
+                      }
+                    </div>
+                    <p class="settings-description">
+                      A direct message tells you once while you are away, and not
+                      again until you open the conversation.
+                    </p>
+                  }
                   <div
                     class="settings-row"
-                    [id]="anchors.mentions">
+                    [id]="anchors.rosterProposals">
                     <app-lcars-toggle
-                      formControlName="notifyMention"
-                      label="Mentions"
-                      ariaLabel="Notify me about mentions"
+                      formControlName="notifyRosterAssociation"
+                      label="Roster association proposals"
+                      ariaLabel="Notify me about roster association proposals"
                     ></app-lcars-toggle>
-                    @if (savedKey === 'notifyMention') {
-                      <span class="settings-saved">Saved</span>
-                    }
-                  </div>
-                  <div
-                    class="settings-row"
-                    [id]="anchors.replies">
-                    <app-lcars-toggle
-                      formControlName="notifyReply"
-                      label="Replies"
-                      ariaLabel="Notify me about replies"
-                    ></app-lcars-toggle>
-                    @if (savedKey === 'notifyReply') {
-                      <span class="settings-saved">Saved</span>
-                    }
-                  </div>
-                  <div
-                    class="settings-row"
-                    [id]="anchors.directMessages">
-                    <app-lcars-toggle
-                      formControlName="notifyDirectMessage"
-                      label="Direct messages"
-                      ariaLabel="Notify me about direct messages"
-                    ></app-lcars-toggle>
-                    @if (savedKey === 'notifyDirectMessage') {
+                    @if (savedKey === 'notifyRosterAssociation') {
                       <span class="settings-saved">Saved</span>
                     }
                   </div>
                   <p class="settings-description">
-                    A direct message tells you once while you are away, and not
-                    again until you open the conversation.
+                    Someone proposing that a character on an imported roster is
+                    yours. You always decide; switching this off means we stop
+                    telling you, and an unanswered proposal eventually expires.
                   </p>
+                  <div
+                    class="settings-row"
+                    [id]="anchors.eventReminders">
+                    <app-lcars-toggle
+                      formControlName="notifyEventReminder"
+                      label="Event reminders"
+                      ariaLabel="Notify me about event reminders"
+                    ></app-lcars-toggle>
+                    @if (savedKey === 'notifyEventReminder') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <p class="settings-description">
+                    Only for events you have asked to be reminded about.
+                  </p>
+                </div>
+              </app-collapsible-section>
+            }
+            <!--
+              Opt-in emails (sc-1067). Each switch saves itself, naming only
+              its own type, like every other control on the page.
+            -->
+            <app-collapsible-section heading="Email notifications">
+              <div class="settings-content">
+                <app-help-link
+                  slug="email-notifications"
+                  label="Help with email notifications" />
+                <p class="settings-description">
+                  Emails go to the address you signed up with. Each kind is off
+                  until you switch it on, except Login alerts, which are on
+                  unless you switch them off. Every email has a link that stops
+                  that kind of email without signing in.
+                </p>
+                @if (emailsPaused) {
+                  <output class="settings-email-paused">
+                    Emails to your address are paused, because an email to it
+                    bounced or was reported as spam. Nothing is sent to it,
+                    whatever is switched on here.
+                    <a [routerLink]="contactLink">Contact us</a> to have them
+                    resumed.
+                  </output>
                 }
                 <div
-                  class="settings-row"
-                  [id]="anchors.rosterProposals">
-                  <app-lcars-toggle
-                    formControlName="notifyRosterAssociation"
-                    label="Roster association proposals"
-                    ariaLabel="Notify me about roster association proposals"
-                  ></app-lcars-toggle>
-                  @if (savedKey === 'notifyRosterAssociation') {
-                    <span class="settings-saved">Saved</span>
-                  }
+                  class="settings-field"
+                  id="setting-email-frequency">
+                  <div class="settings-chooser">
+                    <div class="lcars-input-container">
+                      <label for="email-frequency">{{ emailFrequencyLabel }}</label>
+                      <select
+                        id="email-frequency"
+                        formControlName="emailFrequency"
+                        aria-describedby="email-frequency-description"
+                      >
+                        @for (option of emailFrequencyOptions; track option.value) {
+                          <option [ngValue]="option.value">{{ option.label }}</option>
+                        }
+                      </select>
+                    </div>
+                    @if (savedKey === 'emailFrequency') {
+                      <span class="settings-saved">Saved</span>
+                    }
+                  </div>
+                  <p id="email-frequency-description" class="settings-description">
+                    A digest gathers everything into one email at 08:00 in the
+                    zone your dates are shown in: every day, or on Mondays for
+                    the weekly one. Sent instantly, reactions and new followers
+                    come at most once an hour. Login alerts always come at once.
+                  </p>
                 </div>
-                <p class="settings-description">
-                  Someone proposing that a character on an imported roster is
-                  yours. You always decide; switching this off means we stop
-                  telling you, and an unanswered proposal eventually expires.
-                </p>
                 <div
-                  class="settings-row"
-                  [id]="anchors.eventReminders">
-                  <app-lcars-toggle
-                    formControlName="notifyEventReminder"
-                    label="Event reminders"
-                    ariaLabel="Notify me about event reminders"
-                  ></app-lcars-toggle>
-                  @if (savedKey === 'notifyEventReminder') {
-                    <span class="settings-saved">Saved</span>
+                  class="settings-email-groups"
+                  [formGroup]="emailForm">
+                  @for (group of emailGroups; track group.label) {
+                    <fieldset class="settings-email-group">
+                      <legend class="settings-email-heading">
+                        {{ group.label }}
+                      </legend>
+                      @for (option of group.options; track option.type) {
+                        <div
+                          class="settings-row"
+                          [id]="emailAnchor(option.type)">
+                          <app-lcars-toggle
+                            [formControlName]="option.type"
+                            [label]="option.label"
+                            [ariaLabel]="'Email me ' + option.label"
+                          ></app-lcars-toggle>
+                          @if (option.type === 'LOGIN') {
+                            <span class="settings-recommended">{{ recommendedLabel }}</span>
+                          }
+                          @if (savedKey === 'email:' + option.type) {
+                            <span class="settings-saved">Saved</span>
+                          }
+                        </div>
+                      }
+                    </fieldset>
                   }
                 </div>
-                <p class="settings-description">
-                  Only for events you have asked to be reminded about.
-                </p>
               </div>
             </app-collapsible-section>
           </div>
-        }
       </form>
 
       <div

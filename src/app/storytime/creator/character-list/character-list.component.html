@@ -19,12 +19,83 @@
       ]">
       Add a Character
     </a>
+    <button
+      class="lcars-btn lcars-btn-auto"
+      type="button"
+      aria-controls="storytime-character-copy-picker"
+      [attr.aria-expanded]="isPickerOpen"
+      (click)="togglePicker()">
+      Copy from another Story
+    </button>
     <a
       class="lcars-btn lcars-btn-auto"
       [routerLink]="['/', appRoutes.STORYTIME, 'manage', 'stories', storyId]">
       Back to the Story
     </a>
   </nav>
+
+  <!--
+    A copy is a Character of this Story in its own right: it takes the
+    original's details and tags, but not its Chapters, credits or portrait.
+  -->
+  @if (isPickerOpen) {
+    <app-lcars-panel
+      id="storytime-character-copy-picker"
+      class="storytime-copy-picker"
+      heading="Copy from another Story"
+      [level]="2">
+      <div class="storytime-panel storytime-panel--bare">
+        <p>
+          The copy is a separate Character: changing or deleting one leaves the
+          other as it is. It does not bring its Chapter appearances, credits or
+          portrait.
+        </p>
+
+        @if (pickerError) {
+          <app-lcars-error-message
+            title="Could not copy"
+            [message]="pickerError"></app-lcars-error-message>
+        }
+
+        @if (isPickerLoading) {
+          <app-loading-bar
+            loadingText="Loading your other Stories"></app-loading-bar>
+        } @else if (copyable.length === 0 && !pickerError) {
+          <p class="storytime-empty">
+            None of your other Stories has a Character to copy.
+          </p>
+        } @else {
+          @for (story of copyable; track story.storyId) {
+            <section class="storytime-copy-picker__story">
+              <h3>{{ story.storyTitle }}</h3>
+              <ul class="storytime-copy-picker__list">
+                @for (character of story.characters; track character.id) {
+                  <li class="storytime-copy-picker__character">
+                    <span class="storytime-copy-picker__name">
+                      {{ character.name }}
+                      @if (character.shortBio) {
+                        <span class="field-hint">{{ character.shortBio }}</span>
+                      }
+                    </span>
+                    <button
+                      class="lcars-btn lcars-btn-auto"
+                      type="button"
+                      [attr.aria-label]="
+                        'Copy ' + character.name + ' from ' + story.storyTitle
+                      "
+                      [disabled]="copyingId !== null"
+                      (click)="copy(character)">
+                      {{ copyingId === character.id ? 'Copying' : 'Copy' }}
+                    </button>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+        }
+      </div>
+    </app-lcars-panel>
+  }
 
   @if (errorMessage) {
     <app-lcars-error-message

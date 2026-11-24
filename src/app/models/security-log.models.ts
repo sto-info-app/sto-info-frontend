@@ -6,6 +6,8 @@ export enum SecurityLogSource {
   INVESTIGATION = 'INVESTIGATION',
   ERASURE = 'ERASURE',
   RETENTION = 'RETENTION',
+  /** A creator copying a Character between their Stories (sc-1483). */
+  STORYTIME = 'STORYTIME',
 }
 
 /** How each source is named on the page. */
@@ -18,6 +20,7 @@ export const SECURITY_LOG_SOURCE_LABELS: Readonly<
   [SecurityLogSource.INVESTIGATION]: 'Fleet investigations',
   [SecurityLogSource.ERASURE]: 'Roster erasures',
   [SecurityLogSource.RETENTION]: 'Retention runs',
+  [SecurityLogSource.STORYTIME]: 'Character copies',
 };
 
 /** What each site admin action is called. */
@@ -57,6 +60,7 @@ export const SITE_ADMIN_ACTION_LABELS: Readonly<Record<string, string>> = {
   PUBLICATION_RESUMED: 'Resumed publication',
   FEATURE_SWITCHED_ON: 'Switched a feature on',
   FEATURE_SWITCHED_OFF: 'Switched a feature off',
+  LOG_ENTRY_REMOVED: "Removed a Captain's Log entry",
 };
 
 /** Each feature a site admin may switch on or off, by name (FC-045). */

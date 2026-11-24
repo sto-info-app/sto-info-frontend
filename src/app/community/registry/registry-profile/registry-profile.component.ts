@@ -53,8 +53,11 @@ import { CommunityTabsComponent } from '../../community-tabs/community-tabs.comp
 import { RelationshipStatus } from '../../models/community.models';
 import {
   ReportMemberDialogComponent,
+  ReportMemberDialogData,
   ReportMemberDialogResult,
 } from '../../report-member-dialog/report-member-dialog.component';
+import { PublicLogEntry } from 'src/app/models/captains-log.models';
+import { ProfileCaptainsLogComponent } from '../profile-captains-log/profile-captains-log.component';
 import {
   RegistryAccountSummary,
   RegistryProfile,
@@ -114,6 +117,7 @@ export const REGISTRY_ACCOUNT_SORT_OPTIONS: readonly AccountSortOption[] = [
     CollapsibleSectionComponent,
     FormsModule,
     SettingsLinkComponent,
+    ProfileCaptainsLogComponent,
   ],
 })
 export class RegistryProfileComponent
@@ -512,20 +516,23 @@ export class RegistryProfileComponent
   // ----- Reporting -----
 
   /**
-   * Reports this member to the site's administrators.
+   * Reports this member to the site's administrators, or one of the
+   * Captain's Log entries on their profile (sc-1450).
    *
    * Unlike the friend and block actions this asks for a reason first: an
    * administrator who was not there needs the reporter's account of what
    * happened to act on it.
+   *
+   * @param entry - The Log entry being reported, if one is.
    */
-  reportMember(): void {
+  reportMember(entry?: PublicLogEntry): void {
     const dialogRef = this._dialog.open<
       ReportMemberDialogComponent,
-      { username: string },
+      ReportMemberDialogData,
       ReportMemberDialogResult
     >(ReportMemberDialogComponent, {
       width: '75%',
-      data: { username: this.username },
+      data: { username: this.username, entryHeadline: entry?.headline },
     });
 
     dialogRef
@@ -541,6 +548,7 @@ export class RegistryProfileComponent
             username: this.username,
             reason: result.reason,
             details: result.details,
+            ...(entry ? { logEntryId: entry.id } : {}),
           }),
           'Your report has been sent to the administrators. Thank you.',
           'Something went wrong sending that report.',

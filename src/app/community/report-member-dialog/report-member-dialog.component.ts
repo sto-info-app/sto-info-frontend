@@ -16,6 +16,8 @@ import {
  */
 export interface ReportMemberDialogData {
   username: string;
+  /** The headline of the Captain's Log entry being reported, if one is. */
+  entryHeadline?: string;
 }
 
 /**

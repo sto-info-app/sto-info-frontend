@@ -1873,10 +1873,6 @@ $storytime-landing-colours: (
 );
 
 .storytime-landing {
-  &__beta {
-    font-size: 50%;
-  }
-
   // Storytime's own navigation, which used to be a row of sidebar buttons.
   // Each entry gets a line saying what it is, which is the whole reason for
   // moving it here: "Arcs" alone tells a first-time reader nothing.
@@ -2510,6 +2506,14 @@ app-storytime-tag-row {
     margin-top: 0.75rem;
   }
 
+  // How to mark a spoiler, under the box. Small and quiet: it is the answer to
+  // a question, not part of the form.
+  &__hint {
+    color: vars.$lcars-grey-light;
+    font-size: 0.8rem;
+    margin: 0.25rem 0 0;
+  }
+
   &__note,
   &__loading {
     @include storytime-meta;
@@ -2517,6 +2521,80 @@ app-storytime-tag-row {
 
   &__error {
     @include storytime-message(vars.$lcars-cardinal);
+  }
+}
+
+// Spoilers in a comment
+// -----------------------------------------------------------------------------
+
+// A kept-back passage is a small LCARS pill in the one colour no comment panel
+// wears, so it never reads as part of the panel around it. It says the same
+// word however long the spoiler is, so its width gives nothing away. Once
+// revealed the words keep a tint of the same colour, so a reader can still
+// see which part was the spoiler.
+.storytime-spoiler {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35em;
+  padding: 0 0.75em;
+  border: 0;
+  border-radius: 999px;
+  background: vars.$lcars-african-violet;
+  color: vars.$lcars-black;
+  font: inherit;
+  font-family: vars.$font-antonio;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.5;
+  vertical-align: baseline;
+  cursor: pointer;
+
+  &:hover {
+    background: vars.$lcars-white;
+  }
+
+  &:focus-visible {
+    outline: 2px solid vars.$lcars-white;
+    outline-offset: 2px;
+  }
+
+  // The revealed words go back to reading like the comment, with the spoiler's
+  // colour kept only along their foot.
+  &--revealed {
+    display: inline;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    color: inherit;
+    font-family: inherit;
+    letter-spacing: inherit;
+    text-transform: none;
+    line-height: inherit;
+    cursor: auto;
+    box-shadow: inset 0 -2px 0 vars.$lcars-african-violet;
+
+    &:hover {
+      background: none;
+    }
+  }
+}
+
+// The swap from pill to words is a fade where motion is welcome. The global
+// reduced-motion rule would stop it anyway; asking here as well keeps the
+// intent beside the style.
+@media (prefers-reduced-motion: no-preference) {
+  .storytime-spoiler--revealed {
+    animation: storytime-spoiler-reveal 200ms ease-out;
+  }
+
+  @keyframes storytime-spoiler-reveal {
+    from {
+      opacity: 0;
+    }
+
+    to {
+      opacity: 1;
+    }
   }
 }
 
@@ -2893,4 +2971,43 @@ app-storytime-tag-row {
     flex-flow: column nowrap;
     gap: 1rem;
   }
+}
+
+// The picker of Characters to copy from another Story (sc-1483): each Story's
+// cast as a list of names, with the copy button at the end of each row.
+.storytime-copy-picker {
+  display: block;
+  margin-top: 1.5rem;
+}
+
+.storytime-copy-picker__story > h3 {
+  margin-bottom: 0.5rem;
+}
+
+.storytime-copy-picker__list {
+  display: grid;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.storytime-copy-picker__character {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.storytime-copy-picker__name {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+// The offer, on a copy's editor, of the portrait the copy left behind.
+.storytime-original-portrait {
+  display: block;
+  margin-top: 1.5rem;
 }

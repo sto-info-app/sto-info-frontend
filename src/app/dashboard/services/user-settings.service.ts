@@ -30,6 +30,10 @@ export const DEFAULT_USER_SETTINGS: UserSettings = {
   notifyDirectMessage: true,
   notifyRosterAssociation: true,
   notifyEventReminder: true,
+  // Opt-in, but for the login alert (sc-1067).
+  emailNotificationTypes: ['LOGIN'],
+  emailFrequency: 'INSTANT',
+  emailsPaused: false,
 };
 
 /**

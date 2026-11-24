@@ -68,6 +68,16 @@ export const routes: Routes = [
     canActivate: [ApiRequiredGuard],
   },
   {
+    // An email's unsubscribe link, which needs no sign-in (sc-1067).
+    path: APP_ROUTES.EMAIL_UNSUBSCRIBE,
+    loadComponent: () =>
+      import('./core/email-unsubscribe/email-unsubscribe.component').then(
+        m => m.EmailUnsubscribeComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.EMAIL_UNSUBSCRIBE, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.RESET_PASSWORD,
     component: ResetPasswordRequestComponent,
     data: { title: APP_ROUTE_TITLES.RESET_PASSWORD, requiresApi: true },
@@ -662,6 +672,35 @@ export const routes: Routes = [
     // switch is not a guard: a member who arrives while it is off is
     // told so by the page, which is more use than a redirect.
     canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_LOG,
+    loadComponent: () =>
+      import('./dashboard/captains-log/captains-log-page/captains-log-page.component').then(
+        m => m.CaptainsLogPageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_LOG, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_LOG_NEW,
+    loadComponent: () =>
+      import('./dashboard/captains-log/log-entry-editor/log-entry-editor.component').then(
+        m => m.LogEntryEditorComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_LOG_NEW, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+    canDeactivate: [unsavedChangesGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_LOG_EDIT,
+    loadComponent: () =>
+      import('./dashboard/captains-log/log-entry-editor/log-entry-editor.component').then(
+        m => m.LogEntryEditorComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_LOG_EDIT, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+    canDeactivate: [unsavedChangesGuard],
   },
   {
     path: APP_ROUTES.STO_DASHBOARD_STATS,

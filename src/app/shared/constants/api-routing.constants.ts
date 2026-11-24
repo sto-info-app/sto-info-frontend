@@ -30,6 +30,8 @@ export const API_URLS = {
   // User
   USER: apiUrl + '/user',
   USER_SETTINGS: apiUrl + '/user/settings',
+  // The links in notification emails (sc-1067).
+  EMAIL_UNSUBSCRIBE: apiUrl + '/email-preferences/unsubscribe',
   CLOSE_ACCOUNT: apiUrl + '/user/close-account',
   CLOSE_ACCOUNT_COMMUNITIES: apiUrl + '/user/close-account/communities',
   UPDATE_USER_PROFILE: apiUrl + '/user/update-profile',
@@ -172,6 +174,9 @@ export const API_URLS = {
 
   // News
   NEWS: apiUrl + '/news',
+  CAPTAINS_LOG: apiUrl + '/captains-log',
+  CAPTAINS_LOG_PUBLIC: apiUrl + '/registry/logs',
+  CAPTAINS_LOG_ADMIN: apiUrl + '/admin/captains-log',
   NEWS_ADMIN: apiUrl + '/news/admin',
 
   // Notifications

@@ -9,6 +9,15 @@ export enum NewsStatus {
   PUBLISHED = 'PUBLISHED',
 }
 
+/**
+ * A cover's addresses, by the size it is drawn at: a news card, or the head
+ * of the post's own page. Built by the API, never by the browser.
+ */
+export interface NewsCoverUrls {
+  cover640x360: string;
+  cover1920x1080: string;
+}
+
 export interface NewsPost {
   id: string;
   slug: string;
@@ -19,6 +28,12 @@ export interface NewsPost {
   status: NewsStatus;
   publishedAt: string | null;
   authorId: string | null;
+  /** Delivery reference of its cover, or null (sc-1447). */
+  coverImageId: string | null;
+  /** What the cover shows, or null. */
+  coverImageAlt: string | null;
+  /** The cover's addresses, by size, or null when it has none. */
+  coverImageUrls: NewsCoverUrls | null;
   createdAt: string;
   updatedAt: string;
 }

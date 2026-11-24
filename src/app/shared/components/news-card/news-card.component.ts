@@ -6,6 +6,7 @@ import {
   NEWS_CATEGORY_LABELS,
   NewsPost,
 } from 'src/app/models/news.models';
+import { NewsCover, newsCoverOf } from 'src/app/news/news-cover.constants';
 import { APP_ROUTES } from '../../constants/app-routing.constants';
 import { RoutingService } from '../../services/routing.service';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
@@ -24,6 +25,15 @@ export class NewsCardComponent {
   categoryIcons = NEWS_CATEGORY_ICONS;
 
   private readonly _routingService = inject(RoutingService);
+
+  /**
+   * The post's cover, card-sized (sc-1447).
+   *
+   * @returns The cover, or null when it has none.
+   */
+  get cover(): NewsCover | null {
+    return newsCoverOf(this.post, 'card');
+  }
 
   getDetailLink(slug: string): string {
     return this._routingService.getLink(`${APP_ROUTES.NEWS}/${slug}`);

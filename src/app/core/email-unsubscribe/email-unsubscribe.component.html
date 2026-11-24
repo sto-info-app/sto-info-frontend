@@ -1,0 +1,47 @@
+<div class="unsubscribe-page">
+  <h1>Stop emails</h1>
+  @switch (state()) {
+    @case ('loading') {
+      <p><output>Checking your link&hellip;</output></p>
+    }
+    @case ('confirm') {
+      <p>This link stops these emails:</p>
+      <ul class="unsubscribe-types">
+        @for (label of labels(); track label) {
+          <li>{{ label }}</li>
+        }
+      </ul>
+      <p>
+        Nothing else changes. You can switch them back on in your email
+        notification settings.
+      </p>
+      <button
+        type="button"
+        class="submit-button green"
+        (click)="confirm()">
+        Stop these emails
+      </button>
+    }
+    @case ('saving') {
+      <p><output>Stopping these emails&hellip;</output></p>
+    }
+    @case ('done') {
+      <app-lcars-success-message
+        title="Emails stopped"
+        [message]="'You will get no more emails about ' + labels().join(', ') + '.'"></app-lcars-success-message>
+    }
+    @default {
+      <app-lcars-error-message
+        title="Nothing changed"
+        [message]="errorMessage()"></app-lcars-error-message>
+    }
+  }
+  <p class="unsubscribe-settings">
+    <a
+      class="lcars-btn lcars-btn-auto"
+      [routerLink]="settingsLink"
+      [queryParams]="settingsQuery"
+      >Email notification settings</a
+    >
+  </p>
+</div>

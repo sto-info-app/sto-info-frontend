@@ -1,38 +1,48 @@
-<div
-  id="team-developers-container"
-  class="team-page lcars-rotate">
-  <h1>Developers</h1>
-  <p>
-    The developers keep the {{ appTitle }} moving forward by building features,
-    maintaining the data model, and shaping the user experience.
-  </p>
-
-  <app-team-member-section
-    title="Active Duty"
-    [vms]="currentMemberVms"
-    emptyMessage="No current developers listed yet." />
-
-  <app-team-member-section
-    title="Retired"
-    [vms]="pastMemberVms"
-    emptyMessage="No retired developers listed yet." />
-
-  <app-collapsible-section heading="Want to Join the Crew?">
+<!--
+  Two columns, as a member's own page has: the list on the left, and a
+  Navigation panel on the right leading to the other team list.
+-->
+<div class="team-page-layout">
+  <div
+    id="team-developers-container"
+    class="team-page team-page-main-column lcars-rotate">
+    <h1>Developers</h1>
     <p>
-      STO Info is an open, community-led project built with modern tooling and a
-      strong focus on security, accessibility, and maintainability. Contributions
-      range from frontend and backend development to documentation, testing,
-      automation, and review.
+      The developers keep the {{ appTitle }} moving forward by building features,
+      maintaining the data model, and shaping the user experience.
     </p>
-    <p>
-      You do not need to know everything on day one. Clear guidance, documented
-      standards, and supportive collaboration are part of how this project
-      operates. Curiosity and care matter more than perfection.
-    </p>
-    <p>
-      Use the
-      <a [routerLink]="contactLink">{{ appRouteTitles.CONTACT }}</a>
-      page to get in touch.
-    </p>
-  </app-collapsible-section>
+
+    <app-team-member-section
+      title="Active Duty"
+      [vms]="currentMemberVms"
+      emptyMessage="No current developers listed yet." />
+
+    <app-team-member-section
+      title="Retired"
+      [vms]="pastMemberVms"
+      emptyMessage="No retired developers listed yet." />
+
+    <app-collapsible-section heading="Want to Join the Crew?">
+      <p>
+        STO Info is an open, community-led project built with modern tooling and a
+        strong focus on security, accessibility, and maintainability. Contributions
+        range from frontend and backend development to documentation, testing,
+        automation, and review.
+      </p>
+      <p>
+        You do not need to know everything on day one. Clear guidance, documented
+        standards, and supportive collaboration are part of how this project
+        operates. Curiosity and care matter more than perfection.
+      </p>
+      <p>
+        Use the
+        <a [routerLink]="contactLink">{{ appRouteTitles.CONTACT }}</a>
+        page to get in touch.
+      </p>
+    </app-collapsible-section>
+  </div>
+
+  <aside class="team-page-side-column">
+    <app-team-navigation [crossLink]="crossLink" />
+  </aside>
 </div>
