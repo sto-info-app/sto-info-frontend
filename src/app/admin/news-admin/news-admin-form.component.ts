@@ -305,13 +305,16 @@ export class NewsAdminFormComponent implements OnInit {
    */
   private afterSave(saved: NewsPost): void {
     if (this.isEdit) {
-      this._router.navigate(['/' + APP_ROUTES.ADMIN_NEWS]);
+      void this._router.navigate(['/' + APP_ROUTES.ADMIN_NEWS]);
 
       return;
     }
 
-    this._router.navigate(['/' + APP_ROUTES.ADMIN_NEWS, saved.id, 'edit'], {
-      replaceUrl: true,
-    });
+    void this._router.navigate(
+      ['/' + APP_ROUTES.ADMIN_NEWS, saved.id, 'edit'],
+      {
+        replaceUrl: true,
+      },
+    );
   }
 }

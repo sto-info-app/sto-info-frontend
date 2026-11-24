@@ -292,7 +292,7 @@ export class LogEntryEditorComponent implements OnInit, HasUnsavedChanges {
       () => this._log.delete(entry.id),
       () => {
         this.form.markAsPristine();
-        this._router.navigate([this.logLink]);
+        void this._router.navigate([this.logLink]);
       },
     );
   }
@@ -371,12 +371,12 @@ export class LogEntryEditorComponent implements OnInit, HasUnsavedChanges {
     this.form.markAsPristine();
 
     if (id) {
-      this._router.navigate([this.logLink]);
+      void this._router.navigate([this.logLink]);
 
       return;
     }
 
-    this._router.navigate(
+    void this._router.navigate(
       ['/' + APP_ROUTES.STO_DASHBOARD_LOG_EDIT.replace(':id', saved.id)],
       { replaceUrl: true },
     );

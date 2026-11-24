@@ -126,7 +126,7 @@ export class CaptainsLogPageComponent implements OnInit {
       )
       .subscribe(agreed => {
         if (!agreed) {
-          this._router.navigate(['/' + APP_ROUTES.STO_DASHBOARD]);
+          void this._router.navigate(['/' + APP_ROUTES.STO_DASHBOARD]);
 
           return;
         }
