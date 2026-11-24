@@ -129,6 +129,7 @@ describe('CharacterDetailComponent', () => {
       // The panel has specs of its own; here it is only an element.
       .overrideComponent(CharacterDetailComponent, {
         remove: { imports: [CharacterFleetPanelComponent] },
+        add: { schemas: [NO_ERRORS_SCHEMA] },
       })
       .compileComponents();
   });

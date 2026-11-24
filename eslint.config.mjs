@@ -9,7 +9,9 @@ import globals from 'globals';
 export default tseslint.config(
   // Global ignores
   {
-    ignores: ['src/index.html'],
+    // environment.ts is generated from environment.template.ts by
+    // generate-env and ignored by Git, so Prettier already skips it.
+    ignores: ['src/index.html', 'src/environments/environment.ts'],
   },
   // TypeScript configuration block
   {

@@ -57,13 +57,13 @@
             {{ note }}
           </p>
         }
-        @for (paragraph of section.paragraphs; track paragraph) {
+        @for (paragraph of section.paragraphs; track $index) {
           <p>{{ paragraph }}</p>
         }
 
         @if (section.points) {
           <ul class="lcars-list">
-            @for (point of section.points; track point) {
+            @for (point of section.points; track $index) {
               <li>{{ point }}</li>
             }
           </ul>
