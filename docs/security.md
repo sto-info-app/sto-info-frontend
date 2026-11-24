@@ -16,11 +16,11 @@ Use overrides when:
 
 ## Active overrides
 
-| Override key                | Forced version | Scope                    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| --------------------------- | -------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `glob@>=9.0.0 <14.0.2`      | `^14.0.6`      | Vulnerable versions only | GHSA-3g3m-2fjr-6pw4 (moderate; an aborted glob walk keeps traversing the filesystem) covers every `glob` from `9.0.0` to `14.0.1` and was not backported. `test-exclude@7.0.2` (under `babel-plugin-istanbul`) asks for `glob@^10`, and `@jest/reporters`, `jest-config` and `jest-runtime` `30.5.2` for `glob@^13`. Added 2026-11-13. Dev tree only.                                                                                                                                   |
-| `minimatch@>=7.0.0 <11.0.1` | `^11.0.8`      | Vulnerable versions only | GHSA-g3hv-75wg-m249 (moderate; denial of service through pattern-part amplification) covers `minimatch` `7.0.0` to `11.0.0` and was not backported to 9.x or 10.x. `eslint@10.14.0`, `@eslint/config-array`, `@typescript-eslint/typescript-estree@8.72.2`, `test-exclude` and `@stryker-mutator/core@10.1.1` all ask for `minimatch@^10`. `serve-handler` keeps its own `minimatch@3.1.5`, which is outside the advisory and outside the key's range. Added 2026-11-13. Dev tree only. |
-| `qs`                        | `6.17.1`       | Global                   | `typed-rest-client@2.3.1`, which `@stryker-mutator/core@10.1.1` still pins, exact-pins `qs@6.15.1` (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g, GHSA-6pq8-jhm2-2vcw; vulnerable up to `6.16.0`). `typed-rest-client@3` has moved to `qs@^6.16.0` on its own. Raised from `6.17.0` on 2026-11-13 to track the current release. Dev tree only.                                                                                                                         |
+| Override key                | Forced version | Scope                    | Notes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| --------------------------- | -------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `glob@>=9.0.0 <14.0.2`      | `^14.0.6`      | Vulnerable versions only | GHSA-3g3m-2fjr-6pw4 (moderate; an aborted glob walk keeps traversing the filesystem) covers every `glob` from `9.0.0` to `14.0.1` and was not backported. `test-exclude@7.0.2` (under `babel-plugin-istanbul`) asks for `glob@^10`, and `@jest/reporters`, `jest-config` and `jest-runtime` `30.5.2` for `glob@^13`. Added 2026-11-13. Dev tree only.                                                                                                                                                                                                     |
+| `minimatch@>=7.0.0 <11.0.1` | `^11.0.9`      | Vulnerable versions only | GHSA-g3hv-75wg-m249 (moderate; denial of service through pattern-part amplification) covers `minimatch` `7.0.0` to `11.0.0` and was not backported to 9.x or 10.x. `eslint@10.14.0`, `@eslint/config-array`, `@typescript-eslint/typescript-estree@8.72.2`, `test-exclude` and `@stryker-mutator/core@10.1.1` all ask for `minimatch@^10`. `serve-handler` keeps its own `minimatch@3.1.5`, which is outside the advisory and outside the key's range. Added 2026-11-13; raised from `^11.0.8` on 2026-11-24 to track the current release. Dev tree only. |
+| `qs`                        | `6.17.1`       | Global                   | `typed-rest-client@2.3.1`, which `@stryker-mutator/core@10.1.1` still pins, exact-pins `qs@6.15.1` (GHSA-q8mj-m7cp-5q26, GHSA-x5fp-wj9c-mxmx, GHSA-4mjr-xmp4-gh2g, GHSA-6pq8-jhm2-2vcw; vulnerable up to `6.16.0`). `typed-rest-client@3` has moved to `qs@^6.16.0` on its own. Raised from `6.17.0` on 2026-11-13 to track the current release. Dev tree only.                                                                                                                                                                                           |
 
 The `glob` and `minimatch` keys carry a version range, so each applies only to
 copies inside its advisory. Once every consumer asks for a fixed release the
@@ -87,11 +87,11 @@ npm ls braces
 These are not `overrides` entries, but they are the reason `npm outdated` shows a
 newer `latest` that this project deliberately does not take.
 
-### `typescript` stays on `~6.0.3` (re-checked 2026-11-13)
+### `typescript` stays on `~6.0.3` (re-checked 2026-11-24)
 
 `typescript@7.0.2` is published, but it no longer ships the JavaScript compiler
 API (only `unstable/*` entry points), and the tools that load that API all gate
-on 6.x: `@angular/compiler-cli@22.2.6` and `typescript-eslint@8.72.2` declare
+on 6.x: `@angular/compiler-cli@22.3.0` and `typescript-eslint@8.74.0` declare
 `>=6.0 <6.1` / `<6.1.0`, and `ts-jest@29.4.15` `<7`. Dependabot ignores
 TypeScript majors for that reason (`.github/dependabot.yml`).
 
@@ -217,11 +217,11 @@ npm audit
 
 If `npm ls` shows versions outside the table above, the lockfile may be stale or dependency constraints changed. No `glob` should be below `14.0.2` and no `minimatch` between `7.0.0` and `11.0.0`; `compression` should be `1.8.2` or later and `vite` `8.3.5` or later without an override.
 
-Current expected audit state (last verified 2026-11-22):
+Current expected audit state (last verified 2026-11-24):
 
 - `npm audit --omit=dev`: `0 vulnerabilities`.
 - `npm audit`: `0 vulnerabilities`. The `deepmerge` advisory it used to report was withdrawn on 2026-11-16; see [Known advisory with no remediation](#known-advisory-with-no-remediation).
-- The active overrides only cover dependencies that still need forced versions; removing any one of the three reintroduces an advisory. This was re-confirmed on 2026-11-22 by removing each entry in turn and re-auditing.
+- The active overrides only cover dependencies that still need forced versions; removing any one of the three reintroduces an advisory. This was re-confirmed on 2026-11-24 by removing each entry in turn and re-auditing.
 
 ## Update process
 
