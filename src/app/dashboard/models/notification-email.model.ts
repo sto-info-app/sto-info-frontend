@@ -47,91 +47,70 @@ export interface NotificationEmailOption {
   readonly label: string;
 }
 
-/** Every switch, in the order Settings lists them. */
-export const NOTIFICATION_EMAIL_OPTIONS: readonly NotificationEmailOption[] = [
-  { type: 'LOGIN', group: 'ACCOUNT', label: 'Login alerts' },
-  {
-    type: 'STORYTIME_STORY_INVITE',
-    group: 'STORYTIME',
-    label: 'Invitations to help write a Story',
-  },
-  {
-    type: 'STORYTIME_ARC_INVITE',
-    group: 'STORYTIME',
-    label: 'Invitations to help with an Arc',
-  },
-  {
-    type: 'STORYTIME_MODERATION',
-    group: 'STORYTIME',
-    label: 'Moderation of my work',
-  },
-  { type: 'STORYTIME_APPEAL', group: 'STORYTIME', label: 'Appeal decisions' },
-  {
-    type: 'STORYTIME_SPOTLIGHT',
-    group: 'STORYTIME',
-    label: 'Storytime Spotlight',
-  },
-  { type: 'STORYTIME_FOLLOWER', group: 'STORYTIME', label: 'New followers' },
-  {
-    type: 'STORYTIME_COMMENT',
-    group: 'STORYTIME',
-    label: 'Comments on my work',
-  },
-  {
-    type: 'STORYTIME_REPLY',
-    group: 'STORYTIME',
-    label: 'Replies to my comments',
-  },
-  {
-    type: 'STORYTIME_REACTION',
-    group: 'STORYTIME',
-    label: 'Reactions to my work',
-  },
-  {
-    type: 'STORYTIME_FOLLOWED_PUBLICATION',
-    group: 'STORYTIME',
-    label: 'New Stories and Chapters I follow',
-  },
-  { type: 'FRIEND_REQUEST', group: 'FRIENDS', label: 'Friend requests' },
-  {
-    type: 'FRIEND_ACCEPTED',
-    group: 'FRIENDS',
-    label: 'Accepted friend requests',
-  },
-  { type: 'FLEET_MENTION', group: 'FLEET', label: 'Chat mentions' },
-  { type: 'FLEET_REPLY', group: 'FLEET', label: 'Chat replies' },
-  { type: 'FLEET_DIRECT_MESSAGE', group: 'FLEET', label: 'Direct messages' },
-  {
-    type: 'FLEET_ROSTER_PROPOSAL',
-    group: 'FLEET',
-    label: 'Roster association proposals',
-  },
-  { type: 'FLEET_EVENT_REMINDER', group: 'FLEET', label: 'Event reminders' },
-  { type: 'FLEET_EVENT_CANCELLED', group: 'FLEET', label: 'Cancelled events' },
-  { type: 'FLEET_EVENT_MOVED', group: 'FLEET', label: 'Moved events' },
-  {
-    type: 'FLEET_EVENT_PROMOTED',
-    group: 'FLEET',
-    label: 'Places freed for me at events',
-  },
-  { type: 'FLEET_OWNERSHIP', group: 'FLEET', label: 'Community ownership' },
-  {
-    type: 'FLEET_SUSPENSION',
-    group: 'FLEET',
-    label: 'Suspensions and reinstatements',
-  },
-  {
-    type: 'FLEET_MEMBERSHIP',
-    group: 'FLEET',
-    label: 'Fleet membership changes',
-  },
-  { type: 'FLEET_ARMADA', group: 'FLEET', label: 'Armada changes' },
-  {
-    type: 'FLEET_TRANSCRIPT',
-    group: 'FLEET',
-    label: 'Chat transcripts ready',
-  },
+/**
+ * Each switch's label, in the order Settings lists them. The help and every
+ * email's footer quote these.
+ */
+export const NOTIFICATION_EMAIL_LABELS: Readonly<
+  Record<NotificationEmailType, string>
+> = {
+  LOGIN: 'Login alerts',
+  STORYTIME_STORY_INVITE: 'Invitations to help write a Story',
+  STORYTIME_ARC_INVITE: 'Invitations to help with an Arc',
+  STORYTIME_MODERATION: 'Moderation of my work',
+  STORYTIME_APPEAL: 'Appeal decisions',
+  STORYTIME_SPOTLIGHT: 'Storytime Spotlight',
+  STORYTIME_FOLLOWER: 'New followers',
+  STORYTIME_COMMENT: 'Comments on my work',
+  STORYTIME_REPLY: 'Replies to my comments',
+  STORYTIME_REACTION: 'Reactions to my work',
+  STORYTIME_FOLLOWED_PUBLICATION: 'New Stories and Chapters I follow',
+  FRIEND_REQUEST: 'Friend requests',
+  FRIEND_ACCEPTED: 'Accepted friend requests',
+  FLEET_MENTION: 'Chat mentions',
+  FLEET_REPLY: 'Chat replies',
+  FLEET_DIRECT_MESSAGE: 'Direct messages',
+  FLEET_ROSTER_PROPOSAL: 'Roster association proposals',
+  FLEET_EVENT_REMINDER: 'Event reminders',
+  FLEET_EVENT_CANCELLED: 'Cancelled events',
+  FLEET_EVENT_MOVED: 'Moved events',
+  FLEET_EVENT_PROMOTED: 'Places freed for me at events',
+  FLEET_OWNERSHIP: 'Community ownership',
+  FLEET_SUSPENSION: 'Suspensions and reinstatements',
+  FLEET_MEMBERSHIP: 'Fleet membership changes',
+  FLEET_ARMADA: 'Armada changes',
+  FLEET_TRANSCRIPT: 'Chat transcripts ready',
+};
+
+/** The heading each type's name begins with; the login alert has its own. */
+const GROUP_PREFIXES: readonly (readonly [string, NotificationEmailGroup])[] = [
+  ['STORYTIME_', 'STORYTIME'],
+  ['FRIEND_', 'FRIENDS'],
+  ['FLEET_', 'FLEET'],
 ];
+
+/**
+ * The heading a switch is listed under.
+ *
+ * @param type - The kind of email.
+ * @returns Its heading.
+ */
+export function notificationEmailGroupOf(
+  type: NotificationEmailType,
+): NotificationEmailGroup {
+  return (
+    GROUP_PREFIXES.find(([prefix]) => type.startsWith(prefix))?.[1] ?? 'ACCOUNT'
+  );
+}
+
+/** Every switch, in the order Settings lists them. */
+export const NOTIFICATION_EMAIL_OPTIONS: readonly NotificationEmailOption[] = (
+  Object.keys(NOTIFICATION_EMAIL_LABELS) as NotificationEmailType[]
+).map(type => ({
+  type,
+  group: notificationEmailGroupOf(type),
+  label: NOTIFICATION_EMAIL_LABELS[type],
+}));
 
 /** What each heading is called. */
 export const NOTIFICATION_EMAIL_GROUP_LABELS: Readonly<
