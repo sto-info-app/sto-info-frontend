@@ -87,6 +87,12 @@ export const ROADMAP_COMPLETE: RoadmapEntry[] = [
     'Fleet Communities, Fleets and Armadas can be registered, found in the Fleet Directory and run through roles, recruitment and holdings.',
     'Fleet roster management was added, with imports, history, reports, news, events and notifications.',
     'Chat was added for Fleet, Armada and Community channels and between friends.',
+    'Improved the LCARS interface look and feel throughout the app.',
+    `Captain's and Personal Logs.`,
+    'Email notifications can be switched on for each kind of notice, sent instantly or in a daily or weekly digest.',
+    'News posts can now have cover images.',
+    'Storytime is out of beta: creators can reorder Chapters, copy Characters between their Stories and hide spoilers in comments.',
+    'Volunteer testers are now credited on the About Us page.',
   ),
 ];
 
