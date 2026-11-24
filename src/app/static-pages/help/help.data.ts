@@ -1143,7 +1143,7 @@ const SETTINGS_TOPIC: HelpTopic = {
       sections: [
         guideSection('Where to find them', [
           'Sign in, open your Dashboard and choose Settings. Everything on the page is about how STO Info behaves for you, and nobody else sees any of it.',
-          'The page has a tab for each part of the site: Account, Chat, Fleet, Notifications and Custom Tracking. Chat’s tab is there while chat is switched on, and Fleet’s and Notifications’ while Fleet Community is. The arrow keys move between the tabs.',
+          'The page has a tab for each part of the site: Account, Chat, Fleet, Notifications and Custom Tracking. Chat’s tab is there while chat is switched on, and Fleet’s while Fleet Community is. Notifications is always there, for its emails; its Fleet notices show while Fleet Community is on. The arrow keys move between the tabs.',
           'Each section has a help link under its heading, leading to the guide for that section.',
         ]),
         guideSection('Going straight to a setting', [
@@ -1297,9 +1297,10 @@ const SETTINGS_TOPIC: HelpTopic = {
       requiresFeature: 'FLEET',
       sections: [
         guideSection('Where notices arrive', [
-          'Notices arrive in STO Info only, under Notifications, never by email. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
+          'Notices arrive in STO Info, under Notifications. Reach it from the Notifications tile or the Notifications button on your Dashboard; the tile shows how many are unread. Everything else a Fleet does, such as news, imports and events being scheduled, stays in its activity feed rather than your notifications.',
+          'Any of them can also come by email, if you switch that on under Email notifications on the same tab. The email switches are separate from the ones here: switching a notice off here does not stop its email, and the guide to email notifications explains them.',
           'Notifications shows five at a time, newest first. Each can be marked read or unread, or deleted, and Delete all read clears every one you have read; a deleted notice is gone from your inbox for good, though it changes nothing it told you about.',
-          'Each switch on the Notifications tab of Settings stops that kind of notice as soon as it is switched off; the cog beside the Notifications heading goes there. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none.',
+          'Each switch on the Notifications tab of Settings stops that kind of notice in STO Info as soon as it is switched off; the cog beside the Notifications heading goes there. A notice already sent stays where it is. Five kinds have a switch; the rest, listed last, are sent because something was decided about you, and have none in STO Info, though each has an email switch.',
         ]),
         {
           heading: 'Mentions, replies and direct messages',
@@ -1320,7 +1321,7 @@ const SETTINGS_TOPIC: HelpTopic = {
         {
           heading: 'Notices no switch stops',
           paragraphs: [
-            'These are sent because somebody decided something about you or what you run, so they cannot be switched off:',
+            'These are sent because somebody decided something about you or what you run, so they cannot be switched off in STO Info. Each can also be emailed, if you switch that on, except a picture being removed and what the administrators send:',
           ],
           points: [
             'Your Fleet membership being suspended or reinstated.',
@@ -1336,6 +1337,74 @@ const SETTINGS_TOPIC: HelpTopic = {
       relatedLinks: [
         SETTINGS_LINK,
         { label: 'Notifications', route: APP_ROUTES.NOTIFICATIONS },
+      ],
+    },
+    {
+      slug: 'email-notifications',
+      title: 'Email notifications',
+      summary:
+        'Which notices can also come by email, how often, and how to stop them.',
+      sections: [
+        guideSection('Switching them on', [
+          'Email notifications, on the Notifications tab of Settings, has a switch for each kind of notice that can come by email. Emails go to the address you signed up with.',
+          'Each is off until you switch it on, except Login alerts, which are marked Recommended and are on unless you switch them off. A Login alert tells you somebody has signed in to your account, so you can act if it was not you.',
+          'The email switches are separate from the notices in STO Info: an email can be on for a notice you have switched off in STO Info, and the other way round. Each is saved the moment you change it, with a Saved note beside it.',
+        ]),
+        guideSection(
+          'Account and Friends',
+          ['Under Account and Friends:'],
+          [
+            'Login alerts — somebody signed in to your account.',
+            'Friend requests — somebody asked to be your friend.',
+            'Accepted friend requests — somebody accepted yours.',
+          ],
+        ),
+        guideSection(
+          'Storytime',
+          ['Under Storytime:'],
+          [
+            'Invitations to help write a Story, and Invitations to help with an Arc.',
+            'Moderation of my work — a site administrator acted on something of yours — and Appeal decisions.',
+            'Storytime Spotlight — your work was chosen for the Spotlight.',
+            'New followers — somebody followed you, or a Story or Arc of yours.',
+            'Comments on my work — somebody commented on your Story, Chapter or Arc.',
+            'Replies to my comments — somebody answered a comment of yours.',
+            'Reactions to my work — somebody reacted to your Story, Chapter or Arc.',
+            'New Stories and Chapters I follow — a creator or Story you follow published something new.',
+          ],
+        ),
+        {
+          heading: 'Fleet',
+          paragraphs: [
+            'Under Fleet, while Fleet Community is on. The chat ones show while chat is on as well:',
+          ],
+          points: [
+            'Chat mentions, Chat replies and Direct messages.',
+            'Roster association proposals.',
+            'Event reminders, Cancelled events, Moved events and Places freed for me at events.',
+            'Community ownership, Suspensions and reinstatements, Fleet membership changes and Armada changes.',
+            'Chat transcripts ready.',
+          ],
+          requiresFeature: 'FLEET',
+        },
+        guideSection('How often', [
+          'Send notification emails chooses Instantly, In a daily digest or In a weekly digest, for every notification email at once.',
+          'A digest gathers everything into one email at 08:00 in the zone your dates are shown in: every day, or on Mondays for the weekly one. Sent instantly, everything that came at once arrives in one email, and Reactions to my work and New followers come at most once an hour. Login alerts always come at once.',
+          'An email says what the notice says, with a link to it on STO Info. It never quotes a chat message or a comment.',
+        ]),
+        guideSection('Stopping them', [
+          'Every notification email ends with a link for each kind of email in it, “Stop emails about …”. It opens a page saying what it stops, and stops it when you confirm, without signing in. Many email apps also show an Unsubscribe button, which does the same at once.',
+          'Manage email notifications, at the foot of every email, comes back here. A Login alert has only that link, so it can only be switched off from Settings.',
+        ]),
+        guideSection('When emails are paused', [
+          'If an email to your address bounces for good or is reported as spam, nothing more is sent to it, whatever is switched on, and Email notifications says so. Contact us to have emails resumed once the address works again.',
+          'Nobody is emailed about anything the site’s administrators send to everybody, or to you alone, and no notification email goes to an account whose address has not been verified.',
+        ]),
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        { label: 'Notifications', route: APP_ROUTES.NOTIFICATIONS },
+        { label: 'Privacy policy', route: APP_ROUTES.PRIVACY_POLICY },
       ],
     },
   ],

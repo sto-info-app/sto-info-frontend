@@ -671,6 +671,7 @@ describe('help data', () => {
         'chat-settings',
         'fleet-settings',
         'what-you-are-notified-about',
+        'email-notifications',
       ]);
     });
 

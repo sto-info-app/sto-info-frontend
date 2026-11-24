@@ -68,6 +68,16 @@ export const routes: Routes = [
     canActivate: [ApiRequiredGuard],
   },
   {
+    // An email's unsubscribe link, which needs no sign-in (sc-1067).
+    path: APP_ROUTES.EMAIL_UNSUBSCRIBE,
+    loadComponent: () =>
+      import('./core/email-unsubscribe/email-unsubscribe.component').then(
+        m => m.EmailUnsubscribeComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.EMAIL_UNSUBSCRIBE, requiresApi: true },
+    canActivate: [ApiRequiredGuard],
+  },
+  {
     path: APP_ROUTES.RESET_PASSWORD,
     component: ResetPasswordRequestComponent,
     data: { title: APP_ROUTE_TITLES.RESET_PASSWORD, requiresApi: true },

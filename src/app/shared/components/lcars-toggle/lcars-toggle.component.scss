@@ -41,9 +41,17 @@
 
 .lcars-toggle__label {
   white-space: nowrap;
+
+  // On a phone a long label, such as "New Stories and Chapters I follow",
+  // ran out past the screen's edge; there it wraps instead (sc-1067).
+  @media (width <= 480px) {
+    white-space: normal;
+  }
 }
 
 .lcars-toggle__delta {
+  // Kept whole beside a label that wraps.
+  flex-shrink: 0;
   font-size: 1.3rem;
   color: vars.$white-a15;
   transition:

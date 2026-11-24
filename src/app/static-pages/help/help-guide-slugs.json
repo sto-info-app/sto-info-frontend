@@ -40,7 +40,8 @@
     "dates-and-times",
     "chat-settings",
     "fleet-settings",
-    "what-you-are-notified-about"
+    "what-you-are-notified-about",
+    "email-notifications"
   ],
   "topics": ["community", "fleets", "custom-tracking", "storytime", "settings"]
 }

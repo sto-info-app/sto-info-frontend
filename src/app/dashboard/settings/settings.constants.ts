@@ -1,5 +1,10 @@
 import { SettingsTab } from 'src/app/shared/constants/settings-links.constants';
 
+import {
+  EMAIL_FREQUENCY_LABEL,
+  NOTIFICATION_EMAIL_OPTIONS,
+  NotificationEmailType,
+} from '../models/notification-email.model';
 import { PresenceVisibility, UserSettings } from '../models/user.model';
 
 /**
@@ -24,7 +29,12 @@ export const PRESENCE_OPTIONS: readonly {
  * name the setting in the words the reader sees beside it, so neither leaves
  * them wondering which control it meant.
  */
-export const SETTING_LABELS: Readonly<Record<keyof UserSettings, string>> = {
+export const SETTING_LABELS: Readonly<
+  Record<
+    Exclude<keyof UserSettings, 'emailNotificationTypes' | 'emailsPaused'>,
+    string
+  >
+> = {
   privacyMode: 'Privacy Mode',
   sessionTimeoutMinutes: 'Login inactivity timeout',
   displayTimezone: 'Show dates and times in',
@@ -37,7 +47,24 @@ export const SETTING_LABELS: Readonly<Record<keyof UserSettings, string>> = {
   notifyDirectMessage: 'Direct messages',
   notifyRosterAssociation: 'Roster association proposals',
   notifyEventReminder: 'Event reminders',
+  emailFrequency: EMAIL_FREQUENCY_LABEL,
 };
+
+/**
+ * What an email switch is called, for its "Saved" note and its error
+ * (sc-1067). Said as an email, since "Event reminders" is also the in-app
+ * switch's name.
+ *
+ * @param type - The type.
+ * @returns Its label, as an email.
+ */
+export function emailLabelOf(type: NotificationEmailType): string {
+  const label =
+    NOTIFICATION_EMAIL_OPTIONS.find(option => option.type === type)?.label ??
+    type;
+
+  return `${label} emails`;
+}
 
 /**
  * What the registry switch is called, on Settings as on the Personnel
