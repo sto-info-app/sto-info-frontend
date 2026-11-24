@@ -17,6 +17,8 @@ import {
 import { GovernanceReasonDialogComponent } from 'src/app/fleet/governance/governance-reason-dialog/governance-reason-dialog.component';
 import { ModerationService } from 'src/app/shared/services/moderation.service';
 import { ModerationHoldAdminService } from './moderation-hold-admin.service';
+import { CaptainsLogService } from 'src/app/dashboard/captains-log/captains-log.service';
+
 import { ReportAdminListComponent } from './report-admin-list.component';
 
 const REPORTED_ID = 'reported-1';
@@ -44,6 +46,7 @@ function buildReport(overrides: Partial<UserReport> = {}): UserReport {
     },
     reason: ReportReason.HARASSMENT,
     details: 'Repeated abusive messages.',
+    logEntryId: null,
     status: ReportStatus.OPEN,
     moderatorNotes: null,
     reviewedBy: null,
@@ -79,6 +82,7 @@ describe('ReportAdminListComponent', () => {
   >;
   let dialogSpy: jest.Mocked<MatDialog>;
   let holds: { place: jest.Mock };
+  let captainsLog: { getForAdmin: jest.Mock };
 
   /**
    * Stubs the reason dialog to close with a reason, or with none (FC-039).
@@ -118,6 +122,25 @@ describe('ReportAdminListComponent', () => {
 
     dialogSpy = { open: jest.fn() } as unknown as jest.Mocked<MatDialog>;
     holds = { place: jest.fn(() => of({})) };
+    captainsLog = {
+      getForAdmin: jest.fn(() =>
+        of({
+          id: 'entry-1',
+          userId: REPORTED_ID,
+          type: 'CAPTAIN',
+          headline: 'Arrival',
+          customHeadline: 'Arrival',
+          body: 'We reached the Azure Nebula.',
+          stardate: 104502.57,
+          pictureUrls: null,
+          pictureAlt: null,
+          createdAt: '2026-11-24T10:30:00.000Z',
+          editedAt: null,
+          removedAt: null,
+          removedReason: null,
+        }),
+      ),
+    };
 
     await TestBed.configureTestingModule({
       imports: [ReportAdminListComponent, HttpClientTestingModule],
@@ -125,6 +148,7 @@ describe('ReportAdminListComponent', () => {
         provideRouter([]),
         { provide: ModerationService, useValue: serviceSpy },
         { provide: ModerationHoldAdminService, useValue: holds },
+        { provide: CaptainsLogService, useValue: captainsLog },
       ],
     })
       .overrideComponent(ReportAdminListComponent, {
@@ -143,6 +167,19 @@ describe('ReportAdminListComponent', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('shows the Captain’s Log entry a report names (sc-1450)', () => {
+    serviceSpy.getReports.mockReturnValue(
+      of(buildPage([buildReport({ logEntryId: 'entry-1' })])),
+    );
+
+    fixture.detectChanges();
+
+    expect(captainsLog.getForAdmin).toHaveBeenCalledWith('entry-1');
+    expect(fixture.nativeElement.textContent).toContain(
+      "Reported Captain's Log entry",
+    );
   });
 
   it('loads the open reports on init', () => {

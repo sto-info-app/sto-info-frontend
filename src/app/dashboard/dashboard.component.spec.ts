@@ -403,8 +403,16 @@ describe('DashboardComponent', () => {
     it('should make every tile a link a keyboard can reach', () => {
       fixture.detectChanges();
 
-      expect(tiles()).toHaveLength(7);
+      expect(tiles()).toHaveLength(8);
       expect(tiles().every(tile => tile.tagName === 'A')).toBe(true);
+    });
+
+    it("should open the Captain's Log from its own tile (sc-1450)", () => {
+      fixture.detectChanges();
+
+      expect(
+        tiles().some(tile => tile.textContent?.includes("Captain's Log")),
+      ).toBe(true);
     });
   });
 

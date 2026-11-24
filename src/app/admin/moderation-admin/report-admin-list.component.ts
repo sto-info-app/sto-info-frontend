@@ -38,6 +38,7 @@ import { observeInZone } from 'src/app/shared/rxjs/observe-in-zone.operator';
 import { AppDatePipe } from 'src/app/shared/pipes/app-date.pipe';
 import { CollapsibleSectionComponent } from 'src/app/shared/components/collapsible-section/collapsible-section.component';
 import { LcarsPanelComponent } from 'src/app/shared/components/lcars-panel/lcars-panel.component';
+import { ReportedLogEntryComponent } from './reported-log-entry/reported-log-entry.component';
 
 const PAGE_SIZE = 20;
 const LOAD_TIMEOUT_MS = 12000;
@@ -73,6 +74,7 @@ type StatusFilter = ReportStatus | 'ALL';
     LcarsSuccessMessageComponent,
     CollapsibleSectionComponent,
     LcarsPanelComponent,
+    ReportedLogEntryComponent,
   ],
 })
 export class ReportAdminListComponent implements OnInit {

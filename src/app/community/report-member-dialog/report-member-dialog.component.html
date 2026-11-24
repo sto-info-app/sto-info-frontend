@@ -10,6 +10,12 @@
       your username; {{ data.username }} is never told a report exists, or who
       raised it.
     </p>
+    @if (data.entryHeadline) {
+      <p class="report-dialog-intro">
+        You are reporting their Captain's Log entry
+        <strong>“{{ data.entryHeadline }}”</strong>.
+      </p>
+    }
 
     <form
       [formGroup]="form"

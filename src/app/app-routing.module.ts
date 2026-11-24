@@ -674,6 +674,35 @@ export const routes: Routes = [
     canActivate: [AuthGuard, ApiRequiredGuard],
   },
   {
+    path: APP_ROUTES.STO_DASHBOARD_LOG,
+    loadComponent: () =>
+      import('./dashboard/captains-log/captains-log-page/captains-log-page.component').then(
+        m => m.CaptainsLogPageComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_LOG, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_LOG_NEW,
+    loadComponent: () =>
+      import('./dashboard/captains-log/log-entry-editor/log-entry-editor.component').then(
+        m => m.LogEntryEditorComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_LOG_NEW, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+    canDeactivate: [unsavedChangesGuard],
+  },
+  {
+    path: APP_ROUTES.STO_DASHBOARD_LOG_EDIT,
+    loadComponent: () =>
+      import('./dashboard/captains-log/log-entry-editor/log-entry-editor.component').then(
+        m => m.LogEntryEditorComponent,
+      ),
+    data: { title: APP_ROUTE_TITLES.STO_DASHBOARD_LOG_EDIT, requiresApi: true },
+    canActivate: [AuthGuard, ApiRequiredGuard],
+    canDeactivate: [unsavedChangesGuard],
+  },
+  {
     path: APP_ROUTES.STO_DASHBOARD_STATS,
     loadComponent: () =>
       import('./dashboard/stats/stats.component').then(m => m.StatsComponent),

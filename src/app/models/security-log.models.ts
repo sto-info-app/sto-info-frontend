@@ -60,6 +60,7 @@ export const SITE_ADMIN_ACTION_LABELS: Readonly<Record<string, string>> = {
   PUBLICATION_RESUMED: 'Resumed publication',
   FEATURE_SWITCHED_ON: 'Switched a feature on',
   FEATURE_SWITCHED_OFF: 'Switched a feature off',
+  LOG_ENTRY_REMOVED: "Removed a Captain's Log entry",
 };
 
 /** Each feature a site admin may switch on or off, by name (FC-045). */

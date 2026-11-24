@@ -1,0 +1,32 @@
+<app-lcars-panel
+  [heading]="entry().headline"
+  [level]="level()"
+  [accent]="accent()">
+  <span
+    panelMarks
+    class="log-entry-card__marks">
+    <ng-content select="[entryMarks]" />
+  </span>
+  <article class="log-entry-card">
+    @if (picture(); as shown) {
+      <img
+        class="log-entry-card__picture"
+        [src]="shown.url"
+        [alt]="shown.alt" />
+    }
+    <div
+      class="log-entry-card__body"
+      [innerHTML]="entry().body | markdown"></div>
+    <ng-content select="[entryNotes]" />
+    <p class="log-entry-card__meta">
+      <span>Stardate {{ stardate() }}</span>
+      <span>{{ entry().createdAt | appDate: 'medium' }}</span>
+      @if (entry().editedAt) {
+        <span>Edited {{ entry().editedAt | appDate: 'medium' }}</span>
+      }
+    </p>
+    <div class="log-entry-card__actions">
+      <ng-content select="[entryActions]" />
+    </div>
+  </article>
+</app-lcars-panel>

@@ -356,6 +356,9 @@ const COMMUNITY_TOPIC: HelpTopic = {
           ],
           REPORT_REASON_POINTS,
         ),
+        guideSection('Reporting a Captain’s Log entry', [
+          'To report one of the Captain’s Log entries on somebody’s record, choose Report beneath it. It is reported in the same way, and the administrators are shown which entry you meant.',
+        ]),
         guideSection('Which one to use', [
           'Block somebody you simply want out of your way; it takes effect immediately and needs nobody’s agreement. Report somebody who is breaking the rules, so it can be dealt with for everybody rather than only for you.',
           'The two are not exclusive. Blocking somebody you have reported is often the right thing to do while it is looked at.',
@@ -1191,6 +1194,7 @@ const SETTINGS_TOPIC: HelpTopic = {
         guideSection('What it does not do', [
           'It changes nothing anybody else sees. It does not make your record private, take you out of the registry, or change who may see your accounts, captains or Custom Tracking. Those are decided by the visibility choices on each, and Privacy Mode leaves them as they were.',
           'It is a blur, not a removal. The details are still on the page, so anybody who copies the text, or uses a screen reader, still gets them.',
+          'It does not hide your Captain’s Log. While it is on, the Log asks before it opens, because your Personal entries are shown there in full.',
         ]),
         guideSection('Turning it on', [
           'It is off until you turn it on. Switch on Privacy Mode under Privacy, on the Account tab of Settings; it is saved as soon as you do.',
@@ -1202,6 +1206,55 @@ const SETTINGS_TOPIC: HelpTopic = {
         {
           label: 'Your Personnel Record',
           route: APP_ROUTES.STO_DASHBOARD_PROFILE,
+        },
+      ],
+    },
+    {
+      slug: 'captains-log',
+      title: 'The Captain’s Log',
+      summary:
+        'Keeping a journal of Captain’s entries for your profile and Personal entries for yourself.',
+      sections: [
+        guideSection(
+          'Two kinds of entry',
+          [
+            'The Captain’s Log tile on your Dashboard opens your Captain’s Log, a journal of your entries, newest first. Each entry is one of two types:',
+          ],
+          [
+            'Captain’s Log: shown on your public profile while your profile is publicly visible.',
+            'Personal Log: only ever shown to you.',
+          ],
+        ),
+        guideSection('Where Captain’s entries are shown', [
+          'Your Captain’s entries appear in a Captain’s Log section on your record in the Galactic Personnel Registry, newest first, 20 to a page. While your profile is not publicly visible, nobody sees them, and members on either side of a block never do.',
+        ]),
+        guideSection('Writing an entry', [
+          'Choose New entry, pick the Type, and write the Entry: up to 10,000 characters, with Markdown. Show preview shows how it will look.',
+          'The Headline (optional) takes up to 120 characters. Left blank, the entry is headed by its type and the stardate it was written on, such as “Captain’s Log stardate 104502.6”. The stardate is worked out in UTC when you first save the entry, and never changes.',
+          'The Log panel beside your entries has New entry, and All entries, Captain’s entries and Personal entries to choose which are shown.',
+        ]),
+        guideSection('Adding a picture', [
+          'Save the entry first; a picture can be added then. Choose Add a picture, crop it to 16:9 and describe what it shows in up to 300 characters.',
+          'A new picture is checked for safety before it appears. A Captain’s entry’s picture is shown on your profile with it; a Personal entry’s picture is only ever shown to you.',
+        ]),
+        guideSection('Editing and deleting', [
+          'Choose Edit to change an entry’s type, headline, words or picture; its stardate stays as it was, and it shows Edited with the time.',
+          'Turning a Personal entry into a Captain’s one asks first, because it will then be shown on your profile.',
+          'Delete removes an entry for good, with its picture. It cannot be recovered.',
+        ]),
+        guideSection('With Privacy Mode on', [
+          'Privacy Mode does not hide your entries, so while it is on the Log asks before it opens. Choose Open the Log to go on, or Back to the Dashboard.',
+        ]),
+        guideSection('If an entry is reported', [
+          'Signed-in members can report a Captain’s entry with the Report button beneath it on your record.',
+          'If moderators remove an entry, it leaves your profile and stays in your Log marked Removed by moderators, with their reason. It can no longer be changed, though you can still delete it, and you are sent a notification saying why.',
+        ]),
+      ],
+      relatedLinks: [
+        SETTINGS_LINK,
+        {
+          label: 'Your Captain’s Log',
+          route: APP_ROUTES.STO_DASHBOARD_LOG,
         },
       ],
     },

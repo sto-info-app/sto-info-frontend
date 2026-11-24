@@ -64,6 +64,17 @@
             </div>
           </a>
 
+          <a
+            class="dashboard-tile bahama"
+            [routerLink]="getRouteLink(appRoutes.STO_DASHBOARD_LOG)">
+            <div class="tile-icon">
+              <i class="fa-solid fa-book-bookmark"></i>
+            </div>
+            <div class="tile-content">
+              <span class="tile-stat">{{ appRouteTitles.STO_DASHBOARD_LOG }}</span>
+            </div>
+          </a>
+
           <!--
             The Fleet section, which goes when the server says the
             feature is off and stays when the configuration could not

@@ -1,0 +1,27 @@
+@use 'lcars-variables' as vars;
+@use 'lcars-mixins' as mixins;
+
+// The Captain's Log entry a report names (sc-1450).
+.reported-log-entry {
+  margin: 0.75rem 0;
+
+  &__label {
+    margin: 0 0 0.5rem;
+    text-transform: uppercase;
+    font-size: 0.8rem;
+    color: vars.$white-a70;
+  }
+
+  &__error {
+    color: vars.$lcars-red;
+  }
+
+  &__reason {
+    margin: 0;
+    font-style: italic;
+  }
+}
+
+.status-pill {
+  @include mixins.lcars-panel-card-badge;
+}

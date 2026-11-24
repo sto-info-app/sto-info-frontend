@@ -103,6 +103,11 @@
             </div>
           </div>
         </app-collapsible-section>
+
+        <app-profile-captains-log
+          [username]="profile.username"
+          [canReport]="canActOnMember"
+          (report)="reportMember($event)" />
       </div>
     }
   </div>

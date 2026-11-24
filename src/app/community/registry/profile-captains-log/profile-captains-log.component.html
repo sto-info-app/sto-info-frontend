@@ -1,0 +1,34 @@
+@if (total() > 0 || errorMessage()) {
+  <app-collapsible-section
+    [heading]="heading"
+    [badge]="total() > 0 ? total() : null">
+    <div class="profile-captains-log">
+      @if (errorMessage()) {
+        <p class="lcars-empty-state">{{ errorMessage() }}</p>
+      }
+      @for (entry of entries(); track entry.id; let index = $index) {
+        <app-log-entry-card
+          [entry]="entry"
+          [position]="index">
+          @if (canReport()) {
+            <button
+              entryActions
+              type="button"
+              class="lcars-btn lcars-btn-auto"
+              (click)="report.emit(entry)">
+              Report
+            </button>
+          }
+        </app-log-entry-card>
+      }
+      @if (pageCount() > 1) {
+        <app-lcars-pagination
+          previousLabel="Newer"
+          nextLabel="Older"
+          [page]="page()"
+          [pageCount]="pageCount()"
+          (turn)="turn($event)" />
+      }
+    </div>
+  </app-collapsible-section>
+}

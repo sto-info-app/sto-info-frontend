@@ -174,6 +174,9 @@ export const API_URLS = {
 
   // News
   NEWS: apiUrl + '/news',
+  CAPTAINS_LOG: apiUrl + '/captains-log',
+  CAPTAINS_LOG_PUBLIC: apiUrl + '/registry/logs',
+  CAPTAINS_LOG_ADMIN: apiUrl + '/admin/captains-log',
   NEWS_ADMIN: apiUrl + '/news/admin',
 
   // Notifications

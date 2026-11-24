@@ -65,6 +65,9 @@ export const APP_ROUTES = {
   STO_DASHBOARD_FLEETS: ROOT_ROUTES.DASHBOARD + '/fleets',
   STO_DASHBOARD_STATS: ROOT_ROUTES.DASHBOARD + '/stats',
   STO_DASHBOARD_STATS_DETAIL: ROOT_ROUTES.DASHBOARD + '/stats/:breakdownId',
+  STO_DASHBOARD_LOG: ROOT_ROUTES.DASHBOARD + '/log',
+  STO_DASHBOARD_LOG_NEW: ROOT_ROUTES.DASHBOARD + '/log/new',
+  STO_DASHBOARD_LOG_EDIT: ROOT_ROUTES.DASHBOARD + '/log/:id/edit',
 
   // Community - Galactic Personnel Registry
   COMMUNITY: ROOT_ROUTES.COMMUNITY,
@@ -334,6 +337,9 @@ export const APP_ROUTE_TITLES = {
   STO_DASHBOARD_FLEETS: 'Communities You Follow',
   STO_DASHBOARD_STATS: 'Stats',
   STO_DASHBOARD_STATS_DETAIL: 'Stat Detail',
+  STO_DASHBOARD_LOG: "Captain's Log",
+  STO_DASHBOARD_LOG_NEW: 'New Log Entry',
+  STO_DASHBOARD_LOG_EDIT: 'Edit Log Entry',
 
   // Community - Galactic Personnel Registry
   COMMUNITY: 'Community',

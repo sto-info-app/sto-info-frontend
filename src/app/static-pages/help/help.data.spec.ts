@@ -666,6 +666,7 @@ describe('help data', () => {
       expect(settingsTopic?.guides.map(guide => guide.slug)).toEqual([
         'your-settings',
         'privacy-mode',
+        'captains-log',
         'staying-signed-in',
         'dates-and-times',
         'chat-settings',

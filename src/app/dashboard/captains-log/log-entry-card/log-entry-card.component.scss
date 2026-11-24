@@ -1,0 +1,49 @@
+@use 'lcars-variables' as vars;
+
+// One Captain's Log entry (sc-1450), on its author's Log and on a public
+// profile.
+.log-entry-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  // The picture, in the 16:9 it was cropped to.
+  &__picture {
+    display: block;
+    width: 100%;
+    max-width: 40rem;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: 0.75rem;
+  }
+
+  &__body {
+    overflow-wrap: anywhere;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.25rem;
+    margin: 0;
+    font-size: 0.85rem;
+    color: vars.$white-a70;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: flex-end;
+
+    &:empty {
+      display: none;
+    }
+  }
+
+  &__marks {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+}

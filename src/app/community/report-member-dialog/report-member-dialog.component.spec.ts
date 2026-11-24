@@ -30,6 +30,19 @@ describe('ReportMemberDialogComponent', () => {
 
   it('names the member being reported', () => {
     expect(fixture.nativeElement.textContent).toContain('captain.picard');
+    expect(fixture.nativeElement.textContent).not.toContain(
+      "Captain's Log entry",
+    );
+  });
+
+  it('names the Captain’s Log entry being reported, when there is one (sc-1450)', () => {
+    component.data.entryHeadline = 'Arrival';
+    fixture.componentRef.changeDetectorRef.markForCheck();
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.textContent).toContain(
+      "You are reporting their Captain's Log entry “Arrival”.",
+    );
   });
 
   it('offers every reason', () => {

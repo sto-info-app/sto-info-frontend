@@ -240,6 +240,7 @@ describe('SecurityLogComponent (FC-039)', () => {
     ['PUBLICATION_RESUMED', 'Resumed publication'],
     ['FEATURE_SWITCHED_ON', 'Switched a feature on'],
     ['FEATURE_SWITCHED_OFF', 'Switched a feature off'],
+    ['LOG_ENTRY_REMOVED', "Removed a Captain's Log entry"],
   ])('names %s as “%s” (FC-042, FC-045)', async (action, label) => {
     log.list.mockReturnValue(
       of({

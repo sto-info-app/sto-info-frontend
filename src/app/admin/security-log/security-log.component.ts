@@ -42,6 +42,7 @@ const OTHER_ACTION_LABELS: Readonly<Record<string, string>> = {
 /** What the subjects with a name of their own are called. */
 const SUBJECT_LABELS: Readonly<Record<string, string>> = {
   STORYTIME_CHARACTER: 'Storytime Character',
+  LOG_ENTRY: "Captain's Log entry",
 };
 
 /** What each read of Scan Diagnostics is logged against (FC-042). */

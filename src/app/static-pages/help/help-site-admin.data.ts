@@ -49,6 +49,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
           'Hold their chat messages — places a moderation hold on everything they wrote in chat.',
           'Disable this account — signs them out at once, keeps them from signing in again, takes their record out of the registry, and closes every open report about them, member and chat alike, as actioned. They are not told why. Restore this account undoes it; reports already closed stay closed.',
           'All but Mark as under review ask for a Reason, up to 500 characters. A closed report keeps only the hold and account buttons.',
+          'A report about one of their Captain’s Log entries shows the entry under Reported Captain’s Log entry. Remove entry asks for a Reason, up to 500 characters: the entry leaves their profile, stays in their own Log marked Removed by moderators, and they are sent a notification with your reason. It appears in the Security Log as Removed a Captain’s Log entry. The report itself stays open until you close it.',
         ],
       },
       'How to work Chat Reports': {
@@ -82,7 +83,7 @@ const SITE_ADMIN_GUIDES: HelpGuide[] = [
       ],
     },
     whoCanSeeIt: [
-      'Neither the reporter nor the reported member is told what happens to a member report. Somebody who reports a chat message is thanked, and never told the outcome. A member whose account you disable is not told why, and a removed message’s author is not shown your reason.',
+      'Neither the reporter nor the reported member is told what happens to a member report, except that the author of a Captain’s Log entry you remove is told it was removed, and why. Somebody who reports a chat message is thanked, and never told the outcome. A member whose account you disable is not told why, and a removed message’s author is not shown your reason.',
       'What a hold keeps is read on Moderation Holds alone. Closing a report, removing a message, disabling or restoring an account, and every hold placed, extended, released or read all appear in the Security Log with your reason or purpose.',
     ],
     whenSomethingGoesWrong: [
