@@ -74,18 +74,24 @@ describe('TeamVolunteersComponent', () => {
     expect(component.contactLink).toBe(`/${APP_ROUTES.CONTACT}`);
   });
 
-  it('should lead to the Developers list from the side column', () => {
-    expect(component.crossLink).toEqual({
-      link: `/${APP_ROUTES.ABOUT_DEVELOPERS}`,
-      label: APP_ROUTE_TITLES.ABOUT_DEVELOPERS,
-    });
+  it('should offer Developers, About the App and Supporters in the side column', () => {
+    const expected = [
+      [`/${APP_ROUTES.ABOUT_DEVELOPERS}`, APP_ROUTE_TITLES.ABOUT_DEVELOPERS],
+      [`/${APP_ROUTES.ABOUT}`, 'About the App'],
+      [`/${APP_ROUTES.ABOUT_SUPPORTERS}`, APP_ROUTE_TITLES.ABOUT_SUPPORTERS],
+    ];
+
+    expect(component.navLinks.map(n => [n.link, n.label])).toEqual(expected);
 
     const element = fixture.nativeElement as HTMLElement;
-    const link = element.querySelector<HTMLAnchorElement>(
-      '.team-page-side-column app-team-navigation a.full-width-btn-link',
+    const links = Array.from(
+      element.querySelectorAll<HTMLAnchorElement>(
+        '.team-page-side-column app-team-navigation a.full-width-btn-link',
+      ),
     );
 
-    expect(link?.getAttribute('href')).toBe(`/${APP_ROUTES.ABOUT_DEVELOPERS}`);
-    expect(link?.textContent?.trim()).toBe('Developers');
+    expect(
+      links.map(a => [a.getAttribute('href'), a.textContent?.trim()]),
+    ).toEqual(expected);
   });
 });

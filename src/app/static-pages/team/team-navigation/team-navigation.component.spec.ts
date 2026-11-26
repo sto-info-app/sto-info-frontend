@@ -13,10 +13,11 @@ describe('TeamNavigationComponent', () => {
     }).compileComponents();
 
     fixture = TestBed.createComponent(TeamNavigationComponent);
-    fixture.componentRef.setInput('crossLink', {
-      link: '/about/volunteers',
-      label: 'Volunteers',
-    });
+    fixture.componentRef.setInput('links', [
+      { link: '/about/volunteers', label: 'Volunteers' },
+      { link: '/about', label: 'About the App' },
+      { link: '/about/supporters', label: 'Supporters' },
+    ]);
     fixture.detectChanges();
   });
 
@@ -26,14 +27,20 @@ describe('TeamNavigationComponent', () => {
     expect(element.textContent).toContain('Navigation');
   });
 
-  it('should draw one full-width button to the other team list', () => {
+  it('should draw one full-width button a link, in the order given', () => {
     const element = fixture.nativeElement as HTMLElement;
-    const links = element.querySelectorAll<HTMLAnchorElement>(
-      '.buttons a.full-width-btn-link',
+    const links = Array.from(
+      element.querySelectorAll<HTMLAnchorElement>(
+        '.buttons a.full-width-btn-link',
+      ),
     );
 
-    expect(links).toHaveLength(1);
-    expect(links[0].getAttribute('href')).toBe('/about/volunteers');
-    expect(links[0].textContent?.trim()).toBe('Volunteers');
+    expect(
+      links.map(a => [a.getAttribute('href'), a.textContent?.trim()]),
+    ).toEqual([
+      ['/about/volunteers', 'Volunteers'],
+      ['/about', 'About the App'],
+      ['/about/supporters', 'Supporters'],
+    ]);
   });
 });

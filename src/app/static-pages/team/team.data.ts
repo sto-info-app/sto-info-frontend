@@ -91,14 +91,19 @@ export const TEAM_MEMBERS: TeamMember[] = [
     highlights: ['Fleet Community Beta Tester.'],
   },
   {
-    slug: 'dragon',
-    name: 'Dragon',
+    slug: 'dragonwwolfe',
+    name: 'DragonWWolfe',
     title: 'Beta Tester',
     group: 'volunteers',
     status: 'current',
     photoUrl: '',
-    bio: ``,
-    info: [],
+    bio: `<p>DragonWWolfe is an avid gamer and long-time Star Trek Online player, known for his contributions to the Tribbles in Ecstasy Podcast.</p>`,
+    info: [
+      { label: 'Also Known As', value: 'Dragon' },
+      { label: 'Location', value: 'USA' },
+      { label: 'PC handle', value: '@dragonwwolfe' },
+      { label: 'Xbox handle', value: '@DWWolfe696' },
+    ],
     highlights: ['General Beta Tester.'],
   },
   {
@@ -108,8 +113,11 @@ export const TEAM_MEMBERS: TeamMember[] = [
     group: 'volunteers',
     status: 'current',
     photoUrl: '',
-    bio: ``,
-    info: [{ label: 'Also Known As', value: 'Baz' }],
+    bio: `<p>A stabby Australian gamer who loves a number of franchises and storytelling.</p>`,
+    info: [
+      { label: 'Location', value: 'Australia' },
+      { label: 'PC handle', value: '@bazag' },
+    ],
     highlights: ['STO Storytime Beta Tester.'],
   },
   {

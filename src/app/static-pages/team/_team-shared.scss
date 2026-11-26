@@ -1,10 +1,14 @@
 @use 'lcars-variables' as vars;
 @use 'lcars-mixins' as mixins;
 
+// The page's own width, not the window's, decides how many cards sit in a
+// row: beside the Navigation column a list can be narrow on a window that is
+// still wide.
 .team-page {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  container: team-page / inline-size;
 }
 
 // The Developers and Volunteers lists sit beside a side column, in the
@@ -22,9 +26,14 @@
   min-width: 0;
 }
 
+// Never narrower than the Navigation bar needs. The caret's black cut-out sits
+// at the bar's right-hand end, so in a thin column it covers the end of the
+// title. The title scales with the type; the bar's end cap, padding and caret
+// do not, hence the mix of units.
 .team-page-side-column {
   flex: 1;
   flex-basis: 30%;
+  min-width: calc(6rem + 140px);
 }
 
 // Two to a row, stacking on a phone. The grid rotates the palette across the
@@ -148,6 +157,16 @@
     flex-direction: column;
   }
 
+  // Stacked, the column takes the page's full width, so the floor above
+  // could only push a small phone into scrolling sideways.
+  .team-page-side-column {
+    min-width: 0;
+  }
+}
+
+// Too narrow for two cards to keep the name, photo and title readable, so
+// each card takes the whole row.
+@container team-page (width < 30rem) {
   .team-grid {
     grid-template-columns: 1fr;
   }

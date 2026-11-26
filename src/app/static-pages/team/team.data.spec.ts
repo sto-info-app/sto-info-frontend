@@ -21,7 +21,7 @@ describe('team.data', () => {
 
   it.each([
     ['winters', 'Winters', 'Fleet Community Beta Tester.'],
-    ['dragon', 'Dragon', 'General Beta Tester.'],
+    ['dragonwwolfe', 'DragonWWolfe', 'General Beta Tester.'],
     ['bazag', 'Bazag', 'STO Storytime Beta Tester.'],
     ['tharryn-lachman', 'Tharryn Lachman', 'STO Storytime Beta Tester.'],
   ])(

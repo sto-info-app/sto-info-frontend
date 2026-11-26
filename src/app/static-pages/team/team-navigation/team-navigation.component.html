@@ -2,10 +2,12 @@
   heading="Navigation"
   barClass="small-lcars-bar-gap">
   <div class="buttons">
-    <a
-      [routerLink]="crossLink.link"
-      class="full-width-btn-link"
-      >{{ crossLink.label }}</a
-    >
+    @for (navLink of links; track navLink.link) {
+      <a
+        [routerLink]="navLink.link"
+        class="full-width-btn-link"
+        >{{ navLink.label }}</a
+      >
+    }
   </div>
 </app-collapsible-section>
