@@ -36,6 +36,7 @@
   "concurrency": 4,
   "timeoutMS": 60000,
   "timeoutFactor": 1.5,
+  "dryRunTimeoutMinutes": 30,
   "ignoreStatic": true,
   "maxTestRunnerReuse": 8,
   "incrementalFile": ".stryker-tmp/incremental.json",
