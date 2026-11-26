@@ -194,7 +194,7 @@ export class RegisterComponent implements OnInit, OnDestroy {
       .pipe(observeInZone(this._ngZone, this._cdr))
       .subscribe({
         next: () => {
-          this._router.navigate(['/register/complete']);
+          void this._router.navigate(['/register/complete']);
           this.isSubmitting = false;
         },
         error: error => {

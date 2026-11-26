@@ -379,7 +379,7 @@ export class AuthService {
         );
       }),
       catchError(error => {
-        this._router.navigate([APP_ROUTES.LOGIN]);
+        void this._router.navigate([APP_ROUTES.LOGIN]);
         return throwError(() => error);
       }),
     );
@@ -444,7 +444,7 @@ export class AuthService {
     }
 
     // Navigate to login page with return URL using Angular Router (no page reload)
-    this._router.navigate(['/login'], {
+    void this._router.navigate(['/login'], {
       queryParams: currentUrl ? { returnUrl: currentUrl } : {},
     });
   }

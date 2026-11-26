@@ -38,7 +38,10 @@
   /* Prevent the image from repeating */
   background-repeat: no-repeat;
   background-position: center;
-  animation: pulse 3s ease-in-out infinite;
+
+  @media (prefers-reduced-motion: no-preference) {
+    animation: pulse 3s ease-in-out infinite;
+  }
 }
 
 .loading-bar {

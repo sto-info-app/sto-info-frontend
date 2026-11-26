@@ -8,7 +8,9 @@
 
           <svg
             viewBox="-1.1 -1.1 2.2 2.2"
-            class="pie-chart">
+            class="pie-chart"
+            role="img"
+            aria-label="Pie chart of the breakdown listed alongside">
             @for (segment of pieSegments(); track segment.name) {
               <path
                 [attr.d]="segment.path"

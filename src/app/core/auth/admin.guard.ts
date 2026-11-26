@@ -32,14 +32,14 @@ export class AdminGuard implements CanActivate {
     state: RouterStateSnapshot,
   ): boolean {
     if (!this._authService.isTokenValid()) {
-      this._router.navigate(['/login'], {
+      void this._router.navigate(['/login'], {
         queryParams: { returnUrl: state.url },
       });
       return false;
     }
 
     if (!this._authService.isAdmin()) {
-      this._router.navigate(['/']);
+      void this._router.navigate(['/']);
       return false;
     }
 

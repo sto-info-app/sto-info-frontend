@@ -40,11 +40,14 @@
           // coloured block says nothing a cursor does not.
           text-decoration: none;
           cursor: pointer;
-          transition:
-            transform 0.2s ease,
-            filter 0.2s ease;
           gap: 1rem;
           box-shadow: 0 4px 6px vars.$black-a20;
+
+          @media (prefers-reduced-motion: no-preference) {
+            transition:
+              transform 0.2s ease,
+              filter 0.2s ease;
+          }
 
           &:hover {
             transform: translateY(-4px);

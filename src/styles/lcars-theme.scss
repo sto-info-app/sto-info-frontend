@@ -1788,8 +1788,10 @@ body,
   font-size: 1rem;
 }
 
-html {
-  scroll-behavior: smooth;
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
 }
 
 ::-webkit-scrollbar {
