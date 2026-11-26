@@ -1,7 +1,10 @@
 # End-to-end journeys
 
 Playwright specs, driven in a real browser against a real backend and a real
-database. `playwright.config.ts` splits them into projects, one folder each:
+database. `playwright.config.ts` splits them into projects, one folder each.
+The help video recordings in `e2e/video` are not tests and have a config of
+their own, `playwright.video.config.ts` (see
+[Recording the help videos](#recording-the-help-videos)).
 
 | Project                         | Folder                        | What it holds                                                                                     |
 | ------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
@@ -15,7 +18,6 @@ database. `playwright.config.ts` splits them into projects, one folder each:
 | `journeys`                      | `e2e/journeys`, `e2e/reviews` | The Custom Tracking journeys and reviews (see [What they cover](#what-they-cover)).               |
 | `external`                      | `e2e/external`, `04-pictures` | Mail and picture cases, which reach third-party services.                                         |
 | `fleet-desktop`, `fleet-mobile` | `e2e/fleet`                   | Fleet Community, as people made for the run, with `fleet-setup` and `fleet-teardown`.             |
-| `video`                         | `e2e/video`                   | The help guide recordings.                                                                        |
 
 The Custom Tracking part is eleven journeys plus three reviews:
 accessibility (three cases), responsive layout, and caching headers. That is
@@ -81,15 +83,16 @@ the file. Copy `e2e/.env.local.example` to start.
 
 ### Recording the help videos
 
-`npx playwright test --project=video` records the help guides as 1920 by
-1080 WebM clips under `reports/recordings/`, one a guide, from `e2e/video/`. It is
-not part of `npm run e2e`. It needs what the Fleet journeys need: the local
+`npm run e2e:video` records the help guides as 1920 by
+1080 WebM clips under `reports/recordings/`, one a guide, from `e2e/video/`. It uses
+`playwright.video.config.ts`, which `npm run e2e` never loads, and writes its
+report to `reports/playwright/video-html`. It needs what the Fleet journeys need: the local
 backend, `E2E_BACKEND_DIR`, and no password, since `fleet-setup` makes and
 signs in the people it records as; the clips that upload a picture or an
 export also need the local scan worker running, or they wait at Scanning.
 Each spec is one guide, named `<guide>.video.e2e.ts`, and runs on its own,
 so one clip is retaken with
-`npx playwright test --project=video e2e/video/<guide>.video.e2e.ts`. The clips are silent,
+`npm run e2e:video -- e2e/video/<guide>.video.e2e.ts`. The clips are silent,
 captioned, and paced for a viewer; `e2e/video/support/clip.ts` has the
 cursor, the caption bar and the slowed actions they share, and
 `e2e/video/support/prepare.ts` registers off camera what a clip needs in

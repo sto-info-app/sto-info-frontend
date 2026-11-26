@@ -182,11 +182,12 @@ See [SECURITY.md](SECURITY.md) for more details.
 
 The end-to-end tests use [Playwright](https://playwright.dev/) against a real backend and database, so they need the backend running locally first. See [e2e/README.md](e2e/README.md) for what they need, the projects and the variables.
 
-- `npm run e2e` runs `playwright test` with no filter.
+- `npm run e2e` runs every test project in `playwright.config.ts`.
 - `npm run e2e:high` runs the cases tagged `@high`.
 - `npm run e2e:weekly` runs the cases tagged `@weekly`.
 - `npm run e2e:ui` opens Playwright's interactive runner.
 - `npm run e2e:report` opens the last HTML report, from `reports/playwright/html`.
+- `npm run e2e:video` records the help guide videos. They are not tests, so they have their own config, `playwright.video.config.ts`, which `npm run e2e` never loads.
 
 ## Further help
 

@@ -98,7 +98,7 @@ This runs all critical quality checks in sequence:
    - Stylelint checks the CSS and SCSS under `src/`
 
 4. **Formatting** - `npm run format:check`
-   - Prettier checks the TypeScript, JavaScript, CSS and SCSS under `src/`, the e2e specs and `playwright.config.ts`
+   - Prettier checks the TypeScript, JavaScript, CSS and SCSS under `src/`, the e2e specs and both Playwright configs
 
 5. **Unit tests with coverage** - `npm run test:cov`
    - Runs all unit tests with 100% coverage requirement
