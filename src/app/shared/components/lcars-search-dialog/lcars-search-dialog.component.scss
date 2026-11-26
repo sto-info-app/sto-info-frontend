@@ -100,9 +100,12 @@ $result-colour: vars.$lcars-perano;
   color: vars.$lcars-white;
   font: inherit;
   cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+
+  @media (prefers-reduced-motion: no-preference) {
+    transition:
+      transform 0.2s,
+      box-shadow 0.2s;
+  }
 
   &:hover,
   &:focus-visible {

@@ -392,7 +392,7 @@ export class CharacterDetailComponent
    */
   selectTab(tab: CharacterTab): void {
     this.setActiveTab(tab);
-    this._router.navigate([], {
+    void this._router.navigate([], {
       relativeTo: this._route,
       queryParams: { tab: tab === 'overview' ? null : tab },
       queryParamsHandling: 'merge',

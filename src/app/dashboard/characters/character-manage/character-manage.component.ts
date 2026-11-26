@@ -442,14 +442,14 @@ export class CharacterManageComponent implements OnInit, OnDestroy {
   }
 
   private navigateToAccount(): void {
-    this._router.navigate([
+    void this._router.navigate([
       this._dashboardAccountsRoute,
       encodeStoHandle(this.accountHandle),
     ]);
   }
 
   private navigateToCharacter(characterHandle: string): void {
-    this._router.navigate([
+    void this._router.navigate([
       this._dashboardAccountsRoute,
       encodeStoHandle(this.accountHandle),
       characterHandle,

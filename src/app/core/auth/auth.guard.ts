@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
             .pipe(
               map(() => true),
               catchError(() => {
-                this._router.navigate(['/login'], {
+                void this._router.navigate(['/login'], {
                   queryParams: { returnUrl: state.url },
                 });
                 resolve(false);
@@ -40,7 +40,7 @@ export class AuthGuard implements CanActivate {
           resolve(true);
         }
       } else {
-        this._router.navigate(['/login'], {
+        void this._router.navigate(['/login'], {
           queryParams: { returnUrl: state.url },
         });
         resolve(false);

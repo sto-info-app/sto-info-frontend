@@ -562,7 +562,7 @@ export class AccountDetailComponent
   editAccount(): void {
     if (!this.account) return;
 
-    this._router.navigate([
+    void this._router.navigate([
       '/dashboard/accounts',
       encodeStoHandle(this.account.handle),
       'edit',
@@ -571,7 +571,7 @@ export class AccountDetailComponent
 
   addCharacter(): void {
     if (!this.account) return;
-    this._router.navigate([
+    void this._router.navigate([
       '/dashboard/accounts',
       encodeStoHandle(this.account.handle),
       'characters',
@@ -581,7 +581,7 @@ export class AccountDetailComponent
 
   editCharacter(character: Character): void {
     if (!this.account) return;
-    this._router.navigate([
+    void this._router.navigate([
       '/dashboard/accounts',
       encodeStoHandle(this.account.handle),
       character.handle,

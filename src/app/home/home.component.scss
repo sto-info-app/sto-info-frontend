@@ -17,14 +17,17 @@
     color: vars.$a11y-black;
     text-decoration: none;
     cursor: pointer;
-    transition:
-      transform 0.2s ease,
-      filter 0.2s ease;
     gap: 0.75rem;
     box-shadow: 0 4px 6px vars.$black-a20;
 
     // Each tile takes the next colour of the grid's rotation.
     background-color: var(--lcars-accent, #{vars.$lcars-sunflower});
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
+    }
 
     &:hover {
       transform: translateY(-4px);

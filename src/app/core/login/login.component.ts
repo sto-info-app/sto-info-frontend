@@ -112,7 +112,7 @@ export class LoginComponent implements OnDestroy {
         // navigateByUrl parses the full URL string so any query params or
         // fragment on the return URL are preserved rather than being encoded
         // into a single path segment (as router.navigate([...]) would do).
-        this._router.navigateByUrl(returnUrl ?? this.appLoggedInHome);
+        void this._router.navigateByUrl(returnUrl ?? this.appLoggedInHome);
       },
       error: (error: HttpErrorResponse) => {
         let errMessage: string;

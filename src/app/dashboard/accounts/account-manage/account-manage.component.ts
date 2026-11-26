@@ -211,7 +211,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
       this._stoAccountService.createAccount(accountData).subscribe({
         next: createdAccount => {
           this.isSubmitting = false;
-          this._router.navigate([
+          void this._router.navigate([
             '/dashboard/accounts',
             encodeStoHandle(createdAccount.handle),
           ]);
@@ -232,7 +232,7 @@ export class AccountManageComponent implements OnInit, OnDestroy {
         next: updatedAccount => {
           this.isSubmitting = false;
           const targetHandle = updatedAccount?.handle || accountData.handle;
-          this._router.navigate([
+          void this._router.navigate([
             '/dashboard/accounts',
             encodeStoHandle(targetHandle),
           ]);
@@ -263,13 +263,13 @@ export class AccountManageComponent implements OnInit, OnDestroy {
 
   onCancel(): void {
     if (this.mode === 'edit' && this.account) {
-      this._router.navigate([
+      void this._router.navigate([
         '/dashboard/accounts',
         encodeStoHandle(this.account.handle),
       ]);
       return;
     }
-    this._router.navigate(['/dashboard/accounts']);
+    void this._router.navigate(['/dashboard/accounts']);
   }
 
   ngOnDestroy(): void {

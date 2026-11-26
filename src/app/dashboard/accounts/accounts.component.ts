@@ -320,7 +320,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * Navigates to the in-page account creation screen.
    */
   addAccount(): void {
-    this._router.navigate(['/dashboard/accounts/add']);
+    void this._router.navigate(['/dashboard/accounts/add']);
   }
 
   /**
@@ -329,7 +329,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
    * @param account The account to edit.
    */
   editAccount(account: StoAccount): void {
-    this._router.navigate([
+    void this._router.navigate([
       '/dashboard/accounts',
       this.encodeHandle(account.handle),
       'edit',

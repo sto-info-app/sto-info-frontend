@@ -310,7 +310,9 @@
         font-size: 1.2rem;
         color: vars.$white-a50;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition:
+          color 0.2s ease,
+          transform 0.2s ease;
 
         &:hover {
           color: vars.$lcars-sunflower;

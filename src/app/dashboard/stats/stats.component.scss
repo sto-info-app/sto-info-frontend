@@ -63,9 +63,12 @@
     text-decoration: none;
     font-weight: 700;
     box-shadow: 0 3px 7px vars.$black-a25;
-    transition:
-      transform 0.2s ease,
-      filter 0.2s ease;
+
+    @media (prefers-reduced-motion: no-preference) {
+      transition:
+        transform 0.2s ease,
+        filter 0.2s ease;
+    }
 
     &:hover {
       transform: translateY(-4px);
