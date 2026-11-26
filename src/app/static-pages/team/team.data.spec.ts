@@ -1,3 +1,4 @@
+import { BASE_CLOUDFLARE_IMAGES_URL } from 'src/app/shared/constants/app-image-assets.constants';
 import { TeamGroup } from './models/team-group.model';
 import { TeamStatus } from './models/team-status.model';
 import { SUPPORTERS, TEAM_MEMBERS } from './team.data';
@@ -45,6 +46,24 @@ describe('team.data', () => {
     const keys = TEAM_MEMBERS.map(m => `${m.group}/${m.slug}`);
 
     expect(new Set(keys).size).toBe(keys.length);
+  });
+
+  it('should give every member a known group and status', () => {
+    for (const member of TEAM_MEMBERS) {
+      expect(['developers', 'volunteers']).toContain(member.group);
+      expect(['current', 'past']).toContain(member.status);
+    }
+  });
+
+  it('should turn a photo id into an image URL and no id into none', () => {
+    const steve = TEAM_MEMBERS.find(m => m.slug === 'steve-roberts');
+    const bazag = TEAM_MEMBERS.find(m => m.slug === 'bazag');
+
+    expect(steve?.photoUrl).toBe(
+      `${BASE_CLOUDFLARE_IMAGES_URL}/86e14bc1-3cfd-4c7a-9898-49f586da9700`,
+    );
+    expect(bazag?.photoUrl).toBe('');
+    expect(steve).not.toHaveProperty('photoId');
   });
 
   it('should define supporters array', () => {
