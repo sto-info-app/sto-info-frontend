@@ -313,7 +313,6 @@ Each Render static site is defined by a Blueprint under [render/](../render): [d
 Current behaviour:
 
 - Each Blueprint has one `routes` entry, a `rewrite` from `/*` to `/index.html`, so every address reaches the Angular router (client-side routing).
-- The Blueprints set no response headers. Any cache headers come from the Render dashboard or from Cloudflare.
-- [static.json](../static.json) at the repository root still lists a rewrite and a week's `Cache-Control` for `/favicon.ico` and `/assets/favicons/*.png`. Render static sites do not read it, and it is not copied into the build.
+- Each Blueprint's `headers` give `/favicon.ico` and `/assets/favicons/*` a week's `Cache-Control`. The security headers are set in the Render dashboard; a Blueprint sync keeps any header rule the Blueprint does not list. Other cache headers come from Cloudflare.
 
 > TODO Confirm which other static assets are cached at the CDN edge and the desired cache policy.

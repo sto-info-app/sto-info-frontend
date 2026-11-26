@@ -22,6 +22,17 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
+    # A week's caching for the favicons, which change only with a redesign.
+    # Moved here from static.json, which Render never read. A sync adds or
+    # updates these rules and keeps the headers set in the dashboard (the
+    # security headers), so they need no `sync: false`.
+    headers:
+      - path: /favicon.ico
+        name: Cache-Control
+        value: public, max-age=604800
+      - path: /assets/favicons/*
+        name: Cache-Control
+        value: public, max-age=604800
     envVars:
       - key: PRODUCTION
         value: 'true'
