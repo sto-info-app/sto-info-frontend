@@ -1,12 +1,27 @@
 # End-to-end journeys
 
-Eleven journeys through Custom Tracking, driven in a real browser against a
-real backend and a real database, plus three reviews: accessibility (three
-cases), responsive layout, and caching headers.
+Playwright specs, driven in a real browser against a real backend and a real
+database. `playwright.config.ts` splits them into projects, one folder each:
 
-That is sixteen substantive cases. Setup and teardown are not among them.
-The picture journey is one of the sixteen. It runs in the external project
-and is omitted unless `E2E_IMAGES=on` is set. That project says why it skipped.
+| Project                         | Folder                        | What it holds                                                                                     |
+| ------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------- |
+| `preflight`, `authenticate`     | `e2e/support`                 | Setup: names the database and actors, then signs each actor in.                                   |
+| `custom-tracking`, `teardown`   | `e2e/support`                 | Setup and teardown for the Custom Tracking journeys.                                              |
+| `public`                        | `e2e/public`                  | Pages a stranger sees, with no sign-in.                                                           |
+| `infrastructure`                | `e2e/infrastructure`          | `isolation.e2e.ts`: the run knows every actor, cases reset accounts, the manifest has no secrets. |
+| `frequent`                      | `e2e/frequent`                | Signed-in cases across the site, tagged `@high`.                                                  |
+| `weekly`                        | `e2e/weekly`                  | Broader signed-in cases, tagged `@weekly`.                                                        |
+| `storytime-off`, `storytime`    | `e2e/storytime`               | Storytime switched off, then on, with `storytime-prepare` and `storytime-finish` around it.       |
+| `journeys`                      | `e2e/journeys`, `e2e/reviews` | The Custom Tracking journeys and reviews (see [What they cover](#what-they-cover)).               |
+| `external`                      | `e2e/external`, `04-pictures` | Mail and picture cases, which reach third-party services.                                         |
+| `fleet-desktop`, `fleet-mobile` | `e2e/fleet`                   | Fleet Community, as people made for the run, with `fleet-setup` and `fleet-teardown`.             |
+| `video`                         | `e2e/video`                   | The help guide recordings.                                                                        |
+
+The Custom Tracking part is eleven journeys plus three reviews:
+accessibility (three cases), responsive layout, and caching headers. That is
+sixteen substantive cases. Setup and teardown are not among them. The
+picture journey is one of the sixteen. It runs in the external project and
+is omitted unless `E2E_IMAGES=on` is set. That project says why it skipped.
 
 They are kept apart from `npm test`. The unit suites answer whether each piece
 behaves; these answer whether the pieces, the server and the database agree —
@@ -46,20 +61,23 @@ Rather than typing them on every command, the variables can be kept in
 loads before anything reads them. A variable set in the shell still wins over
 the file. Copy `e2e/.env.local.example` to start.
 
-| Variable              | Default                     | What it is                                      |
-| --------------------- | --------------------------- | ----------------------------------------------- |
-| `E2E_PASSWORD`        | _required_                  | The seed password.                              |
-| `E2E_EMAIL`           | `demo-user-014@example.com` | Who to sign in as.                              |
-| `E2E_USERNAME`        | `demo-user-014`             | Their registry name.                            |
-| `E2E_PUBLIC_ACCOUNT`  | `demo-014-01`               | An STO account of theirs that is public.        |
-| `E2E_PRIVATE_ACCOUNT` | `demo-014-02`               | One that is not.                                |
-| `E2E_BASE_URL`        | `http://localhost:4200`     | Where the browser opens the site.               |
-| `E2E_API_URL`         | `http://localhost:3000`     | Where a journey's own requests go.              |
-| `E2E_BACKEND_DIR`     | `../sto-info-backend`       | For the support commands.                       |
-| `E2E_DATABASE_NAME`   | _required_                  | The database this run may use.                  |
-| `E2E_REDIS_DB`        | _required_                  | The Redis logical database.                     |
-| `E2E_IMAGES`          | unset                       | `on` to include the external picture cases.     |
-| `E2E_OMIT`            | unset                       | Comma-separated ids for a labelled partial run. |
+| Variable              | Default                     | What it is                                                                                                           |
+| --------------------- | --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `E2E_PASSWORD`        | _required_                  | The seed password.                                                                                                   |
+| `E2E_EMAIL`           | `demo-user-014@example.com` | Who to sign in as.                                                                                                   |
+| `E2E_USERNAME`        | `demo-user-014`             | Their registry name.                                                                                                 |
+| `E2E_PUBLIC_ACCOUNT`  | `demo-014-01`               | An STO account of theirs that is public.                                                                             |
+| `E2E_PRIVATE_ACCOUNT` | `demo-014-02`               | One that is not.                                                                                                     |
+| `E2E_BASE_URL`        | `http://localhost:4200`     | Where the browser opens the site.                                                                                    |
+| `E2E_API_URL`         | `http://localhost:3000`     | Where a journey's own requests go.                                                                                   |
+| `E2E_BACKEND_DIR`     | `../sto-info-backend`       | For the support commands.                                                                                            |
+| `E2E_DATABASE_NAME`   | _required_                  | The database this run may use.                                                                                       |
+| `E2E_REDIS_DB`        | _required_                  | The Redis logical database.                                                                                          |
+| `E2E_IMAGES`          | unset                       | `on` to include the external picture cases.                                                                          |
+| `E2E_OMIT`            | unset                       | Comma-separated ids for a labelled partial run.                                                                      |
+| `E2E_FLEET_KEEP`      | unset                       | `1` to skip `fleet-teardown` and keep the Fleet people.                                                              |
+| `E2E_SCAN`            | `local`                     | Which scan made the run, recorded in the manifest (`e2e/support/manifest.ts`). The workflows set `high` or `weekly`. |
+| `E2E_BACKEND_REF`     | _repository variable_       | Not read locally. The backend revision a scheduled `e2e-high-priority.yml` or `e2e-full-weekly.yml` run checks out.  |
 
 ### Recording the help videos
 
@@ -69,8 +87,9 @@ not part of `npm run e2e`. It needs what the Fleet journeys need: the local
 backend, `E2E_BACKEND_DIR`, and no password, since `fleet-setup` makes and
 signs in the people it records as; the clips that upload a picture or an
 export also need the local scan worker running, or they wait at Scanning.
-Each spec is one guide and runs on its own, so one clip is retaken with
-`npx playwright test --project=video e2e/video/<spec>`. The clips are silent,
+Each spec is one guide, named `<guide>.video.e2e.ts`, and runs on its own,
+so one clip is retaken with
+`npx playwright test --project=video e2e/video/<guide>.video.e2e.ts`. The clips are silent,
 captioned, and paced for a viewer; `e2e/video/support/clip.ts` has the
 cursor, the caption bar and the slowed actions they share, and
 `e2e/video/support/prepare.ts` registers off camera what a clip needs in
@@ -339,7 +358,8 @@ a control is a change worth noticing.
 
 ## What they cover
 
-Sixteen cases. CT-13 is three tests in one file. CT-04 is omitted unless
+Sixteen Custom Tracking cases, in the `journeys` and `external` projects.
+CT-13 is three tests in one file. CT-04 is omitted unless
 `E2E_IMAGES=on`.
 
 | ID    | Case                                                                                                                                       |

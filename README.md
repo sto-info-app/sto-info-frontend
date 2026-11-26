@@ -1,4 +1,4 @@
-# sto-info-app-frontend
+# STO Info Frontend
 
 ## Security posture
 
@@ -18,7 +18,9 @@
 ## CI and delivery
 
 [![Lint and Test](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lint-test.yml)
+[![DCO](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/dco.yml)
 [![Version bump](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-bump.yml)
+[![Version sync](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-sync.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/version-sync.yml)
 [![Tag release](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml/badge.svg?branch=production)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/tag-release.yml)
 [![Lighthouse Audit](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lighthouse.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/lighthouse.yml)
 [![Uptime status](https://img.shields.io/uptimerobot/status/m802169070-054df85f9c4a66231e51da43.svg)](https://status.startrekonline.info/)
@@ -26,7 +28,10 @@
 
 ## Quality and testing
 
-[![Mutation testing](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
+[![Mutation testing (full)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml/badge.svg?branch=development)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing.yml)
+[![Mutation testing (incremental)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing-incremental.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/mutation-testing-incremental.yml)
+[![E2E high priority](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/e2e-high-priority.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/e2e-high-priority.yml)
+[![E2E weekly](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/e2e-full-weekly.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/e2e-full-weekly.yml)
 [![Quality Gate](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=coverage)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![codecov](https://codecov.io/gh/sto-info-app/sto-info-frontend/graph/badge.svg?token=ZX5Y9GQ3ZR)](https://codecov.io/gh/sto-info-app/sto-info-frontend)
@@ -34,6 +39,7 @@
 [![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=reliability_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=vulnerabilities)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=bugs)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=sto-info-app_sto-info-frontend&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=sto-info-app_sto-info-frontend)
 [![CodeFactor](https://www.codefactor.io/repository/github/sto-info-app/sto-info-frontend/badge)](https://www.codefactor.io/repository/github/sto-info-app/sto-info-frontend)
 
@@ -46,8 +52,9 @@
 ## Release and project
 
 [![Release](https://img.shields.io/github/v/release/sto-info-app/sto-info-frontend?display_name=tag&sort=semver)](https://github.com/sto-info-app/sto-info-frontend/releases)
-[![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend?branch=development&label=licence)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENSE)
+[![Licence](https://img.shields.io/github/license/sto-info-app/sto-info-frontend?label=licence)](https://github.com/sto-info-app/sto-info-frontend/blob/development/LICENSE)
 [![Contributors](https://img.shields.io/github/contributors/sto-info-app/sto-info-frontend?label=all%20contributors)](CONTRIBUTORS.md)
+[![Contributors workflow](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/contributors.yml/badge.svg)](https://github.com/sto-info-app/sto-info-frontend/actions/workflows/contributors.yml)
 [![Angular](https://img.shields.io/github/package-json/dependency-version/sto-info-app/sto-info-frontend/@angular/core?label=angular&branch=development)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Node](https://img.shields.io/badge/node-24.22.3-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/package.json)
 [![Written language](https://img.shields.io/badge/written%20language-en--GB-informational)](https://github.com/sto-info-app/sto-info-frontend/blob/development/README.md)
@@ -56,7 +63,7 @@
 
 The `sto-info-frontend` is a frontend static site to provide information related to STO (Star Trek Online) player's accounts, characters and fleets. It is built using modern web technologies and follows best practices.
 
-This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^22.1.8`).
+This project uses [Angular CLI](https://github.com/angular/angular-cli) (see `package.json` devDependency `@angular/cli`, currently `^22.3.0`).
 
 ### Runtime and dependency versions
 
@@ -66,7 +73,9 @@ The `package.json` overrides are intentional security pins for transitive depend
 
 ## Development server
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+1. Run `npm ci` to install the dependencies.
+2. Run `npm run generate-env` to write `src/environments/environment.ts` from `src/environments/environment.template.ts`. The generated file is gitignored, and the defaults suit local development.
+3. Run `npm start`, which runs `ng serve` with the `local` configuration, then open `http://localhost:4200/`. The app reloads when you change a source file.
 
 ## Code scaffolding
 
@@ -155,7 +164,8 @@ Dynamic Application Security Testing (DAST) is performed using OWASP ZAP to iden
 
 - **Pull requests**: Runs ZAP baseline scan against a locally built version of the app (using `npx serve` on `localhost:4202`).
 - **Development/Production version bumps**: Runs a ZAP baseline scan against the deployed frontend (using a smart polling loop for up to 10 minutes to wait for `version.json` deployment).
-- **Weekly schedule**: Runs a ZAP full scan against the dev frontend base URL.
+- **Weekly schedule**: Runs a ZAP full scan against the dev frontend base URL every Monday at 03:00 UTC.
+- **Monthly schedule**: Runs a ZAP full scan against the production frontend (`https://startrekonline.info`) on the 1st of every month at 04:00 UTC.
 - **Manual trigger**: Can run baseline or full scan via `workflow_dispatch` on the environment-specific workflows.
 - **WAF Bypass**: Scans and connectivity checks use a custom `User-Agent` to bypass edge protection.
 - **Scan reports**: Available as workflow artifacts for 30 days.
@@ -170,11 +180,17 @@ See [SECURITY.md](SECURITY.md) for more details.
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+The end-to-end tests use [Playwright](https://playwright.dev/) against a real backend and database, so they need the backend running locally first. See [e2e/README.md](e2e/README.md) for what they need, the projects and the variables.
+
+- `npm run e2e` runs `playwright test` with no filter.
+- `npm run e2e:high` runs the cases tagged `@high`.
+- `npm run e2e:weekly` runs the cases tagged `@weekly`.
+- `npm run e2e:ui` opens Playwright's interactive runner.
+- `npm run e2e:report` opens the last HTML report, from `reports/playwright/html`.
 
 ## Further help
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
 ## CI/CD and Automation
 

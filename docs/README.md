@@ -15,7 +15,7 @@ The production system also includes:
 - Hosting on **Render.com**
 - Edge/CDN and security controls via **Cloudflare**
 
-> TODO Link to the backend repository (NestJS) and any infra-as-code repo(s).
+The backend lives in [sto-info-app/sto-info-backend](https://github.com/sto-info-app/sto-info-backend). The Render Blueprints for the frontend are in this repository, under [render/](../render).
 
 ## System at a glance
 
@@ -58,6 +58,7 @@ This project uses TypeScript `~6.0.3`. Angular 22's compiler (`@angular/compiler
 ### Install and run
 
 - Install dependencies: `npm ci`
+- Generate the environment file: `npm run generate-env` (writes the gitignored `src/environments/environment.ts`; see [Configuration and environment variables](#configuration-and-environment-variables))
 - Run locally: `npm start` (Angular dev server)
 - Run tests: `npm test`
 - Run lint: `npm run lint`
@@ -93,16 +94,22 @@ This runs all critical quality checks in sequence:
    - ESLint checks for code quality and style issues
    - Ensures code follows project standards
 
-3. **Unit tests with coverage** - `npm run test:cov`
+3. **Style linting** - `npm run lint:style`
+   - Stylelint checks the CSS and SCSS under `src/`
+
+4. **Formatting** - `npm run format:check`
+   - Prettier checks the TypeScript, JavaScript, CSS and SCSS under `src/`, the e2e specs and `playwright.config.ts`
+
+5. **Unit tests with coverage** - `npm run test:cov`
    - Runs all unit tests with 100% coverage requirement
    - Generates coverage reports in `reports/coverage/`
 
-4. **Fuzz testing** - `npm run test:fuzz`
+6. **Fuzz testing** - `npm run test:fuzz`
    - Property-based fuzz tests (50 iterations)
    - Tests edge cases and unexpected inputs
    - Enforces strict type safety (no `any` in catch blocks)
 
-5. **Build verification** - `npm run build`
+7. **Build verification** - `npm run build`
    - Production build to ensure everything compiles
    - Catches build-time errors before pushing
 
@@ -126,7 +133,7 @@ In GitHub Actions, most of these checks use **Smart Skip** logic. If your PR onl
 
 Most routes require a working backend.
 
-- Default API URL is `http://localhost:3000` (see [src/environments/environment.ts](../src/environments/environment.ts)).
+- Default API URL is `http://localhost:3000` (the `API_URL` default in [src/environments/inject-env-vars.js](../src/environments/inject-env-vars.js), which writes the gitignored `src/environments/environment.ts`).
 - The UI performs health checks against the backend and will show a warning state if the backend is down.
 
 > TODO Document how to run the backend locally (NestJS commands, database setup, seed data, migrations).
@@ -177,7 +184,7 @@ Production builds do not rely on an Angular file replacement strategy.
 Instead, the build pipeline runs a token replacement step:
 
 - [src/environments/environment.template.ts](../src/environments/environment.template.ts) contains placeholder tokens.
-- [src/environments/inject-env-vars.js](../src/environments/inject-env-vars.js) replaces tokens using `process.env` and writes [src/environments/environment.ts](../src/environments/environment.ts).
+- [src/environments/inject-env-vars.js](../src/environments/inject-env-vars.js) replaces tokens using `process.env` and writes `src/environments/environment.ts`, which is gitignored. Run `npm run generate-env` to create it locally.
 - The app then validates environment values at startup and throws an error if any are missing.
 
 This is intentionally strict so a misconfigured deployment fails fast.
@@ -260,11 +267,12 @@ Key behaviours:
   - Manual logout clears all active timers and dialogs
   - Attempts to revoke the refresh token on the backend (ignores 401 errors for already-expired tokens)
   - Preserves return URL when already on login page to avoid redirect loops
-  - All cleanup is handled through `ngOnDestroy` hooks to prevent memory leaks
+  - `AppComponent` clears its session timers, dialogs and subscriptions in `ngOnDestroy` to prevent memory leaks
 
 Memory leak prevention:
 
-- All subscriptions use `takeUntil(destroy$)` pattern
+- Most subscriptions end with `takeUntilDestroyed(this._destroyRef)`, where `_destroyRef = inject(DestroyRef)`, so they close when their component or service is destroyed. Inside an injection context, `takeUntilDestroyed()` needs no argument
+- `AppComponent` and `LogRocketService` still use the older `takeUntil(destroy$)` pattern, completing `destroy$` in `ngOnDestroy`
 - HTTP requests (including nested subscriptions) are properly managed
 - Timers (`setTimeout`, `setInterval`) are explicitly cleared on component destruction
 - See [Memory leak prevention guide](memory-leak-prevention-guide.md) for comprehensive patterns
@@ -300,13 +308,12 @@ Session replay and error tracking:
 
 ## Static hosting details
 
-Render uses [static.json](../static.json) for SPA routing and caching headers.
+Each Render static site is defined by a Blueprint under [render/](../render): [development.yaml](../render/development.yaml), [staging.yaml](../render/staging.yaml) and [production.yaml](../render/production.yaml).
 
 Current behaviour:
 
-- All requests are rewritten to `/index.html` (client-side routing).
-- Cache headers are explicitly set for:
-  - `/favicon.ico`
-  - `/assets/favicons/*.png`
+- Each Blueprint has one `routes` entry, a `rewrite` from `/*` to `/index.html`, so every address reaches the Angular router (client-side routing).
+- The Blueprints set no response headers. Any cache headers come from the Render dashboard or from Cloudflare.
+- [static.json](../static.json) at the repository root still lists a rewrite and a week's `Cache-Control` for `/favicon.ico` and `/assets/favicons/*.png`. Render static sites do not read it, and it is not copied into the build.
 
 > TODO Confirm which other static assets are cached at the CDN edge and the desired cache policy.
