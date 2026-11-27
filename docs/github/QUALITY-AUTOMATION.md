@@ -36,7 +36,7 @@ Mutation testing measures the effectiveness of our unit tests by introducing del
 
 ### Weekly full run
 
-`.github/workflows/mutation-testing.yml` runs every Sunday at midnight UTC, and can be started by hand from the Actions tab.
+`.github/workflows/mutation-testing.yml` runs every Monday at midnight UTC, and can be started by hand from the Actions tab. It is on Monday rather than Sunday because the backend's full run takes 16 of the Free plan's 20 concurrent jobs on Sunday.
 
 **Why it is split.** A GitHub-hosted job is stopped at 6 hours, whatever its `timeout-minutes` says. As a single job the run took 4 to 5.6 hours for 16,724 mutants, and was cancelled at 6 hours one week in three. The Fleet Community merge takes the mutate set from ~265 to ~480 files (about 30,000 mutants, roughly 10 hours in one job).
 

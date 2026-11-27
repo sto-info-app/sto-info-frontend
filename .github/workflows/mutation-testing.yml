@@ -2,7 +2,9 @@ name: Mutation Testing (Full)
 
 on:
   schedule:
-    - cron: '0 0 * * 0' # Run every Sunday at midnight
+    # Monday, not Sunday: the backend's full run takes 16 of the Free plan's
+    # 20 concurrent jobs on Sunday, and these 4 would take the rest.
+    - cron: '0 0 * * 1' # Run every Monday at midnight
   workflow_dispatch: # Allow manual trigger
     inputs:
       force:

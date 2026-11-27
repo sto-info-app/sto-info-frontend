@@ -8,7 +8,8 @@
     "src/**/*.d.ts",
     "setup-jest.ts",
     "e2e/**/*.ts",
-    "playwright.config.ts"
+    "playwright.config.ts",
+    "playwright.video.config.ts"
   ],
   "exclude": []
 }

@@ -27,20 +27,20 @@ See [docs/README.md](README.md) for the full list.
 
 ### SPA routing and static headers
 
-The static host uses [static.json](../static.json):
+Each Render Blueprint under [render/](../render) sets both:
 
-- Rewrites all paths to `/index.html` for client-side routing.
-- Sets explicit cache headers for favicon assets.
+- A `routes` rewrite from `/*` to `/index.html`, for client-side routing.
+- `headers` giving `/favicon.ico` and `/assets/favicons/*` a week's `Cache-Control` (`public, max-age=604800`).
 
 If you see unexpected 404s on deep links, check:
 
 - Cloudflare rules for the domain (page rules / cache rules)
 - Render static site rewrite behaviour
-- That `static.json` is included in the built output (Angular copies `src/static.json` as an asset)
+- That the Blueprint's `routes` rule matches the one in the dashboard
 
 Security headers:
 
-- Response headers for the frontend (including CSP, HSTS, COOP/CORP, etc.) are configured in the **Render static site** under "Manage Headers".
+- Response headers for the frontend (including CSP, HSTS, COOP/CORP, etc.) are configured in the **Render static site** under "Manage Headers". The Blueprints do not list them, and a Blueprint sync keeps any header rule it does not list.
 - This is independent of Cloudflare, although Cloudflare can also add/override headers if configured.
 
 > TODO Capture which domains/environments have which header sets (prod vs dev) and keep them in sync.
